@@ -170,10 +170,10 @@ export default function BioPage() {
           </div>
 
           {/* Features - Carrossel no Mobile, Grid no Desktop */}
-          <div className="py-8 pb-12">
+          <div className="py-4">
             {/* Carrossel Mobile */}
             <div className="md:hidden">
-              <div className="overflow-visible pb-6" ref={emblaRef}>
+              <div className="overflow-visible pb-4" ref={emblaRef}>
                 <div className="flex">
                   <div className="flex-[0_0_100%] min-w-0 px-4">
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#439b1e]/20">
@@ -208,7 +208,7 @@ export default function BioPage() {
               </div>
 
               {/* Indicadores do Carrossel */}
-              <div className="flex justify-center gap-2 mt-4">
+              <div className="flex justify-center gap-2 mt-2">
                 {[0, 1, 2].map((index) => (
                   <button
                     key={index}
@@ -250,7 +250,7 @@ export default function BioPage() {
           </div>
 
           {/* Footer */}
-          <div className="pt-8">
+          <div className="pt-4">
             <p className="text-sm text-gray-500">
               Criado com 💚 para minhas cheirosas em 2025
             </p>
