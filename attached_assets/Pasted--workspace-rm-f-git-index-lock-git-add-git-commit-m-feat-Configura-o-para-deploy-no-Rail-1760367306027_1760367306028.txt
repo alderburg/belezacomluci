@@ -1,0 +1,52 @@
+~/workspace$ rm -f .git/index.lock
+git add .
+git commit -m "feat: Configuração para deploy no Railway com banco Locaweb"
+git push origin main
+On branch main
+nothing to commit, working tree clean
+Enumerating objects: 277, done.
+Counting objects: 100% (277/277), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (276/276), done.
+Writing objects: 100% (277/277), 3.56 MiB | 3.62 MiB/s, done.
+Total 277 (delta 37), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (37/37), done.
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: 
+remote: - GITHUB PUSH PROTECTION
+remote:   —————————————————————————————————————————
+remote:     Resolve the following violations before pushing again
+remote: 
+remote:     - Push cannot contain secrets
+remote: 
+remote:     
+remote:      (?) Learn how to resolve a blocked push
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push
+remote:     
+remote:     
+remote:       —— Google OAuth Client ID ————————————————————————————
+remote:        locations:
+remote:          - commit: e11eef82dc64c97c750c4719b79998ed587bf248
+remote:            path: DEPLOY.md:37
+remote:          - commit: c11cbb8f578bf28bdb61099b3da7bdd5ffef7866
+remote:            path: start.sh:12
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/alderburg/belezacomluci/security/secret-scanning/unblock-secret/3413XUU8bKOXhw3QmdTAKJnEdug
+remote:     
+remote:     
+remote:       —— Google OAuth Client Secret ————————————————————————
+remote:        locations:
+remote:          - commit: e11eef82dc64c97c750c4719b79998ed587bf248
+remote:            path: DEPLOY.md:38
+remote:          - commit: c11cbb8f578bf28bdb61099b3da7bdd5ffef7866
+remote:            path: start.sh:13
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/alderburg/belezacomluci/security/secret-scanning/unblock-secret/3413XXa6Zcg5rj5OpFwTj7j7T9J
+remote:     
+remote: 
+remote: 
+To https://github.com/alderburg/belezacomluci
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/alderburg/belezacomluci'
