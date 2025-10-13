@@ -2,8 +2,30 @@
 import { Link } from "wouter";
 import { Sparkles, Gift, Heart, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
+import { useEffect, useState } from "react";
 
 export default function BioPage() {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
+    Autoplay({ delay: 3000, stopOnInteraction: false })
+  ]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    };
+
+    emblaApi.on("select", onSelect);
+    onSelect();
+
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi]);
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50 relative overflow-hidden">
       {/* Botão Portal no canto superior direito */}
@@ -133,34 +155,87 @@ export default function BioPage() {
             </h1>
             
             <p className="text-base md:text-lg text-gray-600 max-w-lg mx-auto">
-              Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚
+              Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚✨
             </p>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-8">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#439b1e]/20 hover:shadow-xl transition-shadow">
-              <div className="bg-gradient-to-br from-[#439b1e] to-[#357a18] w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-6 h-6 text-white" />
+          {/* Features - Carrossel no Mobile, Grid no Desktop */}
+          <div className="py-8">
+            {/* Carrossel Mobile */}
+            <div className="md:hidden">
+              <div className="overflow-hidden" ref={emblaRef}>
+                <div className="flex">
+                  <div className="flex-[0_0_100%] min-w-0 px-4">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#439b1e]/20">
+                      <div className="bg-gradient-to-br from-[#439b1e] to-[#357a18] w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Sparkles className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="font-semibold text-lg mb-2 text-gray-800">Conteúdo Exclusivo</h3>
+                      <p className="text-sm text-gray-600">Dicas, tutoriais e reviews de beleza e perfumaria</p>
+                    </div>
+                  </div>
+
+                  <div className="flex-[0_0_100%] min-w-0 px-4">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-pink-300/30">
+                      <div className="bg-gradient-to-br from-pink-500 to-pink-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Heart className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="font-semibold text-lg mb-2 text-gray-800">Autocuidado</h3>
+                      <p className="text-sm text-gray-600">Tudo sobre cuidados pessoais e bem-estar com pitadas de humor</p>
+                    </div>
+                  </div>
+
+                  <div className="flex-[0_0_100%] min-w-0 px-4">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-300/30">
+                      <div className="bg-gradient-to-br from-purple-500 to-purple-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Gift className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="font-semibold text-lg mb-2 text-gray-800">Cupons Exclusivos</h3>
+                      <p className="text-sm text-gray-600">Descontos especiais nas suas marcas favoritas</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">Conteúdo Exclusivo</h3>
-              <p className="text-sm text-gray-600">Dicas, tutoriais e reviews de beleza e perfumaria</p>
+
+              {/* Indicadores do Carrossel */}
+              <div className="flex justify-center gap-2 mt-4">
+                {[0, 1, 2].map((index) => (
+                  <button
+                    key={index}
+                    className={`h-2 rounded-full transition-all ${
+                      selectedIndex === index ? "w-8 bg-[#439b1e]" : "w-2 bg-gray-300"
+                    }`}
+                    onClick={() => emblaApi?.scrollTo(index)}
+                  />
+                ))}
+              </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-pink-300/30 hover:shadow-xl transition-shadow">
-              <div className="bg-gradient-to-br from-pink-500 to-pink-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-6 h-6 text-white" />
+            {/* Grid Desktop */}
+            <div className="hidden md:grid grid-cols-3 gap-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#439b1e]/20 hover:shadow-xl transition-shadow">
+                <div className="bg-gradient-to-br from-[#439b1e] to-[#357a18] w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2 text-gray-800">Conteúdo Exclusivo</h3>
+                <p className="text-sm text-gray-600">Dicas, tutoriais e reviews de beleza e perfumaria</p>
               </div>
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">Autocuidado</h3>
-              <p className="text-sm text-gray-600">Tudo sobre cuidados pessoais e bem-estar com pitadas de humor</p>
-            </div>
 
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-300/30 hover:shadow-xl transition-shadow">
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Gift className="w-6 h-6 text-white" />
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-pink-300/30 hover:shadow-xl transition-shadow">
+                <div className="bg-gradient-to-br from-pink-500 to-pink-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2 text-gray-800">Autocuidado</h3>
+                <p className="text-sm text-gray-600">Tudo sobre cuidados pessoais e bem-estar com pitadas de humor</p>
               </div>
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">Cupons Exclusivos</h3>
-              <p className="text-sm text-gray-600">Descontos especiais nas suas marcas favoritas</p>
+
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-300/30 hover:shadow-xl transition-shadow">
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Gift className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2 text-gray-800">Cupons Exclusivos</h3>
+                <p className="text-sm text-gray-600">Descontos especiais nas suas marcas favoritas</p>
+              </div>
             </div>
           </div>
 
