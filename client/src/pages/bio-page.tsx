@@ -32,9 +32,13 @@ export default function BioPage() {
           <div className="space-y-4">
             <div className="flex justify-center">
               <div className="relative">
-                <div className="absolute inset-0 bg-[#439b1e]/20 rounded-full blur-xl"></div>
-                <div className="relative bg-gradient-to-br from-[#439b1e] to-[#357a18] p-6 rounded-full">
-                  <Sparkles className="w-16 h-16 text-white" />
+                <div className="absolute inset-0 bg-[#439b1e]/30 rounded-full blur-2xl scale-110"></div>
+                <div className="relative w-56 h-56 md:w-64 md:h-64">
+                  <img 
+                    src="/attached_assets/Adesivos (Luci)2_1760374475877.png" 
+                    alt="Luci - Beleza com Luci"
+                    className="w-full h-full object-contain drop-shadow-2xl"
+                  />
                 </div>
               </div>
             </div>

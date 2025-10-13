@@ -41,6 +41,7 @@ import ProfileMobilePage from "@/pages/profile-mobile-page"; // Import the new m
 import MeuPerfilMobilePage from "@/pages/meuperfil-mobile-page"; // Import the new mobile edit profile page
 import ComunidadeMobilePage from "@/pages/comunidade-mobile-page"; // Import the new mobile community page
 import AjudaMobilePage from "@/pages/ajuda-mobile-page"; // Import the new mobile help page
+import BioPage from "@/pages/bio-page"; // Import the bio page
 
 
 import { useNotificationsWebSocket } from './hooks/use-notifications-websocket';
@@ -72,6 +73,7 @@ function Router() {
       <ProtectedRoute path="/mobile-menu" component={MobileMenuPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
       <ProtectedRoute path="/admin/cheirosas" component={AdminCheirosasPage} />
+      <Route path="/bio" component={BioPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>

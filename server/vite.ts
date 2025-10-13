@@ -36,13 +36,16 @@ export async function setupVite(app: Express, server: Server) {
     appType: "custom",
   });
 
+  // Serve attached_assets folder
+  app.use('/attached_assets', express.static(path.resolve(__dirname, '..', 'attached_assets')));
+
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
     // Skip Vite handling only for API routes and static files
     // All other routes should return index.html for SPA routing
-    if (url.startsWith('/api') || url.startsWith('/uploads')) {
+    if (url.startsWith('/api') || url.startsWith('/uploads') || url.startsWith('/attached_assets')) {
       return next();
     }
 
