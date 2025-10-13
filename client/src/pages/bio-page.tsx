@@ -263,7 +263,7 @@ export default function BioPage() {
       <Sheet open={isSocialMenuOpen} onOpenChange={setIsSocialMenuOpen}>
         <SheetContent side="right" className="w-[300px] sm:w-[400px]">
           <SheetHeader>
-            <SheetTitle className="text-xl font-bold text-primary">Links</SheetTitle>
+            <SheetTitle className="text-xl font-bold text-primary">Minhas Redes</SheetTitle>
           </SheetHeader>
           
           <div className="mt-6 space-y-4">
