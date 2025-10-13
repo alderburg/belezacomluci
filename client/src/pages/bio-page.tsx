@@ -95,7 +95,7 @@ export default function BioPage() {
         </div>
         
         {/* Chapinha/Prancha */}
-        <div className="absolute top-[35%] left-[5%] animate-float-medium opacity-18">
+        <div className="absolute top-[35%] left-[5%] animate-float-medium opacity-20">
           <div className="relative w-6 h-20">
             <div className="w-full h-16 bg-gradient-to-br from-[#439b1e] to-[#357a18] rounded-lg shadow-lg"></div>
             <div className="w-3 h-6 bg-gradient-to-b from-[#2d6615] to-[#1f4a0f] rounded-lg mt-1 mx-auto"></div>
