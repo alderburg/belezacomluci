@@ -263,26 +263,10 @@ export default function BioPage() {
       <Sheet open={isSocialMenuOpen} onOpenChange={setIsSocialMenuOpen}>
         <SheetContent side="right" className="w-[300px] sm:w-[400px]">
           <SheetHeader>
-            <SheetTitle className="text-xl font-bold text-primary">Menu</SheetTitle>
+            <SheetTitle className="text-xl font-bold text-primary">Links</SheetTitle>
           </SheetHeader>
           
           <div className="mt-6 space-y-4">
-            {/* Acesso ao Sistema */}
-            <Link href="/">
-              <a
-                className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer"
-                onClick={() => setIsSocialMenuOpen(false)}
-              >
-                <div className="flex items-center justify-center w-12 h-12 bg-primary rounded-lg">
-                  <Sparkles className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-semibold text-foreground">Acessar Sistema</h3>
-                  <p className="text-sm text-muted-foreground">Entre na plataforma</p>
-                </div>
-              </a>
-            </Link>
-
             {/* Portal da Luci */}
             <a
               href="https://linktr.ee/belezacomluci"
@@ -295,7 +279,7 @@ export default function BioPage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-foreground">Portal da Luci</h3>
-                <p className="text-sm text-muted-foreground">Todos os links em um só lugar</p>
+                <p className="text-sm text-muted-foreground">Feito para minhas cheirosas</p>
               </div>
             </a>
 
