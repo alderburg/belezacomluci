@@ -23,6 +23,42 @@ export default function BioPage() {
         <div className="absolute top-20 left-10 w-32 h-32 bg-[#439b1e]/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-pink-300/20 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-purple-300/10 rounded-full blur-2xl"></div>
+        
+        {/* Ícones decorativos sutis */}
+        {/* Pente 1 */}
+        <svg className="absolute top-[15%] left-[12%] w-8 h-8 text-[#439b1e] opacity-15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 3h2v18H3V3zm4 0h2v18H7V3zm4 0h2v18h-2V3zm4 0h2v18h-2V3zm4 0h2v18h-2V3z"/>
+        </svg>
+        
+        {/* Escova */}
+        <svg className="absolute top-[60%] right-[15%] w-9 h-9 text-pink-400 opacity-12" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 8h-3V4H3v4H0v2h3v4h14v-4h3V8zm-5 4H5V6h10v6z"/>
+          <rect x="7" y="8" width="2" height="3"/>
+          <rect x="11" y="8" width="2" height="3"/>
+        </svg>
+        
+        {/* Caixa de Presente 1 */}
+        <svg className="absolute top-[35%] left-[8%] w-9 h-9 text-purple-400 opacity-14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/>
+        </svg>
+        
+        {/* Coração 1 */}
+        <Heart className="absolute bottom-[25%] left-[18%] w-7 h-7 text-pink-500 opacity-13" />
+        
+        {/* Pente 2 */}
+        <svg className="absolute bottom-[40%] right-[25%] w-7 h-7 text-[#5ab832] opacity-16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 3h2v18H3V3zm4 0h2v18H7V3zm4 0h2v18h-2V3zm4 0h2v18h-2V3zm4 0h2v18h-2V3z"/>
+        </svg>
+        
+        {/* Caixa de Presente 2 */}
+        <Gift className="absolute top-[70%] left-[32%] w-8 h-8 text-purple-500 opacity-11" />
+        
+        {/* Coração 2 */}
+        <Heart className="absolute top-[25%] right-[20%] w-6 h-6 text-pink-400 opacity-15" />
+        
+        {/* Sparkles decorativos */}
+        <Sparkles className="absolute top-[45%] left-[5%] w-6 h-6 text-[#439b1e] opacity-18" />
+        <Sparkles className="absolute bottom-[15%] right-[10%] w-5 h-5 text-pink-400 opacity-16" />
       </div>
 
       {/* Conteúdo Principal */}
