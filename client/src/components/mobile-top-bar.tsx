@@ -1,4 +1,4 @@
-import { Bell, Search, Menu, User, Sparkles, Instagram, Youtube, Music } from "lucide-react";
+import { Bell, Search, Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -10,12 +10,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useNotificationsWebSocket } from "@/hooks/use-notifications-websocket";
@@ -69,7 +63,6 @@ export default function MobileTopBar({
   const { viewMode } = useAdmin();
   const [isNotificationPopoverOpen, setIsNotificationPopoverOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
   const [, setLocation] = useLocation();
 
   // State to track loading status for marking notifications as read
@@ -397,7 +390,7 @@ export default function MobileTopBar({
               variant="ghost"
               size="icon"
               className="text-white hover:bg-white/10"
-              onClick={() => setIsSocialMenuOpen(true)}
+              onClick={onMenuClick}
             >
               <Menu className="h-5 w-5" />
             </Button>
@@ -412,81 +405,6 @@ export default function MobileTopBar({
         isOpen={isSearchOpen} 
         onClose={() => setIsSearchOpen(false)} 
       />
-
-      {/* Modal de Menu Social */}
-      <Sheet open={isSocialMenuOpen} onOpenChange={setIsSocialMenuOpen}>
-        <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-          <SheetHeader>
-            <SheetTitle className="text-xl font-bold text-primary">Portal da Luci</SheetTitle>
-          </SheetHeader>
-          
-          <div className="mt-6 space-y-4">
-            {/* Portal da Luci */}
-            <a
-              href="https://linktr.ee/belezacomluci"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-colors"
-            >
-              <div className="flex items-center justify-center w-12 h-12 bg-primary rounded-lg">
-                <Sparkles className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-foreground">Portal da Luci</h3>
-                <p className="text-sm text-muted-foreground">Todos os links em um só lugar</p>
-              </div>
-            </a>
-
-            {/* Instagram */}
-            <a
-              href="https://www.instagram.com/belezacomluci"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl border border-pink-200/50 hover:bg-pink-500/20 transition-colors"
-            >
-              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-500 rounded-lg">
-                <Instagram className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-foreground">Instagram</h3>
-                <p className="text-sm text-muted-foreground">@belezacomluci</p>
-              </div>
-            </a>
-
-            {/* YouTube */}
-            <a
-              href="https://www.youtube.com/@belezacomluci"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-red-500/10 rounded-xl border border-red-200/50 hover:bg-red-500/20 transition-colors"
-            >
-              <div className="flex items-center justify-center w-12 h-12 bg-red-600 rounded-lg">
-                <Youtube className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-foreground">YouTube</h3>
-                <p className="text-sm text-muted-foreground">Vídeos e tutoriais</p>
-              </div>
-            </a>
-
-            {/* TikTok */}
-            <a
-              href="https://www.tiktok.com/@belezacomluci"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-black/10 rounded-xl border border-gray-200/50 hover:bg-black/20 transition-colors"
-            >
-              <div className="flex items-center justify-center w-12 h-12 bg-black rounded-lg">
-                <Music className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-foreground">TikTok</h3>
-                <p className="text-sm text-muted-foreground">Conteúdo rápido e divertido</p>
-              </div>
-            </a>
-          </div>
-        </SheetContent>
-      </Sheet>
     </>
   );
 }
