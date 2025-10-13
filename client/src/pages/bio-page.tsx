@@ -7,9 +7,15 @@ import Autoplay from "embla-carousel-autoplay";
 import { useEffect, useState } from "react";
 
 export default function BioPage() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
-    Autoplay({ delay: 3000, stopOnInteraction: false })
-  ]);
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { 
+      loop: true,
+      duration: 30
+    }, 
+    [
+      Autoplay({ delay: 5000, stopOnInteraction: false })
+    ]
+  );
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
