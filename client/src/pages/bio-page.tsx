@@ -35,7 +35,7 @@ export default function BioPage() {
                 <div className="absolute inset-0 bg-[#439b1e]/30 rounded-full blur-2xl scale-110"></div>
                 <div className="relative w-56 h-56 md:w-64 md:h-64">
                   <img 
-                    src="/attached_assets/Adesivos (Luci)2_1760374475877.png" 
+                    src="/attached_assets/Adesivos (Luci)trans_1760374914723.png" 
                     alt="Luci - Beleza com Luci"
                     className="w-full h-full object-contain drop-shadow-2xl"
                   />
