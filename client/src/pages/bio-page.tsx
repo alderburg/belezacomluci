@@ -1,7 +1,13 @@
 
 import { Link } from "wouter";
-import { Sparkles, Gift, Heart, ExternalLink } from "lucide-react";
+import { Sparkles, Gift, Heart, Menu, Instagram, Youtube, Music, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useEffect, useState } from "react";
@@ -17,6 +23,7 @@ export default function BioPage() {
     ]
   );
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -34,16 +41,14 @@ export default function BioPage() {
   }, [emblaApi]);
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50 relative overflow-hidden">
-      {/* Botão Portal no canto superior direito */}
+      {/* Botão Menu Sanduíche no canto superior direito */}
       <div className="absolute top-6 right-6 z-10">
-        <Link href="/">
-          <Button 
-            className="bg-primary hover:bg-primary/90 text-white shadow-lg flex items-center gap-2"
-          >
-            Portal
-            <ExternalLink className="w-4 h-4" />
-          </Button>
-        </Link>
+        <Button 
+          onClick={() => setIsSocialMenuOpen(true)}
+          className="bg-primary hover:bg-primary/90 text-white shadow-lg w-12 h-12 rounded-full p-0"
+        >
+          <Menu className="w-6 h-6" />
+        </Button>
       </div>
 
       {/* Elementos decorativos de fundo com itens de beleza flutuando */}
@@ -253,6 +258,113 @@ export default function BioPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Menu Social */}
+      <Sheet open={isSocialMenuOpen} onOpenChange={setIsSocialMenuOpen}>
+        <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+          <SheetHeader>
+            <SheetTitle className="text-xl font-bold text-primary">Menu</SheetTitle>
+          </SheetHeader>
+          
+          <div className="mt-6 space-y-4">
+            {/* Acesso ao Sistema */}
+            <Link href="/">
+              <a
+                className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer"
+                onClick={() => setIsSocialMenuOpen(false)}
+              >
+                <div className="flex items-center justify-center w-12 h-12 bg-primary rounded-lg">
+                  <Sparkles className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-foreground">Acessar Sistema</h3>
+                  <p className="text-sm text-muted-foreground">Entre na plataforma</p>
+                </div>
+              </a>
+            </Link>
+
+            {/* Portal da Luci */}
+            <a
+              href="https://linktr.ee/belezacomluci"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-colors"
+            >
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg">
+                <Sparkles className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-foreground">Portal da Luci</h3>
+                <p className="text-sm text-muted-foreground">Todos os links em um só lugar</p>
+              </div>
+            </a>
+
+            {/* Instagram */}
+            <a
+              href="https://www.instagram.com/belezacomluci"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 p-4 bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl border border-pink-200/50 hover:bg-pink-500/20 transition-colors"
+            >
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-500 rounded-lg">
+                <Instagram className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-foreground">Instagram</h3>
+                <p className="text-sm text-muted-foreground">@belezacomluci</p>
+              </div>
+            </a>
+
+            {/* Facebook */}
+            <a
+              href="https://www.facebook.com/belezacomluci"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 p-4 bg-blue-500/10 rounded-xl border border-blue-200/50 hover:bg-blue-500/20 transition-colors"
+            >
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-lg">
+                <Facebook className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-foreground">Facebook</h3>
+                <p className="text-sm text-muted-foreground">Curta nossa página</p>
+              </div>
+            </a>
+
+            {/* YouTube */}
+            <a
+              href="https://www.youtube.com/@belezacomluci"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 p-4 bg-red-500/10 rounded-xl border border-red-200/50 hover:bg-red-500/20 transition-colors"
+            >
+              <div className="flex items-center justify-center w-12 h-12 bg-red-600 rounded-lg">
+                <Youtube className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-foreground">YouTube</h3>
+                <p className="text-sm text-muted-foreground">Vídeos e tutoriais</p>
+              </div>
+            </a>
+
+            {/* TikTok */}
+            <a
+              href="https://www.tiktok.com/@belezacomluci"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 p-4 bg-black/10 rounded-xl border border-gray-200/50 hover:bg-black/20 transition-colors"
+            >
+              <div className="flex items-center justify-center w-12 h-12 bg-black rounded-lg">
+                <Music className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-foreground">TikTok</h3>
+                <p className="text-sm text-muted-foreground">Conteúdo rápido e divertido</p>
+              </div>
+            </a>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
