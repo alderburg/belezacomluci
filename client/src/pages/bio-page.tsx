@@ -10,7 +10,7 @@ export default function BioPage() {
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { 
       loop: true,
-      duration: 30
+      duration: 50
     }, 
     [
       Autoplay({ delay: 5000, stopOnInteraction: false })
