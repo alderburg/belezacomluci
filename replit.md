@@ -233,18 +233,18 @@ O projeto usa o banco PostgreSQL da Locaweb (externo ao Railway):
 
 ### Variáveis de Ambiente Necessárias no Railway
 ```
-LOCAWEB_DB_HOST=portalblzluci.postgresql.dbaas.com.br
+LOCAWEB_DB_HOST=seu_host.postgresql.dbaas.com.br
 LOCAWEB_DB_PORT=5432
-LOCAWEB_DB_NAME=portalblzluci
-LOCAWEB_DB_USER=portalblzluci
-LOCAWEB_DB_PASSWORD=[senha]
-YOUTUBE_API_KEY=[chave]
-GOOGLE_CLIENT_ID=[client_id]
-GOOGLE_CLIENT_SECRET=[client_secret]
-SESSION_SECRET=[secret]
+LOCAWEB_DB_NAME=seu_banco
+LOCAWEB_DB_USER=seu_usuario
+LOCAWEB_DB_PASSWORD=sua_senha
+YOUTUBE_API_KEY=sua_chave_youtube
+GOOGLE_CLIENT_ID=seu_client_id
+GOOGLE_CLIENT_SECRET=seu_client_secret
+SESSION_SECRET=sua_chave_session_secreta
 NODE_ENV=production
-BASE_URL=[url_do_railway]
-WEBSOCKET=[url_do_railway]
+BASE_URL=https://seu-app.up.railway.app
+WEBSOCKET=https://seu-app.up.railway.app
 ```
 
 ### Health Check

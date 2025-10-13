@@ -24,19 +24,19 @@ No painel do Railway, vá em **Variables** e adicione:
 
 #### Banco de Dados Locaweb (OBRIGATÓRIO)
 ```
-LOCAWEB_DB_HOST=portalblzluci.postgresql.dbaas.com.br
+LOCAWEB_DB_HOST=seu_host.postgresql.dbaas.com.br
 LOCAWEB_DB_PORT=5432
-LOCAWEB_DB_NAME=portalblzluci
-LOCAWEB_DB_USER=portalblzluci
-LOCAWEB_DB_PASSWORD=Dr19122010@
+LOCAWEB_DB_NAME=seu_banco_aqui
+LOCAWEB_DB_USER=seu_usuario_aqui
+LOCAWEB_DB_PASSWORD=sua_senha_aqui
 ```
 
 #### APIs e Autenticação
 ```
-YOUTUBE_API_KEY=AIzaSyDTcvQZujqiD9byqFqwojEdJ1ALxC-S-Po
-GOOGLE_CLIENT_ID=728779368569-nt2qjlc4siecb70detohorb5s5tn04vr.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
-SESSION_SECRET=beleza_luci_secret_key_2024_a8f2e9c7b1d4f6a3e8b5c2d7f9a1e4b6c3d8f2a5e7b9c1d4f6a8e2b5c7d9f1a3e6
+YOUTUBE_API_KEY=sua_chave_youtube_aqui
+GOOGLE_CLIENT_ID=seu_google_client_id_aqui
+GOOGLE_CLIENT_SECRET=seu_google_client_secret_aqui
+SESSION_SECRET=sua_chave_secreta_session_aqui
 ```
 
 #### Configuração do Ambiente
