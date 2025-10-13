@@ -48,7 +48,7 @@ export default function BioPage() {
             </h1>
             
             <p className="text-base md:text-lg text-gray-600 max-w-lg mx-auto">
-              Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚 para minhas cheirosas em 2025 ✨
+              Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚✨
             </p>
           </div>
 
