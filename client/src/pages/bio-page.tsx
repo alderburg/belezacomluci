@@ -44,7 +44,7 @@ export default function BioPage() {
       <div className="absolute top-6 right-6 z-10">
         <Button
           onClick={() => setIsSocialMenuOpen(true)}
-          className="bg-primary hover:bg-primary/90 text-white shadow-lg w-12 h-12 rounded-lg p-0"
+          className="bg-[#439b1e] hover:bg-[#357a18] text-white shadow-lg w-12 h-12 rounded-lg p-0"
         >
           <Menu className="w-6 h-6" />
         </Button>
@@ -170,10 +170,10 @@ export default function BioPage() {
           </div>
 
           {/* Features - Carrossel no Mobile, Grid no Desktop */}
-          <div className="py-4">
+          <div className="py-8 pb-12">
             {/* Carrossel Mobile */}
             <div className="md:hidden">
-              <div className="overflow-visible pb-4" ref={emblaRef}>
+              <div className="overflow-visible pb-6" ref={emblaRef}>
                 <div className="flex">
                   <div className="flex-[0_0_100%] min-w-0 px-4">
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#439b1e]/20">
@@ -208,7 +208,7 @@ export default function BioPage() {
               </div>
 
               {/* Indicadores do Carrossel */}
-              <div className="flex justify-center gap-2 mt-2">
+              <div className="flex justify-center gap-2 mt-4">
                 {[0, 1, 2].map((index) => (
                   <button
                     key={index}
@@ -250,7 +250,7 @@ export default function BioPage() {
           </div>
 
           {/* Footer */}
-          <div className="pt-4">
+          <div className="pt-8">
             <p className="text-sm text-gray-500">
               Criado com 💚 para minhas cheirosas em 2025
             </p>
