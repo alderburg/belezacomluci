@@ -268,20 +268,20 @@ export default function BioPage() {
           
           <div className="mt-6 space-y-4">
             {/* Portal da Luci */}
-            <a
-              href="https://linktr.ee/belezacomluci"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-colors"
-            >
-              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg">
-                <Sparkles className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-foreground">Portal da Luci</h3>
-                <p className="text-sm text-muted-foreground">Feito para minhas cheirosas</p>
-              </div>
-            </a>
+            <Link href="/auth">
+              <a
+                className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer"
+                onClick={() => setIsSocialMenuOpen(false)}
+              >
+                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg">
+                  <Sparkles className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-foreground">Portal da Luci</h3>
+                  <p className="text-sm text-muted-foreground">Feito para minhas cheirosas</p>
+                </div>
+              </a>
+            </Link>
 
             {/* Instagram */}
             <a
