@@ -1,0 +1,169 @@
+-- ========== SISTEMA COMPLETO DE NOTIFICAÇÕES ==========
+
+-- Tabela principal de notificações (super completa)
+CREATE TABLE notifications (
+    id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+    title text NOT NULL,
+    content text NOT NULL,
+    type text NOT NULL, -- 'manual', 'scheduled', 'mission_progress', 'mission_completed', 'new_video', 'new_product', 'new_coupon', 'new_raffle'
+    category text DEFAULT 'general', -- 'general', 'promotional', 'system', 'achievements', 'reminders'
+    priority text DEFAULT 'normal', -- 'low', 'normal', 'high', 'urgent'
+    
+    -- VISUAL E INTERAÇÃO
+    icon text DEFAULT 'bell',
+    color text DEFAULT '#ff6b9d',
+    image_url text, -- Imagem/banner na notificação
+    action_type text, -- 'none', 'redirect', 'modal', 'external_link'
+    action_data text, -- JSON com dados da ação
+    link_url text,
+    
+    -- SEGMENTAÇÃO AVANÇADA
+    target_audience text DEFAULT 'all', -- 'all', 'premium', 'free', 'specific', 'custom_group'
+    specific_user_ids text, -- JSON array de IDs específicos
+    custom_conditions text, -- JSON com condições (ex: usuários que assistiram X vídeos)
+    
+    -- CONTROLE DE ENVIO
+    status text DEFAULT 'draft', -- 'draft', 'scheduled', 'sending', 'sent', 'paused', 'cancelled'
+    can_send_manually boolean DEFAULT true,
+    
+    -- AGENDAMENTO E REPETIÇÃO
+    is_scheduled boolean DEFAULT false,
+    scheduled_date_time timestamp,
+    repeat_type text DEFAULT 'none', -- 'none', 'daily', 'weekly', 'monthly', 'custom'
+    repeat_interval integer DEFAULT 1,
+    repeat_days_of_week text, -- JSON array: [1,2,3,4,5] para dias da semana
+    repeat_until timestamp,
+    last_sent_at timestamp,
+    next_send_at timestamp,
+    
+    -- CONTROLE DE FREQUÊNCIA (Anti-spam)
+    max_sends_per_day integer DEFAULT 0, -- 0 = ilimitado
+    min_interval_hours integer DEFAULT 0, -- Intervalo mínimo entre notificações do mesmo tipo
+    
+    -- EXPIRAÇÃO E VALIDADE
+    is_active boolean DEFAULT true,
+    expiry_date timestamp,
+    auto_expire_after_hours integer, -- Auto-expirar após X horas do envio
+    
+    -- ESTATÍSTICAS
+    total_sent_count integer DEFAULT 0,
+    total_read_count integer DEFAULT 0,
+    total_click_count integer DEFAULT 0,
+    target_user_count integer DEFAULT 0, -- Quantos usuários devem receber
+    
+    -- METADADOS
+    created_at timestamp DEFAULT now(),
+    created_by varchar REFERENCES users(id),
+    updated_at timestamp DEFAULT now(),
+    
+    -- TEMPLATE E PERSONALIZAÇÃO
+    is_template boolean DEFAULT false, -- Se é um modelo reutilizável
+    template_name text, -- Nome do template
+    personalization_fields text -- JSON com campos personalizáveis
+);
+
+-- Tabela para templates/modelos de notificações
+CREATE TABLE notification_templates (
+    id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+    name text NOT NULL,
+    description text,
+    template_data text NOT NULL, -- JSON com estrutura da notificação
+    category text DEFAULT 'custom',
+    is_system_template boolean DEFAULT false,
+    usage_count integer DEFAULT 0,
+    created_by varchar REFERENCES users(id),
+    created_at timestamp DEFAULT now()
+);
+
+-- Tabela para grupos customizados de usuários
+CREATE TABLE notification_user_groups (
+    id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+    name text NOT NULL,
+    description text,
+    conditions text NOT NULL, -- JSON com condições de filtro
+    user_count integer DEFAULT 0,
+    last_updated timestamp DEFAULT now(),
+    created_by varchar REFERENCES users(id),
+    created_at timestamp DEFAULT now()
+);
+
+-- Tabela de leituras (melhorada)
+CREATE TABLE notification_reads (
+    id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id varchar NOT NULL REFERENCES users(id),
+    notification_id varchar NOT NULL REFERENCES notifications(id),
+    read_at timestamp DEFAULT now(),
+    clicked boolean DEFAULT false, -- Se clicou na notificação
+    clicked_at timestamp,
+    device_info text, -- JSON com info do dispositivo/browser
+    ip_address inet
+);
+
+-- Tabela para reações/feedback nas notificações
+CREATE TABLE notification_reactions (
+    id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id varchar NOT NULL REFERENCES users(id),
+    notification_id varchar NOT NULL REFERENCES notifications(id),
+    reaction_type text NOT NULL, -- 'like', 'love', 'helpful', 'not_helpful', 'report'
+    feedback_text text, -- Comentário opcional
+    created_at timestamp DEFAULT now()
+);
+
+-- Tabela para log de atividades do sistema de notificações
+CREATE TABLE notification_activity_log (
+    id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+    notification_id varchar REFERENCES notifications(id),
+    action text NOT NULL, -- 'created', 'scheduled', 'sent', 'paused', 'cancelled', 'edited'
+    details text, -- JSON com detalhes da ação
+    performed_by varchar REFERENCES users(id),
+    ip_address inet,
+    user_agent text,
+    created_at timestamp DEFAULT now()
+);
+
+-- Tabela para configurações globais do sistema
+CREATE TABLE notification_settings (
+    id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+    setting_key text UNIQUE NOT NULL,
+    setting_value text NOT NULL,
+    description text,
+    updated_by varchar REFERENCES users(id),
+    updated_at timestamp DEFAULT now()
+);
+
+-- ========== ÍNDICES OTIMIZADOS ==========
+
+-- Notificações
+CREATE INDEX idx_notifications_status_priority ON notifications(status, priority);
+CREATE INDEX idx_notifications_category ON notifications(category);
+CREATE INDEX idx_notifications_scheduled_next ON notifications(next_send_at, status) WHERE next_send_at IS NOT NULL;
+CREATE INDEX idx_notifications_target_audience ON notifications(target_audience);
+CREATE INDEX idx_notifications_active_expiry ON notifications(is_active, expiry_date);
+CREATE INDEX idx_notifications_templates ON notifications(is_template) WHERE is_template = true;
+
+-- Performance para estatísticas
+CREATE INDEX idx_notification_reads_stats ON notification_reads(notification_id, read_at, clicked);
+CREATE INDEX idx_notification_reads_user_date ON notification_reads(user_id, read_at);
+
+-- Reações
+CREATE INDEX idx_notification_reactions_notification ON notification_reactions(notification_id, reaction_type);
+
+-- Log de atividades
+CREATE INDEX idx_notification_log_date ON notification_activity_log(created_at);
+CREATE INDEX idx_notification_log_notification ON notification_activity_log(notification_id);
+
+-- ========== CONFIGURAÇÕES INICIAIS ==========
+
+-- Inserir configurações padrão
+INSERT INTO notification_settings (setting_key, setting_value, description) VALUES
+('max_notifications_per_user_per_day', '10', 'Máximo de notificações por usuário por dia'),
+('default_expiry_hours', '168', 'Expiração padrão em horas (7 dias)'),
+('enable_user_preferences', 'true', 'Permitir usuários configurarem preferências'),
+('batch_send_size', '100', 'Quantidade de notificações enviadas por lote'),
+('rate_limit_per_minute', '1000', 'Limite de notificações por minuto');
+
+-- Inserir templates padrão
+INSERT INTO notification_templates (name, description, template_data, category, is_system_template) VALUES
+('Boas-vindas', 'Template para novos usuários', '{"title": "Bem-vinda, {{name}}!", "content": "Seja bem-vinda ao Beleza com Luci! Explore nossos conteúdos exclusivos.", "icon": "heart", "color": "#ff6b9d"}', 'system', true),
+('Novo Vídeo', 'Template para novos vídeos', '{"title": "🎥 Novo vídeo disponível!", "content": "{{video_title}} foi adicionado à plataforma. Assista agora!", "icon": "play", "color": "#9333ea"}', 'content', true),
+('Missão Concluída', 'Template para missões completadas', '{"title": "🎉 Missão concluída!", "content": "Parabéns! Você completou: {{mission_name}}", "icon": "trophy", "color": "#10b981"}', 'achievements', true);

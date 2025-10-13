@@ -1,0 +1,842 @@
+import { sql } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { pgTable, text, integer, timestamp, boolean, serial, varchar, json, numeric, unique } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  name: text("name").notNull(),
+  cpf: text("cpf"),
+  avatar: text("avatar"),
+  gender: text("gender"),
+  age: integer("age"),
+  
+  // Configurações da página de comunidade (admin)
+  communityTitle: text("community_title").default("Nossa Comunidade"),
+  communitySubtitle: text("community_subtitle").default("Compartilhe suas experiências e dicas de beleza"),
+  communityBackgroundImage: text("community_background_image"),
+  communityBackgroundImageMobile: text("community_background_image_mobile"),
+  
+  // Campos de contato
+  phone: text("phone"),
+  
+  // Campos de endereço
+  zipCode: text("zip_code"),
+  street: text("street"),
+  number: text("number"),
+  complement: text("complement"),
+  neighborhood: text("neighborhood"),
+  city: text("city"),
+  state: text("state"),
+  
+  // Redes sociais (JSON array)
+  socialNetworks: json("social_networks").default([]),
+  
+  isAdmin: boolean("is_admin").default(false),
+  googleAccessToken: text("google_access_token"),
+  googleRefreshToken: text("google_refresh_token"),
+  googleTokenExpiry: timestamp("google_token_expiry"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  planType: text("plan_type").notNull(), // 'free', 'premium'
+  isActive: boolean("is_active").default(true),
+  startDate: timestamp("start_date").default(sql`now()`),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const videos = pgTable("videos", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  videoUrl: text("video_url").notNull(),
+  type: text("type").notNull().default("video"), // 'video', 'playlist', 'live'
+  thumbnailUrl: text("thumbnail_url"),
+  isExclusive: boolean("is_exclusive").default(false),
+  categoryId: varchar("category_id").references(() => categories.id),
+  duration: text("duration"), // in HH:MM:SS format
+  likes: integer("likes").default(0),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const categories = pgTable("categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  coverImageUrl: text("cover_image_url"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const products = pgTable("products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  type: text("type").notNull(), // 'ebook', 'course', 'pdf', 'checklist'
+  fileUrl: text("file_url"),
+  coverImageUrl: text("cover_image_url"),
+  categoryId: varchar("category_id").references(() => categories.id),
+  isExclusive: boolean("is_exclusive").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const coupons = pgTable("coupons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: text("code").notNull().unique(),
+  brand: text("brand").notNull(),
+  description: text("description").notNull(),
+  discount: text("discount").notNull(),
+  categoryId: varchar("category_id").references(() => categories.id),
+  expiryDate: timestamp("expiry_date"),
+  isExclusive: boolean("is_exclusive").default(false),
+  isActive: boolean("is_active").default(true),
+  storeUrl: text("store_url"),
+  coverImageUrl: text("cover_image_url"),
+  startDateTime: timestamp("start_date_time"), // Data e hora de início para ativação automática
+  endDateTime: timestamp("end_date_time"), // Data e hora de fim para desativação automática
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const banners = pgTable("banners", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url").notNull(),
+  linkUrl: text("link_url"),
+  page: text("page").notNull().default("home"), // 'home', 'videos', 'produtos', 'cupons', 'comunidade', 'perfil', 'video_specific'
+  videoId: varchar("video_id").references(() => videos.id), // Para banners específicos de vídeo
+  isActive: boolean("is_active").default(true),
+  order: integer("order").default(0),
+  showTitle: boolean("show_title").notNull().default(true),
+  showDescription: boolean("show_description").notNull().default(true),
+  showButton: boolean("show_button").notNull().default(true),
+  startDateTime: timestamp("start_date_time"), // Data e hora de início para ativação automática
+  endDateTime: timestamp("end_date_time"), // Data e hora de fim para desativação automática
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const posts = pgTable("posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  imageUrl: text("image_url"),
+  likes: integer("likes").default(0),
+  shares: integer("shares").default(0),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const postLikes = pgTable("post_likes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  postId: varchar("post_id").references(() => posts.id).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const postTags = pgTable("post_tags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  postId: varchar("post_id").references(() => posts.id, { onDelete: "cascade" }).notNull(),
+  taggedUserId: varchar("tagged_user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const comments = pgTable("comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  videoId: varchar("video_id").references(() => videos.id),
+  productId: varchar("product_id").references(() => products.id),
+  postId: varchar("post_id").references(() => posts.id),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const userActivity = pgTable("user_activity", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  action: text("action").notNull(), // 'video_watched', 'product_downloaded', 'coupon_used'
+  resourceId: varchar("resource_id"),
+  resourceType: text("resource_type"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const videoLikes = pgTable("video_likes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  videoId: varchar("video_id").references(() => videos.id).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const popups = pgTable("popups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url").notNull(),
+  linkUrl: text("link_url"),
+  trigger: text("trigger").notNull(), // 'login', 'logout', 'page_specific', 'scheduled'
+  targetPage: text("target_page"), // Para trigger 'page_specific'
+  targetVideoId: varchar("target_video_id").references(() => videos.id), // Para páginas de vídeo específico
+  targetCourseId: varchar("target_course_id").references(() => products.id), // Para páginas de curso específico
+  showFrequency: text("show_frequency").notNull().default("always"), // 'always', 'once_per_session'
+  showTitle: boolean("show_title").default(true), // Controla exibição do título
+  showDescription: boolean("show_description").default(true), // Controla exibição da descrição
+  showButton: boolean("show_button").default(true), // Controla exibição do botão
+  isExclusive: boolean("is_exclusive").default(false), // Para usuários premium
+  isActive: boolean("is_active").default(true),
+  startDateTime: timestamp("start_date_time"), // Para agendamento
+  endDateTime: timestamp("end_date_time"), // Para agendamento
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const popupViews = pgTable("popup_views", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  popupId: varchar("popup_id").references(() => popups.id).notNull(),
+  sessionId: text("session_id").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  linkUrl: text("link_url"),
+  targetAudience: text("target_audience").notNull().default("all"), // 'free', 'premium', 'all'
+  isActive: boolean("is_active").default(true),
+  startDateTime: timestamp("start_date_time"), // Para agendamento
+  endDateTime: timestamp("end_date_time"), // Para agendamento
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const userNotifications = pgTable("user_notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  notificationId: varchar("notification_id").references(() => notifications.id).notNull(),
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+}, (table) => {
+  return {
+    userNotificationUnique: unique("user_notification_unique").on(table.userId, table.notificationId),
+  };
+});
+
+export const notificationSettings = pgTable("notification_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  emailEnabled: boolean("email_enabled").default(true),
+  whatsappEnabled: boolean("whatsapp_enabled").default(false),
+  smsEnabled: boolean("sms_enabled").default(false),
+  soundEnabled: boolean("sound_enabled").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+// ========== GAMIFICATION SYSTEM "MINHAS CHEIROSAS" ==========
+
+// Configurações do sistema de compartilhamento
+export const shareSettings = pgTable("share_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  freeReferralPoints: integer("free_referral_points").default(25),
+  premiumReferralPoints: integer("premium_referral_points").default(50),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+  updatedBy: varchar("updated_by").references(() => users.id),
+});
+
+// Sistema de referrals/indicações
+export const referrals = pgTable("referrals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerId: varchar("referrer_id").references(() => users.id).notNull(), // Quem indicou
+  referredId: varchar("referred_id").references(() => users.id).notNull(), // Quem foi indicado
+  referralCode: text("referral_code"), // Código único de indicação
+  pointsAwarded: integer("points_awarded").default(0), // Pontos dados ao indicador
+  referredPlanType: text("referred_plan_type").notNull(), // 'free' ou 'premium'
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const userPoints = pgTable("user_points", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  totalPoints: integer("total_points").default(0),
+  currentLevel: text("current_level").default("bronze"), // 'bronze', 'silver', 'gold', 'diamond'
+  levelProgress: integer("level_progress").default(0),
+  freeReferrals: integer("free_referrals").default(0), // Contador de indicações free
+  premiumReferrals: integer("premium_referrals").default(0), // Contador de indicações premium
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const missions = pgTable("missions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  pointsReward: integer("points_reward").notNull(),
+  missionType: text("mission_type").notNull(), // 'daily', 'weekly', 'monthly', 'achievement'
+  actionRequired: text("action_required").notNull(), // 'watch_video', 'comment', 'share', etc.
+  targetCount: integer("target_count").default(1),
+  icon: text("icon").default("star"),
+  color: text("color").default("#ff6b9d"),
+  minLevel: text("min_level").default("bronze"), // bronze, silver, gold, diamond
+  minPoints: integer("min_points").default(0),
+  premiumOnly: boolean("premium_only").default(false),
+  usageLimit: integer("usage_limit").default(0), // 0 = unlimited
+  isActive: boolean("is_active").default(true),
+  startDate: timestamp("start_date").default(sql`now()`),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const userMissions = pgTable("user_missions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  missionId: varchar("mission_id").references(() => missions.id).notNull(),
+  currentProgress: integer("current_progress").default(0),
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const rewards = pgTable("rewards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  pointsCost: integer("points_cost").notNull(),
+  rewardType: text("reward_type").notNull(), // 'coupon', 'sample', 'exclusive_video', 'badge', 'custom'
+  rewardValue: text("reward_value"), // JSON com dados específicos da recompensa
+  imageUrl: text("image_url"),
+  stockQuantity: integer("stock_quantity").default(-1), // -1 para ilimitado
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const userRewards = pgTable("user_rewards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  rewardId: varchar("reward_id").references(() => rewards.id).notNull(),
+  pointsSpent: integer("points_spent").notNull(),
+  status: text("status").default("claimed"), // 'claimed', 'delivered', 'expired'
+  rewardData: text("reward_data"), // JSON com dados específicos do resgate
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const raffles = pgTable("raffles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  prizeDescription: text("prize_description").notNull(),
+  imageUrl: text("image_url"),
+  entryCost: integer("entry_cost").default(1), // quantos pontos custa cada participação
+  maxEntriesPerUser: integer("max_entries_per_user").default(10),
+  startDate: timestamp("start_date").default(sql`now()`),
+  endDate: timestamp("end_date").notNull(),
+  drawDate: timestamp("draw_date"),
+  winnerUserId: varchar("winner_user_id").references(() => users.id),
+  isActive: boolean("is_active").default(true),
+  totalEntries: integer("total_entries").default(0),
+  // Campos expandidos para o formulário completo
+  category: text("category").default("Beleza"),
+  prizeValue: numeric("prize_value", { precision: 10, scale: 2 }).default("0"),
+  winnerCount: integer("winner_count").default(1),
+  maxParticipants: integer("max_participants").default(1000),
+  minPoints: integer("min_points").default(0),
+  minLevel: text("min_level").default("bronze"), // bronze, silver, gold, diamond
+  premiumOnly: boolean("premium_only").default(false),
+  sponsorName: text("sponsor_name"),
+  sponsorLogo: text("sponsor_logo"),
+  rules: text("rules"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const raffleEntries = pgTable("raffle_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  raffleId: varchar("raffle_id").references(() => raffles.id).notNull(),
+  entryCount: integer("entry_count").default(1),
+  pointsSpent: integer("points_spent").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Tabela para vencedores dos sorteios
+export const raffleWinners = pgTable("raffle_winners", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  raffleId: varchar("raffle_id").references(() => raffles.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  position: integer("position").default(1), // 1º, 2º, 3º lugar
+  prizeDelivered: boolean("prize_delivered").default(false),
+  deliveryInfo: text("delivery_info"), // JSON com dados de entrega
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const achievements = pgTable("achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").default("trophy"),
+  color: text("color").default("#ffd700"),
+  conditionType: text("condition_type").notNull(), // 'points_total', 'level_reached', etc.
+  conditionValue: integer("condition_value").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  achievementId: varchar("achievement_id").references(() => achievements.id).notNull(),
+  unlockedAt: timestamp("unlocked_at").default(sql`now()`),
+});
+
+// Relations
+export const userRelations = relations(users, ({ many, one }) => ({
+  subscription: one(subscriptions),
+  posts: many(posts),
+  comments: many(comments),
+  activities: many(userActivity),
+  videoLikes: many(videoLikes),
+  points: one(userPoints),
+  missions: many(userMissions),
+  rewards: many(userRewards),
+  raffleEntries: many(raffleEntries),
+  raffleWins: many(raffleWinners),
+  achievements: many(userAchievements),
+  referralsMade: many(referrals, { relationName: "referrer" }),
+  referralsReceived: many(referrals, { relationName: "referred" }),
+  userNotifications: many(userNotifications),
+}));
+
+export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
+  user: one(users, { fields: [subscriptions.userId], references: [users.id] }),
+}));
+
+export const videoRelations = relations(videos, ({ many, one }) => ({
+  comments: many(comments),
+  likes: many(videoLikes),
+  category: one(categories, { fields: [videos.categoryId], references: [categories.id] }),
+}));
+
+export const categoryRelations = relations(categories, ({ many }) => ({
+  videos: many(videos),
+  products: many(products),
+  coupons: many(coupons),
+}));
+
+export const productRelations = relations(products, ({ many, one }) => ({
+  comments: many(comments),
+  category: one(categories, { fields: [products.categoryId], references: [categories.id] }),
+}));
+
+export const couponRelations = relations(coupons, ({ one }) => ({
+  category: one(categories, { fields: [coupons.categoryId], references: [categories.id] }),
+}));
+
+export const postRelations = relations(posts, ({ one, many }) => ({
+  user: one(users, { fields: [posts.userId], references: [users.id] }),
+  comments: many(comments),
+}));
+
+export const commentRelations = relations(comments, ({ one }) => ({
+  user: one(users, { fields: [comments.userId], references: [users.id] }),
+  video: one(videos, { fields: [comments.videoId], references: [videos.id] }),
+  product: one(products, { fields: [comments.productId], references: [products.id] }),
+  post: one(posts, { fields: [comments.postId], references: [posts.id] }),
+}));
+
+export const activityRelations = relations(userActivity, ({ one }) => ({
+  user: one(users, { fields: [userActivity.userId], references: [users.id] }),
+}));
+
+export const videoLikeRelations = relations(videoLikes, ({ one }) => ({
+  user: one(users, { fields: [videoLikes.userId], references: [users.id] }),
+  video: one(videos, { fields: [videoLikes.videoId], references: [videos.id] }),
+}));
+
+export const popupRelations = relations(popups, ({ many }) => ({
+  views: many(popupViews),
+}));
+
+export const popupViewRelations = relations(popupViews, ({ one }) => ({
+  user: one(users, { fields: [popupViews.userId], references: [users.id] }),
+  popup: one(popups, { fields: [popupViews.popupId], references: [popups.id] }),
+}));
+
+export const notificationRelations = relations(notifications, ({ many }) => ({
+  userNotifications: many(userNotifications),
+}));
+
+export const userNotificationRelations = relations(userNotifications, ({ one }) => ({
+  user: one(users, { fields: [userNotifications.userId], references: [users.id] }),
+  notification: one(notifications, { fields: [userNotifications.notificationId], references: [notifications.id] }),
+}));
+
+export const notificationSettingsRelations = relations(notificationSettings, ({ one }) => ({
+  user: one(users, { fields: [notificationSettings.userId], references: [users.id] }),
+}));
+
+// ========== GAMIFICATION RELATIONS ==========
+
+export const userPointsRelations = relations(userPoints, ({ one }) => ({
+  user: one(users, { fields: [userPoints.userId], references: [users.id] }),
+}));
+
+export const missionRelations = relations(missions, ({ many }) => ({
+  userMissions: many(userMissions),
+}));
+
+export const userMissionRelations = relations(userMissions, ({ one }) => ({
+  user: one(users, { fields: [userMissions.userId], references: [users.id] }),
+  mission: one(missions, { fields: [userMissions.missionId], references: [missions.id] }),
+}));
+
+export const rewardRelations = relations(rewards, ({ many }) => ({
+  userRewards: many(userRewards),
+}));
+
+export const userRewardRelations = relations(userRewards, ({ one }) => ({
+  user: one(users, { fields: [userRewards.userId], references: [users.id] }),
+  reward: one(rewards, { fields: [userRewards.rewardId], references: [rewards.id] }),
+}));
+
+export const raffleRelations = relations(raffles, ({ one, many }) => ({
+  winner: one(users, { fields: [raffles.winnerUserId], references: [users.id] }),
+  entries: many(raffleEntries),
+  winners: many(raffleWinners),
+}));
+
+export const raffleWinnerRelations = relations(raffleWinners, ({ one }) => ({
+  raffle: one(raffles, { fields: [raffleWinners.raffleId], references: [raffles.id] }),
+  user: one(users, { fields: [raffleWinners.userId], references: [users.id] }),
+}));
+
+export const raffleEntryRelations = relations(raffleEntries, ({ one }) => ({
+  user: one(users, { fields: [raffleEntries.userId], references: [users.id] }),
+  raffle: one(raffles, { fields: [raffleEntries.raffleId], references: [raffles.id] }),
+}));
+
+export const achievementRelations = relations(achievements, ({ many }) => ({
+  userAchievements: many(userAchievements),
+}));
+
+export const userAchievementRelations = relations(userAchievements, ({ one }) => ({
+  user: one(users, { fields: [userAchievements.userId], references: [users.id] }),
+  achievement: one(achievements, { fields: [userAchievements.achievementId], references: [achievements.id] }),
+}));
+
+// ========== REFERRAL SYSTEM RELATIONS ==========
+
+export const shareSettingsRelations = relations(shareSettings, ({ one }) => ({
+  updatedByUser: one(users, { fields: [shareSettings.updatedBy], references: [users.id] }),
+}));
+
+export const referralRelations = relations(referrals, ({ one }) => ({
+  referrer: one(users, { fields: [referrals.referrerId], references: [users.id], relationName: "referrer" }),
+  referred: one(users, { fields: [referrals.referredId], references: [users.id], relationName: "referred" }),
+}));
+
+// Insert schemas
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true }).extend({
+  // Validação customizada para telefone
+  phone: z.string().optional().nullable().refine(
+    (phone) => !phone || /^[1-9]{2}[9]?[0-9]{8}$/.test(phone.replace(/\D/g, '')),
+    "Telefone deve ter formato válido (ex: 11999999999)"
+  ),
+  
+  // Validação de CEP
+  zipCode: z.string().optional().nullable().refine(
+    (cep) => !cep || /^[0-9]{5}-?[0-9]{3}$/.test(cep),
+    "CEP deve ter formato válido (ex: 12345-678)"
+  ),
+  
+  // Validação de redes sociais
+  socialNetworks: z.array(z.object({
+    platform: z.enum(['instagram', 'tiktok', 'youtube', 'facebook', 'twitter', 'linkedin']),
+    username: z.string().min(1, "Nome de usuário é obrigatório"),
+    url: z.string().url("URL deve ser válida").optional()
+  })).optional().default([])
+});
+export const insertVideoSchema = createInsertSchema(videos).omit({ id: true, createdAt: true, views: true, likes: true });
+export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true });
+export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true });
+export const insertCouponSchema = createInsertSchema(coupons).omit({ id: true, createdAt: true }).extend({
+  startDateTime: z.string().optional().nullable().transform((str) => {
+    if (!str || str.trim() === '') return null;
+    
+    // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
+    if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+      const [datePart, timePart] = str.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      // Usar Date.UTC para preservar o wall time sem adicionar offset local
+      return new Date(Date.UTC(year, month - 1, day, hour, minute));
+    }
+    
+    // Fallback para outros formatos
+    const date = new Date(str);
+    if (isNaN(date.getTime())) {
+      throw new Error(`Data de início inválida: ${str}`);
+    }
+    return date;
+  }),
+  endDateTime: z.string().optional().nullable().transform((str) => {
+    if (!str || str.trim() === '') return null;
+    
+    // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
+    if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+      const [datePart, timePart] = str.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      // Usar Date.UTC para preservar o wall time sem adicionar offset local
+      return new Date(Date.UTC(year, month - 1, day, hour, minute));
+    }
+    
+    // Fallback para outros formatos
+    const date = new Date(str);
+    if (isNaN(date.getTime())) {
+      throw new Error(`Data de fim inválida: ${str}`);
+    }
+    return date;
+  }),
+});
+export const insertBannerSchema = createInsertSchema(banners).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  showTitle: z.boolean().optional().default(true),
+  showDescription: z.boolean().optional().default(true),
+  showButton: z.boolean().optional().default(true),
+  startDateTime: z.string().optional().nullable().transform(val => {
+    if (!val || val === "" || val === null || val === undefined) return null;
+    // Convert datetime-local format to ISO timestamp for database
+    return new Date(val).toISOString();
+  }),
+  endDateTime: z.string().optional().nullable().transform(val => {
+    if (!val || val === "" || val === null || val === undefined) return null;
+    // Convert datetime-local format to ISO timestamp for database
+    return new Date(val).toISOString();
+  }),
+  videoId: z.string().optional().nullable().transform(val => {
+    if (!val || val === "" || val === null || val === undefined) return null;
+    return val;
+  }),
+});
+export const insertPostSchema = createInsertSchema(posts).omit({ id: true, createdAt: true, likes: true, shares: true });
+export const insertPostLikeSchema = createInsertSchema(postLikes).omit({ id: true, createdAt: true });
+export const insertPostTagSchema = createInsertSchema(postTags).omit({ id: true, createdAt: true });
+export const insertCommentSchema = createInsertSchema(comments).omit({ id: true, createdAt: true });
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({ id: true, createdAt: true });
+export const insertActivitySchema = createInsertSchema(userActivity).omit({ id: true, createdAt: true });
+export const insertVideoLikeSchema = createInsertSchema(videoLikes).omit({ id: true, createdAt: true });
+export const insertPopupSchema = createInsertSchema(popups).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  startDateTime: z.string().optional().nullable().transform((str) => {
+    if (!str || str.trim() === '') return null;
+    
+    // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
+    if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+      const [datePart, timePart] = str.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      // Usar Date.UTC para preservar o wall time sem adicionar offset local
+      return new Date(Date.UTC(year, month - 1, day, hour, minute));
+    }
+    
+    // Fallback para outros formatos
+    const date = new Date(str);
+    if (isNaN(date.getTime())) {
+      throw new Error(`Data de início inválida: ${str}`);
+    }
+    return date;
+  }),
+  endDateTime: z.string().optional().nullable().transform((str) => {
+    if (!str || str.trim() === '') return null;
+    
+    // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
+    if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+      const [datePart, timePart] = str.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      // Usar Date.UTC para preservar o wall time sem adicionar offset local
+      return new Date(Date.UTC(year, month - 1, day, hour, minute));
+    }
+    
+    // Fallback para outros formatos
+    const date = new Date(str);
+    if (isNaN(date.getTime())) {
+      throw new Error(`Data de fim inválida: ${str}`);
+    }
+    return date;
+  }),
+  targetVideoId: z.string().optional().nullable().transform(val => {
+    if (!val || val === "" || val === null || val === undefined) return null;
+    return val;
+  }),
+});
+export const insertPopupViewSchema = createInsertSchema(popupViews).omit({ id: true, createdAt: true });
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  startDateTime: z.string().optional().nullable().transform((str) => {
+    if (!str || str.trim() === '') return null;
+    
+    // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
+    if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+      const [datePart, timePart] = str.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      // Usar Date.UTC para preservar o wall time sem adicionar offset local
+      return new Date(Date.UTC(year, month - 1, day, hour, minute));
+    }
+    
+    // Fallback para outros formatos
+    const date = new Date(str);
+    if (isNaN(date.getTime())) {
+      throw new Error(`Data de início inválida: ${str}`);
+    }
+    return date;
+  }),
+  endDateTime: z.string().optional().nullable().transform((str) => {
+    if (!str || str.trim() === '') return null;
+    
+    // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
+    if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+      const [datePart, timePart] = str.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      // Usar Date.UTC para preservar o wall time sem adicionar offset local
+      return new Date(Date.UTC(year, month - 1, day, hour, minute));
+    }
+    
+    // Fallback para outros formatos
+    const date = new Date(str);
+    if (isNaN(date.getTime())) {
+      throw new Error(`Data de fim inválida: ${str}`);
+    }
+    return date;
+  }),
+});
+
+export const insertUserNotificationSchema = createInsertSchema(userNotifications).omit({ id: true, createdAt: true });
+
+export const insertNotificationSettingsSchema = createInsertSchema(notificationSettings).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+
+// ========== GAMIFICATION INSERT SCHEMAS ==========
+export const insertUserPointsSchema = createInsertSchema(userPoints).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertMissionSchema = createInsertSchema(missions).omit({ id: true, createdAt: true }).extend({
+  startDate: z.string().optional().nullable().transform(val => {
+    if (!val || val === "" || val === null || val === undefined) return new Date();
+    return new Date(val);
+  }),
+  endDate: z.string().optional().nullable().transform(val => {
+    if (!val || val === "" || val === null || val === undefined) return null;
+    return new Date(val);
+  }),
+});
+export const insertUserMissionSchema = createInsertSchema(userMissions).omit({ id: true, createdAt: true });
+export const insertRewardSchema = createInsertSchema(rewards).omit({ id: true, createdAt: true });
+export const insertUserRewardSchema = createInsertSchema(userRewards).omit({ id: true, createdAt: true });
+export const insertRaffleSchema = createInsertSchema(raffles).omit({ id: true, createdAt: true }).extend({
+  startDate: z.union([z.string(), z.date()]).optional().nullable().transform(val => {
+    if (!val || val === "" || val === null || val === undefined) return new Date();
+    if (val instanceof Date) return val;
+    return new Date(val);
+  }),
+  endDate: z.union([z.string(), z.date()]).optional().nullable().transform(val => {
+    if (!val || val === "" || val === null || val === undefined) return null;
+    if (val instanceof Date) return val;
+    return new Date(val);
+  }),
+  drawDate: z.union([z.string(), z.date()]).optional().nullable().transform(val => {
+    if (!val || val === "" || val === null || val === undefined) return null;
+    if (val instanceof Date) return val;
+    return new Date(val);
+  }),
+  prizeValue: z.union([z.string(), z.number()]).optional().transform(val => {
+    if (!val) return "0";
+    return typeof val === 'number' ? val.toString() : val;
+  }),
+  totalEntries: z.number().optional().default(0),
+  winnerUserId: z.string().optional().nullable(),
+});
+export const insertRaffleEntrySchema = createInsertSchema(raffleEntries).omit({ id: true, createdAt: true });
+export const insertAchievementSchema = createInsertSchema(achievements).omit({ id: true, createdAt: true });
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({ id: true });
+
+// ========== REFERRAL SYSTEM INSERT SCHEMAS ==========
+export const insertShareSettingsSchema = createInsertSchema(shareSettings).omit({ id: true, updatedAt: true });
+export const insertReferralSchema = createInsertSchema(referrals).omit({ id: true, createdAt: true });
+
+// Types
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type InsertVideo = z.infer<typeof insertVideoSchema>;
+export type Video = typeof videos.$inferSelect;
+export type InsertCategory = z.infer<typeof insertCategorySchema>;
+export type Category = typeof categories.$inferSelect;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Product = typeof products.$inferSelect;
+export type InsertCoupon = z.infer<typeof insertCouponSchema>;
+export type Coupon = typeof coupons.$inferSelect;
+export type InsertBanner = z.infer<typeof insertBannerSchema>;
+export type Banner = typeof banners.$inferSelect;
+export type InsertPost = z.infer<typeof insertPostSchema>;
+export type Post = typeof posts.$inferSelect;
+export type InsertPostLike = z.infer<typeof insertPostLikeSchema>;
+export type PostLike = typeof postLikes.$inferSelect;
+export type InsertPostTag = z.infer<typeof insertPostTagSchema>;
+export type PostTag = typeof postTags.$inferSelect;
+export type InsertComment = z.infer<typeof insertCommentSchema>;
+export type Comment = typeof comments.$inferSelect;
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertActivity = z.infer<typeof insertActivitySchema>;
+export type Activity = typeof userActivity.$inferSelect;
+export type InsertVideoLike = z.infer<typeof insertVideoLikeSchema>;
+export type VideoLike = typeof videoLikes.$inferSelect;
+export type InsertPopup = z.infer<typeof insertPopupSchema>;
+export type Popup = typeof popups.$inferSelect;
+export type InsertPopupView = z.infer<typeof insertPopupViewSchema>;
+export type PopupView = typeof popupViews.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertUserNotification = z.infer<typeof insertUserNotificationSchema>;
+export type UserNotification = typeof userNotifications.$inferSelect;
+export type InsertNotificationSettings = z.infer<typeof insertNotificationSettingsSchema>;
+export type NotificationSettings = typeof notificationSettings.$inferSelect;
+
+// ========== GAMIFICATION TYPES ==========
+export type InsertUserPoints = z.infer<typeof insertUserPointsSchema>;
+export type UserPoints = typeof userPoints.$inferSelect;
+export type InsertMission = z.infer<typeof insertMissionSchema>;
+export type Mission = typeof missions.$inferSelect;
+export type InsertUserMission = z.infer<typeof insertUserMissionSchema>;
+export type UserMission = typeof userMissions.$inferSelect;
+export type InsertReward = z.infer<typeof insertRewardSchema>;
+export type Reward = typeof rewards.$inferSelect;
+export type InsertUserReward = z.infer<typeof insertUserRewardSchema>;
+export type UserReward = typeof userRewards.$inferSelect;
+export type InsertRaffle = z.infer<typeof insertRaffleSchema>;
+export type Raffle = typeof raffles.$inferSelect;
+export type InsertRaffleEntry = z.infer<typeof insertRaffleEntrySchema>;
+export type RaffleEntry = typeof raffleEntries.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;

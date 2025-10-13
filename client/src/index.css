@@ -1,0 +1,415 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animações customizadas para notificações */
+@keyframes notification-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+@keyframes notification-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(251, 146, 60, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(251, 146, 60, 0.8), 0 0 30px rgba(251, 146, 60, 0.6); }
+}
+
+.animate-notification-shake {
+  animation: notification-shake 0.5s ease-in-out;
+}
+
+.animate-notification-glow {
+  animation: notification-glow 2s ease-in-out infinite;
+}
+
+.animation-delay-75 {
+  animation-delay: 75ms;
+}
+
+/* Efeito de carregamento para notificações */
+.notification-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.notification-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: loading-shimmer 1.5s infinite;
+  z-index: 1;
+}
+
+@keyframes loading-shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Melhorar a animação do spinner */
+.notification-spinner {
+  border-width: 3px;
+  border-style: solid;
+  border-color: hsl(var(--primary)) transparent hsl(var(--primary)) hsl(var(--primary));
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(300%) skewX(-12deg);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.1);
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(236, 72, 153, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.6), 0 0 30px rgba(168, 85, 247, 0.4);
+  }
+}
+
+/* Animação para botão premium */
+@keyframes gradient-shift {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Custom grid class to ensure uniform card heights */
+.uniform-grid {
+  display: grid !important;
+  gap: 1.5rem !important;
+  align-items: stretch;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+}
+
+.uniform-grid > * {
+  height: 100%;
+  min-height: 320px;
+  width: 100%;
+}
+
+:root {
+  --background: hsl(40, 12%, 98%);
+  --foreground: hsl(240, 10%, 3.9%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(240, 10%, 3.9%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(240, 10%, 3.9%);
+  --primary: hsl(339, 82%, 52%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 4.8%, 95.9%);
+  --secondary-foreground: hsl(240, 5.9%, 10%);
+  --muted: hsl(240, 4.8%, 95.9%);
+  --muted-foreground: hsl(240, 3.8%, 46.1%);
+  --accent: hsl(43, 96%, 56%);
+  --accent-foreground: hsl(240, 5.9%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 5.9%, 90%);
+  --input: hsl(240, 5.9%, 90%);
+  --ring: hsl(339, 82%, 52%);
+  --sidebar: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(240, 10%, 3.9%);
+  --sidebar-primary: hsl(339, 82%, 52%);
+  --sidebar-primary-foreground: hsl(0, 0%, 98%);
+  --sidebar-accent: hsl(240, 4.8%, 95.9%);
+  --sidebar-accent-foreground: hsl(339, 82%, 52%);
+  --sidebar-border: hsl(240, 5.9%, 90%);
+  --sidebar-ring: hsl(339, 82%, 52%);
+  --radius: 0.75rem;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --primary: hsl(339, 82%, 52%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --accent: hsl(43, 96%, 56%);
+  --accent-foreground: hsl(240, 5.9%, 10%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --ring: hsl(339, 82%, 52%);
+  --sidebar: hsl(240, 10%, 3.9%);
+  --sidebar-foreground: hsl(0, 0%, 98%);
+  --sidebar-primary: hsl(339, 82%, 52%);
+  --sidebar-primary-foreground: hsl(0, 0%, 98%);
+  --sidebar-accent: hsl(240, 3.7%, 15.9%);
+  --sidebar-accent-foreground: hsl(339, 82%, 52%);
+  --sidebar-border: hsl(240, 3.7%, 15.9%);
+  --sidebar-ring: hsl(339, 82%, 52%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Permitir seleção apenas em campos de entrada */
+  input, textarea {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+  }
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, hsl(339, 82%, 52%) 0%, hsl(320, 70%, 45%) 100%);
+}
+
+.gradient-gold {
+  background: linear-gradient(135deg, hsl(43, 96%, 56%) 0%, hsl(45, 100%, 51%) 100%);
+}
+
+.nav-item.active {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+
+.nav-item:hover {
+  background-color: hsl(var(--muted));
+}
+
+.banner-indicator.active {
+  opacity: 1;
+}
+
+/* Carousel Scroll */
+.scroll-carousel {
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  width: 100%;
+  max-width: 100%;
+}
+
+.scroll-carousel::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.carousel-container {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  scroll-behavior: smooth;
+}
+
+/* Card width adjustment for carousel */
+.carousel-container > * {
+  flex: 0 0 350px;
+  margin-right: 20px;
+}
+
+/* Mobile-specific carousel adjustments */
+@media (max-width: 768px) {
+  .carousel-container > * {
+    flex: 0 0 calc(100vw - 3rem);
+    max-width: 280px;
+    margin-right: 1rem;
+  }
+  
+  .carousel-container {
+    gap: 1rem;
+  }
+}
+
+/* Video card specific adjustments */
+.video-card {
+  min-width: 350px;
+}
+
+.video-card .video-info {
+  min-width: 0;
+  word-wrap: break-word;
+}
+
+/* Sidebar text animation */
+.sidebar-text-enter {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease-in-out 0.15s;
+}
+
+.sidebar-text-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Efeito especial para Minhas Cheirosas */
+.cheirosas-icon {
+  color: #8b5cf6;
+  animation: icon-movement 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.cheirosas-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  animation: shimmer-pass 2s ease-in-out infinite;
+}
+
+.cheirosas-text {
+  color: #8b5cf6;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #8b5cf6 0%, #a855f7 50%, #8b5cf6 100%);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: purple-shimmer 2s ease-in-out infinite;
+}
+
+.cheirosas-text::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer-pass 2s ease-in-out infinite 0.5s;
+  z-index: 1;
+}
+
+@keyframes icon-movement {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.3));
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5));
+    transform: scale(1.05) rotate(-2deg);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+    transform: scale(1.1) rotate(0deg);
+  }
+  75% {
+    filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5));
+    transform: scale(1.05) rotate(2deg);
+  }
+}
+
+@keyframes purple-shimmer {
+  0% {
+    background-position: -200% 0;
+    filter: brightness(1);
+  }
+  50% {
+    background-position: 0% 0;
+    filter: brightness(1.5) drop-shadow(0 0 2px rgba(168, 85, 247, 0.8));
+  }
+  100% {
+    background-position: 200% 0;
+    filter: brightness(1);
+  }
+}
+
+@keyframes shimmer-pass {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes text-shimmer {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.3);
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: transparent;
+}
+
+/* Hide scrollbar for Firefox */
+html {
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar for IE and Edge */
+body {
+  -ms-overflow-style: none;
+}
+
+/* Prevent scrollbar from disappearing when modals are open */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Ensure modal content has stable scrollbar */
+.modal-content {
+  scrollbar-gutter: stable;
+}

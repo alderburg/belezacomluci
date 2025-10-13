@@ -1,0 +1,94 @@
+Crie uma **página em React com Tailwind CSS** chamada **"Minhas Cheirosas – Desafios & Recompensas"** para integrar dentro de um sistema já existente.  
+Essa página deve ser única e conter todas as seções descritas abaixo, organizadas em cards dentro de um layout responsivo.
+
+---
+
+### 🎀 Estrutura da Página
+- Título fixo no topo: **"Minhas Cheirosas – Desafios & Recompensas"**.
+- Layout em **cards empilhados no mobile** e **grid no desktop**.
+- Estilo feminino, delicado e moderno (rosa, lilás, branco, ícones fofos).
+- Usar **Tailwind CSS** para estilização.
+- A página deve puxar e salvar dados em **Postgres**.
+
+---
+
+### 🏆 Seção 1: Ranking de Engajamento
+- Mostrar **TOP 10 usuárias** com avatar, nome, pontos e nível.
+- Níveis: 🥉 Bronze | 🥈 Prata | 🥇 Ouro | 💎 Diamante.
+- Cada card de usuária deve ter: foto, nome, plano (Free ou Premium), pontos totais e nível atual.
+- Exibir barra de progresso → quantos pontos faltam para o próximo nível.
+
+---
+
+### 🌸 Seção 2: Mural da Fama
+- Destaque visual para as vencedoras recentes (nome + foto + conquista).
+- Mensagem automática: *“Fulana é a Cheirosa Diamante do mês!”*.
+- Mostrar também últimas ganhadoras de sorteios.
+
+---
+
+### 🎯 Seção 3: Missões da Semana
+- Lista de missões ativas com ícones e botões **"Concluir missão"**.
+- Exemplos de missões:
+  - Assistir a um vídeo até o fim (+5 pontos).
+  - Comentar em 3 conteúdos (+10 pontos).
+  - Compartilhar um cupom (+8 pontos).
+  - Convidar uma amiga (+15 pontos).
+- Ao concluir missão → atualizar pontuação no banco.
+
+---
+
+### 🎁 Seção 4: Sorteios
+- Mostrar sorteios ativos com prêmios em destaque (ex: perfume, kit de beleza).
+- Cada ponto acumulado = 1 ticket automático.
+- Botão **"Quero participar"** para usar pontos extras.
+- Card com histórico → exibir últimas vencedoras e prêmios entregues.
+
+---
+
+### 💖 Seção 5: Loja de Recompensas
+- Usuária pode gastar pontos em prêmios fixos.
+- Exemplos:
+  - 50 pontos → Amostra de perfume.
+  - 100 pontos → Cupom de desconto.
+  - 200 pontos → Vídeo premium exclusivo.
+- Cada item tem botão **"Resgatar"**, que desconta pontos do perfil.
+
+---
+
+### 👩 Perfil da Usuária (fixo no topo da página)
+- Mostrar avatar, nome, plano (Free/Premium).
+- Pontuação total atual.
+- Nível atual (Bronze, Prata, Ouro, Diamante).
+- Barra de progresso para o próximo nível.
+
+---
+
+### ⚙️ Banco de Dados (Postgres)
+Criar as seguintes tabelas:
+1. **users**: id, nome, email, avatar, plano (free/premium), pontos, nível.
+2. **missions**: id, descrição, pontos, status.
+3. **rewards**: id, nome, custo_pontos, tipo (cupom, produto, digital).
+4. **sorteios**: id, premio, data, vencedora_id.
+5. **ranking_logs**: id, user_id, pontos_ganhos, tipo (missão, resgate, sorteio).
+
+---
+
+### 🎨 Design Extra
+- Cores principais: rosa claro, lilás e branco.
+- Cards arredondados com sombra suave.
+- Ícones fofos (usar `lucide-react`).
+- Tudo em **uma única página**, sem rotas extras.
+
+---
+
+**Resumo**:  
+A página **"Minhas Cheirosas – Desafios & Recompensas"** deve reunir em um só lugar:  
+- Ranking de engajamento  
+- Mural da fama  
+- Missões semanais  
+- Sorteios ativos e histórico  
+- Loja de recompensas  
+- Perfil da usuária (fixo no topo)  
+
+Tudo integrado ao Postgres, estilizado com Tailwind, pronto para ser usado dentro do sistema já existente.
