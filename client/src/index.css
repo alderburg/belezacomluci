@@ -185,10 +185,6 @@
     -ms-user-select: none;
   }
 
-  html {
-    zoom: 0.8;
-  }
-
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
