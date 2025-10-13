@@ -160,10 +160,10 @@ export default function BioPage() {
           </div>
 
           {/* Features - Carrossel no Mobile, Grid no Desktop */}
-          <div className="py-8">
+          <div className="py-8 pb-12">
             {/* Carrossel Mobile */}
             <div className="md:hidden">
-              <div className="overflow-hidden" ref={emblaRef}>
+              <div className="overflow-visible pb-6" ref={emblaRef}>
                 <div className="flex">
                   <div className="flex-[0_0_100%] min-w-0 px-4">
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#439b1e]/20">
