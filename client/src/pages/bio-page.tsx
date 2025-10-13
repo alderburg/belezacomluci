@@ -1,3 +1,4 @@
+
 import { Link } from "wouter";
 import { Sparkles, Gift, Heart, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,11 +18,69 @@ export default function BioPage() {
         </Link>
       </div>
 
-      {/* Elementos decorativos */}
+      {/* Elementos decorativos de fundo com itens de beleza flutuando */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Efeitos de blur coloridos */}
         <div className="absolute top-20 left-10 w-32 h-32 bg-[#439b1e]/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-pink-300/20 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-purple-300/10 rounded-full blur-2xl"></div>
+        
+        {/* Itens de beleza flutuantes */}
+        {/* Batom 1 */}
+        <div className="absolute top-[10%] left-[15%] animate-float-slow opacity-20">
+          <div className="w-8 h-16 bg-gradient-to-b from-pink-400 to-pink-600 rounded-t-full rounded-b-sm shadow-lg"></div>
+        </div>
+        
+        {/* Perfume 1 */}
+        <div className="absolute top-[20%] right-[20%] animate-float-medium opacity-25">
+          <div className="relative">
+            <div className="w-6 h-6 bg-gradient-to-br from-pink-300 to-pink-400 rounded-sm mb-1"></div>
+            <div className="w-10 h-12 bg-gradient-to-br from-purple-200 to-purple-300 rounded-lg shadow-lg"></div>
+          </div>
+        </div>
+        
+        {/* Espelho */}
+        <div className="absolute top-[60%] left-[10%] animate-float-slow opacity-15">
+          <div className="w-16 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full border-4 border-pink-300 shadow-lg"></div>
+        </div>
+        
+        {/* Batom 2 */}
+        <div className="absolute bottom-[30%] right-[15%] animate-float-fast opacity-20">
+          <div className="w-6 h-14 bg-gradient-to-b from-red-400 to-red-600 rounded-t-full rounded-b-sm shadow-lg"></div>
+        </div>
+        
+        {/* Esmalte */}
+        <div className="absolute top-[40%] right-[30%] animate-float-medium opacity-25">
+          <div className="relative">
+            <div className="w-4 h-4 bg-gradient-to-br from-pink-400 to-pink-500 rounded-full mb-1"></div>
+            <div className="w-8 h-10 bg-gradient-to-br from-pink-300 to-pink-400 rounded-lg shadow-lg"></div>
+          </div>
+        </div>
+        
+        {/* Perfume 2 */}
+        <div className="absolute bottom-[20%] left-[25%] animate-float-slow opacity-20">
+          <div className="relative">
+            <div className="w-5 h-5 bg-gradient-to-br from-purple-300 to-purple-400 rounded-sm mb-1"></div>
+            <div className="w-9 h-11 bg-gradient-to-br from-purple-200 to-purple-300 rounded-lg shadow-lg"></div>
+          </div>
+        </div>
+        
+        {/* Paleta de sombras */}
+        <div className="absolute top-[70%] right-[25%] animate-float-fast opacity-15">
+          <div className="w-16 h-12 bg-gradient-to-br from-pink-200 to-pink-300 rounded-lg shadow-lg border-2 border-pink-400">
+            <div className="grid grid-cols-3 gap-0.5 p-1">
+              <div className="w-3 h-3 bg-pink-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-pink-400 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Sparkles decorativos */}
+        <Sparkles className="absolute top-[15%] left-[40%] w-6 h-6 text-pink-300 animate-pulse opacity-30" />
+        <Sparkles className="absolute bottom-[40%] right-[40%] w-5 h-5 text-purple-300 animate-pulse opacity-25" />
+        <Heart className="absolute top-[50%] left-[5%] w-7 h-7 text-pink-400 animate-pulse opacity-20" />
+        <Gift className="absolute bottom-[15%] right-[10%] w-6 h-6 text-[#439b1e] animate-pulse opacity-25" />
       </div>
 
       {/* Conteúdo Principal */}
@@ -48,7 +107,7 @@ export default function BioPage() {
             </h1>
             
             <p className="text-base md:text-lg text-gray-600 max-w-lg mx-auto">
-              Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚✨
+              Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚 para minhas cheirosas em 2025 ✨
             </p>
           </div>
 
