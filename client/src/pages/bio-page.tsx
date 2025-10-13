@@ -33,7 +33,7 @@ export default function BioPage() {
             <div className="flex justify-center">
               <div className="relative">
                 <div className="absolute inset-0 bg-[#439b1e]/30 rounded-full blur-2xl scale-110"></div>
-                <div className="relative w-56 h-56 md:w-64 md:h-64">
+                <div className="relative w-32 h-32 md:w-40 md:h-40">
                   <img 
                     src="/images/luci-profile.webp" 
                     alt="Luci - Beleza com Luci"
@@ -43,11 +43,11 @@ export default function BioPage() {
               </div>
             </div>
             
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-[#439b1e] via-pink-500 to-purple-500 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#439b1e] via-pink-500 to-purple-500 bg-clip-text text-transparent">
               @belezacomluci
             </h1>
             
-            <p className="text-xl text-gray-600 max-w-lg mx-auto">
+            <p className="text-base md:text-lg text-gray-600 max-w-lg mx-auto">
               Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚✨
             </p>
           </div>
