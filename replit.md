@@ -214,3 +214,60 @@ A seguinte estrutura deve ser mantida:
 ```
 
 Estas configurações garantem que o projeto funcione imediatamente em qualquer nova instância do Replit sem necessidade de correções manuais.
+
+# Deploy no Railway
+
+## Configuração do Projeto
+
+O projeto está configurado para deploy no Railway com as seguintes configurações:
+
+### Arquivos de Configuração
+- `railway.json` - Configuração do Railway com health check
+- `DEPLOY.md` - Guia completo de deploy
+
+### Banco de Dados
+O projeto usa o banco PostgreSQL da Locaweb (externo ao Railway):
+- Conexão via variáveis de ambiente LOCAWEB_DB_*
+- Migrações executadas automaticamente no startup
+- Não é necessário provisionar banco no Railway
+
+### Variáveis de Ambiente Necessárias no Railway
+```
+LOCAWEB_DB_HOST=portalblzluci.postgresql.dbaas.com.br
+LOCAWEB_DB_PORT=5432
+LOCAWEB_DB_NAME=portalblzluci
+LOCAWEB_DB_USER=portalblzluci
+LOCAWEB_DB_PASSWORD=[senha]
+YOUTUBE_API_KEY=[chave]
+GOOGLE_CLIENT_ID=[client_id]
+GOOGLE_CLIENT_SECRET=[client_secret]
+SESSION_SECRET=[secret]
+NODE_ENV=production
+BASE_URL=[url_do_railway]
+WEBSOCKET=[url_do_railway]
+```
+
+### Health Check
+- Endpoint: `/api/health`
+- Timeout: 100ms
+- Retorna: status, uptime, timestamp, environment
+
+### Build e Deploy
+- Build: `npm run build` (Vite frontend + esbuild backend)
+- Start: `npm start` (node dist/index.js)
+- Porta: Automática via variável PORT do Railway
+- Restart: ON_FAILURE com 10 retries
+
+## Diferenças entre Replit e Railway
+
+### Replit (Desenvolvimento)
+- Porta: 5000 (fixa)
+- Vite em modo dev com HMR
+- WebSocket para hot reload
+- Ambiente: development
+
+### Railway (Produção)
+- Porta: Dinâmica (variável PORT)
+- Frontend servido como arquivos estáticos
+- WebSocket para notificações
+- Ambiente: production

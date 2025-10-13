@@ -66,7 +66,15 @@ export function registerRoutes(app: Express): Server {
   });
   app.use('/uploads', express.static(uploadDir));
 
-
+  // Health check endpoint for Railway and monitoring
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({
+      status: 'healthy',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
 
   // Users routes (Admin only)
   app.get("/api/admin/users", async (req, res) => {
