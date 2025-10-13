@@ -40,7 +40,7 @@ export default function BioPage() {
           <Button 
             className="bg-pink-500 hover:bg-pink-600 text-white shadow-lg flex items-center gap-2"
           >
-            Portal da Luci
+            Portal
             <ExternalLink className="w-4 h-4" />
           </Button>
         </Link>
