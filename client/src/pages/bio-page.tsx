@@ -177,32 +177,53 @@ export default function BioPage() {
               <div className="overflow-visible pb-6" ref={emblaRef}>
                 <div className="flex">
                   <div className="flex-[0_0_100%] min-w-0 px-4">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#439b1e]/20">
-                      <div className="bg-gradient-to-br from-[#439b1e] to-[#357a18] w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Sparkles className="w-6 h-6 text-white" />
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-[#439b1e]/20">
+                      <div className="relative w-full h-32 bg-gradient-to-br from-[#439b1e]/20 to-[#357a18]/20 overflow-hidden">
+                        <img 
+                          src="/attached_assets/stock_images/beauty_makeup_cosmet_27615695.jpg" 
+                          alt="Conteúdo Exclusivo"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                       </div>
-                      <h3 className="font-semibold text-lg mb-2 text-gray-800">Conteúdo Exclusivo</h3>
-                      <p className="text-sm text-gray-600">Dicas, tutoriais e reviews de beleza e perfumaria</p>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg mb-2 text-gray-800">Conteúdo Exclusivo</h3>
+                        <p className="text-sm text-gray-600">Dicas, tutoriais e reviews de beleza e perfumaria</p>
+                      </div>
                     </div>
                   </div>
 
                   <div className="flex-[0_0_100%] min-w-0 px-4">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-pink-300/30">
-                      <div className="bg-gradient-to-br from-pink-500 to-pink-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Heart className="w-6 h-6 text-white" />
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-pink-300/30">
+                      <div className="relative w-full h-32 bg-gradient-to-br from-pink-500/20 to-pink-600/20 overflow-hidden">
+                        <img 
+                          src="/attached_assets/stock_images/self_care_wellness_r_1c3c3d83.jpg" 
+                          alt="Autocuidado"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                       </div>
-                      <h3 className="font-semibold text-lg mb-2 text-gray-800">Autocuidado</h3>
-                      <p className="text-sm text-gray-600">Tudo sobre cuidados pessoais e bem-estar com pitadas de humor</p>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg mb-2 text-gray-800">Autocuidado</h3>
+                        <p className="text-sm text-gray-600">Tudo sobre cuidados pessoais e bem-estar com pitadas de humor</p>
+                      </div>
                     </div>
                   </div>
 
                   <div className="flex-[0_0_100%] min-w-0 px-4">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-300/30">
-                      <div className="bg-gradient-to-br from-purple-500 to-purple-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Gift className="w-6 h-6 text-white" />
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-purple-300/30">
+                      <div className="relative w-full h-32 bg-gradient-to-br from-purple-500/20 to-purple-600/20 overflow-hidden">
+                        <img 
+                          src="/attached_assets/stock_images/shopping_discount_co_116d58e1.jpg" 
+                          alt="Cupons Exclusivos"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                       </div>
-                      <h3 className="font-semibold text-lg mb-2 text-gray-800">Cupons Exclusivos</h3>
-                      <p className="text-sm text-gray-600">Descontos especiais nas suas marcas favoritas</p>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg mb-2 text-gray-800">Cupons Exclusivos</h3>
+                        <p className="text-sm text-gray-600">Descontos especiais nas suas marcas favoritas</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -224,28 +245,49 @@ export default function BioPage() {
 
             {/* Grid Desktop */}
             <div className="hidden md:grid grid-cols-3 gap-4">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#439b1e]/20 hover:shadow-xl transition-shadow">
-                <div className="bg-gradient-to-br from-[#439b1e] to-[#357a18] w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="w-6 h-6 text-white" />
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-[#439b1e]/20 hover:shadow-xl transition-shadow">
+                <div className="relative w-full h-32 bg-gradient-to-br from-[#439b1e]/20 to-[#357a18]/20 overflow-hidden">
+                  <img 
+                    src="/attached_assets/stock_images/beauty_makeup_cosmet_27615695.jpg" 
+                    alt="Conteúdo Exclusivo"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-gray-800">Conteúdo Exclusivo</h3>
-                <p className="text-sm text-gray-600">Dicas, tutoriais e reviews de beleza e perfumaria</p>
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg mb-2 text-gray-800">Conteúdo Exclusivo</h3>
+                  <p className="text-sm text-gray-600">Dicas, tutoriais e reviews de beleza e perfumaria</p>
+                </div>
               </div>
 
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-pink-300/30 hover:shadow-xl transition-shadow">
-                <div className="bg-gradient-to-br from-pink-500 to-pink-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-6 h-6 text-white" />
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-pink-300/30 hover:shadow-xl transition-shadow">
+                <div className="relative w-full h-32 bg-gradient-to-br from-pink-500/20 to-pink-600/20 overflow-hidden">
+                  <img 
+                    src="/attached_assets/stock_images/self_care_wellness_r_1c3c3d83.jpg" 
+                    alt="Autocuidado"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-gray-800">Autocuidado</h3>
-                <p className="text-sm text-gray-600">Tudo sobre cuidados pessoais e bem-estar com pitadas de humor</p>
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg mb-2 text-gray-800">Autocuidado</h3>
+                  <p className="text-sm text-gray-600">Tudo sobre cuidados pessoais e bem-estar com pitadas de humor</p>
+                </div>
               </div>
 
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-300/30 hover:shadow-xl transition-shadow">
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Gift className="w-6 h-6 text-white" />
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-purple-300/30 hover:shadow-xl transition-shadow">
+                <div className="relative w-full h-32 bg-gradient-to-br from-purple-500/20 to-purple-600/20 overflow-hidden">
+                  <img 
+                    src="/attached_assets/stock_images/shopping_discount_co_116d58e1.jpg" 
+                    alt="Cupons Exclusivos"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-gray-800">Cupons Exclusivos</h3>
-                <p className="text-sm text-gray-600">Descontos especiais nas suas marcas favoritas</p>
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg mb-2 text-gray-800">Cupons Exclusivos</h3>
+                  <p className="text-sm text-gray-600">Descontos especiais nas suas marcas favoritas</p>
+                </div>
               </div>
             </div>
           </div>
