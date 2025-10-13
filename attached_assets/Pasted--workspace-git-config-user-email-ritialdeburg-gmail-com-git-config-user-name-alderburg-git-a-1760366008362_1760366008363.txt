@@ -1,0 +1,289 @@
+~/workspace$ git config user.email "ritialdeburg@gmail.com"
+git config user.name "alderburg"
+git add .
+git commit -m "Configuração inicial - Beleza com Luci no Replit"
+git push origin main
+fatal: Unable to create '/home/runner/workspace/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+fatal: Unable to create '/home/runner/workspace/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+error: src refspec main does not match any
+error: failed to push some refs to 'https://github.com/alderburg/belezacomluci'
+~/workspace$ rm -f .git/index.lock
+git add .
+git commit -m "Configuração inicial - Beleza com Luci no Replit"
+git push origin main
+[main (root-commit) c11cbb8] Configuração inicial - Beleza com Luci no Replit
+ 259 files changed, 60176 insertions(+)
+ create mode 100644 .env.example
+ create mode 100644 .gitignore
+ create mode 100644 .replit
+ create mode 100644 attached_assets/Banners-BLZ-com-Luciii_1758463365231.gif
+ create mode 100644 attached_assets/Pasted--SISTEMA-COMPLETO-DE-NOTIFICA-ES-Tabela-principal-de-notifica-es-su-1757382793694_1757382793695.txt
+ create mode 100644 attached_assets/Pasted--SISTEMA-COMPLETO-DE-NOTIFICA-ES-Tabela-principal-de-notifica-es-su-1757383921546_1757383921550.txt
+ create mode 100644 attached_assets/Pasted--SISTEMA-COMPLETO-DE-NOTIFICA-ES-Tabela-principal-de-notifica-es-su-1757384197390_1757384197391.txt
+ create mode 100644 attached_assets/Pasted--rest-express-1-0-0-dev-NODE-ENV-development-tsx-server-index-ts-dotenv-17-2-2-injecting-env--1757341117378_1757341117379.txt
+ create mode 100644 attached_assets/Pasted--vite-v5-4-19-building-for-production-transforming-1-index-html-replit-cartographer-Error-pr-1757788429964_1757788429965.txt
+ create mode 100644 attached_assets/Pasted-Crie-uma-p-gina-em-React-com-Tailwind-CSS-chamada-Minhas-Cheirosas-Desafios-Recompensas--1757269770799_1757269770800.txt
+ create mode 100644 attached_assets/Pasted-Crie-uma-pagina-chamada-Minhas-Cheirosas-Desafios-Recompensas-Essa-p-gina-deve-ser-nica--1757269975009_1757269975010.txt
+ create mode 100644 attached_assets/Pasted-Crie-uma-pagina-chamada-Minhas-Cheirosas-Desafios-Recompensas-Essa-p-gina-deve-ser-nica--1757270236203_1757270236209.txt
+ create mode 100644 attached_assets/Pasted-Crie-uma-pagina-chamada-Minhas-Cheirosas-Desafios-Recompensas-Essa-p-gina-deve-ser-nica--1757271291911_1757271291912.txt
+ create mode 100644 attached_assets/Pasted-Error-The-following-dependencies-are-imported-but-could-not-be-resolved-components-ui-toast-1758462543376_1758462543377.txt
+ create mode 100644 attached_assets/Pasted-Error-The-following-dependencies-are-imported-but-could-not-be-resolved-components-ui-toast-1758462594919_1758462594919.txt
+ create mode 100644 attached_assets/WhatsApp Image 2025-09-26 at 20.29.41_1758969914738.jpeg
+ create mode 100644 attached_assets/WhatsApp Image 2025-09-26 at 20.29.41_1758970834572.jpeg
+ create mode 100644 attached_assets/image_1757125929232.png
+ create mode 100644 attached_assets/image_1757166644388.png
+ create mode 100644 attached_assets/image_1757166709371.png
+ create mode 100644 attached_assets/image_1757169361829.png
+ create mode 100644 attached_assets/image_1757177010647.png
+ create mode 100644 attached_assets/image_1757178552383.png
+ create mode 100644 attached_assets/image_1757292016407.png
+ create mode 100644 attached_assets/image_1757884478710.png
+ create mode 100644 attached_assets/image_1758117879847.png
+ create mode 100644 attached_assets/image_1759008854516.png
+ create mode 100644 attached_assets/image_1759009717156.png
+ create mode 100644 attached_assets/image_1759068777943.png
+ create mode 100644 attached_assets/image_1759074536362.png
+ create mode 100644 attached_assets/image_1759075185062.png
+ create mode 100644 attached_assets/image_1759075574294.png
+ create mode 100644 attached_assets/image_1759080660908.png
+ create mode 100644 attached_assets/image_1759080955637.png
+ create mode 100644 attached_assets/image_1759088957490.png
+ create mode 100644 attached_assets/image_1759092973299.png
+ create mode 100644 attached_assets/image_1759093297406.png
+ create mode 100644 attached_assets/image_1759094563118.png
+ create mode 100644 attached_assets/targeted_element_1757124300664.png
+ create mode 100644 attached_assets/targeted_element_1757165993581.png
+ create mode 100644 attached_assets/targeted_element_1757170123673.png
+ create mode 100644 attached_assets/targeted_element_1757787602760.png
+ create mode 100644 attached_assets/targeted_element_1757791932739.png
+ create mode 100644 attached_assets/targeted_element_1757794315233.png
+ create mode 100644 attached_assets/targeted_element_1757876845059.png
+ create mode 100644 attached_assets/targeted_element_1757883511437.png
+ create mode 100644 attached_assets/targeted_element_1758116284247.png
+ create mode 100644 attached_assets/targeted_element_1758387244374.png
+ create mode 100644 attached_assets/targeted_element_1758396599429.png
+ create mode 100644 attached_assets/targeted_element_1758396819235.png
+ create mode 100644 attached_assets/targeted_element_1758396852782.png
+ create mode 100644 attached_assets/targeted_element_1758397010893.png
+ create mode 100644 attached_assets/targeted_element_1758397170884.png
+ create mode 100644 attached_assets/targeted_element_1758397493849.png
+ create mode 100644 attached_assets/targeted_element_1758397903077.png
+ create mode 100644 attached_assets/targeted_element_1758579616954.png
+ create mode 100644 attached_assets/targeted_element_1758919969184.png
+ create mode 100644 attached_assets/targeted_element_1758925509266.png
+ create mode 100644 attached_assets/targeted_element_1758930629790.png
+ create mode 100644 attached_assets/targeted_element_1758969406662.png
+ create mode 100644 attached_assets/targeted_element_1758970033666.png
+ create mode 100644 attached_assets/targeted_element_1758970453067.png
+ create mode 100644 attached_assets/targeted_element_1758976676616.png
+ create mode 100644 attached_assets/targeted_element_1758977227672.png
+ create mode 100644 attached_assets/targeted_element_1759002507120.png
+ create mode 100644 attached_assets/targeted_element_1759002608183.png
+ create mode 100644 attached_assets/targeted_element_1759068844675.png
+ create mode 100644 attached_assets/targeted_element_1759069722608.png
+ create mode 100644 attached_assets/targeted_element_1759073868342.png
+ create mode 100644 attached_assets/targeted_element_1759088282992.png
+ create mode 100644 attached_assets/targeted_element_1759092520723.png
+ create mode 100644 attached_assets/targeted_element_1759092816191.png
+ create mode 100644 attached_assets/targeted_element_1759269977064.png
+ create mode 100644 attached_assets/targeted_element_1759270053013.png
+ create mode 100644 attached_assets/targeted_element_1759271384489.png
+ create mode 100644 attached_assets/targeted_element_1759353685903.png
+ create mode 100644 attached_assets/targeted_element_1759443949175.png
+ create mode 100644 attached_assets/targeted_element_1759535376332.png
+ create mode 100644 client/index.html
+ create mode 100644 client/src/App.tsx
+ create mode 100644 client/src/components/banner-carousel.tsx
+ create mode 100644 client/src/components/countdown-timer.tsx
+ create mode 100644 client/src/components/coupon-card.tsx
+ create mode 100644 client/src/components/create-post-card.tsx
+ create mode 100644 client/src/components/emoji-picker.tsx
+ create mode 100644 client/src/components/enhanced-carousel.tsx
+ create mode 100644 client/src/components/enhanced-post-card.tsx
+ create mode 100644 client/src/components/live-clock.tsx
+ create mode 100644 client/src/components/login-popup-trigger.tsx
+ create mode 100644 client/src/components/main-content.tsx
+ create mode 100644 client/src/components/mobile-bottom-nav.tsx
+ create mode 100644 client/src/components/mobile-search.tsx
+ create mode 100644 client/src/components/mobile-top-bar.tsx
+ create mode 100644 client/src/components/playlist-player.tsx
+ create mode 100644 client/src/components/popup-system.tsx
+ create mode 100644 client/src/components/post-card.tsx
+ create mode 100644 client/src/components/premium-upgrade-modal.tsx
+ create mode 100644 client/src/components/product-card.tsx
+ create mode 100644 client/src/components/share-modal.tsx
+ create mode 100644 client/src/components/sidebar.tsx
+ create mode 100644 client/src/components/timestamp-display.tsx
+ create mode 100644 client/src/components/top-bar.tsx
+ create mode 100644 client/src/components/ui/accordion.tsx
+ create mode 100644 client/src/components/ui/alert-dialog.tsx
+ create mode 100644 client/src/components/ui/alert.tsx
+ create mode 100644 client/src/components/ui/aspect-ratio.tsx
+ create mode 100644 client/src/components/ui/avatar.tsx
+ create mode 100644 client/src/components/ui/badge.tsx
+ create mode 100644 client/src/components/ui/breadcrumb.tsx
+ create mode 100644 client/src/components/ui/button.tsx
+ create mode 100644 client/src/components/ui/calendar.tsx
+ create mode 100644 client/src/components/ui/card.tsx
+ create mode 100644 client/src/components/ui/carousel.tsx
+ create mode 100644 client/src/components/ui/chart.tsx
+ create mode 100644 client/src/components/ui/checkbox.tsx
+ create mode 100644 client/src/components/ui/collapsible.tsx
+ create mode 100644 client/src/components/ui/command.tsx
+ create mode 100644 client/src/components/ui/context-menu.tsx
+ create mode 100644 client/src/components/ui/dialog.tsx
+ create mode 100644 client/src/components/ui/drawer.tsx
+ create mode 100644 client/src/components/ui/dropdown-menu.tsx
+ create mode 100644 client/src/components/ui/form.tsx
+ create mode 100644 client/src/components/ui/hover-card.tsx
+ create mode 100644 client/src/components/ui/input-otp.tsx
+ create mode 100644 client/src/components/ui/input.tsx
+ create mode 100644 client/src/components/ui/label.tsx
+ create mode 100644 client/src/components/ui/menubar.tsx
+ create mode 100644 client/src/components/ui/navigation-menu.tsx
+ create mode 100644 client/src/components/ui/pagination.tsx
+ create mode 100644 client/src/components/ui/popover.tsx
+ create mode 100644 client/src/components/ui/progress.tsx
+ create mode 100644 client/src/components/ui/radio-group.tsx
+ create mode 100644 client/src/components/ui/resizable.tsx
+ create mode 100644 client/src/components/ui/scroll-area.tsx
+ create mode 100644 client/src/components/ui/select.tsx
+ create mode 100644 client/src/components/ui/separator.tsx
+ create mode 100644 client/src/components/ui/sheet.tsx
+ create mode 100644 client/src/components/ui/sidebar.tsx
+ create mode 100644 client/src/components/ui/skeleton.tsx
+ create mode 100644 client/src/components/ui/slider.tsx
+ create mode 100644 client/src/components/ui/switch.tsx
+ create mode 100644 client/src/components/ui/table.tsx
+ create mode 100644 client/src/components/ui/tabs.tsx
+ create mode 100644 client/src/components/ui/textarea.tsx
+ create mode 100644 client/src/components/ui/toast.tsx
+ create mode 100644 client/src/components/ui/toaster.tsx
+ create mode 100644 client/src/components/ui/toggle-group.tsx
+ create mode 100644 client/src/components/ui/toggle.tsx
+ create mode 100644 client/src/components/ui/tooltip.tsx
+ create mode 100644 client/src/components/video-card.tsx
+ create mode 100644 client/src/contexts/admin-context.tsx
+ create mode 100644 client/src/contexts/mobile-detection-context.tsx
+ create mode 100644 client/src/contexts/sidebar-context.tsx
+ create mode 100644 client/src/hooks/use-auth.tsx
+ create mode 100644 client/src/hooks/use-community-loading.ts
+ create mode 100644 client/src/hooks/use-data-sync.ts
+ create mode 100644 client/src/hooks/use-mobile.tsx
+ create mode 100644 client/src/hooks/use-notifications-websocket.ts
+ create mode 100644 client/src/hooks/use-toast.ts
+ create mode 100644 client/src/hooks/use-video-actions.tsx
+ create mode 100644 client/src/hooks/use-youtube-stats.ts
+ create mode 100644 client/src/index.css
+ create mode 100644 client/src/lib/premium-access.ts
+ create mode 100644 client/src/lib/protected-route.tsx
+ create mode 100644 client/src/lib/queryClient.ts
+ create mode 100644 client/src/lib/time.ts
+ create mode 100644 client/src/lib/utils.ts
+ create mode 100644 client/src/main.tsx
+ create mode 100644 client/src/pages/admin-cheirosas-page.tsx
+ create mode 100644 client/src/pages/admin-page.tsx
+ create mode 100644 client/src/pages/ajuda-mobile-page.tsx
+ create mode 100644 client/src/pages/auth-page.tsx
+ create mode 100644 client/src/pages/cheirosas-page.tsx
+ create mode 100644 client/src/pages/community-page.tsx
+ create mode 100644 client/src/pages/comunidade-mobile-page.tsx
+ create mode 100644 client/src/pages/coupons-page.tsx
+ create mode 100644 client/src/pages/cupons-mobile-page.tsx
+ create mode 100644 client/src/pages/edit-profile-page.tsx
+ create mode 100644 client/src/pages/home-mobile-page.tsx
+ create mode 100644 client/src/pages/home-page.tsx
+ create mode 100644 client/src/pages/meu-perfil-page.tsx
+ create mode 100644 client/src/pages/meuperfil-mobile-page.tsx
+ create mode 100644 client/src/pages/mobile-menu-page.tsx
+ create mode 100644 client/src/pages/not-found.tsx
+ create mode 100644 client/src/pages/notification-settings-mobile-page.tsx
+ create mode 100644 client/src/pages/notification-settings-page.tsx
+ create mode 100644 client/src/pages/notifications-mobile-page.tsx
+ create mode 100644 client/src/pages/notifications-page.tsx
+ create mode 100644 client/src/pages/playlist-mobile-page.tsx
+ create mode 100644 client/src/pages/playlist-page.tsx
+ create mode 100644 client/src/pages/products-page.tsx
+ create mode 100644 client/src/pages/produtos-digitais-mobile-page.tsx
+ create mode 100644 client/src/pages/profile-mobile-page.tsx
+ create mode 100644 client/src/pages/profile-page.tsx
+ create mode 100644 client/src/pages/responsive-coupons-page.tsx
+ create mode 100644 client/src/pages/responsive-home-page.tsx
+ create mode 100644 client/src/pages/responsive-products-page.tsx
+ create mode 100644 client/src/pages/responsive-videos-page.tsx
+ create mode 100644 client/src/pages/security-mobile-page.tsx
+ create mode 100644 client/src/pages/security-page.tsx
+ create mode 100644 client/src/pages/video-mobile-page.tsx
+ create mode 100644 client/src/pages/video-watch-page.tsx
+ create mode 100644 client/src/pages/videos-exclusivos-mobile-page.tsx
+ create mode 100644 client/src/pages/videos-page.tsx
+ create mode 100644 components.json
+ create mode 100644 drizzle.config.ts
+ create mode 100644 migrations/0000_majestic_zaladane.sql
+ create mode 100644 migrations/0001_alter_video_duration_to_text.sql
+ create mode 100644 migrations/0001_melted_the_captain.sql
+ create mode 100644 migrations/0002_create_session_table.sql
+ create mode 100644 migrations/0003_add_product_id_to_comments.sql
+ create mode 100644 migrations/0003_omniscient_ogun.sql
+ create mode 100644 migrations/0004_add_banner_display_options.sql
+ create mode 100644 migrations/0004_confused_menace.sql
+ create mode 100644 migrations/0005_add_gender_age_to_users.sql
+ create mode 100644 migrations/0006_add_popups_tables.sql
+ create mode 100644 migrations/0007_add_popup_display_fields.sql
+ create mode 100644 migrations/0008_fix_popup_trigger_typos.sql
+ create mode 100644 migrations/0009_create_gamification_tables.sql
+ create mode 100644 migrations/0010_add_mission_advanced_fields.sql
+ create mode 100644 migrations/0011_add_user_address_contact_social_fields.sql
+ create mode 100644 migrations/0012_add_post_likes_and_shares.sql
+ create mode 100644 migrations/0013_fix_community_interactions.sql
+ create mode 100644 migrations/0014_add_mobile_background_field.sql
+ create mode 100644 migrations/0014_add_mobile_community_background.sql
+ create mode 100644 migrations/0015_add_notification_settings.sql
+ create mode 100644 migrations/0016_add_post_tags.sql
+ create mode 100644 migrations/meta/0000_snapshot.json
+ create mode 100644 migrations/meta/0001_snapshot.json
+ create mode 100644 migrations/meta/0003_snapshot.json
+ create mode 100644 migrations/meta/0004_snapshot.json
+ create mode 100644 migrations/meta/_journal.json
+ create mode 100644 package-lock.json
+ create mode 100644 package.json
+ create mode 100644 postcss.config.js
+ create mode 100644 replit.md
+ create mode 100644 scripts/add-missing-column.sql
+ create mode 100644 scripts/create-notifications-table.js
+ create mode 100644 scripts/generate-password-hash.ts
+ create mode 100644 scripts/populate_notifications.sql
+ create mode 100644 scripts/populate_notifications_fixed.sql
+ create mode 100644 scripts/reset-admin-password.ts
+ create mode 100644 server/auth.ts
+ create mode 100644 server/config.ts
+ create mode 100644 server/db.ts
+ create mode 100644 server/gamification-storage.ts
+ create mode 100644 server/index.ts
+ create mode 100644 server/mission-tracker.ts
+ create mode 100644 server/routes.ts
+ create mode 100644 server/storage.ts
+ create mode 100644 server/vite.ts
+ create mode 100644 server/websocket.ts
+ create mode 100644 server/youtube-oauth.ts
+ create mode 100644 shared/schema.ts
+ create mode 100644 start.sh
+ create mode 100644 tailwind.config.ts
+ create mode 100644 tsconfig.json
+ create mode 100644 uploads/profileImage-1757186725059-882513415.png
+ create mode 100644 vite.config.ts
+remote: Invalid username or token. Password authentication is not supported for Git operations.
+fatal: Authentication failed for 'https://github.com/alderburg/belezacomluci/'
+~/workspace$ 
