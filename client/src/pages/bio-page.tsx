@@ -38,7 +38,7 @@ export default function BioPage() {
       <div className="absolute top-6 right-6 z-10">
         <Link href="/">
           <Button 
-            className="bg-pink-500 hover:bg-pink-600 text-white shadow-lg flex items-center gap-2"
+            className="bg-primary hover:bg-primary/90 text-white shadow-lg flex items-center gap-2"
           >
             Portal
             <ExternalLink className="w-4 h-4" />
