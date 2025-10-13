@@ -82,7 +82,7 @@ export default function BioPage() {
           {/* Footer */}
           <div className="pt-8">
             <p className="text-sm text-gray-500">
-              Criado com 💚 em 2024
+              Criado com 💚 para minhas cheirosas em 2025
             </p>
           </div>
         </div>
