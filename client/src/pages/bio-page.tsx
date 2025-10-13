@@ -35,7 +35,7 @@ export default function BioPage() {
                 <div className="absolute inset-0 bg-[#439b1e]/30 rounded-full blur-2xl scale-110"></div>
                 <div className="relative w-56 h-56 md:w-64 md:h-64">
                   <img 
-                    src="/attached_assets/Adesivos (Luci)trans_1760374914723.png" 
+                    src="/images/luci-profile.webp" 
                     alt="Luci - Beleza com Luci"
                     className="w-full h-full object-contain drop-shadow-2xl"
                   />
@@ -77,27 +77,6 @@ export default function BioPage() {
               <h3 className="font-semibold text-lg mb-2 text-gray-800">Cupons Exclusivos</h3>
               <p className="text-sm text-gray-600">Descontos especiais nas suas marcas favoritas</p>
             </div>
-          </div>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Link href="/">
-              <Button 
-                size="lg"
-                className="bg-gradient-to-r from-[#439b1e] to-[#357a18] hover:from-[#357a18] hover:to-[#2a6113] text-white shadow-lg text-lg px-8 py-6 rounded-full"
-              >
-                Acessar Portal
-              </Button>
-            </Link>
-            
-            <Button 
-              size="lg"
-              variant="outline"
-              className="border-2 border-[#439b1e] text-[#439b1e] hover:bg-[#439b1e] hover:text-white text-lg px-8 py-6 rounded-full"
-              disabled
-            >
-              Mídia Kit (em breve)
-            </Button>
           </div>
 
           {/* Footer */}

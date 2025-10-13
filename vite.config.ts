@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   plugins: [react()],
   root: path.resolve(__dirname, "client"),
+  publicDir: path.resolve(__dirname, "client/public"),
   resolve: {
     alias: [
       {
