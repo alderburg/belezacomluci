@@ -180,7 +180,7 @@ export default function BioPage() {
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-[#439b1e]/20">
                       <div className="relative w-full h-36 bg-gradient-to-br from-[#439b1e]/20 to-[#357a18]/20 overflow-hidden">
                         <img 
-                          src="/attached_assets/stock_images/beauty_makeup_cosmet_27615695.jpg" 
+                          src="/images/bio-conteudo-exclusivo.webp" 
                           alt="Conteúdo Exclusivo"
                           className="w-full h-full object-cover"
                         />
@@ -197,7 +197,7 @@ export default function BioPage() {
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-pink-300/30">
                       <div className="relative w-full h-36 bg-gradient-to-br from-pink-500/20 to-pink-600/20 overflow-hidden">
                         <img 
-                          src="/attached_assets/stock_images/self_care_wellness_r_1c3c3d83.jpg" 
+                          src="/images/bio-autocuidado.webp" 
                           alt="Autocuidado"
                           className="w-full h-full object-cover"
                         />
@@ -214,7 +214,7 @@ export default function BioPage() {
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-purple-300/30">
                       <div className="relative w-full h-36 bg-gradient-to-br from-purple-500/20 to-purple-600/20 overflow-hidden">
                         <img 
-                          src="/attached_assets/stock_images/shopping_discount_co_116d58e1.jpg" 
+                          src="/images/bio-cupons.webp" 
                           alt="Cupons Exclusivos"
                           className="w-full h-full object-cover"
                         />
@@ -248,7 +248,7 @@ export default function BioPage() {
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-[#439b1e]/20 hover:shadow-xl transition-shadow">
                 <div className="relative w-full h-32 bg-gradient-to-br from-[#439b1e]/20 to-[#357a18]/20 overflow-hidden">
                   <img 
-                    src="/attached_assets/stock_images/beauty_makeup_cosmet_27615695.jpg" 
+                    src="/images/bio-conteudo-exclusivo.webp" 
                     alt="Conteúdo Exclusivo"
                     className="w-full h-full object-cover"
                   />
@@ -263,7 +263,7 @@ export default function BioPage() {
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-pink-300/30 hover:shadow-xl transition-shadow">
                 <div className="relative w-full h-32 bg-gradient-to-br from-pink-500/20 to-pink-600/20 overflow-hidden">
                   <img 
-                    src="/attached_assets/stock_images/self_care_wellness_r_1c3c3d83.jpg" 
+                    src="/images/bio-autocuidado.webp" 
                     alt="Autocuidado"
                     className="w-full h-full object-cover"
                   />
@@ -278,7 +278,7 @@ export default function BioPage() {
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-purple-300/30 hover:shadow-xl transition-shadow">
                 <div className="relative w-full h-32 bg-gradient-to-br from-purple-500/20 to-purple-600/20 overflow-hidden">
                   <img 
-                    src="/attached_assets/stock_images/shopping_discount_co_116d58e1.jpg" 
+                    src="/images/bio-cupons.webp" 
                     alt="Cupons Exclusivos"
                     className="w-full h-full object-cover"
                   />
