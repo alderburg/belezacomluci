@@ -2,6 +2,15 @@
 
 This is "Beleza com Luci", a beauty platform built for followers to access exclusive content, digital products, and discount coupons. The application serves as a comprehensive beauty community platform where users can watch exclusive videos, download digital products like e-books and courses, access discount coupons from partner brands, and engage with the community. The platform includes a subscription system with free and premium tiers, where premium content is gated behind paid subscriptions.
 
+# Recent Changes
+
+## 2025-10-14: Sistema de Banners na Página /bio
+- Adicionada opção "Link da Bio" no formulário de cadastro de banners no admin
+- A página /bio agora suporta banners dinâmicos cadastrados pelo admin
+- Banners são exibidos verticalmente (um abaixo do outro), não em formato carrossel
+- Banners respeitam configurações de ativação, ordem e período de exibição (data/hora início e fim)
+- Integração completa com sistema de filtros e validação de banners ativos
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
