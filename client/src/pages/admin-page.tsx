@@ -1771,6 +1771,7 @@ export default function AdminPage() {
                               <option value="coupons">Cupons</option>
                               <option value="community">Comunidade</option>
                               <option value="profile">Perfil</option>
+                              <option value="bio">Link da Bio</option>
                               <option value="video_specific">Video Específico</option>
                             </select>
                           </div>

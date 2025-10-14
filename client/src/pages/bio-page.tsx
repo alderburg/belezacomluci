@@ -9,9 +9,34 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { Banner } from "@shared/schema";
 
 export default function BioPage() {
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
+
+  // Buscar banners da página /bio
+  const { data: banners } = useQuery<Banner[]>({
+    queryKey: ["/api/banners"],
+    select: (data) => {
+      const now = new Date();
+      return data
+        .filter((banner: Banner) => {
+          // Filtrar apenas banners da página 'bio'
+          if (banner.page !== 'bio') return false;
+          
+          // Filtrar apenas banners ativos
+          if (!banner.isActive) return false;
+          
+          // Verificar se está dentro do período de exibição (se definido)
+          if (banner.startDateTime && new Date(banner.startDateTime) > now) return false;
+          if (banner.endDateTime && new Date(banner.endDateTime) < now) return false;
+          
+          return true;
+        })
+        .sort((a: Banner, b: Banner) => (a.order || 0) - (b.order || 0));
+    },
+  });
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50 relative overflow-hidden">
       {/* Botão Menu Sanduíche no canto superior direito */}
@@ -144,43 +169,25 @@ export default function BioPage() {
           </div>
 
           {/* Banners Empilhados */}
-          <div className="py-8 space-y-6">
-            {/* Banner 1 - GIF Animado */}
-            <a 
-              href="/auth"
-              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
-            >
-              <img 
-                src="https://www.belezacomluci.com.br/wp-content/uploads/2025/03/Banners-BLZ-com-Luciii.gif" 
-                alt="Banner Cabelo de Princesa"
-                className="w-full h-auto object-cover"
-              />
-            </a>
-
-            {/* Banner 2 - Cupons */}
-            <a 
-              href="/auth"
-              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
-            >
-              <img 
-                src="https://www.belezacomluci.com.br/wp-content/uploads/2024/11/3-1_11zon.webp" 
-                alt="Banner Melhores Cupons"
-                className="w-full h-auto object-cover"
-              />
-            </a>
-
-            {/* Banner 3 - Shopee */}
-            <a 
-              href="/auth"
-              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
-            >
-              <img 
-                src="https://www.belezacomluci.com.br/wp-content/uploads/2024/12/shopee-banner.png" 
-                alt="Banner Shopee"
-                className="w-full h-auto object-cover"
-              />
-            </a>
-          </div>
+          {banners && banners.length > 0 && (
+            <div className="py-8 space-y-6">
+              {banners.map((banner) => (
+                <a 
+                  key={banner.id}
+                  href={banner.linkUrl || "#"}
+                  target={banner.linkUrl?.startsWith('http') ? "_blank" : undefined}
+                  rel={banner.linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
+                  className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
+                >
+                  <img 
+                    src={banner.imageUrl} 
+                    alt={banner.title}
+                    className="w-full h-auto object-cover"
+                  />
+                </a>
+              ))}
+            </div>
+          )}
 
           {/* Chamada para Redes Sociais */}
           <div className="py-6">

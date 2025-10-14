@@ -115,7 +115,7 @@ export const banners = pgTable("banners", {
   description: text("description"),
   imageUrl: text("image_url").notNull(),
   linkUrl: text("link_url"),
-  page: text("page").notNull().default("home"), // 'home', 'videos', 'produtos', 'cupons', 'comunidade', 'perfil', 'video_specific'
+  page: text("page").notNull().default("home"), // 'home', 'videos', 'produtos', 'cupons', 'comunidade', 'perfil', 'bio', 'video_specific'
   videoId: varchar("video_id").references(() => videos.id), // Para banners específicos de vídeo
   isActive: boolean("is_active").default(true),
   order: integer("order").default(0),
