@@ -5,6 +5,7 @@ import BannerCarousel from "@/components/banner-carousel";
 import { useQuery } from "@tanstack/react-query";
 import { Post, User } from "@shared/schema";
 import { useCommunityLoading } from "@/hooks/use-community-loading";
+import { useDataSync } from "@/hooks/use-data-sync";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ExternalLink, Heart, Users, Star, TrendingUp, Sparkles, MessageCircle, Share2, FileText, Edit3, Camera, Loader2 } from "lucide-react";
@@ -135,6 +136,9 @@ export default function CommunityPage() {
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // Ativar sincronização em tempo real via WebSocket
+  useDataSync();
 
   // Estados para edição
   const [editingElement, setEditingElement] = useState<string | null>(null);

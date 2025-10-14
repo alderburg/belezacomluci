@@ -2977,6 +2977,17 @@ export function registerRoutes(app: Express): Server {
         backgroundImage: updatedUser.communityBackgroundImage,
         mobileBackgroundImage: updatedUser.communityBackgroundImageMobile
       };
+      
+      // Broadcast atualização das configurações da comunidade
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('users', 'updated', { 
+          id: userId,
+          isAdmin: true,
+          communitySettingsUpdated: true
+        });
+      }
+      
       res.json(settings);
     } catch (error) {
       console.error('Error updating community settings:', error);

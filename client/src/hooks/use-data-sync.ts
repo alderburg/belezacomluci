@@ -189,11 +189,10 @@ export function useDataSync() {
       case 'users':
         queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
         queryClient.invalidateQueries({ queryKey: ['/api/users'] });
-        // Se a atualização for de um admin, invalidar também o perfil público
-        if (data?.isAdmin) {
-          queryClient.invalidateQueries({ queryKey: ['/api/admin/public-profile'] });
-          console.log('Admin public profile cache invalidated - Bio page will refresh');
-        }
+        // Sempre invalidar configurações da comunidade e perfil público quando há mudanças em users
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/public-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/community-settings'] });
+        console.log('Admin public profile and community settings cache invalidated - Pages will refresh');
         console.log('Users cache invalidated - UI will refresh with new data');
         break;
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Post, User } from "@shared/schema";
@@ -31,6 +30,7 @@ import {
 } from "lucide-react";
 import { useCommunityLoading } from "@/hooks/use-community-loading";
 import { useToast } from "@/hooks/use-toast";
+import { useDataSync } from "@/hooks/use-data-sync";
 
 type PostWithUser = Post & {
   user: Pick<User, 'id' | 'name' | 'avatar' | 'isAdmin'>
@@ -88,7 +88,7 @@ const getSocialIcon = (type: string) => {
       name: "LinkedIn",
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.065 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
         </svg>
       ),
       color: "#0077B5"
@@ -139,7 +139,7 @@ const getSocialIcon = (type: string) => {
       color: "#EA4335"
     }
   };
-  
+
   return socialIcons[type.toLowerCase()] || socialIcons.instagram;
 };
 
@@ -147,7 +147,9 @@ export default function ComunidadeMobilePage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  
+
+  // Hook para sincronização de dados em tempo real
+  useDataSync(['/api/admin/community-settings', '/api/posts']);
 
   // Estados para configurações da comunidade
   const [communityTitle, setCommunityTitle] = useState<string>("");
@@ -161,7 +163,7 @@ export default function ComunidadeMobilePage() {
   const [editingSecondaryValue, setEditingSecondaryValue] = useState<string>("");
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isUploadingBackground, setIsUploadingBackground] = useState<boolean>(false);
-  
+
   // Redes sociais do usuário (sincronizadas com perfil)
   const userSocialNetworks = user?.socialNetworks || [];
 
@@ -238,7 +240,7 @@ export default function ComunidadeMobilePage() {
 
   const handleElementClick = (elementType: string, currentValue?: string, secondaryValue?: string) => {
     if (!user?.isAdmin) return;
-    
+
     setEditingElement(elementType);
     setEditingValue(currentValue || "");
     setEditingSecondaryValue(secondaryValue || "");
@@ -259,7 +261,7 @@ export default function ComunidadeMobilePage() {
 
   const handleSocialAction = (action: 'edit' | 'visit') => {
     const { social, index } = socialActionModal;
-    
+
     if (action === 'edit' && social && index !== undefined) {
       setEditingElement(`social-${index}`);
       setEditingValue(social.url);
@@ -267,7 +269,7 @@ export default function ComunidadeMobilePage() {
     } else if (action === 'visit' && social) {
       window.open(social.url, '_blank');
     }
-    
+
     setSocialActionModal({ isOpen: false });
   };
 
@@ -275,7 +277,7 @@ export default function ComunidadeMobilePage() {
     if (!editingElement || isSaving) return;
 
     setIsSaving(true);
-    
+
     try {
       if (editingElement === 'community_title' || editingElement === 'community_subtitle') {
         const response = await fetch('/api/admin/community-settings', {
@@ -307,7 +309,7 @@ export default function ComunidadeMobilePage() {
         // Edição de rede social - sincronizar com perfil do usuário
         const index = parseInt(editingElement.split('-')[1]);
         const updatedSocialNetworks = [...userSocialNetworks];
-        
+
         if (updatedSocialNetworks[index]) {
           updatedSocialNetworks[index] = {
             ...updatedSocialNetworks[index],
@@ -338,7 +340,7 @@ export default function ComunidadeMobilePage() {
       }
 
       setEditingElement(null);
-      
+
       toast({
         title: "Sucesso!",
         description: "Alteração salva com sucesso!",
@@ -367,7 +369,7 @@ export default function ComunidadeMobilePage() {
         });
         return;
       }
-      
+
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: "Erro",
@@ -376,14 +378,14 @@ export default function ComunidadeMobilePage() {
         });
         return;
       }
-      
+
       setIsUploadingBackground(true);
-      
+
       const reader = new FileReader();
       reader.onload = async (e) => {
         const base64Data = e.target?.result as string;
         setMobileBackgroundImage(base64Data);
-        
+
         try {
           const response = await fetch('/api/admin/community-settings', {
             method: 'PUT',
@@ -427,7 +429,7 @@ export default function ComunidadeMobilePage() {
 
   const handleBackgroundClick = () => {
     if (!user?.isAdmin) return;
-    
+
     const fileInput = document.getElementById('mobile-background-image-input') as HTMLInputElement;
     if (fileInput) {
       fileInput.click();
@@ -455,7 +457,7 @@ export default function ComunidadeMobilePage() {
         });
         return;
       }
-      
+
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: "Erro",
@@ -464,7 +466,7 @@ export default function ComunidadeMobilePage() {
         });
         return;
       }
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setPostImage(e.target?.result as string);
@@ -504,7 +506,7 @@ export default function ComunidadeMobilePage() {
 
       handleCancelPost();
       refetchPosts();
-      
+
       toast({
         title: "Sucesso!",
         description: "Post criado com sucesso!",
@@ -616,12 +618,12 @@ export default function ComunidadeMobilePage() {
               className="hidden"
             />
           )}
-          
+
           <div 
             className="absolute inset-0 w-full h-full bg-cover bg-center"
             style={{ backgroundImage: `url(${mobileBackgroundImage})` }}
           />
-          
+
           {/* Botão de edição da imagem mobile */}
           {user?.isAdmin && (
             <div 
@@ -640,7 +642,7 @@ export default function ComunidadeMobilePage() {
               </span>
             </div>
           )}
-          
+
           <Card className="relative border-none bg-transparent shadow-none">
             <CardContent className="p-6">
               <div className="flex flex-col items-center gap-4">
@@ -655,7 +657,7 @@ export default function ComunidadeMobilePage() {
                     <Sparkles className="w-3 h-3 text-white" />
                   </div>
                 </div>
-                
+
                 <div className="text-center space-y-2">
                   <div 
                     className={`relative group ${user?.isAdmin ? 'cursor-pointer' : ''}`}
@@ -680,7 +682,7 @@ export default function ComunidadeMobilePage() {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex justify-center gap-3 flex-wrap">
                   {userSocialNetworks.map((network: any, index: number) => {
                     const socialData = getSocialIcon(network.type);
@@ -771,7 +773,7 @@ export default function ComunidadeMobilePage() {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                
+
                 <Textarea
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
@@ -779,7 +781,7 @@ export default function ComunidadeMobilePage() {
                   className="min-h-[100px] resize-none border-0 bg-transparent text-base placeholder:text-muted-foreground focus-visible:ring-0"
                   disabled={isSubmittingPost}
                 />
-                
+
                 {postImage && (
                   <div className="relative">
                     <img
@@ -798,7 +800,7 @@ export default function ComunidadeMobilePage() {
                     </Button>
                   </div>
                 )}
-                
+
                 <div className="flex items-center justify-between pt-2 border-t">
                   <div className="flex items-center space-x-2">
                     <input
@@ -819,7 +821,7 @@ export default function ComunidadeMobilePage() {
                       Foto
                     </Button>
                   </div>
-                  
+
                   <Button
                     onClick={handleSubmitPost}
                     disabled={isSubmittingPost || !postContent.trim()}
@@ -876,7 +878,7 @@ export default function ComunidadeMobilePage() {
               O que você deseja fazer com {socialActionModal.social?.name}?
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="flex flex-col gap-3">
             <Button 
               onClick={() => handleSocialAction('edit')}
@@ -915,7 +917,7 @@ export default function ComunidadeMobilePage() {
                'Modifique as informações do elemento'}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {editingElement === 'community_subtitle' ? (
               <div className="space-y-2">
