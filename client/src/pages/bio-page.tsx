@@ -1,4 +1,3 @@
-
 import { Link } from "wouter";
 import { Sparkles, Gift, Heart, Menu, Instagram, Youtube, Music, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,14 +44,14 @@ export default function BioPage() {
         .filter((banner: Banner) => {
           // Filtrar apenas banners da página 'bio'
           if (banner.page !== 'bio') return false;
-          
+
           // Filtrar apenas banners ativos
           if (!banner.isActive) return false;
-          
+
           // Verificar se está dentro do período de exibição (se definido)
           if (banner.startDateTime && new Date(banner.startDateTime) > now) return false;
           if (banner.endDateTime && new Date(banner.endDateTime) < now) return false;
-          
+
           return true;
         })
         .sort((a: Banner, b: Banner) => (a.order || 0) - (b.order || 0));
@@ -68,7 +67,7 @@ export default function BioPage() {
         name: 'Outra'
       };
     }
-    
+
     switch (platform.toLowerCase()) {
       case 'instagram':
         return {
@@ -174,7 +173,7 @@ export default function BioPage() {
         <div className="absolute top-20 left-10 w-32 h-32 bg-[#439b1e]/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-pink-300/20 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-purple-300/10 rounded-full blur-2xl"></div>
-        
+
         {/* Itens de beleza flutuantes - tema verde */}
         {/* Secador de cabelo */}
         <div className="absolute top-[10%] left-[15%] animate-float-slow opacity-20">
@@ -186,7 +185,7 @@ export default function BioPage() {
             <div className="w-4 h-10 bg-gradient-to-b from-[#2d6615] to-[#1f4a0f] rounded-lg mt-1 mx-auto"></div>
           </div>
         </div>
-        
+
         {/* Perfume verde */}
         <div className="absolute top-[20%] right-[20%] animate-float-medium opacity-25">
           <div className="relative">
@@ -194,7 +193,7 @@ export default function BioPage() {
             <div className="w-10 h-12 bg-gradient-to-br from-[#5ab832] to-[#439b1e] rounded-lg shadow-lg border-2 border-[#357a18]"></div>
           </div>
         </div>
-        
+
         {/* Pente */}
         <div className="absolute top-[60%] left-[10%] animate-float-slow opacity-15">
           <div className="relative w-20 h-12">
@@ -206,7 +205,7 @@ export default function BioPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Escova de cabelo */}
         <div className="absolute bottom-[30%] right-[15%] animate-float-fast opacity-20">
           <div className="relative">
@@ -220,7 +219,7 @@ export default function BioPage() {
             <div className="w-4 h-8 bg-gradient-to-b from-[#2d6615] to-[#1f4a0f] rounded-lg mt-1 mx-auto"></div>
           </div>
         </div>
-        
+
         {/* Creme/Hidratante */}
         <div className="absolute top-[40%] right-[30%] animate-float-medium opacity-25">
           <div className="relative">
@@ -228,7 +227,7 @@ export default function BioPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-[#439b1e] to-[#357a18] rounded-lg shadow-lg border-2 border-[#2d6615]"></div>
           </div>
         </div>
-        
+
         {/* Spray/Fixador */}
         <div className="absolute bottom-[20%] left-[25%] animate-float-slow opacity-20">
           <div className="relative">
@@ -236,14 +235,14 @@ export default function BioPage() {
             <div className="w-8 h-14 bg-gradient-to-br from-[#439b1e] to-[#357a18] rounded-lg shadow-lg border-2 border-[#2d6615]"></div>
           </div>
         </div>
-        
+
         {/* Batom verde */}
         <div className="absolute top-[70%] right-[25%] animate-float-fast opacity-15">
           <div className="relative">
             <div className="w-8 h-16 bg-gradient-to-b from-[#439b1e] to-[#357a18] rounded-t-full rounded-b-sm shadow-lg"></div>
           </div>
         </div>
-        
+
         {/* Chapinha/Prancha */}
         <div className="absolute top-[35%] left-[5%] animate-float-medium opacity-20">
           <div className="relative w-6 h-20">
@@ -251,7 +250,7 @@ export default function BioPage() {
             <div className="w-3 h-6 bg-gradient-to-b from-[#2d6615] to-[#1f4a0f] rounded-lg mt-1 mx-auto"></div>
           </div>
         </div>
-        
+
         {/* Sparkles decorativos verdes */}
         <Sparkles className="absolute top-[15%] left-[40%] w-6 h-6 text-[#5ab832] animate-pulse opacity-30" />
         <Sparkles className="absolute bottom-[40%] right-[40%] w-5 h-5 text-[#439b1e] animate-pulse opacity-25" />
@@ -262,7 +261,7 @@ export default function BioPage() {
       {/* Conteúdo Principal */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-1">
         <div className="max-w-2xl w-full text-center space-y-8">
-          
+
           {/* Logo/Nome */}
           <div className="space-y-4">
             <div className="flex justify-center">
@@ -277,11 +276,11 @@ export default function BioPage() {
                 </div>
               </div>
             </div>
-            
+
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#439b1e] via-pink-500 to-purple-500 bg-clip-text text-transparent">
               @belezacomluci
             </h1>
-            
+
             <p className="text-base md:text-lg text-gray-600 max-w-lg mx-auto">
               {adminProfile?.bio || 'Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚✨'}
             </p>
@@ -314,7 +313,7 @@ export default function BioPage() {
               Siga <span className="font-bold text-[#439b1e]">@belezacomluci</span> nas redes<br />
               sociais e fique por dentro de tudo!
             </p>
-            
+
             {/* Ícones de Redes Sociais - Dinâmico do banco de dados */}
             {adminProfile?.socialNetworks && adminProfile.socialNetworks.length > 0 && (
               <div className="flex justify-center gap-4 mt-6 flex-wrap">
@@ -353,7 +352,7 @@ export default function BioPage() {
           <SheetHeader>
             <SheetTitle className="text-xl font-bold text-primary">Minhas Redes</SheetTitle>
           </SheetHeader>
-          
+
           <div className="mt-6 space-y-4">
             {/* Portal da Luci */}
             <Link href="/auth">
@@ -386,27 +385,34 @@ export default function BioPage() {
                     social.type?.toLowerCase() === 'telegram' ? 'bg-blue-500/10 border-blue-200/50 hover:bg-blue-500/20' :
                     social.type?.toLowerCase() === 'email' ? 'bg-gray-700/10 border-gray-200/50 hover:bg-gray-700/20' :
                     'bg-gray-500/10 border-gray-200/50 hover:bg-gray-500/20';
-                  
+
+                  const description = social.type?.toLowerCase() === 'instagram' ? 'Veja fotos e novidades diárias' :
+                    social.type?.toLowerCase() === 'facebook' ? 'Conecte-se e participe da comunidade' :
+                    social.type?.toLowerCase() === 'youtube' ? 'Assista tutoriais e dicas exclusivas' :
+                    social.type?.toLowerCase() === 'tiktok' ? 'Vídeos curtos e tendências' :
+                    social.type?.toLowerCase() === 'twitter' ? 'Acompanhe as novidades em tempo real' :
+                    social.type?.toLowerCase() === 'linkedin' ? 'Networking profissional' :
+                    social.type?.toLowerCase() === 'whatsapp' ? 'Atendimento direto e personalizado' :
+                    social.type?.toLowerCase() === 'telegram' ? 'Mensagens rápidas e grupos' :
+                    social.type?.toLowerCase() === 'email' ? 'Entre em contato por email' :
+                    'Mais uma forma de conexão';
+
                   return (
-                    <a
+                    <div
                       key={index}
-                      href={social.url || '#'}
-                      target={social.url?.startsWith('http') ? "_blank" : undefined}
-                      rel={social.url?.startsWith('http') ? "noopener noreferrer" : undefined}
-                      className={`flex items-center gap-4 p-4 rounded-xl border transition-colors ${bgClass}`}
+                      className={`flex items-center gap-4 p-4 ${bgClass} rounded-xl border`}
                     >
-                      <div className={`flex items-center justify-center w-12 h-12 ${socialData.bgColor} text-white rounded-lg`}>
+                      <div
+                        className="flex items-center justify-center w-12 h-12 rounded-lg text-white"
+                        style={{ backgroundColor: socialData.bgColor }}
+                      >
                         {socialData.icon}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-base font-semibold text-foreground">
-                          {socialData.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {social.url || 'Siga-nos'}
-                        </p>
+                        <h3 className="text-base font-semibold text-foreground">{socialData.name}</h3>
+                        <p className="text-sm text-muted-foreground">{description}</p>
                       </div>
-                    </a>
+                    </div>
                   );
                 })}
               </>
