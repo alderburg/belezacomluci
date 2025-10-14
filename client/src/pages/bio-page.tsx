@@ -307,7 +307,7 @@ export default function BioPage() {
                     </AvatarFallback>
                   </Avatar>
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                <div className="absolute -bottom-2 -right-2 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-cyan-400 via-teal-500 to-green-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
                   <Sparkles className="w-6 h-6 md:w-7 md:h-7 text-white" />
                 </div>
               </div>
