@@ -185,20 +185,20 @@
     -ms-user-select: none;
   }
 
-  /* Reduzir tamanho base apenas em desktop para proporção similar a 80% */
+  /* Reduzir tamanho base apenas em desktop de forma acessível */
   html {
     font-size: 16px; /* Tamanho padrão para mobile */
   }
 
-  @media (min-width: 769px) {
+  @media (min-width: 1024px) {
     html {
-      font-size: 14px; /* ~87.5% do tamanho original - mais conservador */
+      font-size: 15px; /* ~94% - redução mais suave que mantém legibilidade */
     }
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 1440px) {
     html {
-      font-size: 13px; /* ~81% do tamanho original para telas maiores */
+      font-size: 14.5px; /* ~90% - apenas em telas muito grandes */
     }
   }
 
@@ -433,36 +433,26 @@
   animation: float-fast 5s ease-in-out infinite;
 }
 
-/* Ajustes de espaçamento para desktop */
-@media (min-width: 769px) {
-  .container {
-    max-width: 90% !important;
-  }
-  
-  /* Reduzir padding de cards e containers em desktop */
-  [class*="p-6"], [class*="p-8"] {
-    padding: 1rem !important;
-  }
-  
-  [class*="py-6"], [class*="py-8"] {
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
-  }
-  
-  [class*="px-6"], [class*="px-8"] {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-  }
-  
-  /* Ajustar gaps em grids */
-  [class*="gap-6"], [class*="gap-8"] {
-    gap: 1rem !important;
-  }
-}
-
+/* Ajustes de espaçamento para desktop - abordagem conservadora */
 @media (min-width: 1024px) {
-  .container {
-    max-width: 85% !important;
+  /* Reduzir padding de forma mais sutil */
+  [class*="p-8"] {
+    padding: 1.5rem !important;
+  }
+  
+  [class*="py-8"] {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+  
+  [class*="px-8"] {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+  
+  /* Ajustar gaps maiores em grids */
+  [class*="gap-8"] {
+    gap: 1.25rem !important;
   }
 }
 
