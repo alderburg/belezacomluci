@@ -32,8 +32,8 @@ export default function BioPage() {
   }>({
     queryKey: ["/api/admin/public-profile"],
     refetchOnWindowFocus: true,
-    refetchInterval: 5000, // Refetch a cada 5 segundos
-    staleTime: 0, // Dados sempre considerados obsoletos para forçar refetch
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   // Debug: ver os dados retornados
