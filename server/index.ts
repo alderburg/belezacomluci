@@ -89,21 +89,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  console.log('📊 Executando migrações do banco...');
-  // Run migrations before starting the server
-  try {
-    const { migrate } = await import('drizzle-orm/node-postgres/migrator');
-    await migrate(db, { migrationsFolder: './migrations' });
-    console.log('✅ Migrações executadas com sucesso!');
-  } catch (error: any) {
-    // Se a tabela já existe, ignore o erro
-    if (error?.code !== '42P07') {
-      console.error('❌ Falha nas migrações:', error);
-    } else {
-      console.log('⚠️ Tabelas já existem, ignorando...');
-    }
-  }
-
+  // Migrações desabilitadas - conectando diretamente ao banco Railway
   console.log('🛠️ Registrando rotas...');
   const server = await registerRoutes(app);
   console.log('✅ Rotas registradas!');
@@ -147,16 +133,8 @@ app.use((req, res, next) => {
     port,
     host: "0.0.0.0",
     reusePort: true,
-  }, async () => {
+  }, () => {
     console.log(`✅ Servidor rodando em http://0.0.0.0:${port}`);
-    console.log('👥 Inicializando usuários padrão...');
-    // Initialize default users and sample data
-    try {
-      await storage.seedDefaultUsers();
-      console.log('✅ Usuários padrão inicializados!');
-      console.log('🌸 Beleza com Luci está pronto! 💖');
-    } catch (error) {
-      console.error("❌ Falha ao inicializar usuários padrão:", error);
-    }
+    console.log('🌸 Beleza com Luci está pronto! 💖');
   });
 })();
