@@ -6,29 +6,63 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-// Configuração para banco PostgreSQL da Locaweb
-const dbConfig = {
-  host: process.env.LOCAWEB_DB_HOST,
-  port: parseInt(process.env.LOCAWEB_DB_PORT || '5432'),
-  database: process.env.LOCAWEB_DB_NAME,
-  user: process.env.LOCAWEB_DB_USER,
-  password: process.env.LOCAWEB_DB_PASSWORD,
-  ssl: false, // Ajuste conforme necessário para a Locaweb
-};
+// Escolher qual banco usar: 'railway' ou 'locaweb'
+const DB_PROVIDER = process.env.DB_PROVIDER || 'railway';
 
-// Verificar se todas as variáveis necessárias estão definidas
-const missingVars = [];
-if (!dbConfig.host) missingVars.push('LOCAWEB_DB_HOST');
-if (!dbConfig.database) missingVars.push('LOCAWEB_DB_NAME');
-if (!dbConfig.user) missingVars.push('LOCAWEB_DB_USER');
-if (!dbConfig.password) missingVars.push('LOCAWEB_DB_PASSWORD');
+let dbConfig;
 
-if (missingVars.length > 0) {
-  console.error('Variáveis de ambiente em falta:', missingVars);
-  console.error('Verifique se o arquivo .env está presente e contém as credenciais corretas');
-  throw new Error(
-    `Credenciais do banco Locaweb não configuradas. Variáveis em falta: ${missingVars.join(', ')}`,
-  );
+if (DB_PROVIDER === 'railway') {
+  // Configuração para banco PostgreSQL da Railway
+  dbConfig = {
+    host: process.env.RAILWAY_DB_HOST,
+    port: parseInt(process.env.RAILWAY_DB_PORT || '5432'),
+    database: process.env.RAILWAY_DB_NAME,
+    user: process.env.RAILWAY_DB_USER,
+    password: process.env.RAILWAY_DB_PASSWORD,
+    ssl: false,
+  };
+
+  // Verificar se todas as variáveis necessárias estão definidas
+  const missingVars = [];
+  if (!dbConfig.host) missingVars.push('RAILWAY_DB_HOST');
+  if (!dbConfig.database) missingVars.push('RAILWAY_DB_NAME');
+  if (!dbConfig.user) missingVars.push('RAILWAY_DB_USER');
+  if (!dbConfig.password) missingVars.push('RAILWAY_DB_PASSWORD');
+
+  if (missingVars.length > 0) {
+    console.error('Variáveis de ambiente Railway em falta:', missingVars);
+    throw new Error(
+      `Credenciais do banco Railway não configuradas. Variáveis em falta: ${missingVars.join(', ')}`,
+    );
+  }
+
+  console.log('🚂 Usando banco de dados Railway');
+} else {
+  // Configuração para banco PostgreSQL da Locaweb
+  dbConfig = {
+    host: process.env.LOCAWEB_DB_HOST,
+    port: parseInt(process.env.LOCAWEB_DB_PORT || '5432'),
+    database: process.env.LOCAWEB_DB_NAME,
+    user: process.env.LOCAWEB_DB_USER,
+    password: process.env.LOCAWEB_DB_PASSWORD,
+    ssl: false,
+  };
+
+  // Verificar se todas as variáveis necessárias estão definidas
+  const missingVars = [];
+  if (!dbConfig.host) missingVars.push('LOCAWEB_DB_HOST');
+  if (!dbConfig.database) missingVars.push('LOCAWEB_DB_NAME');
+  if (!dbConfig.user) missingVars.push('LOCAWEB_DB_USER');
+  if (!dbConfig.password) missingVars.push('LOCAWEB_DB_PASSWORD');
+
+  if (missingVars.length > 0) {
+    console.error('Variáveis de ambiente Locaweb em falta:', missingVars);
+    throw new Error(
+      `Credenciais do banco Locaweb não configuradas. Variáveis em falta: ${missingVars.join(', ')}`,
+    );
+  }
+
+  console.log('🌐 Usando banco de dados Locaweb');
 }
 
 export const pool = new Pool(dbConfig);
