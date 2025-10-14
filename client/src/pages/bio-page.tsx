@@ -8,37 +8,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import useEmblaCarousel from "embla-carousel-react";
-import Autoplay from "embla-carousel-autoplay";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function BioPage() {
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { 
-      loop: true,
-      duration: 50
-    }, 
-    [
-      Autoplay({ delay: 5000, stopOnInteraction: false })
-    ]
-  );
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-
-    const onSelect = () => {
-      setSelectedIndex(emblaApi.selectedScrollSnap());
-    };
-
-    emblaApi.on("select", onSelect);
-    onSelect();
-
-    return () => {
-      emblaApi.off("select", onSelect);
-    };
-  }, [emblaApi]);
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50 relative overflow-hidden">
       {/* Botão Menu Sanduíche no canto superior direito */}
@@ -170,126 +143,43 @@ export default function BioPage() {
             </p>
           </div>
 
-          {/* Features - Carrossel no Mobile, Grid no Desktop */}
-          <div className="py-8 pb-12">
-            {/* Carrossel Mobile */}
-            <div className="md:hidden">
-              <div className="overflow-visible pb-6" ref={emblaRef}>
-                <div className="flex">
-                  <div className="flex-[0_0_100%] min-w-0 px-4">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-[#439b1e]/20">
-                      <div className="relative w-full h-36 bg-gradient-to-br from-[#439b1e]/20 to-[#357a18]/20 overflow-hidden">
-                        <img 
-                          src="/images/bio-conteudo-exclusivo.webp" 
-                          alt="Conteúdo Exclusivo"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-lg mb-2 text-gray-800">Conteúdo Exclusivo</h3>
-                        <p className="text-sm text-gray-600">Dicas, tutoriais e reviews de beleza e perfumaria</p>
-                      </div>
-                    </div>
-                  </div>
+          {/* Banners Empilhados */}
+          <div className="py-8 space-y-6">
+            {/* Banner 1 - GIF Animado */}
+            <a 
+              href="/auth"
+              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow cursor-pointer"
+            >
+              <img 
+                src="https://www.belezacomluci.com.br/wp-content/uploads/2025/03/Banners-BLZ-com-Luciii.gif" 
+                alt="Banner Cabelo de Princesa"
+                className="w-full h-auto object-cover"
+              />
+            </a>
 
-                  <div className="flex-[0_0_100%] min-w-0 px-4">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-pink-300/30">
-                      <div className="relative w-full h-36 bg-gradient-to-br from-pink-500/20 to-pink-600/20 overflow-hidden">
-                        <img 
-                          src="/images/bio-autocuidado.webp" 
-                          alt="Autocuidado"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-lg mb-2 text-gray-800">Autocuidado</h3>
-                        <p className="text-sm text-gray-600">Tudo sobre cuidados pessoais e bem-estar com pitadas de humor</p>
-                      </div>
-                    </div>
-                  </div>
+            {/* Banner 2 - Cupons */}
+            <a 
+              href="/auth"
+              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow cursor-pointer"
+            >
+              <img 
+                src="https://www.belezacomluci.com.br/wp-content/uploads/2024/11/3-1_11zon.webp" 
+                alt="Banner Melhores Cupons"
+                className="w-full h-auto object-cover"
+              />
+            </a>
 
-                  <div className="flex-[0_0_100%] min-w-0 px-4">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-purple-300/30">
-                      <div className="relative w-full h-36 bg-gradient-to-br from-purple-500/20 to-purple-600/20 overflow-hidden">
-                        <img 
-                          src="/images/bio-cupons.webp" 
-                          alt="Cupons Exclusivos"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-lg mb-2 text-gray-800">Cupons Exclusivos</h3>
-                        <p className="text-sm text-gray-600">Descontos especiais nas suas marcas favoritas</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Indicadores do Carrossel */}
-              <div className="flex justify-center gap-2 mt-4">
-                {[0, 1, 2].map((index) => (
-                  <button
-                    key={index}
-                    className={`h-2 rounded-full transition-all ${
-                      selectedIndex === index ? "w-8 bg-[#439b1e]" : "w-2 bg-gray-300"
-                    }`}
-                    onClick={() => emblaApi?.scrollTo(index)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Grid Desktop */}
-            <div className="hidden md:grid grid-cols-3 gap-4">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-[#439b1e]/20 hover:shadow-xl transition-shadow">
-                <div className="relative w-full h-32 bg-gradient-to-br from-[#439b1e]/20 to-[#357a18]/20 overflow-hidden">
-                  <img 
-                    src="/images/bio-conteudo-exclusivo.webp" 
-                    alt="Conteúdo Exclusivo"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2 text-gray-800">Conteúdo Exclusivo</h3>
-                  <p className="text-sm text-gray-600">Dicas, tutoriais e reviews de beleza e perfumaria</p>
-                </div>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-pink-300/30 hover:shadow-xl transition-shadow">
-                <div className="relative w-full h-32 bg-gradient-to-br from-pink-500/20 to-pink-600/20 overflow-hidden">
-                  <img 
-                    src="/images/bio-autocuidado.webp" 
-                    alt="Autocuidado"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2 text-gray-800">Autocuidado</h3>
-                  <p className="text-sm text-gray-600">Tudo sobre cuidados pessoais e bem-estar com pitadas de humor</p>
-                </div>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-purple-300/30 hover:shadow-xl transition-shadow">
-                <div className="relative w-full h-32 bg-gradient-to-br from-purple-500/20 to-purple-600/20 overflow-hidden">
-                  <img 
-                    src="/images/bio-cupons.webp" 
-                    alt="Cupons Exclusivos"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2 text-gray-800">Cupons Exclusivos</h3>
-                  <p className="text-sm text-gray-600">Descontos especiais nas suas marcas favoritas</p>
-                </div>
-              </div>
-            </div>
+            {/* Banner 3 - Shopee */}
+            <a 
+              href="/auth"
+              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow cursor-pointer"
+            >
+              <img 
+                src="https://www.belezacomluci.com.br/wp-content/uploads/2024/12/shopee-banner.png" 
+                alt="Banner Shopee"
+                className="w-full h-auto object-cover"
+              />
+            </a>
           </div>
 
           {/* Footer */}
