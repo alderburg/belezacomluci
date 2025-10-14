@@ -148,36 +148,36 @@ export default function BioPage() {
             {/* Banner 1 - GIF Animado */}
             <a 
               href="/auth"
-              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow cursor-pointer"
+              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group"
             >
               <img 
                 src="https://www.belezacomluci.com.br/wp-content/uploads/2025/03/Banners-BLZ-com-Luciii.gif" 
                 alt="Banner Cabelo de Princesa"
-                className="w-full h-auto object-cover"
+                className="w-full h-auto object-cover transform transition-transform duration-300 group-hover:scale-105"
               />
             </a>
 
             {/* Banner 2 - Cupons */}
             <a 
               href="/auth"
-              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow cursor-pointer"
+              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group"
             >
               <img 
                 src="https://www.belezacomluci.com.br/wp-content/uploads/2024/11/3-1_11zon.webp" 
                 alt="Banner Melhores Cupons"
-                className="w-full h-auto object-cover"
+                className="w-full h-auto object-cover transform transition-transform duration-300 group-hover:scale-105"
               />
             </a>
 
             {/* Banner 3 - Shopee */}
             <a 
               href="/auth"
-              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow cursor-pointer"
+              className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group"
             >
               <img 
                 src="https://www.belezacomluci.com.br/wp-content/uploads/2024/12/shopee-banner.png" 
                 alt="Banner Shopee"
-                className="w-full h-auto object-cover"
+                className="w-full h-auto object-cover transform transition-transform duration-300 group-hover:scale-105"
               />
             </a>
           </div>
