@@ -98,8 +98,11 @@ async function importTable(tableName: string) {
         const values = Object.values(cleanRow);
         const placeholders = values.map((_, i) => `$${i + 1}`).join(', ');
         
+        // Escapar nomes de colunas com aspas duplas para evitar conflitos com palavras reservadas SQL
+        const escapedColumns = columns.map(col => `"${col}"`).join(', ');
+        
         const query = `
-          INSERT INTO ${tableName} (${columns.join(', ')})
+          INSERT INTO ${tableName} (${escapedColumns})
           VALUES (${placeholders})
           ON CONFLICT DO NOTHING
         `;
