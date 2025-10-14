@@ -9,7 +9,8 @@ import {
   insertActivitySchema, comments, users, insertMissionSchema,
   insertRaffleSchema, insertRewardSchema, shareSettings, referrals,
   insertNotificationSchema, insertUserNotificationSchema, notifications, userNotifications,
-  insertPopupSchema, insertPopupViewSchema, insertCategorySchema
+  insertPopupSchema, insertPopupViewSchema, insertCategorySchema,
+  insertUserSchema // Assuming insertUserSchema is defined elsewhere
 } from "../shared/schema";
 import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
@@ -22,6 +23,7 @@ import fs from 'fs';
 import express from 'express'; // Import express for static file serving
 import * as missionTracker from './mission-tracker';
 import { SelectUser } from "../shared/schema/user";
+import { requireAuth } from "./middleware/requireAuth"; // Assuming requireAuth is defined elsewhere
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
@@ -81,7 +83,7 @@ export function registerRoutes(app: Express): Server {
     try {
       // Buscar o usuário admin
       const adminUser = await storage.getUserByEmail('admin@belezacomluci.com');
-      
+
       if (!adminUser) {
         return res.status(404).json({ message: "Admin user not found" });
       }
@@ -1621,7 +1623,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   // ========== NOTIFICATION SETTINGS ROUTES ==========
-  
+
   // Get user notification settings
   app.get("/api/notification-settings", async (req, res) => {
     if (!req.isAuthenticated()) {
@@ -1650,7 +1652,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const { emailEnabled, whatsappEnabled, smsEnabled, soundEnabled } = req.body;
-      
+
       const settings = await storage.saveNotificationSettings(req.user!.id, {
         emailEnabled,
         whatsappEnabled,

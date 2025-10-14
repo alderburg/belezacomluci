@@ -10,8 +10,12 @@ import {
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Banner } from "@shared/schema";
+import { useDataSync } from "@/hooks/use-data-sync";
 
 export default function BioPage() {
+  // Ativar sincronização global de dados
+  useDataSync();
+  
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
 
   // Buscar dados do admin (bio e redes sociais)
