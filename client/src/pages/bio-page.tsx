@@ -324,7 +324,7 @@ export default function BioPage() {
 
           {/* Banners Empilhados */}
           {banners && banners.length > 0 && (
-            <div className="pb-8 space-y-6 -mt-4">
+            <div className="pb-8 space-y-6">
               {banners.map((banner) => (
                 <a 
                   key={banner.id}
@@ -352,7 +352,7 @@ export default function BioPage() {
 
             {/* Ícones de Redes Sociais - Dinâmico do banco de dados */}
             {adminProfile?.socialNetworks && adminProfile.socialNetworks.length > 0 && (
-              <div className="flex justify-center gap-4 mt-3 flex-wrap">
+              <div className="flex justify-center gap-4 mt-6 flex-wrap">
                 {adminProfile.socialNetworks.filter(social => social && social.type).map((social, index) => {
                   const socialData = getSocialData(social.type);
                   return (
@@ -373,7 +373,7 @@ export default function BioPage() {
           </div>
 
           {/* Footer */}
-          <div className="pt-2 md:pt-2 -mt-2 md:mt-0">
+          <div className="pt-2">
             <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto mb-3"></div>
             <p className="text-sm text-gray-500">
               Criado com 💚 para minhas cheirosas em 2025
