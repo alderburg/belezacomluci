@@ -267,19 +267,23 @@ export default function BioPage() {
           <div className="space-y-4">
             <div className="flex justify-center">
               <div className="relative">
-                <div className="absolute inset-0 bg-[#439b1e]/30 rounded-full blur-2xl scale-110"></div>
-                <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-white shadow-xl ring-4 ring-primary/20">
-                  <AvatarImage 
-                    src={adminProfile?.avatar || "/images/luci-profile.webp"} 
-                    alt="Luci - Beleza com Luci"
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-3xl md:text-4xl font-bold">
-                    BL
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                  <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-green-500 rounded-full blur-xl opacity-50 scale-110"></div>
+                <div className="relative p-1.5 md:p-2 bg-gradient-to-br from-cyan-400 via-teal-500 to-green-500 rounded-full">
+                  <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-white shadow-2xl">
+                    <AvatarImage 
+                      src={adminProfile?.avatar || "/images/luci-profile.webp"} 
+                      alt="Luci - Beleza com Luci"
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-3xl md:text-4xl font-bold">
+                      BL
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                  <svg className="w-6 h-6 md:w-7 md:h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
                 </div>
               </div>
             </div>
