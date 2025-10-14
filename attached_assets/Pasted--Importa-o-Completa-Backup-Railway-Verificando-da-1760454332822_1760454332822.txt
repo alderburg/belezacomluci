@@ -1,0 +1,104 @@
+🚀 Importação Completa: Backup → Railway
+
+═══════════════════════════════════════
+
+🔍 Verificando dados existentes no Railway...
+
+  ✓ users: 2 registros
+  ✓ categories: 6 registros
+  ✓ videos: 1 registros
+  ✓ products: 2 registros
+  ✓ coupons: 5 registros
+  ✓ banners: 6 registros
+  ✓ subscriptions: 2 registros
+  ✗ posts: vazio
+  ✗ post_likes: vazio
+  ✗ post_tags: vazio
+  ✗ comments: vazio
+  ✗ user_activity: vazio
+  ✗ video_likes: vazio
+  ✓ popups: 1 registros
+  ✗ popup_views: vazio
+  ✓ notifications: 1 registros
+  ✓ user_notifications: 2 registros
+  ✗ notification_settings: vazio
+  ✗ share_settings: vazio
+  ✗ referrals: vazio
+  ✓ user_points: 2 registros
+  ✓ missions: 24 registros
+  ✗ user_missions: vazio
+  ✓ rewards: 10 registros
+  ✗ user_rewards: vazio
+  ✓ raffles: 10 registros
+  ✗ raffle_entries: vazio
+  ✗ raffle_winners: vazio
+  ✓ achievements: 6 registros
+  ✗ user_achievements: vazio
+
+📦 Resumo do Backup:
+  Data: 14/10/2025, 14:46:33
+  Total: 161 registros
+
+📥 Iniciando importação...
+
+📥 Importando users (3 registros)...
+  ⚠️  Erro ao importar registro: invalid input syntax for type json
+✅ users: 0 importados, 3 pulados
+✓ categories: já importado (6 registros)
+✓ videos: já importado (1 registros)
+✓ products: já importado (2 registros)
+✓ coupons: já importado (5 registros)
+✓ banners: já importado (6 registros)
+📥 Importando subscriptions (3 registros)...
+  ⚠️  Erro ao importar registro: insert or update on table "subscriptions" violates foreign key constraint "subscriptions_user_id_users_id_fk"
+✅ subscriptions: 0 importados, 3 pulados
+📥 Importando posts (8 registros)...
+  ⚠️  Erro ao importar registro: insert or update on table "posts" violates foreign key constraint "posts_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "posts" violates foreign key constraint "posts_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "posts" violates foreign key constraint "posts_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "posts" violates foreign key constraint "posts_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "posts" violates foreign key constraint "posts_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "posts" violates foreign key constraint "posts_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "posts" violates foreign key constraint "posts_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "posts" violates foreign key constraint "posts_user_id_users_id_fk"
+✅ posts: 0 importados, 8 pulados
+📥 Importando post_likes (8 registros)...
+  ⚠️  Erro ao importar registro: insert or update on table "post_likes" violates foreign key constraint "post_likes_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "post_likes" violates foreign key constraint "post_likes_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "post_likes" violates foreign key constraint "post_likes_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "post_likes" violates foreign key constraint "post_likes_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "post_likes" violates foreign key constraint "post_likes_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "post_likes" violates foreign key constraint "post_likes_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "post_likes" violates foreign key constraint "post_likes_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "post_likes" violates foreign key constraint "post_likes_user_id_users_id_fk"
+✅ post_likes: 0 importados, 8 pulados
+📥 Importando post_tags (1 registros)...
+  ⚠️  Erro ao importar registro: insert or update on table "post_tags" violates foreign key constraint "post_tags_post_id_posts_id_fk"
+✅ post_tags: 0 importados, 1 pulados
+📥 Importando comments (11 registros)...
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "comments" violates foreign key constraint "comments_user_id_users_id_fk"
+✅ comments: 0 importados, 11 pulados
+📥 Importando user_activity (46 registros)...
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: insert or update on table "user_activity" violates foreign key constraint "user_activity_user_id_users_id_fk"
+  ⚠️  Erro ao importar registro: Client network socket disconnected before secure TLS connection was established
