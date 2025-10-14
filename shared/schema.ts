@@ -20,10 +20,12 @@ export const users = pgTable("users", {
   communityTitle: text("community_title").default("Nossa Comunidade"),
   communitySubtitle: text("community_subtitle").default("Compartilhe suas experiências e dicas de beleza"),
   communityBackgroundImage: text("community_background_image"),
+  communityMobileBackgroundImage: text("community_mobile_background_image"),
   communityBackgroundImageMobile: text("community_background_image_mobile"),
   
   // Campos de contato
   phone: text("phone"),
+  phoneType: text("phone_type"),
   
   // Campos de endereço
   zipCode: text("zip_code"),

@@ -1,0 +1,2886 @@
+{
+  "achievements": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "icon",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'trophy'::text"
+      },
+      {
+        "column_name": "color",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'#ffd700'::text"
+      },
+      {
+        "column_name": "condition_type",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "condition_value",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [],
+    "indexes": []
+  },
+  "banners": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "link_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "order",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "page",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "'home'::text"
+      },
+      {
+        "column_name": "show_title",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "true"
+      },
+      {
+        "column_name": "show_description",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "true"
+      },
+      {
+        "column_name": "show_button",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "true"
+      },
+      {
+        "column_name": "video_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "start_date_time",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "end_date_time",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "video_id",
+        "foreign_table_name": "videos",
+        "foreign_column_name": "id",
+        "constraint_name": "banners_video_id_videos_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "categories": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "cover_image_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [],
+    "indexes": []
+  },
+  "comments": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "video_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "post_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "content",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "product_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "comments_user_id_users_id_fk"
+      },
+      {
+        "column_name": "video_id",
+        "foreign_table_name": "videos",
+        "foreign_column_name": "id",
+        "constraint_name": "comments_video_id_videos_id_fk"
+      },
+      {
+        "column_name": "post_id",
+        "foreign_table_name": "posts",
+        "foreign_column_name": "id",
+        "constraint_name": "comments_post_id_posts_id_fk"
+      },
+      {
+        "column_name": "product_id",
+        "foreign_table_name": "products",
+        "foreign_column_name": "id",
+        "constraint_name": "comments_product_id_products_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "coupons": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "code",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "brand",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "discount",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "expiry_date",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "store_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "is_exclusive",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "start_date_time",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "end_date_time",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "cover_image_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "category_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "category_id",
+        "foreign_table_name": "categories",
+        "foreign_column_name": "id",
+        "constraint_name": "coupons_category_id_categories_id_fk"
+      }
+    ],
+    "indexes": [
+      {
+        "index_name": "coupons_code_unique",
+        "column_name": "code",
+        "is_unique": true
+      }
+    ]
+  },
+  "missions": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "points_reward",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "mission_type",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "action_required",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "target_count",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "1"
+      },
+      {
+        "column_name": "icon",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'star'::text"
+      },
+      {
+        "column_name": "color",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'#ff6b9d'::text"
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "start_date",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "end_date",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "min_level",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'bronze'::character varying"
+      },
+      {
+        "column_name": "min_points",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "premium_only",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "usage_limit",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [],
+    "indexes": []
+  },
+  "notification_settings": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "email_enabled",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "whatsapp_enabled",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "sms_enabled",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "sound_enabled",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "notification_settings_user_id_users_id_fk"
+      }
+    ],
+    "indexes": [
+      {
+        "index_name": "notification_settings_user_id_key",
+        "column_name": "user_id",
+        "is_unique": true
+      }
+    ]
+  },
+  "notifications": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "link_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "target_audience",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "'all'::text"
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "start_date_time",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "end_date_time",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [],
+    "indexes": []
+  },
+  "popup_views": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "popup_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "session_id",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "popup_views_user_id_users_id_fk"
+      },
+      {
+        "column_name": "popup_id",
+        "foreign_table_name": "popups",
+        "foreign_column_name": "id",
+        "constraint_name": "popup_views_popup_id_popups_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "popups": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "link_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "trigger",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "target_page",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "target_video_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "show_frequency",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "'always'::text"
+      },
+      {
+        "column_name": "is_exclusive",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "start_date_time",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "end_date_time",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "show_title",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "show_description",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "show_button",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "target_course_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "target_video_id",
+        "foreign_table_name": "videos",
+        "foreign_column_name": "id",
+        "constraint_name": "popups_target_video_id_videos_id_fk"
+      },
+      {
+        "column_name": "target_course_id",
+        "foreign_table_name": "products",
+        "foreign_column_name": "id",
+        "constraint_name": "popups_target_course_id_products_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "post_likes": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "post_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "post_likes_user_id_users_id_fk"
+      },
+      {
+        "column_name": "post_id",
+        "foreign_table_name": "posts",
+        "foreign_column_name": "id",
+        "constraint_name": "post_likes_post_id_posts_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "post_tags": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "post_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "tagged_user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "post_id",
+        "foreign_table_name": "posts",
+        "foreign_column_name": "id",
+        "constraint_name": "post_tags_post_id_fkey"
+      },
+      {
+        "column_name": "tagged_user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "post_tags_tagged_user_id_fkey"
+      }
+    ],
+    "indexes": [
+      {
+        "index_name": "idx_post_tags_post_id",
+        "column_name": "post_id",
+        "is_unique": false
+      },
+      {
+        "index_name": "idx_post_tags_tagged_user_id",
+        "column_name": "tagged_user_id",
+        "is_unique": false
+      }
+    ]
+  },
+  "posts": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "content",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "image_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "likes",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "shares",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "posts_user_id_users_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "products": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "type",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "file_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "cover_image_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "is_exclusive",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "category_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "category_id",
+        "foreign_table_name": "categories",
+        "foreign_column_name": "id",
+        "constraint_name": "products_category_id_categories_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "raffle_entries": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "raffle_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "entry_count",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "1"
+      },
+      {
+        "column_name": "points_spent",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "raffle_entries_user_id_users_id_fk"
+      },
+      {
+        "column_name": "raffle_id",
+        "foreign_table_name": "raffles",
+        "foreign_column_name": "id",
+        "constraint_name": "raffle_entries_raffle_id_raffles_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "raffle_winners": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "raffle_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "position",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "1"
+      },
+      {
+        "column_name": "prize_delivered",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "delivery_info",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "raffle_id",
+        "foreign_table_name": "raffles",
+        "foreign_column_name": "id",
+        "constraint_name": "raffle_winners_raffle_id_raffles_id_fk"
+      },
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "raffle_winners_user_id_users_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "raffles": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "prize_description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "image_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "entry_cost",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "1"
+      },
+      {
+        "column_name": "max_entries_per_user",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "10"
+      },
+      {
+        "column_name": "start_date",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "end_date",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "draw_date",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "winner_user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "total_entries",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "category",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'Beleza'::text"
+      },
+      {
+        "column_name": "prize_value",
+        "data_type": "numeric",
+        "udt_name": "numeric",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "winner_count",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "1"
+      },
+      {
+        "column_name": "max_participants",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "1000"
+      },
+      {
+        "column_name": "min_points",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "min_level",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'bronze'::text"
+      },
+      {
+        "column_name": "premium_only",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "sponsor_name",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "sponsor_logo",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "rules",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "winner_user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "raffles_winner_user_id_users_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "referrals": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "referrer_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "referred_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "referral_code",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "points_awarded",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "referred_plan_type",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "referrer_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "referrals_referrer_id_users_id_fk"
+      },
+      {
+        "column_name": "referred_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "referrals_referred_id_users_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "rewards": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "points_cost",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "reward_type",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "reward_value",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "image_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "stock_quantity",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'-1'::integer"
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [],
+    "indexes": []
+  },
+  "session": {
+    "columns": [
+      {
+        "column_name": "sid",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "sess",
+        "data_type": "json",
+        "udt_name": "json",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "expire",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      }
+    ],
+    "primaryKeys": [
+      "sid"
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "index_name": "IDX_session_expire",
+        "column_name": "expire",
+        "is_unique": false
+      }
+    ]
+  },
+  "share_settings": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "free_referral_points",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "25"
+      },
+      {
+        "column_name": "premium_referral_points",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "50"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_by",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "updated_by",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "share_settings_updated_by_users_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "subscriptions": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "plan_type",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "start_date",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "end_date",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "subscriptions_user_id_users_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "user_achievements": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "achievement_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "unlocked_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "user_achievements_user_id_users_id_fk"
+      },
+      {
+        "column_name": "achievement_id",
+        "foreign_table_name": "achievements",
+        "foreign_column_name": "id",
+        "constraint_name": "user_achievements_achievement_id_achievements_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "user_activity": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "action",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "resource_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "resource_type",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "user_activity_user_id_users_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "user_missions": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "mission_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "current_progress",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "is_completed",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "completed_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "expires_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "user_missions_user_id_users_id_fk"
+      },
+      {
+        "column_name": "mission_id",
+        "foreign_table_name": "missions",
+        "foreign_column_name": "id",
+        "constraint_name": "user_missions_mission_id_missions_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "user_notifications": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "notification_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "is_read",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "read_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "user_notifications_user_id_users_id_fk"
+      },
+      {
+        "column_name": "notification_id",
+        "foreign_table_name": "notifications",
+        "foreign_column_name": "id",
+        "constraint_name": "user_notifications_notification_id_notifications_id_fk"
+      }
+    ],
+    "indexes": [
+      {
+        "index_name": "user_notification_unique",
+        "column_name": "user_id",
+        "is_unique": true
+      },
+      {
+        "index_name": "user_notification_unique",
+        "column_name": "notification_id",
+        "is_unique": true
+      }
+    ]
+  },
+  "user_points": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "total_points",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "current_level",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'bronze'::text"
+      },
+      {
+        "column_name": "level_progress",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "free_referrals",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "premium_referrals",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "user_points_user_id_users_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "user_rewards": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "reward_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "points_spent",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'claimed'::text"
+      },
+      {
+        "column_name": "reward_data",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "user_rewards_user_id_users_id_fk"
+      },
+      {
+        "column_name": "reward_id",
+        "foreign_table_name": "rewards",
+        "foreign_column_name": "id",
+        "constraint_name": "user_rewards_reward_id_rewards_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "users": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "username",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "email",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "password",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "name",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "avatar",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_admin",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "google_access_token",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "google_refresh_token",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "google_token_expiry",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "gender",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "age",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "phone",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "zip_code",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "street",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "number",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "complement",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "neighborhood",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "city",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "state",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "social_networks",
+        "data_type": "json",
+        "udt_name": "json",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'[]'::json"
+      },
+      {
+        "column_name": "cpf",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "community_title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'Nossa Comunidade'::text"
+      },
+      {
+        "column_name": "community_subtitle",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "'Compartilhe suas experiências e dicas de beleza'::text"
+      },
+      {
+        "column_name": "community_background_image",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "community_mobile_background_image",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "community_background_image_mobile",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "phone_type",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "index_name": "users_username_unique",
+        "column_name": "username",
+        "is_unique": true
+      },
+      {
+        "index_name": "users_email_unique",
+        "column_name": "email",
+        "is_unique": true
+      }
+    ]
+  },
+  "video_likes": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "video_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "user_id",
+        "foreign_table_name": "users",
+        "foreign_column_name": "id",
+        "constraint_name": "video_likes_user_id_users_id_fk"
+      },
+      {
+        "column_name": "video_id",
+        "foreign_table_name": "videos",
+        "foreign_column_name": "id",
+        "constraint_name": "video_likes_video_id_videos_id_fk"
+      }
+    ],
+    "indexes": []
+  },
+  "videos": {
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "video_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "thumbnail_url",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_exclusive",
+        "data_type": "boolean",
+        "udt_name": "bool",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "duration",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "udt_name": "timestamp",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "likes",
+        "data_type": "integer",
+        "udt_name": "int4",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "type",
+        "data_type": "text",
+        "udt_name": "text",
+        "character_maximum_length": null,
+        "is_nullable": "NO",
+        "column_default": "'video'::text"
+      },
+      {
+        "column_name": "category_id",
+        "data_type": "character varying",
+        "udt_name": "varchar",
+        "character_maximum_length": null,
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "primaryKeys": [
+      "id"
+    ],
+    "foreignKeys": [
+      {
+        "column_name": "category_id",
+        "foreign_table_name": "categories",
+        "foreign_column_name": "id",
+        "constraint_name": "videos_category_id_categories_id_fk"
+      }
+    ],
+    "indexes": []
+  }
+}
