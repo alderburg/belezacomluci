@@ -352,7 +352,7 @@ export default function BioPage() {
 
             {/* Ícones de Redes Sociais - Dinâmico do banco de dados */}
             {adminProfile?.socialNetworks && adminProfile.socialNetworks.length > 0 && (
-              <div className="flex justify-center gap-4 mt-6 mb-2 flex-wrap">
+              <div className="flex justify-center gap-4 mt-6 mb-1 flex-wrap">
                 {adminProfile.socialNetworks.filter(social => social && social.type).map((social, index) => {
                   const socialData = getSocialData(social.type);
                   return (
@@ -373,8 +373,8 @@ export default function BioPage() {
           </div>
 
           {/* Footer */}
-          <div className="pt-0">
-            <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto mb-3"></div>
+          <div className="pt-0 mt-1">
+            <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto mb-2"></div>
             <p className="text-sm text-white/80">
               Criado com 💚 para minhas cheirosas em 2025
             </p>
