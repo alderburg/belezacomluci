@@ -25,8 +25,7 @@ export default function BioPage() {
     avatar: string;
     bio: string;
     socialNetworks: Array<{
-      platform: string;
-      username: string;
+      type: string;
       url?: string;
     }>;
   }>({
@@ -36,12 +35,6 @@ export default function BioPage() {
     staleTime: 0,
   });
 
-  // Debug: ver os dados retornados
-  console.log('Admin Profile:', adminProfile);
-  console.log('Social Networks:', adminProfile?.socialNetworks);
-  if (adminProfile?.socialNetworks) {
-    console.log('Social Networks JSON:', JSON.stringify(adminProfile.socialNetworks, null, 2));
-  }
 
   // Buscar banners da página /bio
   const { data: banners } = useQuery<Banner[]>({
