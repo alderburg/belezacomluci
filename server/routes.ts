@@ -76,6 +76,28 @@ export function registerRoutes(app: Express): Server {
     });
   });
 
+  // Public route to get admin profile info (for bio page)
+  app.get('/api/admin/public-profile', async (req, res) => {
+    try {
+      // Buscar o usuário admin
+      const adminUser = await storage.getUserByEmail('admin@belezacomluci.com');
+      
+      if (!adminUser) {
+        return res.status(404).json({ message: "Admin user not found" });
+      }
+
+      // Retornar apenas informações públicas
+      res.json({
+        name: adminUser.name,
+        avatar: adminUser.avatar,
+        bio: adminUser.communitySubtitle || 'Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚✨',
+        socialNetworks: adminUser.socialNetworks || []
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch admin profile" });
+    }
+  });
+
   // Users routes (Admin only)
   app.get("/api/admin/users", async (req, res) => {
     try {
