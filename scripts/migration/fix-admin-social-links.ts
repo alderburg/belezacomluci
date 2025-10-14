@@ -30,47 +30,65 @@ async function fixAdminUser() {
       return;
     }
     
-    // Preparar dados corrigidos
-    const userData = {
-      ...admin,
-      social_media_links: admin.social_media_links || null
+    // Mapear campos antigos para novos
+    const userData: any = {
+      id: admin.id,
+      username: admin.username,
+      email: admin.email,
+      password: admin.password_hash || admin.password,
+      name: admin.full_name || admin.name || 'Admin',
+      cpf: admin.cpf || null,
+      avatar: admin.avatar || null,
+      gender: admin.gender || null,
+      age: admin.age || null,
+      phone: admin.phone || null,
+      phone_type: admin.phone_type || null,
+      zip_code: admin.zip_code || null,
+      street: admin.street || null,
+      number: admin.number || null,
+      complement: admin.complement || null,
+      neighborhood: admin.neighborhood || null,
+      city: admin.city || null,
+      state: admin.state || null,
+      is_admin: admin.is_admin || false,
+      created_at: admin.created_at || new Date().toISOString()
     };
     
-    // Se social_media_links for string, tentar fazer parse
-    if (typeof userData.social_media_links === 'string') {
+    // Converter social_media_links para social_networks
+    let socialNetworks = [];
+    if (admin.social_media_links && admin.social_media_links !== 'undefined') {
       try {
-        userData.social_media_links = JSON.parse(userData.social_media_links);
+        if (typeof admin.social_media_links === 'string') {
+          socialNetworks = JSON.parse(admin.social_media_links);
+        } else if (Array.isArray(admin.social_media_links)) {
+          socialNetworks = admin.social_media_links;
+        }
       } catch {
-        userData.social_media_links = null;
+        socialNetworks = [];
       }
     }
-    
-    // Se ainda não for array válido, definir como null
-    if (!Array.isArray(userData.social_media_links)) {
-      userData.social_media_links = null;
-    }
+    userData.social_networks = JSON.stringify(socialNetworks);
     
     console.log('📋 Dados do admin a serem importados:');
     console.log('Username:', userData.username);
     console.log('Email:', userData.email);
-    console.log('Social media links:', JSON.stringify(userData.social_media_links));
+    console.log('Social networks:', userData.social_networks);
     
     // Inserir no Railway
     const columns = Object.keys(userData);
     const values = Object.values(userData);
     const placeholders = values.map((_, i) => `$${i + 1}`).join(', ');
     
+    const updateCols = columns
+      .filter(c => c !== 'id' && c !== 'created_at')
+      .map(c => `${c} = EXCLUDED.${c}`)
+      .join(', ');
+    
     const query = `
       INSERT INTO users (${columns.join(', ')})
       VALUES (${placeholders})
       ON CONFLICT (username) DO UPDATE SET
-        email = EXCLUDED.email,
-        full_name = EXCLUDED.full_name,
-        password_hash = EXCLUDED.password_hash,
-        is_admin = EXCLUDED.is_admin,
-        is_premium = EXCLUDED.is_premium,
-        social_media_links = EXCLUDED.social_media_links,
-        updated_at = NOW()
+        ${updateCols}
     `;
     
     await railwayPool.query(query, values);
@@ -79,6 +97,7 @@ async function fixAdminUser() {
     
   } catch (error: any) {
     console.error('❌ Erro:', error.message);
+    console.error('Stack:', error.stack);
   } finally {
     await railwayPool.end();
   }
