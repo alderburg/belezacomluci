@@ -375,17 +375,7 @@ export default function BioPage() {
               <>
                 {adminProfile.socialNetworks.filter(social => social && social.type).map((social, index) => {
                   const socialData = getSocialData(social.type);
-                  const bgClass = social.type?.toLowerCase() === 'instagram' ? 'bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-200/50 hover:bg-pink-500/20' :
-                    social.type?.toLowerCase() === 'facebook' ? 'bg-blue-500/10 border-blue-200/50 hover:bg-blue-500/20' :
-                    social.type?.toLowerCase() === 'youtube' ? 'bg-red-500/10 border-red-200/50 hover:bg-red-500/20' :
-                    social.type?.toLowerCase() === 'tiktok' ? 'bg-black/10 border-gray-200/50 hover:bg-black/20' :
-                    social.type?.toLowerCase() === 'twitter' ? 'bg-black/10 border-gray-200/50 hover:bg-black/20' :
-                    social.type?.toLowerCase() === 'linkedin' ? 'bg-blue-700/10 border-blue-300/50 hover:bg-blue-700/20' :
-                    social.type?.toLowerCase() === 'whatsapp' ? 'bg-green-500/10 border-green-200/50 hover:bg-green-500/20' :
-                    social.type?.toLowerCase() === 'telegram' ? 'bg-blue-500/10 border-blue-200/50 hover:bg-blue-500/20' :
-                    social.type?.toLowerCase() === 'email' ? 'bg-gray-700/10 border-gray-200/50 hover:bg-gray-700/20' :
-                    'bg-gray-500/10 border-gray-200/50 hover:bg-gray-500/20';
-
+                  
                   const description = social.type?.toLowerCase() === 'instagram' ? 'Veja fotos e novidades diárias' :
                     social.type?.toLowerCase() === 'facebook' ? 'Conecte-se e participe da comunidade' :
                     social.type?.toLowerCase() === 'youtube' ? 'Assista tutoriais e dicas exclusivas' :
@@ -397,22 +387,28 @@ export default function BioPage() {
                     social.type?.toLowerCase() === 'email' ? 'Entre em contato por email' :
                     'Mais uma forma de conexão';
 
+                  // Formatar URL do email como mailto:
+                  const linkUrl = social.type?.toLowerCase() === 'email' 
+                    ? `mailto:${social.url}` 
+                    : social.url;
+
                   return (
-                    <div
+                    <a
                       key={index}
-                      className={`flex items-center gap-4 p-4 ${bgClass} rounded-xl border`}
+                      href={linkUrl || '#'}
+                      target={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "_blank" : undefined}
+                      rel={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
+                      onClick={() => setIsSocialMenuOpen(false)}
+                      className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer"
                     >
-                      <div
-                        className="flex items-center justify-center w-12 h-12 rounded-lg text-white"
-                        style={{ backgroundColor: socialData.bgColor }}
-                      >
+                      <div className={`flex items-center justify-center w-12 h-12 ${socialData.bgColor} rounded-lg text-white`}>
                         {socialData.icon}
                       </div>
                       <div className="flex-1">
                         <h3 className="text-base font-semibold text-foreground">{socialData.name}</h3>
                         <p className="text-sm text-muted-foreground">{description}</p>
                       </div>
-                    </div>
+                    </a>
                   );
                 })}
               </>
