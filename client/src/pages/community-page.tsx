@@ -7,6 +7,8 @@ import { Post, User } from "@shared/schema";
 import { useCommunityLoading } from "@/hooks/use-community-loading";
 import { useDataSync } from "@/hooks/use-data-sync";
 import { Card, CardContent } from "@/components/ui/card";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ExternalLink, Heart, Users, Star, TrendingUp, Sparkles, MessageCircle, Share2, FileText, Edit3, Camera, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -139,6 +141,21 @@ export default function CommunityPage() {
   
   // Ativar sincronização em tempo real via WebSocket
   useDataSync();
+  
+  const queryClient = useQueryClient();
+  
+  // Recarregar dados quando houver atualizações via WebSocket
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/community-settings'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [queryClient]);
 
   // Estados para edição
   const [editingElement, setEditingElement] = useState<string | null>(null);

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Post, User } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
@@ -147,6 +147,7 @@ export default function ComunidadeMobilePage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Hook para sincronização de dados em tempo real
   useDataSync(['/api/admin/community-settings', '/api/posts']);
@@ -305,6 +306,8 @@ export default function ComunidadeMobilePage() {
         }
 
         refetchCommunitySettings();
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/community-settings"] });
+
       } else if (editingElement.startsWith('social-')) {
         // Edição de rede social - sincronizar com perfil do usuário
         const index = parseInt(editingElement.split('-')[1]);
@@ -313,7 +316,8 @@ export default function ComunidadeMobilePage() {
         if (updatedSocialNetworks[index]) {
           updatedSocialNetworks[index] = {
             ...updatedSocialNetworks[index],
-            url: editingValue
+            url: editingValue,
+            name: editingSecondaryValue // Assuming secondary value is the name
           };
         }
 
@@ -335,7 +339,9 @@ export default function ComunidadeMobilePage() {
           throw new Error('Failed to update social networks');
         }
 
-        // Recarregar dados do usuário
+        // Invalidate user profile query to refetch updated data
+        queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
+        // Reloading the page to ensure all parts of the UI reflect the changes, especially the user object which might be used elsewhere.
         window.location.reload();
       }
 
@@ -406,6 +412,8 @@ export default function ComunidadeMobilePage() {
           }
 
           refetchCommunitySettings();
+          queryClient.invalidateQueries({ queryKey: ["/api/admin/community-settings"] });
+
 
           toast({
             title: "Sucesso!",
@@ -506,6 +514,8 @@ export default function ComunidadeMobilePage() {
 
       handleCancelPost();
       refetchPosts();
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+
 
       toast({
         title: "Sucesso!",
