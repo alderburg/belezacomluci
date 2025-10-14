@@ -1,5 +1,6 @@
 
-const { Pool } = require('pg');
+import pg from 'pg';
+const { Pool } = pg;
 
 const railwayPool = new Pool({
   host: process.env.RAILWAY_DB_HOST,
