@@ -492,7 +492,7 @@ export default function MeuPerfilPage() {
 
       <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0' : ''}`}>
         <PopupSystem trigger="page_specific" targetPage="profile" />
-        <div className={`container mx-auto px-6 py-8 ${isMobile ? 'pt-32' : 'pt-20'}`}>
+        <div className={`container mx-auto px-6 py-8 ${isMobile ? 'pt-32' : 'pt-36'}`}>
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
             <Button

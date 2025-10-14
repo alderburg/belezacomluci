@@ -4,6 +4,11 @@ This is "Beleza com Luci", a beauty platform built for followers to access exclu
 
 # Recent Changes
 
+## 2025-10-14: Correção de Espaçamento em /meuperfil Desktop
+- Ajustado padding-top da página /meuperfil na versão desktop de pt-20 para pt-28
+- Corrigido problema onde título e subtítulo ficavam parcialmente cobertos pela topbar
+- Espaçamento mobile mantido em pt-32
+
 ## 2025-10-14: Sistema de Banners na Página /bio
 - Adicionada opção "Link da Bio" no formulário de cadastro de banners no admin
 - A página /bio agora suporta banners dinâmicos cadastrados pelo admin
