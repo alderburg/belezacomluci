@@ -115,7 +115,8 @@ const SOCIAL_NETWORK_OPTIONS = [
   { value: 'pinterest', label: 'Pinterest', icon: '📌' },
   { value: 'snapchat', label: 'Snapchat', icon: '👻' },
   { value: 'whatsapp', label: 'WhatsApp', icon: '💬' },
-  { value: 'telegram', label: 'Telegram', icon: '✈️' }
+  { value: 'telegram', label: 'Telegram', icon: '✈️' },
+  { value: 'email', label: 'Email', icon: '📧' }
 ];
 
 export default function MeuPerfilMobilePage() {

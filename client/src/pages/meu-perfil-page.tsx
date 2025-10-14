@@ -22,7 +22,7 @@ import { Loader2 } from "lucide-react";
 
 // Zod schema for comprehensive form validation
 const socialNetworkSchema = z.object({
-  type: z.enum(['instagram', 'facebook', 'tiktok', 'youtube', 'twitter', 'linkedin', 'pinterest', 'snapchat', 'whatsapp', 'telegram'], {
+  type: z.enum(['instagram', 'facebook', 'tiktok', 'youtube', 'twitter', 'linkedin', 'pinterest', 'snapchat', 'whatsapp', 'telegram', 'email'], {
     required_error: "Selecione um tipo de rede social"
   }),
   url: z.string().min(1, "Campo obrigatório")
@@ -31,6 +31,11 @@ const socialNetworkSchema = z.object({
   if (data.type === 'whatsapp' || data.type === 'telegram') {
     const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
     return phoneRegex.test(data.url);
+  }
+  // Se for email, validar como email
+  if (data.type === 'email') {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(data.url);
   }
   // Para outras redes sociais, validar como URL
   try {
@@ -115,7 +120,8 @@ const SOCIAL_NETWORK_OPTIONS = [
   { value: 'pinterest', label: 'Pinterest', icon: '📌' },
   { value: 'snapchat', label: 'Snapchat', icon: '👻' },
   { value: 'whatsapp', label: 'WhatsApp', icon: '💬' },
-  { value: 'telegram', label: 'Telegram', icon: '✈️' }
+  { value: 'telegram', label: 'Telegram', icon: '✈️' },
+  { value: 'email', label: 'Email', icon: '📧' }
 ];
 
 export default function MeuPerfilPage() {
@@ -847,7 +853,9 @@ export default function MeuPerfilPage() {
                           <Label>
                             {form.watch(`socialNetworks.${index}.type`) === 'whatsapp' || 
                              form.watch(`socialNetworks.${index}.type`) === 'telegram' ? 
-                             'Telefone' : 'URL do Perfil'}
+                             'Telefone' : 
+                             form.watch(`socialNetworks.${index}.type`) === 'email' ? 
+                             'Email' : 'URL do Perfil'}
                           </Label>
                           <Input
                             value={form.watch(`socialNetworks.${index}.url`) || ''}
@@ -864,7 +872,9 @@ export default function MeuPerfilPage() {
                             placeholder={
                               form.watch(`socialNetworks.${index}.type`) === 'whatsapp' || 
                               form.watch(`socialNetworks.${index}.type`) === 'telegram' ? 
-                              '(11) 99999-9999' : 'https://instagram.com/seu_perfil'
+                              '(11) 99999-9999' : 
+                              form.watch(`socialNetworks.${index}.type`) === 'email' ? 
+                              'seu@email.com' : 'https://instagram.com/seu_perfil'
                             }
                             maxLength={
                               form.watch(`socialNetworks.${index}.type`) === 'whatsapp' || 
