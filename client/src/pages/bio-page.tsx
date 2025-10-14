@@ -65,11 +65,9 @@ export default function BioPage() {
   // Mudar a cor da barra do navegador para verde apenas quando o conteúdo carregar
   useEffect(() => {
     if (!isLoading) {
-      // Salvar cor original
-      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-      const originalColor = metaThemeColor?.getAttribute('content') || '#ec4899';
-      
       // Criar ou atualizar meta tag
+      let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      
       if (metaThemeColor) {
         metaThemeColor.setAttribute('content', '#034738');
       } else {
@@ -79,11 +77,11 @@ export default function BioPage() {
         document.head.appendChild(meta);
       }
 
-      // Restaurar cor original ao sair da página
+      // Remover meta tag ao sair da página (volta para cor padrão do navegador)
       return () => {
         const meta = document.querySelector('meta[name="theme-color"]');
         if (meta) {
-          meta.setAttribute('content', originalColor);
+          meta.remove();
         }
       };
     }
