@@ -8,7 +8,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Banner } from "@shared/schema";
 import { useDataSync } from "@/hooks/use-data-sync";
@@ -16,6 +16,31 @@ import { useDataSync } from "@/hooks/use-data-sync";
 export default function BioPage() {
   // Ativar sincronização global de dados
   useDataSync();
+
+  // Mudar a cor da barra do navegador para verde
+  useEffect(() => {
+    // Salvar cor original
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    const originalColor = metaThemeColor?.getAttribute('content') || '#ec4899';
+    
+    // Criar ou atualizar meta tag
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', '#034738');
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      meta.content = '#034738';
+      document.head.appendChild(meta);
+    }
+
+    // Restaurar cor original ao sair da página
+    return () => {
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) {
+        meta.setAttribute('content', originalColor);
+      }
+    };
+  }, []);
 
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
 
