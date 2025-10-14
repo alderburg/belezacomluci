@@ -1,0 +1,122 @@
+[
+  {
+    "id": "4fb1f0ff-d8b1-4409-ada5-047ed8b68a98",
+    "title": "TESTE: Consultoria Personalizada - 30 min",
+    "description": "Sessão de consultoria individual com nossa especialista em beleza. Dicas personalizadas para você!",
+    "points_cost": 300,
+    "reward_type": "custom",
+    "reward_value": "{\"type\": \"consultation\", \"duration\": 30, \"specialist\": \"Expert Beauty\", \"method\": \"video_call\"}",
+    "image_url": "",
+    "stock_quantity": 20,
+    "is_active": true,
+    "created_at": "2025-09-10T21:59:27.104Z"
+  },
+  {
+    "id": "8d8b6e1b-f7fb-4de3-8a9c-09ff4f3d3042",
+    "title": "TESTE: Cupom 25% OFF - Compra Acima de R$ 150",
+    "description": "Desconto especial de 25% para compras acima de R$ 150 em lojas parceiras. Economia garantida!",
+    "points_cost": 200,
+    "reward_type": "coupon",
+    "reward_value": "{\"discount\": 25, \"min_purchase\": 150, \"code\": \"SAVE25\", \"valid_days\": 45}",
+    "image_url": "",
+    "stock_quantity": -1,
+    "is_active": true,
+    "created_at": "2025-09-10T21:59:27.104Z"
+  },
+  {
+    "id": "c90526ad-89dc-4ca2-8668-365695324053",
+    "title": "TESTE: Badge Especial - Cheirosa de Ouro",
+    "description": "Badge exclusivo para seu perfil mostrando seu status VIP na comunidade. Destaque-se!",
+    "points_cost": 90,
+    "reward_type": "badge",
+    "reward_value": "{\"badge\": \"cheirosa_gold\", \"icon\": \"crown\", \"color\": \"#ffd700\", \"title\": \"Cheirosa de Ouro\"}",
+    "image_url": "",
+    "stock_quantity": -1,
+    "is_active": true,
+    "created_at": "2025-09-10T21:59:27.104Z"
+  },
+  {
+    "id": "833f356e-f32b-4bc6-a6ca-d5d06a3dc507",
+    "title": "TESTE: Amostra Premium - Perfume Floral",
+    "description": "Amostra exclusiva de perfume floral importado. Fragrância sofisticada para testar por 10 dias.",
+    "points_cost": 110,
+    "reward_type": "sample",
+    "reward_value": "{\"type\": \"perfume_sample\", \"brand\": \"Floral Dreams\", \"size\": \"5ml\", \"notes\": [\"rosa\", \"jasmim\", \"âmbar\"]}",
+    "image_url": "",
+    "stock_quantity": 60,
+    "is_active": true,
+    "created_at": "2025-09-10T21:59:27.104Z"
+  },
+  {
+    "id": "b7df9f21-a41b-4bea-8977-86ec38b9fd11",
+    "title": "TESTE: Amostra Premium - Sérum Vitamina C",
+    "description": "Amostra exclusiva do sérum de vitamina C mais vendido do Brasil! Teste por 7 dias e veja os resultados.",
+    "points_cost": 50,
+    "reward_type": "sample",
+    "reward_value": "{\"type\": \"skincare_sample\", \"brand\": \"Vitamin C Pro\", \"size\": \"15ml\", \"days\": 7}",
+    "image_url": "",
+    "stock_quantity": 100,
+    "is_active": true,
+    "created_at": "2025-09-10T21:59:27.104Z"
+  },
+  {
+    "id": "1a22ca73-99fa-40a8-94f1-e0d5cca3469f",
+    "title": "TESTE: Cupom 15% OFF - Produtos Selecionados",
+    "description": "Desconto especial de 15% em produtos de skincare e makeup de marcas parceiras. Válido por 30 dias.",
+    "points_cost": 75,
+    "reward_type": "coupon",
+    "reward_value": "{\"discount\": 15, \"code\": \"CHEIROSA15\", \"category\": \"beauty\", \"valid_days\": 30}",
+    "image_url": "",
+    "stock_quantity": -1,
+    "is_active": true,
+    "created_at": "2025-09-10T21:59:27.104Z"
+  },
+  {
+    "id": "189b934a-abf2-4cb9-bc4b-2e25f1412fe4",
+    "title": "TESTE: E-book - Guia Completo de Skincare",
+    "description": "E-book exclusivo com rotinas de skincare para todos os tipos de pele, escrito por especialistas.",
+    "points_cost": 100,
+    "reward_type": "custom",
+    "reward_value": "{\"type\": \"ebook\", \"title\": \"Skincare Completo\", \"pages\": 45, \"format\": \"PDF\"}",
+    "image_url": "",
+    "stock_quantity": -1,
+    "is_active": true,
+    "created_at": "2025-09-10T21:59:27.104Z"
+  },
+  {
+    "id": "e46531c0-1412-40f6-948a-519c43c6e0d5",
+    "title": "TESTE: Amostra Deluxe - Base Líquida Premium",
+    "description": "Amostra generosa da base líquida mais amada pelas influencers! Cobertura perfeita e longa duração.",
+    "points_cost": 80,
+    "reward_type": "sample",
+    "reward_value": "{\"type\": \"makeup_sample\", \"brand\": \"Perfect Base\", \"size\": \"10ml\", \"shades\": [\"claro\", \"médio\", \"escuro\"]}",
+    "image_url": "",
+    "stock_quantity": 75,
+    "is_active": true,
+    "created_at": "2025-09-10T21:59:27.104Z"
+  },
+  {
+    "id": "2bd18563-5108-47bd-a015-80d62b4c73a6",
+    "title": "TESTE: Vídeo Exclusivo - Técnicas Avançadas",
+    "description": "Acesso a vídeo exclusivo com técnicas avançadas de maquiagem profissional. Conteúdo premium de 45 minutos.",
+    "points_cost": 120,
+    "reward_type": "exclusive_video",
+    "reward_value": "{\"video_id\": \"advanced_makeup_2024\", \"duration\": 45, \"access_days\": 60}",
+    "image_url": "",
+    "stock_quantity": -1,
+    "is_active": true,
+    "created_at": "2025-09-10T21:59:27.104Z"
+  },
+  {
+    "id": "96a8d596-584c-4223-8914-355d14089349",
+    "title": "TESTE: Kit Amostra - Cuidados Noturnos",
+    "description": "Kit com 5 amostras de produtos para rotina noturna: demaquilante, tônico, sérum, hidratante e óleo facial.",
+    "points_cost": 150,
+    "reward_type": "sample",
+    "reward_value": "{\"type\": \"night_care_kit\", \"products\": 5, \"brand\": \"Night Beauty\", \"usage\": \"14 dias\"}",
+    "image_url": "",
+    "stock_quantity": 50,
+    "is_active": true,
+    "created_at": "2025-09-10T21:59:27.104Z"
+  }
+]

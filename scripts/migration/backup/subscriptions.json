@@ -1,0 +1,29 @@
+[
+  {
+    "id": "7fe2eb6d-0f4e-4935-8aca-ec94de851d50",
+    "user_id": "3a35d9b6-a570-454c-af6f-b4d94b94d461",
+    "plan_type": "free",
+    "is_active": true,
+    "start_date": "2025-09-03T23:17:59.775Z",
+    "end_date": null,
+    "created_at": "2025-09-03T23:17:59.775Z"
+  },
+  {
+    "id": "3a43c797-dc35-4917-9fdb-f66c78d2fc12",
+    "user_id": "fc0f55c2-6048-407e-9f75-e48b43b1c662",
+    "plan_type": "free",
+    "is_active": true,
+    "start_date": "2025-09-03T18:25:42.191Z",
+    "end_date": null,
+    "created_at": "2025-09-03T18:25:42.191Z"
+  },
+  {
+    "id": "e7eff7f8-c2b2-4e2a-a30d-2d1240483ff1",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "plan_type": "premium",
+    "is_active": true,
+    "start_date": "2025-09-03T18:25:40.896Z",
+    "end_date": null,
+    "created_at": "2025-09-03T18:25:40.896Z"
+  }
+]

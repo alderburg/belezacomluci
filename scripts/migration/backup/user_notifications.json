@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ccdc8d62-d85c-4a02-99de-a9604b67d560",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "notification_id": "2b06327d-d22b-4a1c-8943-616b07272a4a",
+    "is_read": true,
+    "read_at": "2025-10-14T12:44:30.059Z",
+    "created_at": "2025-09-30T19:04:50.603Z"
+  },
+  {
+    "id": "d756dfce-04c5-4d91-9d14-87865dab338a",
+    "user_id": "3a35d9b6-a570-454c-af6f-b4d94b94d461",
+    "notification_id": "2b06327d-d22b-4a1c-8943-616b07272a4a",
+    "is_read": false,
+    "read_at": null,
+    "created_at": "2025-09-27T08:48:02.439Z"
+  },
+  {
+    "id": "2839599f-ac44-4680-b233-c75574fbeda6",
+    "user_id": "fc0f55c2-6048-407e-9f75-e48b43b1c662",
+    "notification_id": "2b06327d-d22b-4a1c-8943-616b07272a4a",
+    "is_read": false,
+    "read_at": null,
+    "created_at": "2025-09-27T08:48:02.602Z"
+  }
+]

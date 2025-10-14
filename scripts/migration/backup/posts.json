@@ -1,0 +1,74 @@
+[
+  {
+    "id": "c6f6dc16-a398-4d1d-810a-07d1d83b49d1",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "content": "teste",
+    "image_url": "https://youtu.be/S0oQXmPpniM?si=FY4uuNZULgNxQ4-4",
+    "likes": 1,
+    "created_at": "2025-09-22T19:36:00.824Z",
+    "shares": 0
+  },
+  {
+    "id": "9dc59430-8d9a-4533-8741-c3b237334cc2",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "content": "teste",
+    "image_url": null,
+    "likes": 1,
+    "created_at": "2025-09-17T16:32:06.686Z",
+    "shares": 0
+  },
+  {
+    "id": "34b35968-cfd0-444b-bf1e-65e3ecd62b87",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "content": "teste",
+    "image_url": null,
+    "likes": 1,
+    "created_at": "2025-09-20T14:11:46.477Z",
+    "shares": 3
+  },
+  {
+    "id": "102baa78-6d74-4424-8da5-992ed37f1d7b",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "content": "teste",
+    "image_url": null,
+    "likes": 1,
+    "created_at": "2025-10-03T21:12:11.999Z",
+    "shares": 0
+  },
+  {
+    "id": "0a0b6edf-9a5f-46af-b5ea-1bb46f376147",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "content": "teste",
+    "image_url": null,
+    "likes": 1,
+    "created_at": "2025-09-20T17:06:25.582Z",
+    "shares": 3
+  },
+  {
+    "id": "7e37a63c-88a3-4c43-a659-29c658605076",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "content": "testando",
+    "image_url": null,
+    "likes": 1,
+    "created_at": "2025-09-03T18:46:57.323Z",
+    "shares": 0
+  },
+  {
+    "id": "df31a40f-3f24-4546-91dc-12dfff63a0f7",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "content": "💄 Dica de maquiagem",
+    "image_url": null,
+    "likes": 1,
+    "created_at": "2025-09-20T14:11:57.427Z",
+    "shares": 1
+  },
+  {
+    "id": "bd27f686-ddae-498d-94fe-c3b21df4afea",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "content": "Testando postagens",
+    "image_url": "https://img.youtube.com/vi/jUteWsk5WPg/maxresdefault.jpg",
+    "likes": 1,
+    "created_at": "2025-09-17T16:40:01.891Z",
+    "shares": 1
+  }
+]

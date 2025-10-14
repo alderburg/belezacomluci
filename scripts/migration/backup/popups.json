@@ -1,0 +1,22 @@
+[
+  {
+    "id": "d7a517cd-a622-4619-a22f-70d9971014c7",
+    "title": "teste",
+    "description": "teste",
+    "image_url": "",
+    "link_url": "",
+    "trigger": "login",
+    "target_page": "",
+    "target_video_id": null,
+    "show_frequency": "always",
+    "is_exclusive": false,
+    "is_active": false,
+    "start_date_time": null,
+    "end_date_time": null,
+    "created_at": "2025-09-14T11:35:53.976Z",
+    "show_title": true,
+    "show_description": true,
+    "show_button": true,
+    "target_course_id": null
+  }
+]

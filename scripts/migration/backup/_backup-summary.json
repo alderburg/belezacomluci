@@ -1,0 +1,126 @@
+{
+  "date": "2025-10-14T13:45:56.775Z",
+  "totalRecords": 161,
+  "tables": [
+    {
+      "table": "users",
+      "count": 3
+    },
+    {
+      "table": "subscriptions",
+      "count": 3
+    },
+    {
+      "table": "videos",
+      "count": 1
+    },
+    {
+      "table": "categories",
+      "count": 6
+    },
+    {
+      "table": "products",
+      "count": 2
+    },
+    {
+      "table": "coupons",
+      "count": 5
+    },
+    {
+      "table": "banners",
+      "count": 6
+    },
+    {
+      "table": "posts",
+      "count": 8
+    },
+    {
+      "table": "post_likes",
+      "count": 8
+    },
+    {
+      "table": "post_tags",
+      "count": 1
+    },
+    {
+      "table": "comments",
+      "count": 11
+    },
+    {
+      "table": "user_activity",
+      "count": 46
+    },
+    {
+      "table": "video_likes",
+      "count": 0
+    },
+    {
+      "table": "popups",
+      "count": 1
+    },
+    {
+      "table": "popup_views",
+      "count": 0
+    },
+    {
+      "table": "notifications",
+      "count": 1
+    },
+    {
+      "table": "user_notifications",
+      "count": 3
+    },
+    {
+      "table": "notification_settings",
+      "count": 1
+    },
+    {
+      "table": "share_settings",
+      "count": 1
+    },
+    {
+      "table": "referrals",
+      "count": 0
+    },
+    {
+      "table": "user_points",
+      "count": 3
+    },
+    {
+      "table": "missions",
+      "count": 24
+    },
+    {
+      "table": "user_missions",
+      "count": 1
+    },
+    {
+      "table": "rewards",
+      "count": 10
+    },
+    {
+      "table": "user_rewards",
+      "count": 0
+    },
+    {
+      "table": "raffles",
+      "count": 10
+    },
+    {
+      "table": "raffle_entries",
+      "count": 0
+    },
+    {
+      "table": "raffle_winners",
+      "count": 0
+    },
+    {
+      "table": "achievements",
+      "count": 6
+    },
+    {
+      "table": "user_achievements",
+      "count": 0
+    }
+  ]
+}

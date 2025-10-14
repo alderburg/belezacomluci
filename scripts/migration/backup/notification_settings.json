@@ -1,0 +1,12 @@
+[
+  {
+    "id": "0de81c29-e5ce-40dc-a1a9-561d23fa6975",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "email_enabled": true,
+    "whatsapp_enabled": true,
+    "sms_enabled": true,
+    "sound_enabled": true,
+    "created_at": "2025-10-01T20:24:52.759Z",
+    "updated_at": "2025-10-02T22:42:19.074Z"
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "0dee7d92-5754-409b-824d-3c39bbf12172",
+    "title": "Primeira Curtida",
+    "description": "Curtiu seu primeiro vídeo",
+    "icon": "heart",
+    "color": "#ff6b9d",
+    "condition_type": "action_count",
+    "condition_value": 1,
+    "is_active": true,
+    "created_at": "2025-09-08T10:41:27.591Z"
+  },
+  {
+    "id": "be5e6cdb-14f3-47c1-b054-963d9334e998",
+    "title": "Viciada em Vídeos",
+    "description": "Assistiu 10 vídeos diferentes",
+    "icon": "play",
+    "color": "#9c5ff5",
+    "condition_type": "action_count",
+    "condition_value": 10,
+    "is_active": true,
+    "created_at": "2025-09-08T10:41:27.591Z"
+  },
+  {
+    "id": "1a6d49f3-99be-40ff-a418-6b902944db33",
+    "title": "Comentarista Expert",
+    "description": "Fez 25 comentários",
+    "icon": "message-circle",
+    "color": "#10b981",
+    "condition_type": "action_count",
+    "condition_value": 25,
+    "is_active": true,
+    "created_at": "2025-09-08T10:41:27.591Z"
+  },
+  {
+    "id": "d0f08842-7057-432d-9426-68bfbdba0e98",
+    "title": "Colecionadora de Pontos",
+    "description": "Acumulou 500 pontos",
+    "icon": "coins",
+    "color": "#f59e0b",
+    "condition_type": "points_total",
+    "condition_value": 500,
+    "is_active": true,
+    "created_at": "2025-09-08T10:41:27.591Z"
+  },
+  {
+    "id": "62c3e791-3fe0-4156-9359-c55a89ebcedd",
+    "title": "Nível Prata",
+    "description": "Alcançou o nível Silver",
+    "icon": "medal",
+    "color": "#c0c0c0",
+    "condition_type": "level_reached",
+    "condition_value": 2,
+    "is_active": true,
+    "created_at": "2025-09-08T10:41:27.591Z"
+  },
+  {
+    "id": "d927cfe9-0d05-4d1a-8f9a-4fbc1b9d88f7",
+    "title": "Compartilhadora Social",
+    "description": "Compartilhou 15 conteúdos",
+    "icon": "share",
+    "color": "#ef4444",
+    "condition_type": "action_count",
+    "condition_value": 15,
+    "is_active": true,
+    "created_at": "2025-09-08T10:41:27.591Z"
+  }
+]

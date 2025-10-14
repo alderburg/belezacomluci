@@ -1,0 +1,35 @@
+[
+  {
+    "id": "eb3cf2e4-ca1a-4868-8392-549e2fe8b39f",
+    "user_id": "3a35d9b6-a570-454c-af6f-b4d94b94d461",
+    "total_points": 180,
+    "current_level": "silver",
+    "level_progress": 80,
+    "free_referrals": 1,
+    "premium_referrals": 0,
+    "created_at": "2025-09-08T14:58:23.415Z",
+    "updated_at": "2025-09-08T14:58:23.415Z"
+  },
+  {
+    "id": "351ec308-3cc2-4d5e-a774-45e47461f28f",
+    "user_id": "fc0f55c2-6048-407e-9f75-e48b43b1c662",
+    "total_points": 350,
+    "current_level": "silver",
+    "level_progress": 120,
+    "free_referrals": 2,
+    "premium_referrals": 1,
+    "created_at": "2025-09-08T14:58:23.415Z",
+    "updated_at": "2025-09-08T14:58:23.415Z"
+  },
+  {
+    "id": "629c35df-658a-467b-ac04-57400591c5cf",
+    "user_id": "528cdbb6-0f69-46f0-a6e1-5acc40bfbe93",
+    "total_points": 1305,
+    "current_level": "silver",
+    "level_progress": 305,
+    "free_referrals": 0,
+    "premium_referrals": 0,
+    "created_at": "2025-09-08T13:59:38.232Z",
+    "updated_at": "2025-09-12T21:38:14.949Z"
+  }
+]

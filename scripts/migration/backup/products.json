@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cf62e90f-2e31-46d6-8687-2a614ed2461d",
+    "title": "Beleza Curso",
+    "description": "Manual completo com todas as técnicas de maquiagem teste",
+    "type": "ebook",
+    "file_url": "https://www.youtube.com/watch?v=80_M97jXFpE&list=PLveUSFqkZWtOQ252_YytOiV-ckTFMKCeg",
+    "cover_image_url": "https://img.youtube.com/vi/jUteWsk5WPg/maxresdefault.jpg",
+    "is_active": true,
+    "created_at": "2025-09-03T18:25:42.733Z",
+    "is_exclusive": true,
+    "category_id": "dffd5d0e-29a9-428d-b746-02a6ad7bb875"
+  },
+  {
+    "id": "01c25a6a-537b-443c-a0c8-2216e615219a",
+    "title": "Checklist de Skincarekkk",
+    "description": "Lista completa de produtos e rotinas para sua pele",
+    "type": "course",
+    "file_url": "https://www.youtube.com/watch?v=80_M97jXFpE&list=PLveUSFqkZWtOQ252_YytOiV-ckTFMKCeg",
+    "cover_image_url": "https://img.youtube.com/vi/jUteWsk5WPg/maxresdefault.jpg",
+    "is_active": true,
+    "created_at": "2025-09-03T18:25:42.733Z",
+    "is_exclusive": false,
+    "category_id": "c529b149-ee6b-46d7-a75a-25b323c2fc12"
+  }
+]

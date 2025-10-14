@@ -1,0 +1,50 @@
+[
+  {
+    "id": "dffd5d0e-29a9-428d-b746-02a6ad7bb875",
+    "title": "Geral",
+    "description": "Categoria geral para conteúdos diversos",
+    "cover_image_url": "https://img.youtube.com/vi/jUteWsk5WPg/maxresdefault.jpg",
+    "is_active": true,
+    "created_at": "2025-09-14T16:15:02.369Z"
+  },
+  {
+    "id": "c1c489f1-a222-44d1-93bd-134a1bfea6f7",
+    "title": "Maquiagem",
+    "description": "Produtos e conteúdos sobre maquiagem",
+    "cover_image_url": "https://img.youtube.com/vi/jUteWsk5WPg/maxresdefault.jpg",
+    "is_active": true,
+    "created_at": "2025-09-14T16:15:02.369Z"
+  },
+  {
+    "id": "dd49f993-be4f-41eb-ac6c-bb8b0374caeb",
+    "title": "Unhas",
+    "description": "Nail art e cuidados com as unhas",
+    "cover_image_url": "https://img.youtube.com/vi/jUteWsk5WPg/maxresdefault.jpg",
+    "is_active": true,
+    "created_at": "2025-09-14T16:15:02.369Z"
+  },
+  {
+    "id": "e1e5102d-bcf7-473f-8f19-d4ed160c57f9",
+    "title": "Skincares",
+    "description": "Cuidados com a pele",
+    "cover_image_url": "https://img.youtube.com/vi/jUteWsk5WPg/maxresdefault.jpg",
+    "is_active": true,
+    "created_at": "2025-09-14T16:15:02.369Z"
+  },
+  {
+    "id": "c529b149-ee6b-46d7-a75a-25b323c2fc12",
+    "title": "Cabeloss",
+    "description": "Produtos e técnicas para cabelos",
+    "cover_image_url": "https://img.youtube.com/vi/jUteWsk5WPg/maxresdefault.jpg",
+    "is_active": true,
+    "created_at": "2025-09-14T16:15:02.369Z"
+  },
+  {
+    "id": "e4a95364-00fe-417d-b48a-a6a7ba6fd296",
+    "title": "Perfumes",
+    "description": "Fragrâncias e perfumes",
+    "cover_image_url": "https://img.youtube.com/vi/jUteWsk5WPg/maxresdefault.jpg",
+    "is_active": true,
+    "created_at": "2025-09-14T16:15:02.369Z"
+  }
+]
