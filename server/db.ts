@@ -19,7 +19,9 @@ if (DB_PROVIDER === 'railway') {
     database: process.env.RAILWAY_DB_NAME,
     user: process.env.RAILWAY_DB_USER,
     password: process.env.RAILWAY_DB_PASSWORD,
-    ssl: false,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   };
 
   // Verificar se todas as variáveis necessárias estão definidas
