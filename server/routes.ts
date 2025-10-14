@@ -433,7 +433,7 @@ export function registerRoutes(app: Express): Server {
 
       res.status(201).json(coupon);
     } catch (error) {
-      res.status(400).json({ 
+      res.status(400).json({
         message: "Invalid coupon data",
         details: error.message,
         validation: error.issues || []
@@ -458,7 +458,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(coupon);
     } catch (error) {
-      res.status(400).json({ 
+      res.status(400).json({
         message: "Invalid coupon data",
         details: error.message,
         validation: error.issues || []
@@ -529,7 +529,7 @@ export function registerRoutes(app: Express): Server {
 
       res.status(201).json(category);
     } catch (error) {
-      res.status(400).json({ 
+      res.status(400).json({
         message: "Invalid category data",
         details: error.message,
         validation: error.issues || []
@@ -554,7 +554,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(category);
     } catch (error) {
-      res.status(400).json({ 
+      res.status(400).json({
         message: "Invalid category data",
         details: error.message,
         validation: error.issues || []
@@ -821,10 +821,10 @@ export function registerRoutes(app: Express): Server {
       // Broadcast data update via WebSocket
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('posts', 'updated', { 
-          postId: postId, 
-          liked: result.liked, 
-          likesCount: result.likesCount 
+        wsService.broadcastDataUpdate('posts', 'updated', {
+          postId: postId,
+          liked: result.liked,
+          likesCount: result.likesCount
         });
       }
 
@@ -862,10 +862,10 @@ export function registerRoutes(app: Express): Server {
       // Broadcast data update via WebSocket
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('posts', 'updated', { 
-          postId: postId, 
+        wsService.broadcastDataUpdate('posts', 'updated', {
+          postId: postId,
           action: 'comment_added',
-          comment: comment 
+          comment: comment
         });
       }
 
@@ -889,9 +889,9 @@ export function registerRoutes(app: Express): Server {
       // Broadcast data update via WebSocket
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('posts', 'updated', { 
-          postId: id, 
-          sharesCount: result.sharesCount 
+        wsService.broadcastDataUpdate('posts', 'updated', {
+          postId: id,
+          sharesCount: result.sharesCount
         });
       }
 
@@ -1783,7 +1783,7 @@ export function registerRoutes(app: Express): Server {
 
       // Se tem startDateTime e ainda não chegou a hora, não enviar
       if (startDate && nowInBrasilia < startDate) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: "Notification is scheduled for future",
           scheduledFor: startDate
         });
@@ -1791,7 +1791,7 @@ export function registerRoutes(app: Express): Server {
 
       // Se tem endDateTime e já passou, não enviar
       if (endDate && nowInBrasilia > endDate) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: "Notification has expired",
           expiredAt: endDate
         });
@@ -1874,8 +1874,8 @@ export function registerRoutes(app: Express): Server {
         console.error('Erro ao enviar notificação via WebSocket:', wsError);
       }
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: `Notificação enviada com sucesso para ${successCount} usuários!`,
         sentToUsers: successCount,
         totalEligibleUsers: eligibleUsers.length
@@ -2191,8 +2191,8 @@ export function registerRoutes(app: Express): Server {
           pointsEarned: result.pointsEarned
         });
       } else {
-        res.status(400).json({ 
-          message: "Não foi possível completar a missão" 
+        res.status(400).json({
+          message: "Não foi possível completar a missão"
         });
       }
     } catch (error) {
@@ -2514,10 +2514,10 @@ export function registerRoutes(app: Express): Server {
       const secret = process.env.SESSION_SECRET || 'default-secret';
 
       const token = jwt.sign(
-        { 
+        {
           userId: req.user!.id,
-          email: req.user!.email 
-        }, 
+          email: req.user!.email
+        },
         secret,
         { expiresIn: '24h' }
       );
@@ -2855,7 +2855,7 @@ export function registerRoutes(app: Express): Server {
 
       // Validate age if present
       if (sanitizedProfileData.age !== undefined && (typeof sanitizedProfileData.age !== 'number' || sanitizedProfileData.age < 0)) {
-         return res.status(400).json({ message: "Idade inválida." });
+        return res.status(400).json({ message: "Idade inválida." });
       }
 
       // Update the user profile in the database
