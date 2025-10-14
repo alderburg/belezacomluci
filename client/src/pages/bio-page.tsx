@@ -15,6 +15,23 @@ import type { Banner } from "@shared/schema";
 export default function BioPage() {
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
 
+  // Buscar dados do admin (bio e redes sociais)
+  const { data: adminProfile } = useQuery<{
+    name: string;
+    avatar: string;
+    bio: string;
+    socialNetworks: Array<{
+      platform: string;
+      username: string;
+      url?: string;
+    }>;
+  }>({
+    queryKey: ["/api/admin/public-profile"],
+  });
+
+  // Debug: ver os dados retornados
+  console.log('Admin Profile:', adminProfile);
+
   // Buscar banners da página /bio
   const { data: banners } = useQuery<Banner[]>({
     queryKey: ["/api/banners"],
@@ -37,6 +54,54 @@ export default function BioPage() {
         .sort((a: Banner, b: Banner) => (a.order || 0) - (b.order || 0));
     },
   });
+
+  // Função helper para obter o ícone da rede social
+  const getSocialIcon = (platform: string) => {
+    if (!platform) return <Music className="w-6 h-6 text-white" />;
+    
+    switch (platform.toLowerCase()) {
+      case 'instagram':
+        return <Instagram className="w-6 h-6 text-white" />;
+      case 'facebook':
+        return <Facebook className="w-6 h-6 text-white" />;
+      case 'youtube':
+        return <Youtube className="w-6 h-6 text-white" />;
+      case 'tiktok':
+        return (
+          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+          </svg>
+        );
+      case 'email':
+        return (
+          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+          </svg>
+        );
+      default:
+        return <Music className="w-6 h-6 text-white" />;
+    }
+  };
+
+  // Função helper para obter a cor de fundo da rede social
+  const getSocialBgColor = (platform: string) => {
+    if (!platform) return 'bg-gray-700';
+    
+    switch (platform.toLowerCase()) {
+      case 'instagram':
+        return 'bg-gradient-to-br from-pink-500 to-purple-500';
+      case 'facebook':
+        return 'bg-blue-600';
+      case 'youtube':
+        return 'bg-red-600';
+      case 'tiktok':
+        return 'bg-black';
+      case 'email':
+        return 'bg-gray-700';
+      default:
+        return 'bg-gray-700';
+    }
+  };
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50 relative overflow-hidden">
       {/* Botão Menu Sanduíche no canto superior direito */}
@@ -164,7 +229,7 @@ export default function BioPage() {
             </h1>
             
             <p className="text-base md:text-lg text-gray-600 max-w-lg mx-auto">
-              Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚✨
+              {adminProfile?.bio || 'Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚✨'}
             </p>
           </div>
 
@@ -196,55 +261,22 @@ export default function BioPage() {
               sociais e fique por dentro de tudo!
             </p>
             
-            {/* Ícones de Redes Sociais */}
-            <div className="flex justify-center gap-4 mt-6">
-              <a
-                href="https://www.instagram.com/belezacomluci"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-pink-500 to-purple-500 hover:scale-110 transition-transform duration-300"
-              >
-                <Instagram className="w-6 h-6 text-white" />
-              </a>
-              
-              <a
-                href="https://www.facebook.com/belezacomluci"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-600 hover:scale-110 transition-transform duration-300"
-              >
-                <Facebook className="w-6 h-6 text-white" />
-              </a>
-              
-              <a
-                href="https://www.tiktok.com/@belezacomluci"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full flex items-center justify-center bg-black hover:scale-110 transition-transform duration-300"
-              >
-                <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                </svg>
-              </a>
-              
-              <a
-                href="https://www.youtube.com/@belezacomluci"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full flex items-center justify-center bg-red-600 hover:scale-110 transition-transform duration-300"
-              >
-                <Youtube className="w-6 h-6 text-white" />
-              </a>
-              
-              <a
-                href="mailto:contato@belezacomluci.com.br"
-                className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-700 hover:scale-110 transition-transform duration-300"
-              >
-                <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                </svg>
-              </a>
-            </div>
+            {/* Ícones de Redes Sociais - Dinâmico do banco de dados */}
+            {adminProfile?.socialNetworks && adminProfile.socialNetworks.length > 0 && (
+              <div className="flex justify-center gap-4 mt-6 flex-wrap">
+                {adminProfile.socialNetworks.filter(social => social && social.platform).map((social, index) => (
+                  <a
+                    key={index}
+                    href={social.url || '#'}
+                    target={social.url?.startsWith('http') ? "_blank" : undefined}
+                    rel={social.url?.startsWith('http') ? "noopener noreferrer" : undefined}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center ${getSocialBgColor(social.platform)} hover:scale-110 transition-transform duration-300`}
+                  >
+                    {getSocialIcon(social.platform)}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Footer */}
@@ -267,7 +299,7 @@ export default function BioPage() {
           <div className="mt-6 space-y-4">
             {/* Portal da Luci */}
             <Link href="/auth">
-              <a
+              <div
                 className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer"
                 onClick={() => setIsSocialMenuOpen(false)}
               >
@@ -278,72 +310,42 @@ export default function BioPage() {
                   <h3 className="text-base font-semibold text-foreground">Portal da Luci</h3>
                   <p className="text-sm text-muted-foreground">Feito para minhas cheirosas</p>
                 </div>
-              </a>
+              </div>
             </Link>
 
-            {/* Instagram */}
-            <a
-              href="https://www.instagram.com/belezacomluci"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl border border-pink-200/50 hover:bg-pink-500/20 transition-colors"
-            >
-              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-500 rounded-lg">
-                <Instagram className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-foreground">Instagram</h3>
-                <p className="text-sm text-muted-foreground">@belezacomluci</p>
-              </div>
-            </a>
-
-            {/* Facebook */}
-            <a
-              href="https://www.facebook.com/belezacomluci"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-blue-500/10 rounded-xl border border-blue-200/50 hover:bg-blue-500/20 transition-colors"
-            >
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-lg">
-                <Facebook className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-foreground">Facebook</h3>
-                <p className="text-sm text-muted-foreground">Curta nossa página</p>
-              </div>
-            </a>
-
-            {/* YouTube */}
-            <a
-              href="https://www.youtube.com/@belezacomluci"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-red-500/10 rounded-xl border border-red-200/50 hover:bg-red-500/20 transition-colors"
-            >
-              <div className="flex items-center justify-center w-12 h-12 bg-red-600 rounded-lg">
-                <Youtube className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-foreground">YouTube</h3>
-                <p className="text-sm text-muted-foreground">Vídeos e tutoriais</p>
-              </div>
-            </a>
-
-            {/* TikTok */}
-            <a
-              href="https://www.tiktok.com/@belezacomluci"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-black/10 rounded-xl border border-gray-200/50 hover:bg-black/20 transition-colors"
-            >
-              <div className="flex items-center justify-center w-12 h-12 bg-black rounded-lg">
-                <Music className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-foreground">TikTok</h3>
-                <p className="text-sm text-muted-foreground">Conteúdo rápido e divertido</p>
-              </div>
-            </a>
+            {/* Redes Sociais - Dinâmico do banco de dados */}
+            {adminProfile?.socialNetworks && adminProfile.socialNetworks.length > 0 && (
+              <>
+                {adminProfile.socialNetworks.filter(social => social && social.platform).map((social, index) => (
+                  <a
+                    key={index}
+                    href={social.url || '#'}
+                    target={social.url?.startsWith('http') ? "_blank" : undefined}
+                    rel={social.url?.startsWith('http') ? "noopener noreferrer" : undefined}
+                    className={`flex items-center gap-4 p-4 rounded-xl border transition-colors ${
+                      social.platform?.toLowerCase() === 'instagram' ? 'bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-200/50 hover:bg-pink-500/20' :
+                      social.platform?.toLowerCase() === 'facebook' ? 'bg-blue-500/10 border-blue-200/50 hover:bg-blue-500/20' :
+                      social.platform?.toLowerCase() === 'youtube' ? 'bg-red-500/10 border-red-200/50 hover:bg-red-500/20' :
+                      social.platform?.toLowerCase() === 'tiktok' ? 'bg-black/10 border-gray-200/50 hover:bg-black/20' :
+                      social.platform?.toLowerCase() === 'email' ? 'bg-gray-700/10 border-gray-200/50 hover:bg-gray-700/20' :
+                      'bg-gray-500/10 border-gray-200/50 hover:bg-gray-500/20'
+                    }`}
+                  >
+                    <div className={`flex items-center justify-center w-12 h-12 ${getSocialBgColor(social.platform)} rounded-lg`}>
+                      {getSocialIcon(social.platform)}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-base font-semibold text-foreground capitalize">
+                        {social.platform}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {social.username ? `@${social.username}` : 'Siga-nos'}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </>
+            )}
           </div>
         </SheetContent>
       </Sheet>

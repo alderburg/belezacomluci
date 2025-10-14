@@ -560,9 +560,9 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true, creat
   
   // Validação de redes sociais
   socialNetworks: z.array(z.object({
-    platform: z.enum(['instagram', 'tiktok', 'youtube', 'facebook', 'twitter', 'linkedin']),
+    platform: z.enum(['instagram', 'tiktok', 'youtube', 'facebook', 'twitter', 'linkedin', 'email']),
     username: z.string().min(1, "Nome de usuário é obrigatório"),
-    url: z.string().url("URL deve ser válida").optional()
+    url: z.string().optional()
   })).optional().default([])
 });
 export const insertVideoSchema = createInsertSchema(videos).omit({ id: true, createdAt: true, views: true, likes: true });
