@@ -184,7 +184,7 @@ export default function BioPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ backgroundColor: '#034738' }}>
       {/* Botão Menu Sanduíche no canto superior direito */}
       <div className="absolute top-6 right-6 z-10">
         <Button 
