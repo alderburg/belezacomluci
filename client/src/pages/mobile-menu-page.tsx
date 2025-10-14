@@ -118,7 +118,7 @@ export default function MobileMenuPage() {
 
       {/* User Profile Section */}
       {user && (
-        <div className="bg-pink-100/50 border border-pink-200/50 mx-4 mt-20 rounded-xl p-4 shadow-sm">
+        <div className="bg-pink-100/50 border border-pink-200/50 mx-4 mt-24 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="relative">
               <Avatar className="w-16 h-16 border-2 border-white shadow-md">
