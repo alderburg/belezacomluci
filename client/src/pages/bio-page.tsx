@@ -352,7 +352,7 @@ export default function BioPage() {
 
             {/* Ícones de Redes Sociais - Dinâmico do banco de dados */}
             {adminProfile?.socialNetworks && adminProfile.socialNetworks.length > 0 && (
-              <div className="flex justify-center gap-4 mt-6 flex-wrap">
+              <div className="flex justify-center gap-4 mt-3 flex-wrap">
                 {adminProfile.socialNetworks.filter(social => social && social.type).map((social, index) => {
                   const socialData = getSocialData(social.type);
                   return (
