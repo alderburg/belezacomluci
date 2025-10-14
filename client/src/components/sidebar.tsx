@@ -47,7 +47,12 @@ export default function Sidebar() {
     { href: "/produtos", label: "Produtos Digitais", icon: Download },
     { href: "/cupons", label: "Cupons", icon: Tag },
     { href: "/cheirosas", label: "Minhas Cheirosas", icon: Sparkles },
-    { href: "/comunidade", label: "Timeline da Luci", icon: Users },
+    {
+      icon: Users,
+      label: "Timeline da Luci",
+      href: "/comunidade",
+      adminOnly: false
+    },
     { href: "/perfil", label: "Perfil", icon: User },
   ];
 
