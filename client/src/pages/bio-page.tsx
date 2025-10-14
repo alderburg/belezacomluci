@@ -373,7 +373,7 @@ export default function BioPage() {
           </div>
 
           {/* Footer */}
-          <div className="pt-0 mt-2">
+          <div className="pt-0 -mt-4">
             <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto mb-1"></div>
             <p className="text-sm text-white/80">
               Criado com 💚 para minhas cheirosas em 2025
