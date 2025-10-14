@@ -17,31 +17,6 @@ export default function BioPage() {
   // Ativar sincronização global de dados
   useDataSync();
 
-  // Mudar a cor da barra do navegador para verde
-  useEffect(() => {
-    // Salvar cor original
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    const originalColor = metaThemeColor?.getAttribute('content') || '#ec4899';
-    
-    // Criar ou atualizar meta tag
-    if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', '#034738');
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'theme-color';
-      meta.content = '#034738';
-      document.head.appendChild(meta);
-    }
-
-    // Restaurar cor original ao sair da página
-    return () => {
-      const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) {
-        meta.setAttribute('content', originalColor);
-      }
-    };
-  }, []);
-
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
 
   // Buscar dados do admin (bio e redes sociais)
@@ -86,6 +61,33 @@ export default function BioPage() {
 
   // Verificar se está carregando
   const isLoading = isLoadingProfile || isLoadingBanners;
+
+  // Mudar a cor da barra do navegador para verde apenas quando o conteúdo carregar
+  useEffect(() => {
+    if (!isLoading) {
+      // Salvar cor original
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      const originalColor = metaThemeColor?.getAttribute('content') || '#ec4899';
+      
+      // Criar ou atualizar meta tag
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', '#034738');
+      } else {
+        const meta = document.createElement('meta');
+        meta.name = 'theme-color';
+        meta.content = '#034738';
+        document.head.appendChild(meta);
+      }
+
+      // Restaurar cor original ao sair da página
+      return () => {
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+          meta.setAttribute('content', originalColor);
+        }
+      };
+    }
+  }, [isLoading]);
 
   // Função helper para obter os dados da rede social (ícone e cor)
   const getSocialData = (platform: string) => {
