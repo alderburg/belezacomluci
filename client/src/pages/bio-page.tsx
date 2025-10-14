@@ -324,7 +324,7 @@ export default function BioPage() {
 
           {/* Banners Empilhados */}
           {banners && banners.length > 0 && (
-            <div className="pb-8 space-y-6">
+            <div className="pb-8 space-y-6 -mt-4">
               {banners.map((banner) => (
                 <a 
                   key={banner.id}
