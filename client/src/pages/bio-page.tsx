@@ -16,7 +16,7 @@ import { useDataSync } from "@/hooks/use-data-sync";
 export default function BioPage() {
   // Ativar sincronização global de dados
   useDataSync();
-  
+
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
 
   // Buscar dados do admin (bio e redes sociais)
@@ -166,11 +166,11 @@ export default function BioPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50">
         <div className="text-center space-y-6">
           {/* Spinner com gradiente */}
-          <div className="relative w-24 h-24 mx-auto">
+          <div className="relative w-8 h-8 mx-auto">
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-green-500 rounded-full animate-ping opacity-20"></div>
-            <div className="relative w-24 h-24 rounded-full border-4 border-transparent border-t-cyan-400 border-r-teal-500 border-b-green-500 animate-spin"></div>
+            <div className="relative w-8 h-8 rounded-full border-2 border-transparent border-t-cyan-400 border-r-teal-500 border-b-green-500 animate-spin"></div>
           </div>
-          
+
           {/* Texto de carregamento */}
           <div className="space-y-2">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-teal-500 to-green-500 bg-clip-text text-transparent">
@@ -182,7 +182,7 @@ export default function BioPage() {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50 relative overflow-hidden">
       {/* Botão Menu Sanduíche no canto superior direito */}
@@ -411,7 +411,7 @@ export default function BioPage() {
               <>
                 {adminProfile.socialNetworks.filter(social => social && social.type).map((social, index) => {
                   const socialData = getSocialData(social.type);
-                  
+
                   const description = social.type?.toLowerCase() === 'instagram' ? 'Veja fotos e novidades diárias' :
                     social.type?.toLowerCase() === 'facebook' ? 'Conecte-se e participe da comunidade' :
                     social.type?.toLowerCase() === 'youtube' ? 'Assista tutoriais e dicas exclusivas' :
