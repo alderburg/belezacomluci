@@ -313,11 +313,11 @@ export default function BioPage() {
               </div>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#439b1e] via-pink-500 to-purple-500 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-bold text-white">
               @belezacomluci
             </h1>
 
-            <p className="text-base md:text-lg text-gray-600 max-w-lg mx-auto">
+            <p className="text-base md:text-lg text-white max-w-lg mx-auto">
               {adminProfile?.bio || 'Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚✨'}
             </p>
           </div>
@@ -345,8 +345,8 @@ export default function BioPage() {
 
           {/* Chamada para Redes Sociais */}
           <div className="py-6">
-            <p className="text-base md:text-lg font-medium text-center leading-relaxed text-gray-800">
-              Siga <span className="font-bold text-[#439b1e]">@belezacomluci</span> nas redes<br />
+            <p className="text-base md:text-lg font-medium text-center leading-relaxed text-white">
+              Siga <span className="font-bold text-white">@belezacomluci</span> nas redes<br />
               sociais e fique por dentro de tudo!
             </p>
 
@@ -374,8 +374,8 @@ export default function BioPage() {
 
           {/* Footer */}
           <div className="pt-2">
-            <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto mb-3"></div>
-            <p className="text-sm text-gray-500">
+            <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto mb-3"></div>
+            <p className="text-sm text-white/80">
               Criado com 💚 para minhas cheirosas em 2025
             </p>
           </div>
