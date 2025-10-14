@@ -7,6 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Banner } from "@shared/schema";
@@ -274,12 +275,18 @@ export default function BioPage() {
             <div className="flex justify-center">
               <div className="relative">
                 <div className="absolute inset-0 bg-[#439b1e]/30 rounded-full blur-2xl scale-110"></div>
-                <div className="relative w-32 h-32 md:w-40 md:h-40">
-                  <img 
-                    src="/images/luci-profile.webp" 
+                <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-white shadow-xl ring-4 ring-primary/20">
+                  <AvatarImage 
+                    src={adminProfile?.avatar || "/images/luci-profile.webp"} 
                     alt="Luci - Beleza com Luci"
-                    className="w-full h-full object-contain drop-shadow-2xl"
+                    className="object-cover"
                   />
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-3xl md:text-4xl font-bold">
+                    BL
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-2 -right-2 w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                  <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
               </div>
             </div>
