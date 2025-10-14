@@ -31,6 +31,10 @@ export default function BioPage() {
 
   // Debug: ver os dados retornados
   console.log('Admin Profile:', adminProfile);
+  console.log('Social Networks:', adminProfile?.socialNetworks);
+  if (adminProfile?.socialNetworks) {
+    console.log('Social Networks JSON:', JSON.stringify(adminProfile.socialNetworks, null, 2));
+  }
 
   // Buscar banners da página /bio
   const { data: banners } = useQuery<Banner[]>({

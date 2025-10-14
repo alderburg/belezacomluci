@@ -235,7 +235,7 @@ export function setupAuth(app: Express) {
 
       // Validate social networks format
       if (socialNetworks && Array.isArray(socialNetworks)) {
-        const validNetworks = ['instagram', 'facebook', 'tiktok', 'youtube', 'twitter', 'linkedin', 'pinterest', 'snapchat', 'whatsapp', 'telegram'];
+        const validNetworks = ['instagram', 'facebook', 'tiktok', 'youtube', 'twitter', 'linkedin', 'pinterest', 'snapchat', 'whatsapp', 'telegram', 'email'];
         for (const network of socialNetworks) {
           if (!network.type || !network.url) {
             return res.status(400).json({ message: "Each social network must have a type and URL" });
@@ -250,6 +250,12 @@ export function setupAuth(app: Express) {
             const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
             if (!phoneRegex.test(network.url)) {
               return res.status(400).json({ message: `Invalid phone format for ${network.type}: ${network.url}. Use format: (xx) xxxxx-xxxx` });
+            }
+          } else if (network.type.toLowerCase() === 'email') {
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(network.url)) {
+              return res.status(400).json({ message: `Invalid email format: ${network.url}` });
             }
           } else {
             // URL validation for other social networks
