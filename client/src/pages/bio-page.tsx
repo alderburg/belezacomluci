@@ -189,7 +189,7 @@ export default function BioPage() {
       <div className="absolute top-6 right-6 z-10">
         <Button 
           onClick={() => setIsSocialMenuOpen(true)}
-          className="bg-primary hover:bg-primary/90 text-white shadow-lg w-10 h-10 rounded-lg p-0"
+          className="bg-[#439b1e] hover:bg-[#357a18] text-white shadow-lg w-10 h-10 rounded-lg p-0"
         >
           <Menu className="w-5 h-5" />
         </Button>
