@@ -166,9 +166,9 @@ export default function BioPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50">
         <div className="text-center space-y-6">
           {/* Spinner com gradiente */}
-          <div className="relative w-12 h-12 mx-auto">
+          <div className="relative w-24 h-24 mx-auto">
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-green-500 rounded-full animate-ping opacity-20"></div>
-            <div className="relative w-12 h-12 rounded-full border-3 border-transparent border-t-cyan-400 border-r-teal-500 border-b-green-500 animate-spin"></div>
+            <div className="relative w-24 h-24 rounded-full border-4 border-transparent border-t-cyan-400 border-r-teal-500 border-b-green-500 animate-spin"></div>
           </div>
           
           {/* Texto de carregamento */}
