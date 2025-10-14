@@ -287,7 +287,7 @@ export default function BioPage() {
       </div>
 
       {/* Conteúdo Principal */}
-      <div className="flex-1 flex items-center justify-center px-6 py-4 relative z-1">
+      <div className="flex-1 flex items-center justify-center px-6 pt-20 pb-4 md:pt-24 relative z-1">
         <div className="max-w-2xl w-full text-center space-y-6">
 
           {/* Logo/Nome */}
