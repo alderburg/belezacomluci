@@ -182,6 +182,15 @@ export default function BioPage() {
             </a>
           </div>
 
+          {/* Chamada para Redes Sociais */}
+          <div className="py-6">
+            <div className="bg-[#439b1e] text-white py-4 px-6 rounded-xl text-center shadow-lg">
+              <p className="text-base md:text-lg font-medium leading-relaxed">
+                Siga <span className="font-bold">@belezacomluci</span> nas redes<br className="md:hidden" /> sociais e fique por dentro de tudo!
+              </p>
+            </div>
+          </div>
+
           {/* Footer */}
           <div className="pt-2">
             <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto mb-3"></div>
