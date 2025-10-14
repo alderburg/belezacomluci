@@ -433,6 +433,39 @@
   animation: float-fast 5s ease-in-out infinite;
 }
 
+/* Ajustes de espaçamento para desktop */
+@media (min-width: 769px) {
+  .container {
+    max-width: 90% !important;
+  }
+  
+  /* Reduzir padding de cards e containers em desktop */
+  [class*="p-6"], [class*="p-8"] {
+    padding: 1rem !important;
+  }
+  
+  [class*="py-6"], [class*="py-8"] {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+  
+  [class*="px-6"], [class*="px-8"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Ajustar gaps em grids */
+  [class*="gap-6"], [class*="gap-8"] {
+    gap: 1rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 85% !important;
+  }
+}
+
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
   width: 0px;
