@@ -59,51 +59,101 @@ export default function BioPage() {
     },
   });
 
-  // Função helper para obter o ícone da rede social
-  const getSocialIcon = (platform: string) => {
-    if (!platform) return <Music className="w-6 h-6 text-white" />;
-    
-    switch (platform.toLowerCase()) {
-      case 'instagram':
-        return <Instagram className="w-6 h-6 text-white" />;
-      case 'facebook':
-        return <Facebook className="w-6 h-6 text-white" />;
-      case 'youtube':
-        return <Youtube className="w-6 h-6 text-white" />;
-      case 'tiktok':
-        return (
-          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-          </svg>
-        );
-      case 'email':
-        return (
-          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-          </svg>
-        );
-      default:
-        return <Music className="w-6 h-6 text-white" />;
+  // Função helper para obter os dados da rede social (ícone e cor)
+  const getSocialData = (platform: string) => {
+    if (!platform) {
+      return {
+        icon: <Music className="w-6 h-6" />,
+        bgColor: 'bg-gray-700',
+        name: 'Outra'
+      };
     }
-  };
-
-  // Função helper para obter a cor de fundo da rede social
-  const getSocialBgColor = (platform: string) => {
-    if (!platform) return 'bg-gray-700';
     
     switch (platform.toLowerCase()) {
       case 'instagram':
-        return 'bg-gradient-to-br from-pink-500 to-purple-500';
+        return {
+          icon: <Instagram className="w-6 h-6" />,
+          bgColor: 'bg-gradient-to-br from-pink-500 to-purple-500',
+          name: 'Instagram'
+        };
       case 'facebook':
-        return 'bg-blue-600';
+        return {
+          icon: <Facebook className="w-6 h-6" />,
+          bgColor: 'bg-blue-600',
+          name: 'Facebook'
+        };
       case 'youtube':
-        return 'bg-red-600';
+        return {
+          icon: <Youtube className="w-6 h-6" />,
+          bgColor: 'bg-red-600',
+          name: 'YouTube'
+        };
       case 'tiktok':
-        return 'bg-black';
+        return {
+          icon: (
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+            </svg>
+          ),
+          bgColor: 'bg-black',
+          name: 'TikTok'
+        };
+      case 'twitter':
+        return {
+          icon: (
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          ),
+          bgColor: 'bg-black',
+          name: 'Twitter/X'
+        };
+      case 'linkedin':
+        return {
+          icon: (
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+          ),
+          bgColor: 'bg-blue-700',
+          name: 'LinkedIn'
+        };
+      case 'whatsapp':
+        return {
+          icon: (
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+          ),
+          bgColor: 'bg-green-500',
+          name: 'WhatsApp'
+        };
+      case 'telegram':
+        return {
+          icon: (
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+            </svg>
+          ),
+          bgColor: 'bg-blue-500',
+          name: 'Telegram'
+        };
       case 'email':
-        return 'bg-gray-700';
+        return {
+          icon: (
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
+          ),
+          bgColor: 'bg-gray-700',
+          name: 'Email'
+        };
       default:
-        return 'bg-gray-700';
+        return {
+          icon: <Music className="w-6 h-6" />,
+          bgColor: 'bg-gray-700',
+          name: platform
+        };
     }
   };
   return (
@@ -268,17 +318,21 @@ export default function BioPage() {
             {/* Ícones de Redes Sociais - Dinâmico do banco de dados */}
             {adminProfile?.socialNetworks && adminProfile.socialNetworks.length > 0 && (
               <div className="flex justify-center gap-4 mt-6 flex-wrap">
-                {adminProfile.socialNetworks.filter(social => social && social.platform).map((social, index) => (
-                  <a
-                    key={index}
-                    href={social.url || '#'}
-                    target={social.url?.startsWith('http') ? "_blank" : undefined}
-                    rel={social.url?.startsWith('http') ? "noopener noreferrer" : undefined}
-                    className={`w-12 h-12 rounded-full flex items-center justify-center ${getSocialBgColor(social.platform)} hover:scale-110 transition-transform duration-300`}
-                  >
-                    {getSocialIcon(social.platform)}
-                  </a>
-                ))}
+                {adminProfile.socialNetworks.filter(social => social && social.type).map((social, index) => {
+                  const socialData = getSocialData(social.type);
+                  return (
+                    <a
+                      key={index}
+                      href={social.url || '#'}
+                      target={social.url?.startsWith('http') ? "_blank" : undefined}
+                      rel={social.url?.startsWith('http') ? "noopener noreferrer" : undefined}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center ${socialData.bgColor} text-white hover:scale-110 transition-transform duration-300 shadow-lg`}
+                      title={socialData.name}
+                    >
+                      {socialData.icon}
+                    </a>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -320,34 +374,41 @@ export default function BioPage() {
             {/* Redes Sociais - Dinâmico do banco de dados */}
             {adminProfile?.socialNetworks && adminProfile.socialNetworks.length > 0 && (
               <>
-                {adminProfile.socialNetworks.filter(social => social && social.platform).map((social, index) => (
-                  <a
-                    key={index}
-                    href={social.url || '#'}
-                    target={social.url?.startsWith('http') ? "_blank" : undefined}
-                    rel={social.url?.startsWith('http') ? "noopener noreferrer" : undefined}
-                    className={`flex items-center gap-4 p-4 rounded-xl border transition-colors ${
-                      social.platform?.toLowerCase() === 'instagram' ? 'bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-200/50 hover:bg-pink-500/20' :
-                      social.platform?.toLowerCase() === 'facebook' ? 'bg-blue-500/10 border-blue-200/50 hover:bg-blue-500/20' :
-                      social.platform?.toLowerCase() === 'youtube' ? 'bg-red-500/10 border-red-200/50 hover:bg-red-500/20' :
-                      social.platform?.toLowerCase() === 'tiktok' ? 'bg-black/10 border-gray-200/50 hover:bg-black/20' :
-                      social.platform?.toLowerCase() === 'email' ? 'bg-gray-700/10 border-gray-200/50 hover:bg-gray-700/20' :
-                      'bg-gray-500/10 border-gray-200/50 hover:bg-gray-500/20'
-                    }`}
-                  >
-                    <div className={`flex items-center justify-center w-12 h-12 ${getSocialBgColor(social.platform)} rounded-lg`}>
-                      {getSocialIcon(social.platform)}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base font-semibold text-foreground capitalize">
-                        {social.platform}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {social.username ? `@${social.username}` : 'Siga-nos'}
-                      </p>
-                    </div>
-                  </a>
-                ))}
+                {adminProfile.socialNetworks.filter(social => social && social.type).map((social, index) => {
+                  const socialData = getSocialData(social.type);
+                  const bgClass = social.type?.toLowerCase() === 'instagram' ? 'bg-gradient-to-r from-pink-500/10 to-purple-500/10 border-pink-200/50 hover:bg-pink-500/20' :
+                    social.type?.toLowerCase() === 'facebook' ? 'bg-blue-500/10 border-blue-200/50 hover:bg-blue-500/20' :
+                    social.type?.toLowerCase() === 'youtube' ? 'bg-red-500/10 border-red-200/50 hover:bg-red-500/20' :
+                    social.type?.toLowerCase() === 'tiktok' ? 'bg-black/10 border-gray-200/50 hover:bg-black/20' :
+                    social.type?.toLowerCase() === 'twitter' ? 'bg-black/10 border-gray-200/50 hover:bg-black/20' :
+                    social.type?.toLowerCase() === 'linkedin' ? 'bg-blue-700/10 border-blue-300/50 hover:bg-blue-700/20' :
+                    social.type?.toLowerCase() === 'whatsapp' ? 'bg-green-500/10 border-green-200/50 hover:bg-green-500/20' :
+                    social.type?.toLowerCase() === 'telegram' ? 'bg-blue-500/10 border-blue-200/50 hover:bg-blue-500/20' :
+                    social.type?.toLowerCase() === 'email' ? 'bg-gray-700/10 border-gray-200/50 hover:bg-gray-700/20' :
+                    'bg-gray-500/10 border-gray-200/50 hover:bg-gray-500/20';
+                  
+                  return (
+                    <a
+                      key={index}
+                      href={social.url || '#'}
+                      target={social.url?.startsWith('http') ? "_blank" : undefined}
+                      rel={social.url?.startsWith('http') ? "noopener noreferrer" : undefined}
+                      className={`flex items-center gap-4 p-4 rounded-xl border transition-colors ${bgClass}`}
+                    >
+                      <div className={`flex items-center justify-center w-12 h-12 ${socialData.bgColor} text-white rounded-lg`}>
+                        {socialData.icon}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-semibold text-foreground">
+                          {socialData.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {social.url || 'Siga-nos'}
+                        </p>
+                      </div>
+                    </a>
+                  );
+                })}
               </>
             )}
           </div>
