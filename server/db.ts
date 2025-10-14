@@ -14,11 +14,11 @@ let dbConfig;
 if (DB_PROVIDER === 'railway') {
   // Configuração para banco PostgreSQL da Railway
   dbConfig = {
-    host: process.env.RAILWAY_DB_HOST,
+    host: process.env.RAILWAY_DB_HOST?.trim(),
     port: parseInt(process.env.RAILWAY_DB_PORT || '5432'),
-    database: process.env.RAILWAY_DB_NAME,
-    user: process.env.RAILWAY_DB_USER,
-    password: process.env.RAILWAY_DB_PASSWORD,
+    database: process.env.RAILWAY_DB_NAME?.trim(),
+    user: process.env.RAILWAY_DB_USER?.trim(),
+    password: process.env.RAILWAY_DB_PASSWORD?.trim(),
     ssl: {
       rejectUnauthorized: false,
     },
