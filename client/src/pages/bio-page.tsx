@@ -307,10 +307,8 @@ export default function BioPage() {
                     </AvatarFallback>
                   </Avatar>
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                  <svg className="w-6 h-6 md:w-7 md:h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
+                <div className="absolute -bottom-2 -right-2 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                  <Sparkles className="w-6 h-6 md:w-7 md:h-7 text-white" />
                 </div>
               </div>
             </div>
