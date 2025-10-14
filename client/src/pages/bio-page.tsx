@@ -344,7 +344,7 @@ export default function BioPage() {
           )}
 
           {/* Chamada para Redes Sociais */}
-          <div className="py-6">
+          <div className="py-0">
             <p className="text-base md:text-lg font-medium text-center leading-relaxed text-white">
               Siga <span className="font-bold text-white">@belezacomluci</span> nas redes<br />
               sociais e fique por dentro de tudo!
