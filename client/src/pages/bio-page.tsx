@@ -176,6 +176,7 @@ export default function BioPage() {
             <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-teal-500 to-green-500 bg-clip-text text-transparent">
               Carregando...
             </h2>
+            <p className="text-gray-500 text-sm">Preparando sua página</p>
           </div>
         </div>
       </div>
