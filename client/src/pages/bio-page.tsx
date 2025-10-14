@@ -336,7 +336,7 @@ export default function BioPage() {
                   <img 
                     src={banner.imageUrl} 
                     alt={banner.title}
-                    className="w-full h-auto object-cover"
+                    className="w-full h-auto min-h-[200px] md:min-h-0 object-cover"
                   />
                 </a>
               ))}
