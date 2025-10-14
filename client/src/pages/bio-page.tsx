@@ -384,7 +384,7 @@ export default function BioPage() {
 
       {/* Modal de Menu Social */}
       <Sheet open={isSocialMenuOpen} onOpenChange={setIsSocialMenuOpen}>
-        <SheetContent side="right" className="w-full [&>button]:bg-[#439b1e] [&>button]:hover:bg-[#357a18]">
+        <SheetContent side="right" className="w-full [&>button]:focus:ring-[#439b1e] [&>button]:focus-visible:ring-[#439b1e]">
           <SheetHeader>
             <SheetTitle className="text-xl font-bold text-black">Minhas Redes</SheetTitle>
           </SheetHeader>
