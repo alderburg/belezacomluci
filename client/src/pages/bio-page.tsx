@@ -188,6 +188,54 @@ export default function BioPage() {
               Siga <span className="font-bold text-[#439b1e]">@belezacomluci</span> nas redes<br />
               sociais e fique por dentro de tudo!
             </p>
+            
+            {/* Ícones de Redes Sociais */}
+            <div className="flex justify-center gap-4 mt-6">
+              <a
+                href="https://www.instagram.com/belezacomluci"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-pink-500 to-purple-500 hover:scale-110 transition-transform duration-300"
+              >
+                <Instagram className="w-6 h-6 text-white" />
+              </a>
+              
+              <a
+                href="https://www.facebook.com/belezacomluci"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-600 hover:scale-110 transition-transform duration-300"
+              >
+                <Facebook className="w-6 h-6 text-white" />
+              </a>
+              
+              <a
+                href="https://www.tiktok.com/@belezacomluci"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-12 h-12 rounded-full flex items-center justify-center bg-black hover:scale-110 transition-transform duration-300"
+              >
+                <Music className="w-6 h-6 text-white" />
+              </a>
+              
+              <a
+                href="https://www.youtube.com/@belezacomluci"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-12 h-12 rounded-full flex items-center justify-center bg-red-600 hover:scale-110 transition-transform duration-300"
+              >
+                <Youtube className="w-6 h-6 text-white" />
+              </a>
+              
+              <a
+                href="mailto:contato@belezacomluci.com.br"
+                className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-700 hover:scale-110 transition-transform duration-300"
+              >
+                <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+              </a>
+            </div>
           </div>
 
           {/* Footer */}
