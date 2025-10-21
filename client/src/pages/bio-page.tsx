@@ -18,6 +18,7 @@ export default function BioPage() {
   useDataSync();
 
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
+  const [isCouponsModalOpen, setIsCouponsModalOpen] = useState(false);
 
   // Buscar dados do admin (bio e redes sociais)
   const { data: adminProfile, isLoading: isLoadingProfile } = useQuery<{
@@ -57,6 +58,19 @@ export default function BioPage() {
         })
         .sort((a: Banner, b: Banner) => (a.order || 0) - (b.order || 0));
     },
+  });
+
+  // Buscar cupons ativos com categorias
+  const { data: couponsData } = useQuery<Array<{
+    id: string;
+    coverImageUrl: string | null;
+    brand: string;
+    discount: string;
+    categoryId: string | null;
+    categoryTitle: string | null;
+  }>>({
+    queryKey: ["/api/coupons/active-with-categories"],
+    enabled: isCouponsModalOpen,
   });
 
   // Verificar se está carregando
@@ -350,21 +364,41 @@ export default function BioPage() {
           {/* Banners Empilhados */}
           {banners && banners.length > 0 && (
             <div className="pb-8 space-y-6">
-              {banners.map((banner) => (
-                <a 
-                  key={banner.id}
-                  href={banner.linkUrl || "#"}
-                  target={banner.linkUrl?.startsWith('http') ? "_blank" : undefined}
-                  rel={banner.linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
-                  className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
-                >
-                  <img 
-                    src={banner.imageUrl} 
-                    alt={banner.title}
-                    className="w-full h-auto min-h-[160px] md:min-h-0 object-cover"
-                  />
-                </a>
-              ))}
+              {banners.map((banner, index) => {
+                // Se for o segundo banner (índice 1), abre o modal de cupons
+                if (index === 1) {
+                  return (
+                    <div
+                      key={banner.id}
+                      onClick={() => setIsCouponsModalOpen(true)}
+                      className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
+                    >
+                      <img 
+                        src={banner.imageUrl} 
+                        alt={banner.title}
+                        className="w-full h-auto min-h-[160px] md:min-h-0 object-cover"
+                      />
+                    </div>
+                  );
+                }
+                
+                // Outros banners mantêm comportamento de link normal
+                return (
+                  <a 
+                    key={banner.id}
+                    href={banner.linkUrl || "#"}
+                    target={banner.linkUrl?.startsWith('http') ? "_blank" : undefined}
+                    rel={banner.linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
+                    className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
+                  >
+                    <img 
+                      src={banner.imageUrl} 
+                      alt={banner.title}
+                      className="w-full h-auto min-h-[160px] md:min-h-0 object-cover"
+                    />
+                  </a>
+                );
+              })}
             </div>
           )}
 
@@ -472,6 +506,72 @@ export default function BioPage() {
                     </a>
                   );
                 })}
+              </>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Modal de Cupons */}
+      <Sheet open={isCouponsModalOpen} onOpenChange={setIsCouponsModalOpen}>
+        <SheetContent side="left" className="w-full [&>button]:!ring-1 [&>button]:!ring-[#439b1e] [&>button]:!ring-offset-1">
+          <SheetHeader>
+            <SheetTitle className="text-xl font-bold text-black">Meus Cupons</SheetTitle>
+          </SheetHeader>
+
+          <div className="mt-6 overflow-y-auto max-h-[calc(100vh-120px)]">
+            {!couponsData || couponsData.length === 0 ? (
+              <div className="text-center py-12">
+                <Gift className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500">Nenhum cupom disponível no momento</p>
+              </div>
+            ) : (
+              <>
+                {/* Agrupar cupons por categoria */}
+                {(() => {
+                  // Agrupar cupons por categoria
+                  const couponsByCategory = couponsData.reduce((acc, coupon) => {
+                    const categoryTitle = coupon.categoryTitle || 'Sem Categoria';
+                    if (!acc[categoryTitle]) {
+                      acc[categoryTitle] = [];
+                    }
+                    acc[categoryTitle].push(coupon);
+                    return acc;
+                  }, {} as Record<string, typeof couponsData>);
+
+                  return Object.entries(couponsByCategory).map(([categoryTitle, coupons]) => (
+                    <div key={categoryTitle} className="mb-8">
+                      {/* Título da Categoria */}
+                      <h3 className="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-[#439b1e]">
+                        {categoryTitle}
+                      </h3>
+
+                      {/* Grid de 2 colunas com imagens dos cupons */}
+                      <div className="grid grid-cols-2 gap-4">
+                        {coupons.map((coupon) => (
+                          <div
+                            key={coupon.id}
+                            className="relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                          >
+                            {coupon.coverImageUrl ? (
+                              <img
+                                src={coupon.coverImageUrl}
+                                alt={`${coupon.brand} - ${coupon.discount}`}
+                                className="w-full h-auto object-cover"
+                              />
+                            ) : (
+                              <div className="w-full aspect-square bg-gradient-to-br from-[#439b1e]/10 to-[#357a18]/20 flex flex-col items-center justify-center p-4">
+                                <Gift className="w-12 h-12 text-[#439b1e] mb-2" />
+                                <p className="text-sm font-bold text-center text-gray-800">{coupon.brand}</p>
+                                <p className="text-xs text-center text-[#439b1e] font-semibold mt-1">{coupon.discount}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ));
+                })()}
               </>
             )}
           </div>

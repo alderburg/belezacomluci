@@ -10,13 +10,13 @@ import {
   insertRaffleSchema, insertRewardSchema, shareSettings, referrals,
   insertNotificationSchema, insertUserNotificationSchema, notifications, userNotifications,
   insertPopupSchema, insertPopupViewSchema, insertCategorySchema,
-  insertUserSchema // Assuming insertUserSchema is defined elsewhere
+  insertUserSchema, coupons, categories // Assuming insertUserSchema is defined elsewhere
 } from "../shared/schema";
 import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
 import { youtubeOAuth } from './youtube-oauth';
 import { db } from './db';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, or, isNull, lte, gte } from 'drizzle-orm';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -413,6 +413,42 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error fetching coupons:", error);
       res.status(500).json({ message: "Failed to fetch coupons" });
+    }
+  });
+
+  // Cupons ativos com categorias para modal da página /bio
+  app.get("/api/coupons/active-with-categories", async (req, res) => {
+    try {
+      const now = new Date();
+      const result = await db
+        .select({
+          id: coupons.id,
+          coverImageUrl: coupons.coverImageUrl,
+          brand: coupons.brand,
+          discount: coupons.discount,
+          categoryId: coupons.categoryId,
+          categoryTitle: categories.title,
+        })
+        .from(coupons)
+        .leftJoin(categories, eq(coupons.categoryId, categories.id))
+        .where(
+          and(
+            eq(coupons.isActive, true),
+            or(
+              isNull(coupons.startDateTime),
+              lte(coupons.startDateTime, now)
+            ),
+            or(
+              isNull(coupons.endDateTime),
+              gte(coupons.endDateTime, now)
+            )
+          )
+        );
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching active coupons with categories:", error);
+      res.status(500).json({ message: "Failed to fetch active coupons" });
     }
   });
 
