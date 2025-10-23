@@ -7,7 +7,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'remove-vite-client',
+      transformIndexHtml: {
+        order: 'post',
+        handler(html) {
+          // Remover completamente a injeção do @vite/client
+          return html.replace(/<script[^>]*\/@vite\/client[^>]*><\/script>/g, '');
+        }
+      }
+    }
+  ],
   root: path.resolve(__dirname, "client"),
   publicDir: path.resolve(__dirname, "client/public"),
   resolve: {

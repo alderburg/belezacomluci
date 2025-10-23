@@ -35,6 +35,17 @@ export async function setupVite(app: Express, server: Server) {
     },
     server: serverOptions,
     appType: "custom",
+    // Desabilitar completamente a injeção do cliente Vite
+    plugins: [
+      ...(viteConfig.plugins || []),
+      {
+        name: 'disable-vite-client',
+        transformIndexHtml(html) {
+          // Remover qualquer script @vite/client que foi injetado
+          return html.replace(/<script[^>]*\/@vite\/client[^>]*><\/script>/g, '');
+        }
+      }
+    ]
   });
 
   // Serve attached_assets folder
