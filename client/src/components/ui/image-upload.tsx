@@ -52,15 +52,6 @@ export function ImageUpload({ label, value, onChange, id, placeholder }: ImageUp
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
-      {preview && (
-        <div className="mt-2 relative w-full h-40 bg-muted rounded-lg overflow-hidden">
-          <img
-            src={preview}
-            alt="Preview"
-            className="w-full h-full object-contain"
-          />
-        </div>
-      )}
       <div className="flex items-center gap-2">
         <Input
           id={id}
@@ -90,6 +81,15 @@ export function ImageUpload({ label, value, onChange, id, placeholder }: ImageUp
           </Button>
         )}
       </div>
+      {preview && (
+        <div className="mt-2 relative w-full h-40 bg-muted rounded-lg overflow-hidden">
+          <img
+            src={preview}
+            alt="Preview"
+            className="w-full h-full object-contain"
+          />
+        </div>
+      )}
     </div>
   );
 }

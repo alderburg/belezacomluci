@@ -53,12 +53,10 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/">
-        <Redirect to="/bio" />
-      </Route>
       <Route path="/home">
-        <Redirect to="/bio" />
+        <Redirect to="/" />
       </Route>
+      <ProtectedRoute path="/" component={ResponsiveHomePage} />
       <ProtectedRoute path="/videos" component={ResponsiveVideosPage} />
       <ProtectedRoute path="/video/:id" component={isMobile ? VideoMobilePage : VideoWatchPage} />
       <ProtectedRoute path="/playlist/:id" component={isMobile ? PlaylistMobilePage : PlaylistPage} />
