@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
@@ -10,13 +11,41 @@ export default defineConfig({
   plugins: [
     react(),
     {
-      name: 'remove-vite-client',
+      name: 'remove-vite-client-aggressive',
       enforce: 'post',
-      transformIndexHtml(html) {
-        // Remove completamente o cliente Vite do HTML final
-        return html
-          .replace(/<script[^>]*\/@vite\/client[^>]*><\/script>/g, '')
-          .replace(/import\s+.*?from\s+['"]@vite\/client['"];?/g, '');
+      apply: 'build',
+      transformIndexHtml: {
+        order: 'post',
+        handler(html) {
+          // Remove todas as referências ao cliente Vite
+          return html
+            .replace(/<script[^>]*\/@vite\/client[^>]*><\/script>/g, '')
+            .replace(/<script[^>]*type="module"[^>]*>[\s\S]*?@vite\/client[\s\S]*?<\/script>/gi, '')
+            .replace(/import\s+.*?from\s+['"]@vite\/client['"];?/g, '')
+            .replace(/import\s+['"]@vite\/client['"];?/g, '');
+        },
+      },
+      transform(code, id) {
+        // Remove importações do @vite/client de todos os arquivos
+        if (code.includes('@vite/client')) {
+          return {
+            code: code
+              .replace(/import\s+.*?from\s+['"]@vite\/client['"];?/g, '')
+              .replace(/import\s+['"]@vite\/client['"];?/g, ''),
+            map: null
+          };
+        }
+      },
+      generateBundle(options, bundle) {
+        // Remover referências do Vite client dos arquivos JS gerados
+        for (const fileName in bundle) {
+          const file = bundle[fileName];
+          if (file.type === 'chunk' && file.code) {
+            file.code = file.code
+              .replace(/@vite\/client/g, '')
+              .replace(/import\s+.*?from\s+['"]@vite\/client['"];?/g, '');
+          }
+        }
       },
     },
   ],
@@ -42,6 +71,7 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
+    minify: 'terser',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -67,6 +97,7 @@ export default defineConfig({
   },
   define: {
     __HMR_ENABLE__: false,
+    'import.meta.hot': 'undefined',
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'wouter'],
