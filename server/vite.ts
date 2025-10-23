@@ -33,16 +33,37 @@ export async function setupVite(app: Express, server: Server) {
         process.exit(1);
       },
     },
-    server: serverOptions,
+    server: {
+      ...serverOptions,
+      hmr: false,
+      ws: false,
+    },
     appType: "custom",
-    // Desabilitar completamente a injeção do cliente Vite
+    clearScreen: false,
     plugins: [
       ...(viteConfig.plugins || []),
       {
         name: 'disable-vite-client',
-        transformIndexHtml(html) {
-          // Remover qualquer script @vite/client que foi injetado
-          return html.replace(/<script[^>]*\/@vite\/client[^>]*><\/script>/g, '');
+        enforce: 'post',
+        transformIndexHtml: {
+          order: 'post',
+          handler(html) {
+            // Remover completamente qualquer injeção do @vite/client
+            return html
+              .replace(/<script[^>]*\/@vite\/client[^>]*><\/script>/g, '')
+              .replace(/<script type="module" crossorigin src="\/@vite\/client"><\/script>/g, '')
+              .replace(/<script type="module">.*?import.*?@vite\/client.*?<\/script>/gs, '');
+          }
+        },
+        configureServer(server) {
+          // Desabilitar o cliente HMR
+          server.hot = {
+            send: () => {},
+            listen: () => {},
+            close: () => {},
+            on: () => {},
+            off: () => {},
+          } as any;
         }
       }
     ]
