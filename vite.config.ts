@@ -42,6 +42,7 @@ export default defineConfig({
     port: 5000,
     strictPort: false,
     hmr: false,
+    ws: false,
     watch: {
       usePolling: false,
       ignored: ['**/node_modules/**', '**/.git/**'],
