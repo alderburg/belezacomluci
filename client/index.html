@@ -13,44 +13,7 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      window.addEventListener('unhandledrejection', (event) => {
-        if (event.reason && event.reason.message && event.reason.message.includes('Failed to fetch')) {
-          event.preventDefault();
-        }
-      });
-      
-      const originalConsole = {
-        log: console.log,
-        warn: console.warn,
-        error: console.error,
-        debug: console.debug
-      };
-      
-      console.log = function(...args) {
-        const msg = args.join(' ');
-        if (msg.includes('[vite]')) return;
-        originalConsole.log.apply(console, args);
-      };
-      
-      console.warn = function(...args) {
-        const msg = args.join(' ');
-        if (msg.includes('[vite]')) return;
-        originalConsole.warn.apply(console, args);
-      };
-      
-      console.error = function(...args) {
-        const msg = args.join(' ');
-        if (msg.includes('[vite]')) return;
-        originalConsole.error.apply(console, args);
-      };
-      
-      console.debug = function(...args) {
-        const msg = args.join(' ');
-        if (msg.includes('[vite]')) return;
-        originalConsole.debug.apply(console, args);
-      };
-    </script>
+    
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
