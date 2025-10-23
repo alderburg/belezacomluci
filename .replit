@@ -46,7 +46,7 @@ externalPort = 4200
 PORT = "5000"
 
 [workflows]
-runButton = "Project"
+runButton = "Production Server"
 
 [[workflows.workflow]]
 name = "Dev Server"
@@ -90,6 +90,19 @@ outputType = "webview"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Production Server"
+author = 48937516
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run build"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run start"
 
 [agent]
 expertMode = true
