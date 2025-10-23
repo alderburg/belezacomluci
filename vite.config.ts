@@ -48,6 +48,9 @@ export default defineConfig({
       ignored: ['**/node_modules/**', '**/.git/**'],
     },
   },
+  define: {
+    __HMR_ENABLE__: false,
+  },
   optimizeDeps: {
     include: ['react', 'react-dom', 'wouter'],
     force: false,
