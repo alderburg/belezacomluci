@@ -4,6 +4,25 @@ This is "Beleza com Luci", a beauty platform built for followers to access exclu
 
 # Recent Changes
 
+## 2025-10-23: Sistema de Upload de Imagens com Base64
+- Implementado componente reutilizável ImageUpload para upload de imagens nos formulários de admin
+- Substituídos todos os campos de URL de imagem por seleção de arquivo do computador
+- Imagens são convertidas para base64 e armazenadas diretamente no banco de dados
+- Atualizado layout do preview: imagem aparece antes dos botões "Alterar Imagem" e "X"
+- Aplicado em todos os formulários: vídeos (thumbnailUrl), produtos (coverImageUrl), cupons (coverImageUrl), banners (imageUrl), popups (imageUrl), notificações (imageUrl) e categorias (coverImageUrl)
+- Validação de tipo de arquivo (apenas imagens) e tamanho máximo (5MB)
+- ⚠️ **Nota**: Base64 pode causar problemas de performance em listas grandes. Considere migrar para armazenamento de arquivos no futuro.
+
+## 2025-10-23: Mudança de Rota Inicial
+- Página inicial alterada de tela de login para /bio
+- Agora o sistema carrega diretamente a página /bio ao acessar o site
+- Rotas "/" e "/home" redirecionam para /bio
+
+## 2025-10-23: Configuração do Banco de Dados Railway
+- Configurado banco de dados PostgreSQL do Railway
+- Sistema usando banco Railway ao invés de Locaweb
+- Variáveis de ambiente RAILWAY_DB_* configuradas
+
 ## 2025-10-14: Correção de Espaçamento em /meuperfil Desktop
 - Corrigido padding-top da página /meuperfil para seguir o padrão das outras páginas
 - Aplicado pt-16 (64px) no desktop e pt-32 (128px) no mobile no elemento <main>
