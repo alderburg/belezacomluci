@@ -43,12 +43,11 @@ export default defineConfig({
     strictPort: false,
     hmr: {
       protocol: 'wss',
-      host: '0.0.0.0',
-      port: 5000,
       clientPort: 443,
     },
     watch: {
-      usePolling: false,
+      usePolling: true,
+      interval: 1000,
       ignored: ['**/node_modules/**', '**/.git/**'],
     },
   },
