@@ -340,7 +340,6 @@ export default function BioPage() {
                       src={adminProfile?.avatar || "/images/luci-profile.webp"} 
                       alt="Luci - Beleza com Luci"
                       className="object-cover"
-                      fetchpriority="high"
                     />
                     <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-3xl md:text-4xl font-bold">
                       BL
