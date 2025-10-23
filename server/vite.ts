@@ -35,6 +35,16 @@ export async function setupVite(app: Express, server: Server) {
     },
     server: serverOptions,
     appType: "custom",
+    plugins: [
+      ...(viteConfig.plugins || []),
+      {
+        name: 'disable-hmr-client',
+        transformIndexHtml(html) {
+          // Remove any Vite client script injection
+          return html.replace(/<script[^>]*\/@vite\/client[^>]*><\/script>/g, '');
+        },
+      },
+    ],
   });
 
   // Serve attached_assets folder
