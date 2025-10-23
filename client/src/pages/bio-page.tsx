@@ -81,7 +81,7 @@ export default function BioPage() {
     if (!isLoading) {
       // Criar ou atualizar meta tag
       let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-      
+
       if (metaThemeColor) {
         metaThemeColor.setAttribute('content', '#034738');
       } else {
@@ -340,6 +340,7 @@ export default function BioPage() {
                       src={adminProfile?.avatar || "/images/luci-profile.webp"} 
                       alt="Luci - Beleza com Luci"
                       className="object-cover"
+                      fetchpriority="high"
                     />
                     <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-3xl md:text-4xl font-bold">
                       BL
@@ -381,7 +382,7 @@ export default function BioPage() {
                     </div>
                   );
                 }
-                
+
                 // Outros banners mantêm comportamento de link normal
                 return (
                   <a 
