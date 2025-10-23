@@ -19,7 +19,7 @@ export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
     hmr: {
-      protocol: 'ws',
+      protocol: 'wss',
       server: server,
       host: '0.0.0.0',
     },
