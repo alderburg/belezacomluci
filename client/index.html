@@ -14,34 +14,80 @@
   <body>
     <div id="root"></div>
     <script>
-      // Block all Vite client WebSocket connections
+      // Bloquear completamente a execução do @vite/client
+      const originalCreateElement = document.createElement;
+      document.createElement = function(tagName) {
+        const element = originalCreateElement.call(document, tagName);
+        
+        if (tagName.toLowerCase() === 'script') {
+          const originalSetAttribute = element.setAttribute;
+          element.setAttribute = function(name, value) {
+            // Bloquear scripts do Vite client
+            if (name === 'src' && value && (
+              value.includes('/@vite/client') || 
+              value.includes('@vite/client') ||
+              value.includes('__vite')
+            )) {
+              return; // Não definir o src, bloqueando o script
+            }
+            return originalSetAttribute.call(this, name, value);
+          };
+          
+          // Interceptar definição direta de src
+          Object.defineProperty(element, 'src', {
+            set: function(value) {
+              if (value && (
+                value.includes('/@vite/client') || 
+                value.includes('@vite/client') ||
+                value.includes('__vite')
+              )) {
+                return; // Bloquear
+              }
+              Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src').set.call(this, value);
+            },
+            get: function() {
+              return Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src').get.call(this);
+            }
+          });
+        }
+        
+        return element;
+      };
+      
+      // Bloquear WebSocket do Vite silenciosamente
       if (window.WebSocket) {
         const OriginalWebSocket = window.WebSocket;
         window.WebSocket = function(url, protocols) {
-          // Block Vite HMR WebSocket connections
           if (url && (url.includes('/@vite') || url.includes('__vite') || url.includes(':24678') || url.includes(':5173'))) {
-            console.log('[Blocked] Vite HMR WebSocket connection attempt');
-            // Return a mock WebSocket that does nothing
+            // Mock WebSocket que não faz nada
             return {
-              readyState: 0,
+              readyState: 3, // CLOSED
               send: () => {},
               close: () => {},
               addEventListener: () => {},
-              removeEventListener: () => {}
+              removeEventListener: () => {},
+              dispatchEvent: () => false,
+              CONNECTING: 0,
+              OPEN: 1,
+              CLOSING: 2,
+              CLOSED: 3
             };
           }
           return new OriginalWebSocket(url, protocols);
         };
       }
       
+      // Silenciar erros de WebSocket
       window.addEventListener('unhandledrejection', (event) => {
         if (event.reason && event.reason.message && 
             (event.reason.message.includes('Failed to fetch') || 
-             event.reason.message.includes('WebSocket'))) {
+             event.reason.message.includes('WebSocket') ||
+             event.reason.message.includes('vite'))) {
           event.preventDefault();
         }
       });
       
+      // Silenciar todos os logs do Vite
       const originalConsole = {
         log: console.log,
         warn: console.warn,
@@ -51,25 +97,25 @@
       
       console.log = function(...args) {
         const msg = args.join(' ');
-        if (msg.includes('[vite]') || msg.includes('[@vite')) return;
+        if (msg.includes('[vite]') || msg.includes('[@vite') || msg.includes('[Blocked]')) return;
         originalConsole.log.apply(console, args);
       };
       
       console.warn = function(...args) {
         const msg = args.join(' ');
-        if (msg.includes('[vite]') || msg.includes('[@vite')) return;
+        if (msg.includes('[vite]') || msg.includes('[@vite') || msg.includes('[Blocked]')) return;
         originalConsole.warn.apply(console, args);
       };
       
       console.error = function(...args) {
         const msg = args.join(' ');
-        if (msg.includes('[vite]') || msg.includes('[@vite')) return;
+        if (msg.includes('[vite]') || msg.includes('[@vite') || msg.includes('WebSocket') || msg.includes('[Blocked]')) return;
         originalConsole.error.apply(console, args);
       };
       
       console.debug = function(...args) {
         const msg = args.join(' ');
-        if (msg.includes('[vite]') || msg.includes('[@vite')) return;
+        if (msg.includes('[vite]') || msg.includes('[@vite') || msg.includes('[Blocked]')) return;
         originalConsole.debug.apply(console, args);
       };
     </script>
