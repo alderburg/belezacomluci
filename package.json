@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "vite build --logLevel=silent && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && node -e \"const fs=require('fs');const path=require('path');const html=fs.readFileSync('dist/public/index.html','utf8');const cleaned=html.replace(/<script[^>]*vite[^>]*><\\/script>/gi,'').replace(/@vite\\/client/gi,'').replace(/import.*?vite.*?;?/gi,'');fs.writeFileSync('dist/public/index.html',cleaned);const files=fs.readdirSync('dist/public/assets');files.forEach(f=>{if(f.endsWith('.js')){const fp=path.join('dist/public/assets',f);let c=fs.readFileSync(fp,'utf8');c=c.replace(/@vite\\/client/gi,'').replace(/import.*?vite.*?;?/gi,'');fs.writeFileSync(fp,c);}});\"",
+    "build": "vite build --logLevel=silent && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc"
   },

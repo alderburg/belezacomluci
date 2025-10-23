@@ -19,7 +19,6 @@ export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
     hmr: false,
-    ws: false,
     allowedHosts: true as const,
   };
 
@@ -35,30 +34,6 @@ export async function setupVite(app: Express, server: Server) {
     },
     server: serverOptions,
     appType: "custom",
-    plugins: [
-      ...(viteConfig.plugins || []),
-      {
-        name: 'disable-hmr-client',
-        enforce: 'post',
-        transformIndexHtml: {
-          order: 'post',
-          handler(html) {
-            // Remove completamente qualquer script do Vite client
-            let transformed = html.replace(/<script[^>]*\/@vite\/client[^>]*><\/script>/g, '');
-            // Remove também imports inline do tipo @vite/client
-            transformed = transformed.replace(/import\s+.*?from\s+['"]@vite\/client['"]/g, '');
-            return transformed;
-          },
-        },
-        transform(code, id) {
-          // Interceptar e remover qualquer importação do @vite/client
-          if (code.includes('@vite/client')) {
-            return code.replace(/import\s+.*?from\s+['"]@vite\/client['"];?/g, '');
-          }
-          return null;
-        },
-      },
-    ],
   });
 
   // Serve attached_assets folder
@@ -88,12 +63,7 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`,
       );
-      let page = await vite.transformIndexHtml(url, template);
-      
-      // Remover qualquer script do Vite client que possa ter sido injetado
-      page = page.replace(/<script[^>]*type="module"[^>]*>[\s\S]*?@vite\/client[\s\S]*?<\/script>/gi, '');
-      page = page.replace(/import\s+["']@vite\/client["']/g, '');
-      
+      const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);

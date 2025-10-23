@@ -81,7 +81,7 @@ export default function BioPage() {
     if (!isLoading) {
       // Criar ou atualizar meta tag
       let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-
+      
       if (metaThemeColor) {
         metaThemeColor.setAttribute('content', '#034738');
       } else {
@@ -381,7 +381,7 @@ export default function BioPage() {
                     </div>
                   );
                 }
-
+                
                 // Outros banners mantêm comportamento de link normal
                 return (
                   <a 
