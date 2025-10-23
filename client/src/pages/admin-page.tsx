@@ -28,6 +28,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAdmin } from "@/contexts/admin-context";
 import { useEffect } from "react";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 const createVideoSchema = insertVideoSchema;
 const createProductSchema = insertProductSchema;
@@ -1338,28 +1339,24 @@ export default function AdminPage() {
                           />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="video-url">URL do Vídeo</Label>
-                            <Input
-                              id="video-url"
-                              {...videoForm.register("videoUrl")}
-                              placeholder="https://..."
-                              data-testid="input-video-url"
-                              onBlur={(e) => handleVideoUrlChange(e.target.value)}
-                            />
-                          </div>
-
-                          <div>
-                            <Label htmlFor="video-thumbnail">URL da Capa</Label>
-                            <Input
-                              id="video-thumbnail"
-                              {...videoForm.register("thumbnailUrl")}
-                              placeholder="https://..."
-                              data-testid="input-video-thumbnail"
-                            />
-                          </div>
+                        <div>
+                          <Label htmlFor="video-url">URL do Vídeo</Label>
+                          <Input
+                            id="video-url"
+                            {...videoForm.register("videoUrl")}
+                            placeholder="https://..."
+                            data-testid="input-video-url"
+                            onBlur={(e) => handleVideoUrlChange(e.target.value)}
+                          />
                         </div>
+
+                        <ImageUpload
+                          id="video-thumbnail"
+                          label="Imagem de Capa"
+                          value={videoForm.watch("thumbnailUrl")}
+                          onChange={(base64) => videoForm.setValue("thumbnailUrl", base64)}
+                          placeholder="Selecionar imagem de capa"
+                        />
 
                         <div className="grid grid-cols-2 gap-4">
                           <div>
@@ -1489,15 +1486,13 @@ export default function AdminPage() {
                           </div>
                         </div>
 
-                        <div>
-                          <Label htmlFor="product-cover">URL da Capa</Label>
-                          <Input
-                            id="product-cover"
-                            {...productForm.register("coverImageUrl")}
-                            placeholder="https://..."
-                            data-testid="input-product-cover"
-                          />
-                        </div>
+                        <ImageUpload
+                          id="product-cover"
+                          label="Imagem de Capa"
+                          value={productForm.watch("coverImageUrl")}
+                          onChange={(base64) => productForm.setValue("coverImageUrl", base64)}
+                          placeholder="Selecionar imagem de capa"
+                        />
 
                         <div>
                           <Label htmlFor="product-category">Categoria</Label>
@@ -1625,15 +1620,13 @@ export default function AdminPage() {
                           />
                         </div>
 
-                        <div>
-                          <Label htmlFor="coupon-cover">URL da Capa</Label>
-                          <Input
-                            id="coupon-cover"
-                            {...couponForm.register("coverImageUrl")}
-                            placeholder="https://..."
-                            data-testid="input-coupon-cover"
-                          />
-                        </div>
+                        <ImageUpload
+                          id="coupon-cover"
+                          label="Imagem de Capa"
+                          value={couponForm.watch("coverImageUrl")}
+                          onChange={(base64) => couponForm.setValue("coverImageUrl", base64)}
+                          placeholder="Selecionar imagem de capa"
+                        />
 
                         <div className="grid grid-cols-2 gap-4">
                           <div>
@@ -1723,26 +1716,22 @@ export default function AdminPage() {
                           />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="banner-image">URL da Imagem</Label>
-                            <Input
-                              id="banner-image"
-                              {...bannerForm.register("imageUrl")}
-                              placeholder="https://..."
-                              data-testid="input-banner-image"
-                            />
-                          </div>
+                        <ImageUpload
+                          id="banner-image"
+                          label="Imagem do Banner"
+                          value={bannerForm.watch("imageUrl")}
+                          onChange={(base64) => bannerForm.setValue("imageUrl", base64)}
+                          placeholder="Selecionar imagem do banner"
+                        />
 
-                          <div>
-                            <Label htmlFor="banner-link">URL de Destino</Label>
-                            <Input
-                              id="banner-link"
-                              {...bannerForm.register("linkUrl")}
-                              placeholder="https://..."
-                              data-testid="input-banner-link"
-                            />
-                          </div>
+                        <div>
+                          <Label htmlFor="banner-link">URL de Destino</Label>
+                          <Input
+                            id="banner-link"
+                            {...bannerForm.register("linkUrl")}
+                            placeholder="https://..."
+                            data-testid="input-banner-link"
+                          />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -1909,26 +1898,22 @@ export default function AdminPage() {
                           />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="popup-image">URL da Imagem</Label>
-                            <Input
-                              id="popup-image"
-                              {...popupForm.register("imageUrl")}
-                              placeholder="https://..."
-                              data-testid="input-popup-image"
-                            />
-                          </div>
+                        <ImageUpload
+                          id="popup-image"
+                          label="Imagem do Popup"
+                          value={popupForm.watch("imageUrl")}
+                          onChange={(base64) => popupForm.setValue("imageUrl", base64)}
+                          placeholder="Selecionar imagem do popup"
+                        />
 
-                          <div>
-                            <Label htmlFor="popup-link">URL de Destino</Label>
-                            <Input
-                              id="popup-link"
-                              {...popupForm.register("linkUrl")}
-                              placeholder="https://..."
-                              data-testid="input-popup-link"
-                            />
-                          </div>
+                        <div>
+                          <Label htmlFor="popup-link">URL de Destino</Label>
+                          <Input
+                            id="popup-link"
+                            {...popupForm.register("linkUrl")}
+                            placeholder="https://..."
+                            data-testid="input-popup-link"
+                          />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -2161,15 +2146,13 @@ export default function AdminPage() {
                           />
                         </div>
 
-                        <div>
-                          <Label htmlFor="notification-image">URL da Imagem</Label>
-                          <Input
-                            id="notification-image"
-                            {...notificationForm.register("imageUrl")}
-                            placeholder="https://exemplo.com/imagem.jpg"
-                            data-testid="input-notification-image"
-                          />
-                        </div>
+                        <ImageUpload
+                          id="notification-image"
+                          label="Imagem da Notificação"
+                          value={notificationForm.watch("imageUrl")}
+                          onChange={(base64) => notificationForm.setValue("imageUrl", base64)}
+                          placeholder="Selecionar imagem da notificação"
+                        />
 
                         <div>
                           <Label htmlFor="notification-link">URL de Destino</Label>
@@ -2276,15 +2259,13 @@ export default function AdminPage() {
                           />
                         </div>
 
-                        <div>
-                          <Label htmlFor="category-cover-image">URL da Imagem de Capa</Label>
-                          <Input
-                            id="category-cover-image"
-                            {...categoryForm.register("coverImageUrl")}
-                            placeholder="https://exemplo.com/imagem.jpg"
-                            data-testid="input-category-cover-image"
-                          />
-                        </div>
+                        <ImageUpload
+                          id="category-cover-image"
+                          label="Imagem de Capa da Categoria"
+                          value={categoryForm.watch("coverImageUrl")}
+                          onChange={(base64) => categoryForm.setValue("coverImageUrl", base64)}
+                          placeholder="Selecionar imagem de capa"
+                        />
 
                         <div className="flex items-center space-x-2">
                           <Switch
