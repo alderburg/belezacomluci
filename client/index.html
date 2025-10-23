@@ -13,50 +13,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // Silenciar completamente logs e erros do Vite
-      (function() {
-        const originalConsole = {
-          log: console.log,
-          warn: console.warn,
-          error: console.error,
-          debug: console.debug
-        };
-        
-        const viteKeywords = ['[vite]', '[@vite', '[Blocked]', 'connecting...', 'server connection', 'WebSocket'];
-        
-        const shouldBlock = (args) => {
-          const msg = args.join(' ').toLowerCase();
-          return viteKeywords.some(keyword => msg.includes(keyword.toLowerCase()));
-        };
-        
-        console.log = function(...args) {
-          if (!shouldBlock(args)) originalConsole.log.apply(console, args);
-        };
-        
-        console.warn = function(...args) {
-          if (!shouldBlock(args)) originalConsole.warn.apply(console, args);
-        };
-        
-        console.error = function(...args) {
-          if (!shouldBlock(args)) originalConsole.error.apply(console, args);
-        };
-        
-        console.debug = function(...args) {
-          if (!shouldBlock(args)) originalConsole.debug.apply(console, args);
-        };
-        
-        // Bloquear erros não tratados relacionados ao Vite
-        window.addEventListener('unhandledrejection', (event) => {
-          if (event.reason && event.reason.message) {
-            const msg = event.reason.message.toLowerCase();
-            if (msg.includes('websocket') || msg.includes('vite') || msg.includes('failed to fetch')) {
-              event.preventDefault();
-            }
-          }
-        });
-      })();
-    </script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>

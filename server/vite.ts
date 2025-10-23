@@ -43,27 +43,28 @@ export async function setupVite(app: Express, server: Server) {
     plugins: [
       ...(viteConfig.plugins || []),
       {
-        name: 'disable-vite-client',
-        enforce: 'post',
-        transformIndexHtml: {
-          order: 'post',
-          handler(html) {
-            // Remover completamente qualquer injeção do @vite/client
-            return html
-              .replace(/<script[^>]*\/@vite\/client[^>]*><\/script>/g, '')
-              .replace(/<script type="module" crossorigin src="\/@vite\/client"><\/script>/g, '')
-              .replace(/<script type="module">.*?import.*?@vite\/client.*?<\/script>/gs, '');
+        name: 'disable-hmr-client',
+        enforce: 'pre',
+        resolveId(id) {
+          // Bloquear importação do @vite/client
+          if (id === '@vite/client' || id.includes('/@vite/client')) {
+            return '\0virtual:empty';
           }
         },
-        configureServer(server) {
-          // Desabilitar o cliente HMR
-          server.hot = {
-            send: () => {},
-            listen: () => {},
-            close: () => {},
-            on: () => {},
-            off: () => {},
-          } as any;
+        load(id) {
+          // Retornar módulo vazio para @vite/client
+          if (id === '\0virtual:empty') {
+            return 'export default {}';
+          }
+        },
+        transformIndexHtml: {
+          order: 'pre',
+          handler(html) {
+            // Remover qualquer script do @vite/client antes do processamento
+            return html
+              .replace(/<script[^>]*@vite\/client[^>]*><\/script>/g, '')
+              .replace(/import\s+['"]@vite\/client['"]/g, '');
+          }
         }
       }
     ]
