@@ -137,13 +137,13 @@ export default function Sidebar() {
             onClick={() => setIsCollapsed(!isCollapsed)}
             data-testid="button-toggle-sidebar"
             className={cn(
-              "absolute top-4 z-10 w-6 h-6 p-0 bg-background border border-border shadow-md hover:bg-muted transition-all duration-300 rounded-full",
+              "absolute top-4 z-10 w-7 h-7 p-0 bg-background border border-border shadow-md hover:bg-muted transition-all duration-300 rounded-full",
               isCollapsed
-                ? "right-[-12px]"
-                : "right-[-12px]"
+                ? "right-[-14px]"
+                : "right-[-14px]"
             )}
           >
-            <Menu className="w-3 h-3" />
+            <Menu className="w-3.5 h-3.5" />
           </Button>
         )}
 
