@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Post, User } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
@@ -31,6 +31,24 @@ import {
 import { useCommunityLoading } from "@/hooks/use-community-loading";
 import { useToast } from "@/hooks/use-toast";
 import { useDataSync } from "@/hooks/use-data-sync";
+
+// Adicionar estilos para ocultar scrollbar
+const hideScrollbarStyle = `
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = hideScrollbarStyle;
+  document.head.appendChild(styleElement);
+}
 
 type PostWithUser = Post & {
   user: Pick<User, 'id' | 'name' | 'avatar' | 'isAdmin'>
@@ -719,36 +737,58 @@ export default function ComunidadeMobilePage() {
                   })}
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 w-full mt-2">
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-3 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <Users className="w-4 h-4 text-white" />
-                      </div>
-                      <p className="text-lg font-bold text-white">{communityStats.cheirosas}</p>
-                      <p className="text-xs text-white/80">Cheirosas</p>
-                    </CardContent>
-                  </Card>
+                <div className="w-full mt-2 overflow-x-auto scrollbar-hide">
+                  <div className="flex gap-3 pb-2" style={{ minWidth: 'max-content' }}>
+                    <Card className="bg-white/10 backdrop-blur-sm border-white/20 flex-shrink-0 w-28">
+                      <CardContent className="p-3 text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Users className="w-4 h-4 text-white" />
+                        </div>
+                        <p className="text-lg font-bold text-white">{communityStats.cheirosas}</p>
+                        <p className="text-xs text-white/80">Cheirosas</p>
+                      </CardContent>
+                    </Card>
 
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-3 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <Heart className="w-4 h-4 text-white" />
-                      </div>
-                      <p className="text-lg font-bold text-white">{communityStats.curtidas}</p>
-                      <p className="text-xs text-white/80">Curtidas</p>
-                    </CardContent>
-                  </Card>
+                    <Card className="bg-white/10 backdrop-blur-sm border-white/20 flex-shrink-0 w-28">
+                      <CardContent className="p-3 text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <TrendingUp className="w-4 h-4 text-white" />
+                        </div>
+                        <p className="text-lg font-bold text-white">{communityStats.postagens}</p>
+                        <p className="text-xs text-white/80">Postagens</p>
+                      </CardContent>
+                    </Card>
 
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-3 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <MessageCircle className="w-4 h-4 text-white" />
-                      </div>
-                      <p className="text-lg font-bold text-white">{communityStats.comentarios}</p>
-                      <p className="text-xs text-white/80">Comentários</p>
-                    </CardContent>
-                  </Card>
+                    <Card className="bg-white/10 backdrop-blur-sm border-white/20 flex-shrink-0 w-28">
+                      <CardContent className="p-3 text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Heart className="w-4 h-4 text-white" />
+                        </div>
+                        <p className="text-lg font-bold text-white">{communityStats.curtidas}</p>
+                        <p className="text-xs text-white/80">Curtidas</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/10 backdrop-blur-sm border-white/20 flex-shrink-0 w-28">
+                      <CardContent className="p-3 text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <MessageCircle className="w-4 h-4 text-white" />
+                        </div>
+                        <p className="text-lg font-bold text-white">{communityStats.comentarios}</p>
+                        <p className="text-xs text-white/80">Comentários</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/10 backdrop-blur-sm border-white/20 flex-shrink-0 w-28">
+                      <CardContent className="p-3 text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Share2 className="w-4 h-4 text-white" />
+                        </div>
+                        <p className="text-lg font-bold text-white">{communityStats.compartilhamentos}</p>
+                        <p className="text-xs text-white/80">Compartilhamentos</p>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
               </div>
             </CardContent>
