@@ -17,9 +17,23 @@ CREATE TABLE IF NOT EXISTS comment_replies (
   created_at timestamp DEFAULT now()
 );
 
+-- Remover colunas se existirem (para recriar corretamente)
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns 
+             WHERE table_name = 'comments' AND column_name = 'likes_count') THEN
+    ALTER TABLE comments DROP COLUMN likes_count;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.columns 
+             WHERE table_name = 'comments' AND column_name = 'replies_count') THEN
+    ALTER TABLE comments DROP COLUMN replies_count;
+  END IF;
+END $$;
+
 -- Adicionar colunas de contadores aos comentários
-ALTER TABLE comments ADD COLUMN IF NOT EXISTS likes_count integer DEFAULT 0;
-ALTER TABLE comments ADD COLUMN IF NOT EXISTS replies_count integer DEFAULT 0;
+ALTER TABLE comments ADD COLUMN likes_count integer DEFAULT 0;
+ALTER TABLE comments ADD COLUMN replies_count integer DEFAULT 0;
 
 -- Índices para performance
 CREATE INDEX IF NOT EXISTS idx_comment_likes_user_id ON comment_likes(user_id);
