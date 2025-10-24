@@ -787,6 +787,8 @@ export class DatabaseStorage implements IStorage {
         postId: comments.postId,
         productId: comments.productId,
         content: comments.content,
+        likesCount: comments.likesCount,
+        repliesCount: comments.repliesCount,
         createdAt: comments.createdAt,
         user: {
           id: users.id,
@@ -810,7 +812,9 @@ export class DatabaseStorage implements IStorage {
       .values({
         postId: commentData.postId,
         userId: commentData.userId,
-        content: commentData.content
+        content: commentData.content,
+        likesCount: 0,
+        repliesCount: 0
       })
       .returning();
 
@@ -822,6 +826,8 @@ export class DatabaseStorage implements IStorage {
       postId: comments.postId,
       productId: comments.productId,
       content: comments.content,
+      likesCount: comments.likesCount,
+      repliesCount: comments.repliesCount,
       createdAt: comments.createdAt,
       user: {
         id: users.id,

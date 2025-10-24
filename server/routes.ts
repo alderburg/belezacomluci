@@ -1212,13 +1212,21 @@ export function registerRoutes(app: Express): Server {
         result = { liked: true };
       }
 
-      // Get updated like count
-      const [updatedComment] = await db
-        .select()
-        .from(comments)
+      // Sync like count with actual count from commentLikes table
+      const likesCountResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(commentLikes)
+        .where(eq(commentLikes.commentId, commentId));
+      
+      const actualCount = Number(likesCountResult[0]?.count) || 0;
+      
+      // Update comment with actual count
+      await db
+        .update(comments)
+        .set({ likesCount: actualCount })
         .where(eq(comments.id, commentId));
-      result.likesCount = updatedComment.likesCount || 0;
-
+      
+      result.likesCount = actualCount;
 
       // Broadcast data update via WebSocket
       const wsService = (global as any).notificationWS;
@@ -1332,13 +1340,28 @@ export function registerRoutes(app: Express): Server {
         .innerJoin(users, eq(commentReplies.userId, users.id))
         .where(eq(commentReplies.id, reply.id));
 
+      // Sync reply count with actual count from commentReplies table
+      const repliesCountResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(commentReplies)
+        .where(eq(commentReplies.commentId, commentId));
+      
+      const actualCount = Number(repliesCountResult[0]?.count) || 0;
+      
+      // Update comment with actual count
+      await db
+        .update(comments)
+        .set({ repliesCount: actualCount })
+        .where(eq(comments.id, commentId));
+
       // Broadcast data update via WebSocket
       const wsService = (global as any).notificationWS;
       if (wsService) {
         wsService.broadcastDataUpdate('posts', 'updated', {
           action: 'comment_reply',
           commentId: commentId,
-          reply: fullReply
+          reply: fullReply,
+          repliesCount: actualCount
         });
       }
 
