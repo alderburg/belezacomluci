@@ -444,7 +444,7 @@ export function registerRoutes(app: Express): Server {
             )
           )
         );
-      
+
       res.json(result);
     } catch (error) {
       console.error("Error fetching active coupons with categories:", error);
@@ -1193,6 +1193,7 @@ export function registerRoutes(app: Express): Server {
         ))
         .limit(1);
 
+      let result;
       if (existingLike.length > 0) {
         // Unlike
         await db
@@ -1201,12 +1202,14 @@ export function registerRoutes(app: Express): Server {
             eq(commentLikes.commentId, commentId),
             eq(commentLikes.userId, userId)
           ));
+        result = { liked: false };
       } else {
         // Like
         await db.insert(commentLikes).values({
           commentId,
           userId,
         });
+        result = { liked: true };
       }
 
       // Get updated like count
@@ -1214,11 +1217,21 @@ export function registerRoutes(app: Express): Server {
         .select()
         .from(comments)
         .where(eq(comments.id, commentId));
+      result.likesCount = updatedComment.likesCount || 0;
 
-      res.json({
-        liked: existingLike.length === 0,
-        likesCount: updatedComment.likesCount || 0,
-      });
+
+      // Broadcast data update via WebSocket
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('posts', 'updated', {
+          action: 'comment_like',
+          commentId: commentId,
+          liked: result.liked,
+          likesCount: result.likesCount
+        });
+      }
+
+      res.json(result);
     } catch (error) {
       console.error("Error toggling comment like:", error);
       res.status(500).json({ error: "Failed to toggle like" });
@@ -1318,6 +1331,16 @@ export function registerRoutes(app: Express): Server {
         .from(commentReplies)
         .innerJoin(users, eq(commentReplies.userId, users.id))
         .where(eq(commentReplies.id, reply.id));
+
+      // Broadcast data update via WebSocket
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('posts', 'updated', {
+          action: 'comment_reply',
+          commentId: commentId,
+          reply: fullReply
+        });
+      }
 
       res.status(201).json(fullReply);
     } catch (error) {
@@ -3253,7 +3276,7 @@ export function registerRoutes(app: Express): Server {
         backgroundImage: updatedUser.communityBackgroundImage,
         mobileBackgroundImage: updatedUser.communityBackgroundImageMobile
       };
-      
+
       // Broadcast atualização das configurações da comunidade
       const wsService = (global as any).notificationWS;
       if (wsService) {
@@ -3263,7 +3286,7 @@ export function registerRoutes(app: Express): Server {
           communitySettingsUpdated: true
         });
       }
-      
+
       res.json(settings);
     } catch (error) {
       console.error('Error updating community settings:', error);

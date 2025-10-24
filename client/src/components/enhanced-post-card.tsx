@@ -178,6 +178,50 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
     }
   }, [commentsData, user]);
 
+  // Escutar atualizações do WebSocket para curtidas e respostas de comentários
+  useEffect(() => {
+    const handleDataUpdate = (event: MessageEvent) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === 'data_update' && message.dataType === 'posts') {
+          const data = message.data;
+          
+          // Atualizar curtidas de comentário
+          if (data?.action === 'comment_like' && data.commentId) {
+            setComments(prev => prev.map(c => 
+              c.id === data.commentId 
+                ? { ...c, likesCount: data.likesCount }
+                : c
+            ));
+          }
+          
+          // Atualizar respostas de comentário
+          if (data?.action === 'comment_reply' && data.commentId && data.reply) {
+            setCommentReplies(prev => ({
+              ...prev,
+              [data.commentId]: [data.reply, ...(prev[data.commentId] || [])]
+            }));
+            
+            setComments(prev => prev.map(c => 
+              c.id === data.commentId 
+                ? { ...c, repliesCount: (c.repliesCount || 0) + 1 }
+                : c
+            ));
+          }
+        }
+      } catch (error) {
+        console.error('Error handling WebSocket message:', error);
+      }
+    };
+
+    // Simular escuta do WebSocket (em produção, usar o hook useDataSync)
+    // Este código será integrado com o sistema WebSocket existente
+    
+    return () => {
+      // Cleanup
+    };
+  }, []);
+
   const likeMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest('POST', `/api/posts/${post.id}/like`);

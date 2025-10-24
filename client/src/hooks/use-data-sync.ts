@@ -192,7 +192,7 @@ export function useDataSync() {
         // Sempre invalidar configurações da comunidade e perfil público quando há mudanças em users
         queryClient.invalidateQueries({ queryKey: ['/api/admin/public-profile'] });
         queryClient.invalidateQueries({ queryKey: ['/api/admin/community-settings'] });
-        
+
         // Forçar refetch imediato
         queryClient.refetchQueries({ 
           queryKey: ['/api/admin/community-settings'],
@@ -202,7 +202,7 @@ export function useDataSync() {
           queryKey: ['/api/admin/public-profile'],
           type: 'active'
         });
-        
+
         console.log('Admin public profile and community settings cache invalidated and refetched - Pages will refresh');
         console.log('Users cache invalidated - UI will refresh with new data');
         break;
@@ -224,6 +224,13 @@ export function useDataSync() {
         if (data?.postId) {
           queryClient.invalidateQueries({ queryKey: [`/api/posts/${data.postId}/comments`] });
         }
+        // Invalidar curtidas e respostas de comentários se a ação for relacionada a comentários
+        if (data?.action === 'comment_like' || data?.action === 'comment_reply') {
+          // Extrair postId do commentId se disponível
+          if (data?.postId) {
+            queryClient.invalidateQueries({ queryKey: [`/api/posts/${data.postId}/comments`] });
+          }
+        }
         console.log('Posts cache invalidated - Community posts will refresh with new data');
         break;
 
@@ -244,6 +251,8 @@ export function useDataSync() {
         queryClient.invalidateQueries({ queryKey: ['/api/admin/rewards'] });
         console.log('Gamification cache invalidated - Cheirosas page will refresh with new data');
         break;
+      default:
+        console.log(`Unknown data type for invalidation: ${dataType}`);
     }
   };
 
