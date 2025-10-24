@@ -208,9 +208,15 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
             
             setComments(prev => prev.map(c => 
               c.id === data.commentId 
-                ? { ...c, repliesCount: (c.repliesCount || 0) + 1 }
+                ? { ...c, repliesCount: data.repliesCount || (c.repliesCount || 0) + 1 }
                 : c
             ));
+          }
+          
+          // Atualizar comentário adicionado
+          if (action === 'comment_added' && data?.comment) {
+            setComments(prev => [data.comment, ...prev]);
+            setCommentsCount(prev => prev + 1);
           }
         }
       } catch (error) {

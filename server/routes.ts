@@ -1228,12 +1228,20 @@ export function registerRoutes(app: Express): Server {
       
       result.likesCount = actualCount;
 
+      // Get the postId from the comment for WebSocket broadcast
+      const [comment] = await db
+        .select({ postId: comments.postId })
+        .from(comments)
+        .where(eq(comments.id, commentId))
+        .limit(1);
+
       // Broadcast data update via WebSocket
       const wsService = (global as any).notificationWS;
-      if (wsService) {
+      if (wsService && comment?.postId) {
         wsService.broadcastDataUpdate('posts', 'updated', {
           action: 'comment_like',
           commentId: commentId,
+          postId: comment.postId,
           liked: result.liked,
           likesCount: result.likesCount
         });
@@ -1354,12 +1362,20 @@ export function registerRoutes(app: Express): Server {
         .set({ repliesCount: actualCount })
         .where(eq(comments.id, commentId));
 
+      // Get the postId from the comment for WebSocket broadcast
+      const [comment] = await db
+        .select({ postId: comments.postId })
+        .from(comments)
+        .where(eq(comments.id, commentId))
+        .limit(1);
+
       // Broadcast data update via WebSocket
       const wsService = (global as any).notificationWS;
-      if (wsService) {
+      if (wsService && comment?.postId) {
         wsService.broadcastDataUpdate('posts', 'updated', {
           action: 'comment_reply',
           commentId: commentId,
+          postId: comment.postId,
           reply: fullReply,
           repliesCount: actualCount
         });
