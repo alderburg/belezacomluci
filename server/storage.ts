@@ -107,7 +107,7 @@ export interface IStorage {
   deleteBanner(id: string): Promise<void>;
 
   // Post methods
-  getPosts(): Promise<(Post & { user: Pick<User, 'id' | 'name' | 'avatar' | 'isAdmin'>, taggedUsers?: Array<Pick<User, 'id' | 'name' | 'avatar'>> })[]>;
+  getPosts(): Promise<(Post & { user: Pick<User, 'id' | 'name' | 'avatar' | 'isAdmin'>; taggedUsers?: Array<Pick<User, 'id' | 'name' | 'avatar'>> })[]>;
   getPost(id: string): Promise<Post | undefined>;
   createPost(post: InsertPost, taggedUserIds?: string[]): Promise<Post>;
   updatePost(id: string, post: Partial<InsertPost>): Promise<Post>;
