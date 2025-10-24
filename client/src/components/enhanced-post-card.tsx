@@ -1002,15 +1002,7 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
                                 onChange={(e) => setReplyContent(e.target.value)}
                                 className="min-h-[60px] text-sm"
                               />
-                              <div className="flex justify-end space-x-2 mt-2">
-                                <Button 
-                                  onClick={() => setReplyingTo(null)} 
-                                  size="sm" 
-                                  variant="ghost"
-                                  className="h-7 text-xs"
-                                >
-                                  Cancelar
-                                </Button>
+                              <div className="flex justify-end mt-2">
                                 <Button 
                                   onClick={() => submitReply(comment.id)} 
                                   disabled={!replyContent.trim()}
