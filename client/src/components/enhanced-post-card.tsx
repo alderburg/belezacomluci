@@ -480,32 +480,6 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
               />
             </div>
           </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-accent/50">
-                <MoreHorizontal className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={handleSave} className="cursor-pointer">
-                <Bookmark className="w-4 h-4 mr-2" />
-                {saved ? 'Remover dos salvos' : 'Salvar postagem'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCopyLink} className="cursor-pointer">
-                <Copy className="w-4 h-4 mr-2" />
-                Copiar link
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Abrir em nova aba
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer text-destructive">
-                <Flag className="w-4 h-4 mr-2" />
-                Reportar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
         {/* Conteúdo do Post */}
