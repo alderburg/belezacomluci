@@ -158,8 +158,25 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
     if (commentsData && Array.isArray(commentsData)) {
       setComments(commentsData);
       setCommentsCount(commentsData.length);
+      
+      // Carregar status de curtida para cada comentário
+      commentsData.forEach(async (comment: any) => {
+        if (user) {
+          try {
+            const response = await fetch(`/api/comments/${comment.id}/like-status`, {
+              credentials: 'include'
+            });
+            if (response.ok) {
+              const { liked } = await response.json();
+              setCommentLikes(prev => ({ ...prev, [comment.id]: liked }));
+            }
+          } catch (error) {
+            console.error('Error fetching like status:', error);
+          }
+        }
+      });
     }
-  }, [commentsData]);
+  }, [commentsData, user]);
 
   const likeMutation = useMutation({
     mutationFn: async () => {
@@ -464,6 +481,10 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
       return;
     }
 
+    // Optimistic update
+    const previousLiked = commentLikes[commentId] || false;
+    setCommentLikes(prev => ({ ...prev, [commentId]: !previousLiked }));
+
     try {
       const response = await fetch(`/api/comments/${commentId}/like`, {
         method: 'POST',
@@ -476,7 +497,7 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
       
       setCommentLikes(prev => ({ ...prev, [commentId]: result.liked }));
       
-      // Update comment in list
+      // Update comment in list with actual count from server
       setComments(prev => prev.map(c => 
         c.id === commentId 
           ? { ...c, likesCount: result.likesCount }
@@ -488,6 +509,8 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
         description: result.liked ? "Você curtiu este comentário" : "Você descurtiu este comentário",
       });
     } catch (error) {
+      // Rollback on error
+      setCommentLikes(prev => ({ ...prev, [commentId]: previousLiked }));
       console.error('Error liking comment:', error);
       toast({
         title: "Erro",
@@ -522,6 +545,7 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
         [commentId]: [reply, ...(prev[commentId] || [])]
       }));
       
+      // Atualizar o comentário com o contador atualizado
       setComments(prev => prev.map(c => 
         c.id === commentId 
           ? { ...c, repliesCount: (c.repliesCount || 0) + 1 }
@@ -531,6 +555,9 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
       setReplyContent('');
       setReplyingTo(null);
       setShowReplies(prev => ({ ...prev, [commentId]: true }));
+
+      // Invalidar query para recarregar comentários com contadores atualizados
+      queryClient.invalidateQueries({ queryKey: [`/api/posts/${post.id}/comments`] });
 
       toast({
         title: "Resposta enviada! 💬",

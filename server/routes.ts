@@ -1253,6 +1253,32 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Check if user liked a comment - NOVA ROTA
+  app.get("/api/comments/:commentId/like-status", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ liked: false });
+    }
+
+    try {
+      const { commentId } = req.params;
+      const userId = req.user!.id;
+
+      const like = await db
+        .select()
+        .from(commentLikes)
+        .where(and(
+          eq(commentLikes.commentId, commentId),
+          eq(commentLikes.userId, userId)
+        ))
+        .limit(1);
+
+      res.json({ liked: like.length > 0 });
+    } catch (error) {
+      console.error("Error checking comment like status:", error);
+      res.status(500).json({ liked: false });
+    }
+  });
+
   // Add reply to comment
   app.post("/api/comments/:commentId/reply", async (req, res) => {
     if (!req.isAuthenticated()) {
