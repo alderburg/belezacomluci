@@ -957,6 +957,104 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // ========== COMMENT INTERACTION ROUTES ==========
+
+  // Toggle comment like
+  app.post("/api/comments/:commentId/like", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { commentId } = req.params;
+      const userId = req.user!.id;
+
+      const result = await storage.toggleCommentLike(commentId, userId);
+
+      // Broadcast update via WebSocket
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('comments', 'updated', {
+          commentId: commentId,
+          liked: result.liked,
+          likesCount: result.likesCount
+        });
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error toggling comment like:', error);
+      res.status(500).json({ message: "Failed to toggle comment like" });
+    }
+  });
+
+  // Check if user liked a comment
+  app.get("/api/comments/:commentId/like-status", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { commentId } = req.params;
+      const userId = req.user!.id;
+      const liked = await storage.getUserCommentLike(commentId, userId);
+      res.json({ liked });
+    } catch (error) {
+      console.error('Error checking comment like status:', error);
+      res.status(500).json({ message: "Failed to check like status" });
+    }
+  });
+
+  // Create comment reply
+  app.post("/api/comments/:commentId/replies", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { commentId } = req.params;
+      const { content } = req.body;
+      const userId = req.user!.id;
+
+      if (!content?.trim()) {
+        return res.status(400).json({ error: 'Content is required' });
+      }
+
+      const reply = await storage.createCommentReply({
+        commentId: commentId,
+        userId: userId,
+        content: content.trim()
+      });
+
+      // Broadcast update via WebSocket
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('comments', 'updated', {
+          commentId: commentId,
+          action: 'reply_added',
+          reply: reply
+        });
+      }
+
+      res.status(201).json(reply);
+    } catch (error) {
+      console.error('Error creating comment reply:', error);
+      res.status(400).json({ message: "Failed to create reply" });
+    }
+  });
+
+  // Get comment replies
+  app.get("/api/comments/:commentId/replies", async (req, res) => {
+    try {
+      const { commentId } = req.params;
+      const replies = await storage.getCommentReplies(commentId);
+      res.json(replies);
+    } catch (error) {
+      console.error('Error fetching comment replies:', error);
+      res.status(500).json({ message: "Failed to fetch replies" });
+    }
+  });
+
   // Get user's saved posts
   app.get("/api/user/saved-posts", async (req, res) => {
     if (!req.isAuthenticated()) {
