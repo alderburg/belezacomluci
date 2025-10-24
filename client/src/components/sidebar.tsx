@@ -98,14 +98,15 @@ export default function Sidebar() {
           <div className="flex items-center justify-between p-4">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => setIsOpen(true)}
               data-testid="button-open-sidebar"
+              className="h-8 w-8"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4" />
             </Button>
             <h1 className="text-lg font-semibold">Beleza com Luci</h1>
-            <div className="w-10" /> {/* Spacer */}
+            <div className="w-8" /> {/* Spacer */}
           </div>
         </header>
       )}
