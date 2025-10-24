@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { pgTable, text, integer, timestamp, boolean, serial, varchar, json, numeric, unique } from "drizzle-orm/pg-core";
-import { relations, many, one } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -440,19 +440,19 @@ export const userAchievements = pgTable("user_achievements", {
 
 // Relations
 export const userRelations = relations(users, ({ many, one }) => ({
-  subscription: one(subscriptions),
+  subscription: one(subscriptions, { fields: [users.id], references: [subscriptions.userId] }),
   posts: many(posts),
   comments: many(comments),
   activities: many(userActivity),
   videoLikes: many(videoLikes),
-  points: one(userPoints),
+  points: one(userPoints, { fields: [users.id], references: [userPoints.userId] }),
   missions: many(userMissions),
   rewards: many(userRewards),
   raffleEntries: many(raffleEntries),
   raffleWins: many(raffleWinners),
   achievements: many(userAchievements),
-  referralsMade: many(referrals, { relationName: "referrer" }),
-  referralsReceived: many(referrals, { relationName: "referred" }),
+  referralsMade: many(referrals),
+  referralsReceived: many(referrals),
   userNotifications: many(userNotifications),
 }));
 
