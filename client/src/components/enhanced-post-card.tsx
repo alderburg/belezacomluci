@@ -970,11 +970,10 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
                               onClick={() => handleReplyToComment(comment.id)}
                               className="h-6 px-0 hover:bg-transparent text-muted-foreground hover:text-primary transition-all duration-300"
                             >
-                              <MessageCircle className="w-3 h-3 mr-1" />
-                              <span className="text-xs">Responder</span>
+                              <MessageCircle className="w-3 h-3" />
                             </Button>
                             {comment.repliesCount > 0 && (
-                              <span className="text-xs text-muted-foreground">({comment.repliesCount})</span>
+                              <span className="text-xs text-muted-foreground">{comment.repliesCount}</span>
                             )}
                           </div>
                         </div>
