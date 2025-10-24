@@ -769,7 +769,7 @@ export default function ComunidadeMobilePage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-white/10 backdrop-blur-sm border-white/20 flex-shrink-0 w-28">
+                    <Card className="bg-white/10 backdrop-blur-sm border-white/20 flex-shrink-0 w-32">
                       <CardContent className="p-3 text-center">
                         <div className="flex items-center justify-center gap-1 mb-1">
                           <MessageCircle className="w-4 h-4 text-white" />
@@ -779,13 +779,13 @@ export default function ComunidadeMobilePage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-white/10 backdrop-blur-sm border-white/20 flex-shrink-0 w-28">
+                    <Card className="bg-white/10 backdrop-blur-sm border-white/20 flex-shrink-0 w-36">
                       <CardContent className="p-3 text-center">
                         <div className="flex items-center justify-center gap-1 mb-1">
                           <Share2 className="w-4 h-4 text-white" />
                         </div>
                         <p className="text-lg font-bold text-white">{communityStats.compartilhamentos}</p>
-                        <p className="text-xs text-white/80">Compartilhamentos</p>
+                        <p className="text-xs text-white/80 whitespace-nowrap">Compartilhamentos</p>
                       </CardContent>
                     </Card>
                   </div>
