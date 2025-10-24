@@ -946,9 +946,9 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleCommentLike(comment.id)}
-                            className={`h-6 px-0 text-xs transition-colors ${commentLikes[comment.id] ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
+                            className={`h-6 px-0 text-xs transition-all duration-300 hover:bg-transparent ${commentLikes[comment.id] ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
                           >
-                            <Heart className={`w-3 h-3 mr-1 ${commentLikes[comment.id] ? 'fill-current' : ''}`} />
+                            <Heart className={`w-3 h-3 mr-1 transition-all duration-300 ${commentLikes[comment.id] ? 'fill-current animate-pulse' : ''}`} />
                             {comment.likesCount > 0 && <span>{comment.likesCount}</span>}
                           </Button>
                           <Button 
