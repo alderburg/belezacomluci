@@ -16,7 +16,7 @@ import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
 import { youtubeOAuth } from './youtube-oauth';
 import { db } from './db';
-import { eq, desc, and, or, isNull, lte, gte } from 'drizzle-orm';
+import { eq, desc, and, or, isNull, lte, gte, sql } from 'drizzle-orm';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
