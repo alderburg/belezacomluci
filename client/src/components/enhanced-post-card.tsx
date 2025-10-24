@@ -573,6 +573,14 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
   };
 
   const handleReplyToComment = async (commentId: string) => {
+    // Toggle: se já está respondendo este comentário, fecha
+    if (replyingTo === commentId) {
+      setReplyingTo(null);
+      setReplyContent('');
+      setShowReplies(prev => ({ ...prev, [commentId]: !prev[commentId] }));
+      return;
+    }
+    
     setReplyingTo(commentId);
     setReplyContent('');
     
