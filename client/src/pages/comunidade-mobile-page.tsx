@@ -737,8 +737,8 @@ export default function ComunidadeMobilePage() {
                   })}
                 </div>
 
-                <div className="w-full mt-2 overflow-x-auto scrollbar-hide">
-                  <div className="flex gap-3 pb-2" style={{ minWidth: 'max-content' }}>
+                <div className="w-full mt-2 overflow-x-auto scrollbar-hide touch-pan-x" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <div className="flex gap-3 pb-2 px-1" style={{ width: 'max-content' }}>
                     <Card className="bg-white/10 backdrop-blur-sm border-white/20 flex-shrink-0 w-28">
                       <CardContent className="p-3 text-center">
                         <div className="flex items-center justify-center gap-1 mb-1">
