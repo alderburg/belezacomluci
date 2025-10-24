@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { pgTable, text, integer, timestamp, boolean, serial, varchar, json, numeric, unique } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, many, one } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
