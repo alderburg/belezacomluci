@@ -15,9 +15,7 @@ import {
   Bookmark,
   Flag,
   Copy,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp
+  ExternalLink
 } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -574,9 +572,28 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
     }
   };
 
-  const handleReplyToComment = (commentId: string) => {
+  const handleReplyToComment = async (commentId: string) => {
     setReplyingTo(commentId);
     setReplyContent('');
+    
+    // Carregar respostas se ainda não foram carregadas
+    if (!commentReplies[commentId]) {
+      try {
+        const response = await fetch(`/api/comments/${commentId}/replies`, {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const replies = await response.json();
+          setCommentReplies(prev => ({ ...prev, [commentId]: replies }));
+        }
+      } catch (error) {
+        console.error('Error fetching replies:', error);
+      }
+    }
+    
+    // Sempre mostrar as respostas ao clicar em responder
+    setShowReplies(prev => ({ ...prev, [commentId]: true }));
   };
 
   const submitReply = async (commentId: string) => {
@@ -608,6 +625,7 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
 
       setReplyContent('');
       setReplyingTo(null);
+      // Manter respostas visíveis após enviar
       setShowReplies(prev => ({ ...prev, [commentId]: true }));
 
       // Invalidar query para recarregar comentários com contadores atualizados
@@ -627,27 +645,7 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
     }
   };
 
-  const toggleReplies = async (commentId: string) => {
-    const isShowing = showReplies[commentId];
-    
-    if (!isShowing && !commentReplies[commentId]) {
-      // Fetch replies
-      try {
-        const response = await fetch(`/api/comments/${commentId}/replies`, {
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          const replies = await response.json();
-          setCommentReplies(prev => ({ ...prev, [commentId]: replies }));
-        }
-      } catch (error) {
-        console.error('Error fetching replies:', error);
-      }
-    }
-    
-    setShowReplies(prev => ({ ...prev, [commentId]: !isShowing }));
-  };
+  
 
   const isChallenge = post.content.toLowerCase().includes('desafio') || 
                      post.content.includes('🎯') || 
@@ -972,23 +970,13 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
                               onClick={() => handleReplyToComment(comment.id)}
                               className="h-6 px-0 hover:bg-transparent text-muted-foreground hover:text-primary transition-all duration-300"
                             >
-                              <MessageCircle className="w-3 h-3" />
+                              <MessageCircle className="w-3 h-3 mr-1" />
+                              <span className="text-xs">Responder</span>
                             </Button>
                             {comment.repliesCount > 0 && (
-                              <span className="text-xs text-muted-foreground">{comment.repliesCount}</span>
+                              <span className="text-xs text-muted-foreground">({comment.repliesCount})</span>
                             )}
                           </div>
-                          {comment.repliesCount > 0 && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => toggleReplies(comment.id)}
-                              className="h-6 px-0 text-xs text-muted-foreground hover:text-primary hover:bg-transparent"
-                            >
-                              {showReplies[comment.id] ? <ChevronUp className="w-3 h-3 mr-1" /> : <ChevronDown className="w-3 h-3 mr-1" />}
-                              {showReplies[comment.id] ? 'Ocultar' : 'Ver'} respostas
-                            </Button>
-                          )}
                         </div>
 
                         {/* Reply input */}
