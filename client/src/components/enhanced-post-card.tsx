@@ -89,6 +89,25 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
 
   const [liked, setLiked] = useState(post.liked || false);
   const [saved, setSaved] = useState(false);
+
+  // Query para verificar se o usuário salvou este post
+  const { data: saveStatus } = useQuery({
+    queryKey: [`/api/posts/${post.id}/save-status`],
+    queryFn: async () => {
+      const response = await fetch(`/api/posts/${post.id}/save-status`, {
+        credentials: 'include'
+      });
+      return response.json();
+    },
+    enabled: !!user
+  });
+
+  // Atualizar estado de salvo baseado na query
+  useEffect(() => {
+    if (saveStatus?.saved !== undefined) {
+      setSaved(saveStatus.saved);
+    }
+  }, [saveStatus]);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
   const [commentsCount, setCommentsCount] = useState(0); // Será atualizado com os dados dos comentários
   const [sharesCount, setSharesCount] = useState(post.shares || 0);
@@ -369,12 +388,54 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Faça login para salvar postagens",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Optimistic update
+    const previousSaved = saved;
     setSaved(!saved);
-    toast({
-      title: saved ? 'Postagem removida dos salvos' : '🔖 Postagem salva!',
-      description: saved ? 'Removida da sua lista' : 'Adicionada aos seus salvos',
-    });
+
+    try {
+      const response = await fetch(`/api/posts/${post.id}/save`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao salvar postagem');
+      }
+
+      const result = await response.json();
+
+      // Confirma com dados reais do servidor
+      setSaved(result.saved);
+
+      // Invalidate queries for global sync
+      queryClient.invalidateQueries({ queryKey: [`/api/posts/${post.id}/save-status`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user/saved-posts'] });
+
+      toast({
+        title: result.saved ? '🔖 Postagem salva!' : 'Postagem removida dos salvos',
+        description: result.saved ? 'Adicionada aos seus salvos' : 'Removida da sua lista',
+      });
+
+    } catch (error) {
+      // Rollback on error
+      setSaved(previousSaved);
+      console.error('Erro ao salvar:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao salvar postagem",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCopyLink = async () => {

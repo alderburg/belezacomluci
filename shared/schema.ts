@@ -15,18 +15,18 @@ export const users = pgTable("users", {
   avatar: text("avatar"),
   gender: text("gender"),
   age: integer("age"),
-  
+
   // Configurações da página de comunidade (admin)
   communityTitle: text("community_title").default("Nossa Comunidade"),
   communitySubtitle: text("community_subtitle").default("Compartilhe suas experiências e dicas de beleza"),
   communityBackgroundImage: text("community_background_image"),
   communityMobileBackgroundImage: text("community_mobile_background_image"),
   communityBackgroundImageMobile: text("community_background_image_mobile"),
-  
+
   // Campos de contato
   phone: text("phone"),
   phoneType: text("phone_type"),
-  
+
   // Campos de endereço
   zipCode: text("zip_code"),
   street: text("street"),
@@ -35,10 +35,10 @@ export const users = pgTable("users", {
   neighborhood: text("neighborhood"),
   city: text("city"),
   state: text("state"),
-  
+
   // Redes sociais (JSON array)
   socialNetworks: json("social_networks").default([]),
-  
+
   isAdmin: boolean("is_admin").default(false),
   googleAccessToken: text("google_access_token"),
   googleRefreshToken: text("google_refresh_token"),
@@ -146,9 +146,17 @@ export const postLikes = pgTable("post_likes", {
 
 export const postTags = pgTable("post_tags", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  postId: varchar("post_id").references(() => posts.id, { onDelete: "cascade" }).notNull(),
-  taggedUserId: varchar("tagged_user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
-  createdAt: timestamp("created_at").default(sql`now()`),
+  postId: varchar("post_id").notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Saved posts table
+export const savedPosts = pgTable("saved_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  postId: varchar("post_id").notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const comments = pgTable("comments", {
@@ -551,13 +559,13 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true, creat
     (phone) => !phone || /^[1-9]{2}[9]?[0-9]{8}$/.test(phone.replace(/\D/g, '')),
     "Telefone deve ter formato válido (ex: 11999999999)"
   ),
-  
+
   // Validação de CEP
   zipCode: z.string().optional().nullable().refine(
     (cep) => !cep || /^[0-9]{5}-?[0-9]{3}$/.test(cep),
     "CEP deve ter formato válido (ex: 12345-678)"
   ),
-  
+
   // Validação de redes sociais
   socialNetworks: z.array(z.object({
     platform: z.enum(['instagram', 'tiktok', 'youtube', 'facebook', 'twitter', 'linkedin', 'email']),
@@ -571,7 +579,7 @@ export const insertProductSchema = createInsertSchema(products).omit({ id: true,
 export const insertCouponSchema = createInsertSchema(coupons).omit({ id: true, createdAt: true }).extend({
   startDateTime: z.string().optional().nullable().transform((str) => {
     if (!str || str.trim() === '') return null;
-    
+
     // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
     if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
       const [datePart, timePart] = str.split('T');
@@ -580,7 +588,7 @@ export const insertCouponSchema = createInsertSchema(coupons).omit({ id: true, c
       // Usar Date.UTC para preservar o wall time sem adicionar offset local
       return new Date(Date.UTC(year, month - 1, day, hour, minute));
     }
-    
+
     // Fallback para outros formatos
     const date = new Date(str);
     if (isNaN(date.getTime())) {
@@ -590,7 +598,7 @@ export const insertCouponSchema = createInsertSchema(coupons).omit({ id: true, c
   }),
   endDateTime: z.string().optional().nullable().transform((str) => {
     if (!str || str.trim() === '') return null;
-    
+
     // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
     if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
       const [datePart, timePart] = str.split('T');
@@ -599,7 +607,7 @@ export const insertCouponSchema = createInsertSchema(coupons).omit({ id: true, c
       // Usar Date.UTC para preservar o wall time sem adicionar offset local
       return new Date(Date.UTC(year, month - 1, day, hour, minute));
     }
-    
+
     // Fallback para outros formatos
     const date = new Date(str);
     if (isNaN(date.getTime())) {
@@ -644,7 +652,7 @@ export const insertPopupSchema = createInsertSchema(popups).omit({
 }).extend({
   startDateTime: z.string().optional().nullable().transform((str) => {
     if (!str || str.trim() === '') return null;
-    
+
     // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
     if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
       const [datePart, timePart] = str.split('T');
@@ -653,7 +661,7 @@ export const insertPopupSchema = createInsertSchema(popups).omit({
       // Usar Date.UTC para preservar o wall time sem adicionar offset local
       return new Date(Date.UTC(year, month - 1, day, hour, minute));
     }
-    
+
     // Fallback para outros formatos
     const date = new Date(str);
     if (isNaN(date.getTime())) {
@@ -663,7 +671,7 @@ export const insertPopupSchema = createInsertSchema(popups).omit({
   }),
   endDateTime: z.string().optional().nullable().transform((str) => {
     if (!str || str.trim() === '') return null;
-    
+
     // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
     if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
       const [datePart, timePart] = str.split('T');
@@ -672,7 +680,7 @@ export const insertPopupSchema = createInsertSchema(popups).omit({
       // Usar Date.UTC para preservar o wall time sem adicionar offset local
       return new Date(Date.UTC(year, month - 1, day, hour, minute));
     }
-    
+
     // Fallback para outros formatos
     const date = new Date(str);
     if (isNaN(date.getTime())) {
@@ -693,7 +701,7 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 }).extend({
   startDateTime: z.string().optional().nullable().transform((str) => {
     if (!str || str.trim() === '') return null;
-    
+
     // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
     if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
       const [datePart, timePart] = str.split('T');
@@ -702,7 +710,7 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
       // Usar Date.UTC para preservar o wall time sem adicionar offset local
       return new Date(Date.UTC(year, month - 1, day, hour, minute));
     }
-    
+
     // Fallback para outros formatos
     const date = new Date(str);
     if (isNaN(date.getTime())) {
@@ -712,7 +720,7 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   }),
   endDateTime: z.string().optional().nullable().transform((str) => {
     if (!str || str.trim() === '') return null;
-    
+
     // Se vem no formato "2025-09-10T21:30", preservar wall time usando UTC
     if (str.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
       const [datePart, timePart] = str.split('T');
@@ -721,7 +729,7 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
       // Usar Date.UTC para preservar o wall time sem adicionar offset local
       return new Date(Date.UTC(year, month - 1, day, hour, minute));
     }
-    
+
     // Fallback para outros formatos
     const date = new Date(str);
     if (isNaN(date.getTime())) {
@@ -733,10 +741,10 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 
 export const insertUserNotificationSchema = createInsertSchema(userNotifications).omit({ id: true, createdAt: true });
 
-export const insertNotificationSettingsSchema = createInsertSchema(notificationSettings).omit({ 
-  id: true, 
-  createdAt: true, 
-  updatedAt: true 
+export const insertNotificationSettingsSchema = createInsertSchema(notificationSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
 });
 
 // ========== GAMIFICATION INSERT SCHEMAS ==========

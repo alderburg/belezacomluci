@@ -912,6 +912,67 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Toggle save post
+  app.post("/api/posts/:id/save", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { id } = req.params;
+      const userId = req.user!.id;
+      const result = await storage.toggleSavedPost(id, userId);
+
+      // Broadcast data update via WebSocket
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('posts', 'updated', {
+          postId: id,
+          action: result.saved ? 'saved' : 'unsaved',
+          userId: userId
+        });
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error toggling save post:', error);
+      res.status(500).json({ message: "Failed to toggle save post" });
+    }
+  });
+
+  // Check if user saved a post
+  app.get("/api/posts/:id/save-status", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { id } = req.params;
+      const userId = req.user!.id;
+      const saved = await storage.getUserSavedPost(id, userId);
+      res.json({ saved });
+    } catch (error) {
+      console.error('Error checking save status:', error);
+      res.status(500).json({ message: "Failed to check save status" });
+    }
+  });
+
+  // Get user's saved posts
+  app.get("/api/user/saved-posts", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const userId = req.user!.id;
+      const savedPosts = await storage.getUserSavedPosts(userId);
+      res.json(savedPosts);
+    } catch (error) {
+      console.error('Error fetching saved posts:', error);
+      res.status(500).json({ message: "Failed to fetch saved posts" });
+    }
+  });
+
   // Share post (increment share count)
   app.post("/api/posts/:id/share", async (req, res) => {
     if (!req.isAuthenticated()) {

@@ -834,6 +834,70 @@ export class DatabaseStorage implements IStorage {
     return commentWithUser;
   }
 
+  // Saved posts functions
+  async toggleSavedPost(postId: string, userId: string): Promise<{ saved: boolean }> {
+    const existingSave = await db
+      .select()
+      .from(savedPosts)
+      .where(and(eq(savedPosts.postId, postId), eq(savedPosts.userId, userId)))
+      .limit(1);
+
+    if (existingSave.length > 0) {
+      // Remove save
+      await db
+        .delete(savedPosts)
+        .where(and(eq(savedPosts.postId, postId), eq(savedPosts.userId, userId)));
+      return { saved: false };
+    } else {
+      // Add save
+      await db.insert(savedPosts).values({
+        postId,
+        userId,
+        createdAt: new Date(),
+      });
+      return { saved: true };
+    }
+  }
+
+  async getUserSavedPost(postId: string, userId: string): Promise<boolean> {
+    const result = await db
+      .select()
+      .from(savedPosts)
+      .where(and(eq(savedPosts.postId, postId), eq(savedPosts.userId, userId)))
+      .limit(1);
+
+    return result.length > 0;
+  }
+
+  async getUserSavedPosts(userId: string): Promise<any[]> {
+    const result = await db
+      .select({
+        id: savedPosts.id,
+        createdAt: savedPosts.createdAt,
+        post: {
+          id: posts.id,
+          content: posts.content,
+          imageUrl: posts.imageUrl,
+          likes: posts.likes,
+          shares: posts.shares,
+          createdAt: posts.createdAt,
+          user: {
+            id: users.id,
+            name: users.name,
+            avatar: users.avatar,
+            isAdmin: users.isAdmin,
+          },
+        },
+      })
+      .from(savedPosts)
+      .leftJoin(posts, eq(savedPosts.postId, posts.id))
+      .leftJoin(users, eq(posts.userId, users.id))
+      .where(eq(savedPosts.userId, userId))
+      .orderBy(desc(savedPosts.createdAt));
+
+    return result;
+  }
+
   async incrementPostShares(postId: string): Promise<{ sharesCount: number }> {
     try {
       // Primeiro verifica se o post existe
