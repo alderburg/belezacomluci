@@ -147,7 +147,7 @@ export const postLikes = pgTable("post_likes", {
 export const postTags = pgTable("post_tags", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   postId: varchar("post_id").notNull().references(() => posts.id, { onDelete: 'cascade' }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  taggedUserId: varchar("tagged_user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

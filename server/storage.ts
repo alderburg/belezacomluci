@@ -690,7 +690,7 @@ export class DatabaseStorage implements IStorage {
         avatar: users.avatar,
       })
       .from(postTags)
-      .innerJoin(users, eq(postTags.userId, users.id))
+      .innerJoin(users, eq(postTags.taggedUserId, users.id))
       .where(eq(postTags.postId, postId));
 
     return tags;
@@ -707,9 +707,9 @@ export class DatabaseStorage implements IStorage {
     // Save tagged users if provided
     if (taggedUserIds && taggedUserIds.length > 0) {
       await this.db.insert(postTags).values(
-        taggedUserIds.map(userId => ({
+        taggedUserIds.map(taggedUserId => ({
           postId: newPost.id,
-          userId
+          taggedUserId
         }))
       );
     }
