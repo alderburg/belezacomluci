@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ShareModal from "@/components/share-modal";
+import EmojiPicker from './emoji-picker';
 
 interface PostWithUser extends Post {
   user: Pick<User, 'id' | 'name' | 'avatar' | 'isAdmin'>;
@@ -897,7 +898,8 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
                       }
                     }}
                   />
-                  <div className="flex justify-end">
+                  <div className="flex items-center justify-between">
+                    <EmojiPicker onEmojiSelect={(emoji) => setNewComment(prev => prev + emoji)} />
                     <Button 
                       onClick={submitComment} 
                       disabled={!newComment.trim() || isSubmittingComment}
@@ -1002,7 +1004,8 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
                                 onChange={(e) => setReplyContent(e.target.value)}
                                 className="min-h-[60px] text-sm"
                               />
-                              <div className="flex justify-end mt-2">
+                              <div className="flex items-center justify-between mt-2">
+                                <EmojiPicker onEmojiSelect={(emoji) => setReplyContent(prev => prev + emoji)} />
                                 <Button 
                                   onClick={() => submitReply(comment.id)} 
                                   disabled={!replyContent.trim()}
