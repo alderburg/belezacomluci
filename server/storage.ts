@@ -11,6 +11,7 @@ import {
   videoLikes,
   postLikes,
   postTags,
+  savedPosts,
   popups,
   popupViews,
   notifications,
@@ -836,7 +837,7 @@ export class DatabaseStorage implements IStorage {
 
   // Saved posts functions
   async toggleSavedPost(postId: string, userId: string): Promise<{ saved: boolean }> {
-    const existingSave = await db
+    const existingSave = await this.db
       .select()
       .from(savedPosts)
       .where(and(eq(savedPosts.postId, postId), eq(savedPosts.userId, userId)))
@@ -844,13 +845,13 @@ export class DatabaseStorage implements IStorage {
 
     if (existingSave.length > 0) {
       // Remove save
-      await db
+      await this.db
         .delete(savedPosts)
         .where(and(eq(savedPosts.postId, postId), eq(savedPosts.userId, userId)));
       return { saved: false };
     } else {
       // Add save
-      await db.insert(savedPosts).values({
+      await this.db.insert(savedPosts).values({
         postId,
         userId,
         createdAt: new Date(),
@@ -860,7 +861,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserSavedPost(postId: string, userId: string): Promise<boolean> {
-    const result = await db
+    const result = await this.db
       .select()
       .from(savedPosts)
       .where(and(eq(savedPosts.postId, postId), eq(savedPosts.userId, userId)))
@@ -870,7 +871,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserSavedPosts(userId: string): Promise<any[]> {
-    const result = await db
+    const result = await this.db
       .select({
         id: savedPosts.id,
         createdAt: savedPosts.createdAt,

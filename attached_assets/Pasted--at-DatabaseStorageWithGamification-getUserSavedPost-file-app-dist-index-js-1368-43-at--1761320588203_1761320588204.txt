@@ -1,0 +1,116 @@
+    at DatabaseStorageWithGamification.getUserSavedPost (file:///app/dist/index.js:1368:43)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at /app/node_modules/express/lib/router/index.js:284:15
+Error checking save status: ReferenceError: savedPosts is not defined
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at DatabaseStorageWithGamification.getUserSavedPost (file:///app/dist/index.js:1368:43)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
+Error checking save status: ReferenceError: savedPosts is not defined
+    at DatabaseStorageWithGamification.getUserSavedPost (file:///app/dist/index.js:1368:43)
+    at file:///app/dist/index.js:4112:35
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at /app/node_modules/express/lib/router/index.js:284:15
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at /app/node_modules/express/lib/router/index.js:284:15
+    at file:///app/dist/index.js:4112:35
+    at /app/node_modules/express/lib/router/index.js:284:15
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+Error checking save status: ReferenceError: savedPosts is not defined
+    at DatabaseStorageWithGamification.getUserSavedPost (file:///app/dist/index.js:1368:43)
+    at file:///app/dist/index.js:4112:35
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
+Error checking save status: ReferenceError: savedPosts is not defined
+    at DatabaseStorageWithGamification.getUserSavedPost (file:///app/dist/index.js:1368:43)
+    at file:///app/dist/index.js:4112:35
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at /app/node_modules/express/lib/router/index.js:284:15
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
+Error checking save status: ReferenceError: savedPosts is not defined
+    at DatabaseStorageWithGamification.getUserSavedPost (file:///app/dist/index.js:1368:43)
+    at file:///app/dist/index.js:4112:35
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at /app/node_modules/express/lib/router/index.js:284:15
+Error checking save status: ReferenceError: savedPosts is not defined
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
+Error checking save status: ReferenceError: savedPosts is not defined
+    at DatabaseStorageWithGamification.getUserSavedPost (file:///app/dist/index.js:1368:43)
+    at file:///app/dist/index.js:4112:35
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at /app/node_modules/express/lib/router/index.js:284:15
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at DatabaseStorageWithGamification.getUserSavedPost (file:///app/dist/index.js:1368:43)
+    at file:///app/dist/index.js:4112:35
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at /app/node_modules/express/lib/router/index.js:284:15
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
+Error checking save status: ReferenceError: savedPosts is not defined
+    at DatabaseStorageWithGamification.getUserSavedPost (file:///app/dist/index.js:1368:43)
+    at file:///app/dist/index.js:4112:35
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at /app/node_modules/express/lib/router/index.js:284:15
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at file:///app/dist/index.js:4090:36
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
+Error checking save status: ReferenceError: savedPosts is not defined
+    at /app/node_modules/express/lib/router/index.js:284:15
+    at DatabaseStorageWithGamification.getUserSavedPost (file:///app/dist/index.js:1368:43)
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at file:///app/dist/index.js:4112:35
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+Error toggling save post: ReferenceError: savedPosts is not defined
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at DatabaseStorageWithGamification.toggleSavedPost (file:///app/dist/index.js:1354:49)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at /app/node_modules/express/lib/router/index.js:284:15
+    at param (/app/node_modules/express/lib/router/index.js:365:14)
+    at param (/app/node_modules/express/lib/router/index.js:376:14)
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:421:3)
