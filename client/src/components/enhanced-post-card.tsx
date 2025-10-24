@@ -180,23 +180,27 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
 
   // Escutar atualizações do WebSocket para curtidas e respostas de comentários
   useEffect(() => {
-    const handleDataUpdate = (event: MessageEvent) => {
+    const handleDataUpdate = (event: CustomEvent) => {
       try {
-        const message = JSON.parse(event.data);
-        if (message.type === 'data_update' && message.dataType === 'posts') {
-          const data = message.data;
-          
+        const { dataType, action, data } = event.detail;
+        
+        if (dataType === 'posts') {
           // Atualizar curtidas de comentário
-          if (data?.action === 'comment_like' && data.commentId) {
+          if (action === 'comment_like' && data?.commentId) {
             setComments(prev => prev.map(c => 
               c.id === data.commentId 
                 ? { ...c, likesCount: data.likesCount }
                 : c
             ));
+            
+            // Atualizar estado de curtida se for do usuário atual
+            if (data.liked !== undefined) {
+              setCommentLikes(prev => ({ ...prev, [data.commentId]: data.liked }));
+            }
           }
           
           // Atualizar respostas de comentário
-          if (data?.action === 'comment_reply' && data.commentId && data.reply) {
+          if (action === 'comment_reply' && data?.commentId && data.reply) {
             setCommentReplies(prev => ({
               ...prev,
               [data.commentId]: [data.reply, ...(prev[data.commentId] || [])]
@@ -214,11 +218,11 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
       }
     };
 
-    // Simular escuta do WebSocket (em produção, usar o hook useDataSync)
-    // Este código será integrado com o sistema WebSocket existente
+    // Escutar eventos de atualização de dados
+    window.addEventListener('data_update', handleDataUpdate as EventListener);
     
     return () => {
-      // Cleanup
+      window.removeEventListener('data_update', handleDataUpdate as EventListener);
     };
   }, []);
 
@@ -942,33 +946,41 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
                           <span className="text-xs text-muted-foreground">
                             {formatTimeAgo(comment.createdAt)}
                           </span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleCommentLike(comment.id)}
-                            className={`h-6 px-0 text-xs transition-all duration-300 hover:bg-transparent ${commentLikes[comment.id] ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
-                          >
-                            <Heart className={`w-3 h-3 mr-1 transition-all duration-300 ${commentLikes[comment.id] ? 'fill-current animate-pulse' : ''}`} />
-                            {comment.likesCount > 0 && <span>{comment.likesCount}</span>}
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleReplyToComment(comment.id)}
-                            className="h-6 px-0 text-xs text-muted-foreground hover:text-primary"
-                          >
-                            <MessageCircle className="w-3 h-3 mr-1" />
-                            Responder
-                          </Button>
+                          <div className="flex items-center space-x-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleCommentLike(comment.id)}
+                              className={`h-6 px-0 hover:bg-transparent transition-all duration-300 ${commentLikes[comment.id] ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
+                            >
+                              <Heart className={`w-3 h-3 transition-all duration-300 ${commentLikes[comment.id] ? 'fill-current animate-pulse' : ''}`} />
+                            </Button>
+                            {comment.likesCount > 0 && (
+                              <span className="text-xs text-muted-foreground">{comment.likesCount}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleReplyToComment(comment.id)}
+                              className="h-6 px-0 hover:bg-transparent text-muted-foreground hover:text-primary transition-all duration-300"
+                            >
+                              <MessageCircle className="w-3 h-3" />
+                            </Button>
+                            {comment.repliesCount > 0 && (
+                              <span className="text-xs text-muted-foreground">{comment.repliesCount}</span>
+                            )}
+                          </div>
                           {comment.repliesCount > 0 && (
                             <Button 
                               variant="ghost" 
                               size="sm" 
                               onClick={() => toggleReplies(comment.id)}
-                              className="h-6 px-0 text-xs text-muted-foreground hover:text-primary"
+                              className="h-6 px-0 text-xs text-muted-foreground hover:text-primary hover:bg-transparent"
                             >
                               {showReplies[comment.id] ? <ChevronUp className="w-3 h-3 mr-1" /> : <ChevronDown className="w-3 h-3 mr-1" />}
-                              {comment.repliesCount} {comment.repliesCount === 1 ? 'resposta' : 'respostas'}
+                              {showReplies[comment.id] ? 'Ocultar' : 'Ver'} respostas
                             </Button>
                           )}
                         </div>
