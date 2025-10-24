@@ -40,10 +40,7 @@ import {
   type UserMission, type InsertUserMission, type Reward, type InsertReward,
   type UserReward, type InsertUserReward, type Raffle, type InsertRaffle,
   type RaffleEntry, type InsertRaffleEntry, type Achievement, type InsertAchievement,
-  type UserAchievement, type InsertUserAchievement, type Category, type InsertCategory,
-  commentLikes, // Import commentLikes schema
-  commentReplies, // Import commentReplies schema
-  savedPosts // Import savedPosts schema
+  type UserAchievement, type InsertUserAchievement, type Category, type InsertCategory
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql, gte, lte, isNull } from "drizzle-orm";
@@ -107,35 +104,16 @@ export interface IStorage {
   deleteBanner(id: string): Promise<void>;
 
   // Post methods
-  getPosts(): Promise<(Post & { user: Pick<User, 'id' | 'name' | 'avatar' | 'isAdmin'>; taggedUsers?: Array<Pick<User, 'id' | 'name' | 'avatar'>> })[]>;
+  getPosts(): Promise<(Post & { user: Pick<User, 'id' | 'name' | 'avatar' | 'isAdmin'> })[]>;
   getPost(id: string): Promise<Post | undefined>;
-  createPost(post: InsertPost, taggedUserIds?: string[]): Promise<Post>;
+  createPost(post: InsertPost): Promise<Post>;
   updatePost(id: string, post: Partial<InsertPost>): Promise<Post>;
   deletePost(id: string): Promise<void>;
-  togglePostLike(postId: string, userId: string): Promise<{ liked: boolean; likesCount: number }>;
-  getPostLikesCount(postId: string): Promise<number>;
-  getPostComments(postId: string): Promise<(Comment & { user: Pick<User, 'id' | 'name' | 'avatar'> })[]>;
-  createPostComment(commentData: { postId: string; userId: string; content: string }): Promise<Comment & { user: Pick<User, 'id' | 'name' | 'avatar'> }>;
-  toggleSavedPost(postId: string, userId: string): Promise<{ saved: boolean }>;
-  getUserSavedPost(postId: string, userId: string): Promise<boolean>;
-  getUserSavedPosts(userId: string): Promise<PostWithUser[]>; // Adjusted return type
-  incrementPostShares(postId: string): Promise<{ sharesCount: number }>;
-  getUserPostLike(postId: string, userId: string): Promise<boolean>;
-  checkPostLike(postId: string, userId: string): Promise<boolean>;
-  likePost(postId: string, userId: string): Promise<void>;
-  unlikePost(postId: string, userId: string): Promise<void>;
-  getPostLikesCountResult(postId: string): Promise<{ liked: boolean; likesCount: number }>;
 
   // Comment methods
   getComments(videoId?: string, postId?: string): Promise<(Comment & { user: Pick<User, 'id' | 'name' | 'avatar'> })[]>;
   createComment(comment: InsertComment): Promise<Comment>;
   deleteComment(id: string): Promise<void>;
-
-  // Comment interactions
-  toggleCommentLike(commentId: string, userId: string): Promise<{ liked: boolean; likesCount: number }>;
-  getUserCommentLike(commentId: string, userId: string): Promise<boolean>;
-  createCommentReply(replyData: { commentId: string; userId: string; content: string }): Promise<any>;
-  getCommentReplies(commentId: string): Promise<any[]>;
 
   // Subscription methods
   getUserSubscription(userId: string): Promise<Subscription | undefined>;
@@ -175,35 +153,13 @@ export interface IStorage {
   removeUserNotification(userId: string, notificationId: string): Promise<void>;
   getUserNotificationByIds(userId: string, notificationId: string);
 
-  // Notification Settings methods
-  getNotificationSettings(userId: string);
-  saveNotificationSettings(userId: string, settings: {
-    emailEnabled: boolean;
-    whatsappEnabled: boolean;
-    smsEnabled: boolean;
-    soundEnabled: boolean;
-  });
-
-  // Seed methods
-  seedDefaultUsers(): Promise<void>;
-  seedSampleContent(adminId: string): Promise<void>;
-
-  // Referral System Methods
-  getShareSettings();
-  updateShareSettings(freePoints: number, premiumPoints: number, updatedBy: string);
-  getReferralsByUser(userId: string);
-  getUserReferralStats(userId: string);
-  getAllUsersWithReferralData();
-  createReferral(referrerId: string, referredId: string, referredPlanType: string);
-  updateUserPoints(userId: string, points: number, referralType?: 'free' | 'premium'); // Signature adjusted for clarity
-
   // ========== GAMIFICATION METHODS ==========
 
   // User Points methods
   getUserPoints(userId: string): Promise<UserPoints | undefined>;
-  createUserPoints(userPointsData: InsertUserPoints): Promise<UserPoints>;
-  updateUserPoints(userId: string, points: number): Promise<UserPoints>; // Simplified signature for general use
-  getUserRanking(limit?: number): Promise<(UserPoints & { user: Pick<User, 'id' | 'name' | 'avatar'>, planType?: string })[]>;
+  createUserPoints(userPoints: InsertUserPoints): Promise<UserPoints>;
+  updateUserPoints(userId: string, points: number): Promise<UserPoints>;
+  getUserRanking(limit?: number): Promise<(UserPoints & { user: Pick<User, 'id' | 'name' | 'avatar'> })[]>;
 
   // Mission methods
   getMissions(isActive?: boolean, missionType?: string): Promise<Mission[]>;
@@ -747,7 +703,7 @@ export class DatabaseStorage implements IStorage {
 
   async createPost(post: InsertPost, taggedUserIds?: string[]): Promise<Post> {
     const [newPost] = await this.db.insert(posts).values(post).returning();
-
+    
     // Save tagged users if provided
     if (taggedUserIds && taggedUserIds.length > 0) {
       await this.db.insert(postTags).values(
@@ -757,7 +713,7 @@ export class DatabaseStorage implements IStorage {
         }))
       );
     }
-
+    
     return newPost;
   }
 
@@ -913,36 +869,33 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
-  async getUserSavedPosts(userId: string): Promise<PostWithUser[]> {
-    try {
-      const result = await this.db
-        .select({
+  async getUserSavedPosts(userId: string): Promise<any[]> {
+    const result = await db
+      .select({
+        id: savedPosts.id,
+        createdAt: savedPosts.createdAt,
+        post: {
           id: posts.id,
-          userId: posts.userId,
           content: posts.content,
           imageUrl: posts.imageUrl,
           likes: posts.likes,
           shares: posts.shares,
-          commentCount: posts.commentCount,
           createdAt: posts.createdAt,
           user: {
             id: users.id,
             name: users.name,
             avatar: users.avatar,
             isAdmin: users.isAdmin,
-          }
-        })
-        .from(savedPosts)
-        .innerJoin(posts, eq(savedPosts.postId, posts.id))
-        .innerJoin(users, eq(posts.userId, users.id))
-        .where(eq(savedPosts.userId, userId))
-        .orderBy(desc(savedPosts.createdAt));
+          },
+        },
+      })
+      .from(savedPosts)
+      .leftJoin(posts, eq(savedPosts.postId, posts.id))
+      .leftJoin(users, eq(posts.userId, users.id))
+      .where(eq(savedPosts.userId, userId))
+      .orderBy(desc(savedPosts.createdAt));
 
-      return result;
-    } catch (error) {
-      console.error('Error fetching user saved posts:', error);
-      return [];
-    }
+    return result;
   }
 
   async incrementPostShares(postId: string): Promise<{ sharesCount: number }> {
@@ -1073,136 +1026,6 @@ export class DatabaseStorage implements IStorage {
 
   async deleteComment(id: string): Promise<void> {
     await this.db.delete(comments).where(eq(comments.id, id));
-  }
-
-  // Comment interactions
-  async toggleCommentLike(commentId: string, userId: string): Promise<{ liked: boolean; likesCount: number }> {
-    try {
-      // Check if already liked
-      const [existingLike] = await this.db
-        .select()
-        .from(commentLikes)
-        .where(and(eq(commentLikes.commentId, commentId), eq(commentLikes.userId, userId)))
-        .limit(1);
-
-      if (existingLike) {
-        // Unlike - remove like
-        await this.db
-          .delete(commentLikes)
-          .where(and(eq(commentLikes.commentId, commentId), eq(commentLikes.userId, userId)));
-      } else {
-        // Like - add like
-        await this.db.insert(commentLikes).values({
-          commentId,
-          userId,
-          createdAt: new Date()
-        });
-      }
-
-      // Get updated like count
-      const [updatedComment] = await this.db
-        .select({ likes: comments.likes })
-        .from(comments)
-        .where(eq(comments.id, commentId));
-
-      // Update the likes count in the comments table
-      const newLikesCount = updatedComment?.likes === undefined ? (existingLike ? -1 : 1) : (existingLike ? updatedComment.likes - 1 : updatedComment.likes + 1);
-      await this.db.update(comments)
-        .set({ likes: newLikesCount })
-        .where(eq(comments.id, commentId));
-
-
-      return {
-        liked: !existingLike,
-        likesCount: newLikesCount
-      };
-    } catch (error) {
-      console.error('Error toggling comment like:', error);
-      throw error;
-    }
-  }
-
-  async getUserCommentLike(commentId: string, userId: string): Promise<boolean> {
-    try {
-      const [like] = await this.db
-        .select()
-        .from(commentLikes)
-        .where(and(eq(commentLikes.commentId, commentId), eq(commentLikes.userId, userId)))
-        .limit(1);
-
-      return like !== undefined;
-    } catch (error) {
-      console.error('Error checking user comment like:', error);
-      return false;
-    }
-  }
-
-  async createCommentReply(replyData: { commentId: string; userId: string; content: string }): Promise<any> {
-    try {
-      const [newReply] = await this.db
-        .insert(commentReplies)
-        .values({
-          commentId: replyData.commentId,
-          userId: replyData.userId,
-          content: replyData.content,
-          createdAt: new Date()
-        })
-        .returning();
-
-      // Get reply with user info
-      const [fullReply] = await this.db
-        .select({
-          id: commentReplies.id,
-          commentId: commentReplies.commentId,
-          content: commentReplies.content,
-          createdAt: commentReplies.createdAt,
-          user: {
-            id: users.id,
-            name: users.name,
-            avatar: users.avatar,
-          }
-        })
-        .from(commentReplies)
-        .innerJoin(users, eq(commentReplies.userId, users.id))
-        .where(eq(commentReplies.id, newReply.id));
-
-      // Increment reply count for the parent comment
-      await this.db.update(comments)
-        .set({ replyCount: sql`${comments.replyCount} + 1` })
-        .where(eq(comments.id, replyData.commentId));
-
-
-      return fullReply;
-    } catch (error) {
-      console.error('Error creating comment reply:', error);
-      throw error;
-    }
-  }
-
-  async getCommentReplies(commentId: string): Promise<any[]> {
-    try {
-      const result = await this.db
-        .select({
-          id: commentReplies.id,
-          commentId: commentReplies.commentId,
-          content: commentReplies.content,
-          createdAt: commentReplies.createdAt,
-          user: {
-            id: users.id,
-            name: users.name,
-            avatar: users.avatar,
-          }
-        })
-        .from(commentReplies)
-        .innerJoin(users, eq(commentReplies.userId, users.id))
-        .where(eq(commentReplies.commentId, commentId))
-        .orderBy(commentReplies.createdAt);
-
-      return result;
-    } catch (error) {
-      console.error('Error fetching comment replies:', error);
-      return [];
-    }
   }
 
   // Subscription methods
@@ -1858,7 +1681,7 @@ export class DatabaseStorage implements IStorage {
     return referral;
   }
 
-  async updateUserPoints(userId: string, pointsToAdd: number, referralType?: 'free' | 'premium'): Promise<UserPoints> {
+  async updateUserPoints(userId: string, pointsToAdd: number, referralType?: 'free' | 'premium') {
     // Get or create user points record
     let [userPointsRecord] = await this.db
       .select()
@@ -1896,7 +1719,6 @@ export class DatabaseStorage implements IStorage {
 
     return userPointsRecord;
   }
-
 
   // ========== GAMIFICATION IMPLEMENTATIONS ==========
 
@@ -2408,7 +2230,7 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
     return userPointRecord;
   }
 
-  async getUserRanking(limit: number = 10): Promise<(UserPoints & { user: Pick<User, 'id' | 'name' | 'avatar'>, planType?: string })[]> {
+  async getUserRanking(limit: number = 10): Promise<(UserPoints & { user: Pick<User, 'id' | 'name' | 'avatar'> })[]> {
     return await this.db.select({
       id: sql`COALESCE(${userPointsTable.id}::text, gen_random_uuid()::text)`.as('id'),
       userId: users.id,

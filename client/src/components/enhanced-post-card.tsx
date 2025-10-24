@@ -32,7 +32,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ShareModal from "@/components/share-modal";
-import { Input } from "@/components/ui/input"; // Import Input
 
 interface PostWithUser extends Post {
   user: Pick<User, 'id' | 'name' | 'avatar' | 'isAdmin'>;
@@ -61,7 +60,7 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
       /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
       /(?:youtube\.com\/v\/)([^&\n?#]+)/
     ];
-
+    
     return youtubePatterns.some(pattern => pattern.test(url));
   };
 
@@ -73,7 +72,7 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
       /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
       /(?:youtube\.com\/v\/)([^&\n?#]+)/
     ];
-
+    
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match && match[1]) {
@@ -213,7 +212,7 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
     const previousLiked = liked;
     const previousLikesCount = likesCount;
     const newLiked = !liked;
-
+    
     setLiked(newLiked);
     setLikesCount(prev => newLiked ? prev + 1 : prev - 1);
 
@@ -535,7 +534,7 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
                   </Badge>
                 )}
               </div>
-
+              
               <TimestampDisplay 
                 date={post.createdAt!} 
                 variant="default"
@@ -722,240 +721,44 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
                 </div>
               )}
               {!isLoadingComments && (comments.length > 0 ? (
-                comments.map((comment) => {
-                  const [commentLiked, setCommentLiked] = useState(false);
-                  const [commentLikesCount, setCommentLikesCount] = useState(comment.likes || 0);
-                  const [showReplies, setShowReplies] = useState(false);
-                  const [showReplyInput, setShowReplyInput] = useState(false);
-                  const [replyContent, setReplyContent] = useState('');
-                  const [replies, setReplies] = useState<any[]>([]);
-                  const [replyCount, setReplyCount] = useState(comment.replyCount || 0);
-
-                  // Query para verificar se usuário curtiu o comentário
-                  const { data: commentLikeStatus, isLoading: isCommentLikeLoading } = useQuery({
-                    queryKey: [`/api/comments/${comment.id}/like-status`],
-                    queryFn: async () => {
-                      const response = await fetch(`/api/comments/${comment.id}/like-status`, { credentials: 'include' });
-                      if (!response.ok) throw new Error('Failed to fetch like status');
-                      return response.json();
-                    },
-                    enabled: !!user
-                  });
-
-                  useEffect(() => {
-                    if (commentLikeStatus?.liked !== undefined) {
-                      setCommentLiked(commentLikeStatus.liked);
-                    }
-                  }, [commentLikeStatus]);
-
-                  // Query para carregar respostas
-                  const { data: repliesData, isLoading: isRepliesLoading } = useQuery({
-                    queryKey: [`/api/comments/${comment.id}/replies`],
-                    queryFn: async () => {
-                      const response = await fetch(`/api/comments/${comment.id}/replies`, { credentials: 'include' });
-                      if (!response.ok) throw new Error('Failed to fetch replies');
-                      return response.json();
-                    },
-                    enabled: showReplies
-                  });
-
-                  useEffect(() => {
-                    if (repliesData) {
-                      setReplies(repliesData);
-                    }
-                  }, [repliesData]);
-
-                  const handleCommentLike = async () => {
-                    if (!user) {
-                      toast({
-                        title: "Login necessário",
-                        description: "Você precisa estar logado para curtir comentários",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-
-                    // Optimistic update
-                    const prevLiked = commentLiked;
-                    const prevLikesCount = commentLikesCount;
-                    setCommentLiked(!commentLiked);
-                    setCommentLikesCount(prev => prev + (commentLiked ? -1 : 1));
-
-                    try {
-                      const response = await fetch(`/api/comments/${comment.id}/like`, {
-                        method: 'POST',
-                        credentials: 'include'
-                      });
-
-                      if (!response.ok) throw new Error('Failed to like comment');
-
-                      const data = await response.json();
-                      setCommentLiked(data.liked);
-                      setCommentLikesCount(data.likesCount);
-                    } catch (error) {
-                      console.error("Error liking comment:", error);
-                      // Rollback optimistic update
-                      setCommentLiked(prevLiked);
-                      setCommentLikesCount(prevLikesCount);
-                      toast({
-                        title: "Erro",
-                        description: "Não foi possível curtir o comentário",
-                        variant: "destructive",
-                      });
-                    }
-                  };
-
-                  const handleReplySubmit = async () => {
-                    if (!user) {
-                      toast({
-                        title: "Login necessário",
-                        description: "Você precisa estar logado para responder",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-
-                    if (!replyContent.trim()) return;
-
-                    try {
-                      const response = await fetch(`/api/comments/${comment.id}/replies`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ content: replyContent })
-                      });
-
-                      if (!response.ok) throw new Error('Failed to reply');
-
-                      const newReply = await response.json();
-                      setReplies([...replies, newReply]);
-                      setReplyContent('');
-                      setShowReplyInput(false);
-                      setReplyCount(replyCount + 1);
-
-                      toast({
-                        title: "Resposta enviada!",
-                        description: "Sua resposta foi publicada com sucesso",
-                      });
-                    } catch (error) {
-                      console.error("Error submitting reply:", error);
-                      toast({
-                        title: "Erro",
-                        description: "Não foi possível enviar a resposta",
-                        variant: "destructive",
-                      });
-                    }
-                  };
-
-                  return (
-                    <div key={comment.id} className="space-y-2">
-                      <div className="flex items-start space-x-3">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
-                          <AvatarFallback>{getUserInitials(comment.user.name)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="bg-muted/50 rounded-lg px-3 py-2">
-                            <p className="font-semibold text-sm">{comment.user.name}</p>
-                            <p className="text-sm text-foreground break-words">{comment.content}</p>
-                          </div>
-                          <div className="flex items-center gap-4 mt-1">
-                            <p className="text-xs text-muted-foreground">
-                              {formatTimeAgo(comment.createdAt!)}
-                            </p>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleCommentLike}
-                              className={`h-auto p-0 text-xs flex items-center gap-1 ${commentLiked ? 'text-red-500' : 'text-muted-foreground'}`}
-                              disabled={isCommentLikeLoading}
-                            >
-                              <Heart className={`w-3 h-3 ${commentLiked ? 'fill-current' : ''}`} />
-                              {commentLikesCount > 0 && commentLikesCount}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setShowReplyInput(!showReplyInput)}
-                              className="h-auto p-0 text-xs text-muted-foreground"
-                            >
-                              Responder
-                            </Button>
-                            {replyCount > 0 && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowReplies(!showReplies)}
-                                className="h-auto p-0 text-xs text-muted-foreground"
-                              >
-                                {showReplies ? 'Ocultar' : 'Ver'} {replyCount} {replyCount === 1 ? 'resposta' : 'respostas'}
-                              </Button>
-                            )}
-                          </div>
-
-                          {/* Input para responder */}
-                          {showReplyInput && (
-                            <div className="mt-2 flex items-start space-x-2">
-                              <Avatar className="w-6 h-6">
-                                <AvatarImage src={user?.avatar} alt={user?.name} />
-                                <AvatarFallback>{user ? getUserInitials(user.name) : 'U'}</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 flex gap-2">
-                                <Input
-                                  value={replyContent}
-                                  onChange={(e) => setReplyContent(e.target.value)}
-                                  placeholder="Escreva uma resposta..."
-                                  className="text-sm h-8"
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                      e.preventDefault();
-                                      handleReplySubmit();
-                                    }
-                                  }}
-                                />
-                                <Button
-                                  size="sm"
-                                  onClick={handleReplySubmit}
-                                  disabled={!replyContent.trim()}
-                                  className="h-8"
-                                >
-                                  <Send className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
+                comments.map((comment: any) => (
+                  <div key={comment.id} className="flex items-start space-x-3 py-2">
+                    <Avatar className="w-8 h-8 flex-shrink-0">
+                      <AvatarImage 
+                        src={comment.user?.avatar || undefined} 
+                        alt={comment.user?.name || 'Usuário'} 
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-xs">
+                        {getUserInitials(comment.user?.name || 'U')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="bg-muted rounded-lg px-3 py-2">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="text-sm font-medium text-foreground">
+                            {comment.user?.name || 'Usuário Anônimo'}
+                          </span>
+                          {comment.user?.isAdmin && (
+                            <Badge className="bg-accent/10 text-accent text-xs px-1 py-0">Admin</Badge>
                           )}
-
-                          {/* Mostrar respostas */}
-                          {showReplies && (isRepliesLoading ? (
-                            <div className="mt-3 ml-4 pl-3 flex justify-center">
-                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                            </div>
-                          ) : replies.length > 0 ? (
-                            <div className="mt-3 ml-4 space-y-3 border-l-2 border-muted pl-3">
-                              {replies.map((reply) => (
-                                <div key={reply.id} className="flex items-start space-x-2">
-                                  <Avatar className="w-6 h-6">
-                                    <AvatarImage src={reply.user.avatar} alt={reply.user.name} />
-                                    <AvatarFallback>{getUserInitials(reply.user.name)}</AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="bg-muted/30 rounded-lg px-2 py-1">
-                                      <p className="font-semibold text-xs">{reply.user.name}</p>
-                                      <p className="text-xs text-foreground break-words">{reply.content}</p>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      {formatTimeAgo(reply.createdAt)}
-                                    </p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : null)}
                         </div>
+                        <p className="text-sm text-foreground">{comment.content}</p>
+                      </div>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <span className="text-xs text-muted-foreground">
+                          {formatTimeAgo(comment.createdAt)}
+                        </span>
+                        <Button variant="ghost" size="sm" className="h-6 px-0 text-xs text-muted-foreground hover:text-red-500">
+                          Curtir
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-6 px-0 text-xs text-muted-foreground hover:text-primary">
+                          Responder
+                        </Button>
                       </div>
                     </div>
-                  );
-                })
+                  </div>
+                ))
               ) : (
                 <div className="text-center py-6 text-muted-foreground">
                   <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />

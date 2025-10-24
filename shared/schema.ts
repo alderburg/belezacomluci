@@ -5,14 +5,6 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Helper function to generate a unique ID (assuming createId is available in your project)
-// If createId is not a standard Drizzle function, you might need to import or define it.
-// For this example, we'll assume it exists and works like uuid() or similar.
-// If you have a specific UUID generation function, replace createId() accordingly.
-// For demonstration purposes, let's assume it's a placeholder for a UUID generator.
-const createId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
@@ -164,7 +156,7 @@ export const savedPosts = pgTable("saved_posts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
   postId: varchar("post_id").notNull().references(() => posts.id, { onDelete: 'cascade' }),
-  createdAt: timestamp("created_at").default(sql`now()`),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const comments = pgTable("comments", {
@@ -174,32 +166,8 @@ export const comments = pgTable("comments", {
   productId: varchar("product_id").references(() => products.id),
   postId: varchar("post_id").references(() => posts.id),
   content: text("content").notNull(),
-  likes: integer("likes").default(0),
-  replyCount: integer("reply_count").default(0),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
-
-// Comment Likes table
-export const commentLikes = pgTable('comment_likes', {
-  id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  commentId: varchar('comment_id').notNull().references(() => comments.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').default(sql`now()`),
-}, (table) => {
-  return {
-    userCommentUnique: unique().on(table.userId, table.commentId),
-  };
-});
-
-// Comment Replies table
-export const commentReplies = pgTable('comment_replies', {
-  id: varchar('id').primaryKey().default(sql`gen_random_uuid()`),
-  commentId: varchar('comment_id').notNull().references(() => comments.id, { onDelete: 'cascade' }),
-  userId: varchar('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  content: text('content').notNull(),
-  createdAt: timestamp('created_at').default(sql`now()`),
-});
-
 
 export const userActivity = pgTable("user_activity", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -440,19 +408,19 @@ export const userAchievements = pgTable("user_achievements", {
 
 // Relations
 export const userRelations = relations(users, ({ many, one }) => ({
-  subscription: one(subscriptions, { fields: [users.id], references: [subscriptions.userId] }),
+  subscription: one(subscriptions),
   posts: many(posts),
   comments: many(comments),
   activities: many(userActivity),
   videoLikes: many(videoLikes),
-  points: one(userPoints, { fields: [users.id], references: [userPoints.userId] }),
+  points: one(userPoints),
   missions: many(userMissions),
   rewards: many(userRewards),
   raffleEntries: many(raffleEntries),
   raffleWins: many(raffleWinners),
   achievements: many(userAchievements),
-  referralsMade: many(referrals),
-  referralsReceived: many(referrals),
+  referralsMade: many(referrals, { relationName: "referrer" }),
+  referralsReceived: many(referrals, { relationName: "referred" }),
   userNotifications: many(userNotifications),
 }));
 
@@ -486,13 +454,11 @@ export const postRelations = relations(posts, ({ one, many }) => ({
   comments: many(comments),
 }));
 
-export const commentRelations = relations(comments, ({ one, many }) => ({
+export const commentRelations = relations(comments, ({ one }) => ({
   user: one(users, { fields: [comments.userId], references: [users.id] }),
   video: one(videos, { fields: [comments.videoId], references: [videos.id] }),
   product: one(products, { fields: [comments.productId], references: [products.id] }),
   post: one(posts, { fields: [comments.postId], references: [posts.id] }),
-  likes: many(commentLikes),
-  replies: many(commentReplies),
 }));
 
 export const activityRelations = relations(userActivity, ({ one }) => ({
@@ -677,8 +643,6 @@ export const insertPostSchema = createInsertSchema(posts).omit({ id: true, creat
 export const insertPostLikeSchema = createInsertSchema(postLikes).omit({ id: true, createdAt: true });
 export const insertPostTagSchema = createInsertSchema(postTags).omit({ id: true, createdAt: true });
 export const insertCommentSchema = createInsertSchema(comments).omit({ id: true, createdAt: true });
-export const insertCommentLikeSchema = createInsertSchema(commentLikes).omit({ id: true, createdAt: true });
-export const insertCommentReplySchema = createInsertSchema(commentReplies).omit({ id: true, createdAt: true });
 export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({ id: true, createdAt: true });
 export const insertActivitySchema = createInsertSchema(userActivity).omit({ id: true, createdAt: true });
 export const insertVideoLikeSchema = createInsertSchema(videoLikes).omit({ id: true, createdAt: true });
@@ -886,9 +850,3 @@ export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
 export type UserAchievement = typeof userAchievements.$inferSelect;
-
-// ========== COMMENT LIKES AND REPLIES TYPES ==========
-export type InsertCommentLike = z.infer<typeof insertCommentLikeSchema>;
-export type CommentLike = typeof commentLikes.$inferSelect;
-export type InsertCommentReply = z.infer<typeof insertCommentReplySchema>;
-export type CommentReply = typeof commentReplies.$inferSelect;
