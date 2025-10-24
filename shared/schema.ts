@@ -486,7 +486,7 @@ export const postRelations = relations(posts, ({ one, many }) => ({
   comments: many(comments),
 }));
 
-export const commentRelations = relations(comments, ({ one }) => ({
+export const commentRelations = relations(comments, ({ one, many }) => ({
   user: one(users, { fields: [comments.userId], references: [users.id] }),
   video: one(videos, { fields: [comments.videoId], references: [videos.id] }),
   product: one(products, { fields: [comments.productId], references: [products.id] }),
