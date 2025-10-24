@@ -166,6 +166,23 @@ export const comments = pgTable("comments", {
   productId: varchar("product_id").references(() => products.id),
   postId: varchar("post_id").references(() => posts.id),
   content: text("content").notNull(),
+  likesCount: integer("likes_count").default(0),
+  repliesCount: integer("replies_count").default(0),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const commentLikes = pgTable("comment_likes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  commentId: varchar("comment_id").references(() => comments.id).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const commentReplies = pgTable("comment_replies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  commentId: varchar("comment_id").references(() => comments.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
@@ -454,11 +471,23 @@ export const postRelations = relations(posts, ({ one, many }) => ({
   comments: many(comments),
 }));
 
-export const commentRelations = relations(comments, ({ one }) => ({
+export const commentRelations = relations(comments, ({ one, many }) => ({
   user: one(users, { fields: [comments.userId], references: [users.id] }),
   video: one(videos, { fields: [comments.videoId], references: [videos.id] }),
   product: one(products, { fields: [comments.productId], references: [products.id] }),
   post: one(posts, { fields: [comments.postId], references: [posts.id] }),
+  likes: many(commentLikes),
+  replies: many(commentReplies),
+}));
+
+export const commentLikeRelations = relations(commentLikes, ({ one }) => ({
+  user: one(users, { fields: [commentLikes.userId], references: [users.id] }),
+  comment: one(comments, { fields: [commentLikes.commentId], references: [comments.id] }),
+}));
+
+export const commentReplyRelations = relations(commentReplies, ({ one }) => ({
+  user: one(users, { fields: [commentReplies.userId], references: [users.id] }),
+  comment: one(comments, { fields: [commentReplies.commentId], references: [comments.id] }),
 }));
 
 export const activityRelations = relations(userActivity, ({ one }) => ({
@@ -642,7 +671,9 @@ export const insertBannerSchema = createInsertSchema(banners).omit({
 export const insertPostSchema = createInsertSchema(posts).omit({ id: true, createdAt: true, likes: true, shares: true });
 export const insertPostLikeSchema = createInsertSchema(postLikes).omit({ id: true, createdAt: true });
 export const insertPostTagSchema = createInsertSchema(postTags).omit({ id: true, createdAt: true });
-export const insertCommentSchema = createInsertSchema(comments).omit({ id: true, createdAt: true });
+export const insertCommentSchema = createInsertSchema(comments).omit({ id: true, createdAt: true, likesCount: true, repliesCount: true });
+export const insertCommentLikeSchema = createInsertSchema(commentLikes).omit({ id: true, createdAt: true });
+export const insertCommentReplySchema = createInsertSchema(commentReplies).omit({ id: true, createdAt: true });
 export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({ id: true, createdAt: true });
 export const insertActivitySchema = createInsertSchema(userActivity).omit({ id: true, createdAt: true });
 export const insertVideoLikeSchema = createInsertSchema(videoLikes).omit({ id: true, createdAt: true });
@@ -814,6 +845,10 @@ export type InsertPostTag = z.infer<typeof insertPostTagSchema>;
 export type PostTag = typeof postTags.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Comment = typeof comments.$inferSelect;
+export type InsertCommentLike = z.infer<typeof insertCommentLikeSchema>;
+export type CommentLike = typeof commentLikes.$inferSelect;
+export type InsertCommentReply = z.infer<typeof insertCommentReplySchema>;
+export type CommentReply = typeof commentReplies.$inferSelect;
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;

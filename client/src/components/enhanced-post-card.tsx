@@ -15,7 +15,9 @@ import {
   Bookmark,
   Flag,
   Copy,
-  ExternalLink
+  ExternalLink,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -276,6 +278,11 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
   };
 
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [commentReplies, setCommentReplies] = useState<Record<string, any[]>>({});
+  const [showReplies, setShowReplies] = useState<Record<string, boolean>>({});
+  const [commentLikes, setCommentLikes] = useState<Record<string, boolean>>({});
 
   const submitComment = async () => {
     if (!newComment.trim() || !user || isSubmittingComment) return;
@@ -445,6 +452,120 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
       title: '🔗 Link copiado!',
       description: 'Link da postagem copiado',
     });
+  };
+
+  const handleCommentLike = async (commentId: string) => {
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Faça login para curtir comentários",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/comments/${commentId}/like`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      if (!response.ok) throw new Error('Failed to like comment');
+
+      const result = await response.json();
+      
+      setCommentLikes(prev => ({ ...prev, [commentId]: result.liked }));
+      
+      // Update comment in list
+      setComments(prev => prev.map(c => 
+        c.id === commentId 
+          ? { ...c, likesCount: result.likesCount }
+          : c
+      ));
+
+      toast({
+        title: result.liked ? "❤️ Curtiu!" : "Curtida removida",
+        description: result.liked ? "Você curtiu este comentário" : "Você descurtiu este comentário",
+      });
+    } catch (error) {
+      console.error('Error liking comment:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao curtir comentário",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReplyToComment = (commentId: string) => {
+    setReplyingTo(commentId);
+    setReplyContent('');
+  };
+
+  const submitReply = async (commentId: string) => {
+    if (!replyContent.trim() || !user) return;
+
+    try {
+      const response = await fetch(`/api/comments/${commentId}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ content: replyContent.trim() })
+      });
+
+      if (!response.ok) throw new Error('Failed to reply');
+
+      const reply = await response.json();
+      
+      setCommentReplies(prev => ({
+        ...prev,
+        [commentId]: [reply, ...(prev[commentId] || [])]
+      }));
+      
+      setComments(prev => prev.map(c => 
+        c.id === commentId 
+          ? { ...c, repliesCount: (c.repliesCount || 0) + 1 }
+          : c
+      ));
+
+      setReplyContent('');
+      setReplyingTo(null);
+      setShowReplies(prev => ({ ...prev, [commentId]: true }));
+
+      toast({
+        title: "Resposta enviada! 💬",
+        description: "Sua resposta foi publicada",
+      });
+    } catch (error) {
+      console.error('Error replying to comment:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao enviar resposta",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleReplies = async (commentId: string) => {
+    const isShowing = showReplies[commentId];
+    
+    if (!isShowing && !commentReplies[commentId]) {
+      // Fetch replies
+      try {
+        const response = await fetch(`/api/comments/${commentId}/replies`, {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const replies = await response.json();
+          setCommentReplies(prev => ({ ...prev, [commentId]: replies }));
+        }
+      } catch (error) {
+        console.error('Error fetching replies:', error);
+      }
+    }
+    
+    setShowReplies(prev => ({ ...prev, [commentId]: !isShowing }));
   };
 
   const isChallenge = post.content.toLowerCase().includes('desafio') || 
@@ -722,39 +843,134 @@ export default function EnhancedPostCard({ post }: EnhancedPostCardProps) {
               )}
               {!isLoadingComments && (comments.length > 0 ? (
                 comments.map((comment: any) => (
-                  <div key={comment.id} className="flex items-start space-x-3 py-2">
-                    <Avatar className="w-8 h-8 flex-shrink-0">
-                      <AvatarImage 
-                        src={comment.user?.avatar || undefined} 
-                        alt={comment.user?.name || 'Usuário'} 
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-xs">
-                        {getUserInitials(comment.user?.name || 'U')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="bg-muted rounded-lg px-3 py-2">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-sm font-medium text-foreground">
-                            {comment.user?.name || 'Usuário Anônimo'}
+                  <div key={comment.id} className="py-3">
+                    <div className="flex items-start space-x-3">
+                      <Avatar className="w-8 h-8 flex-shrink-0">
+                        <AvatarImage 
+                          src={comment.user?.avatar || undefined} 
+                          alt={comment.user?.name || 'Usuário'} 
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-xs">
+                          {getUserInitials(comment.user?.name || 'U')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="bg-muted rounded-lg px-3 py-2">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="text-sm font-medium text-foreground">
+                              {comment.user?.name || 'Usuário Anônimo'}
+                            </span>
+                            {comment.user?.isAdmin && (
+                              <Badge className="bg-accent/10 text-accent text-xs px-1 py-0">Admin</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-foreground">{comment.content}</p>
+                        </div>
+                        <div className="flex items-center space-x-4 mt-2">
+                          <span className="text-xs text-muted-foreground">
+                            {formatTimeAgo(comment.createdAt)}
                           </span>
-                          {comment.user?.isAdmin && (
-                            <Badge className="bg-accent/10 text-accent text-xs px-1 py-0">Admin</Badge>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleCommentLike(comment.id)}
+                            className={`h-6 px-0 text-xs transition-colors ${commentLikes[comment.id] ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
+                          >
+                            <Heart className={`w-3 h-3 mr-1 ${commentLikes[comment.id] ? 'fill-current' : ''}`} />
+                            {comment.likesCount > 0 && <span>{comment.likesCount}</span>}
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleReplyToComment(comment.id)}
+                            className="h-6 px-0 text-xs text-muted-foreground hover:text-primary"
+                          >
+                            <MessageCircle className="w-3 h-3 mr-1" />
+                            Responder
+                          </Button>
+                          {comment.repliesCount > 0 && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => toggleReplies(comment.id)}
+                              className="h-6 px-0 text-xs text-muted-foreground hover:text-primary"
+                            >
+                              {showReplies[comment.id] ? <ChevronUp className="w-3 h-3 mr-1" /> : <ChevronDown className="w-3 h-3 mr-1" />}
+                              {comment.repliesCount} {comment.repliesCount === 1 ? 'resposta' : 'respostas'}
+                            </Button>
                           )}
                         </div>
-                        <p className="text-sm text-foreground">{comment.content}</p>
-                      </div>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <span className="text-xs text-muted-foreground">
-                          {formatTimeAgo(comment.createdAt)}
-                        </span>
-                        <Button variant="ghost" size="sm" className="h-6 px-0 text-xs text-muted-foreground hover:text-red-500">
-                          Curtir
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-6 px-0 text-xs text-muted-foreground hover:text-primary">
-                          Responder
-                        </Button>
+
+                        {/* Reply input */}
+                        {replyingTo === comment.id && (
+                          <div className="mt-3 flex items-start space-x-2">
+                            <Avatar className="w-6 h-6 flex-shrink-0">
+                              <AvatarImage src={user?.avatar || undefined} className="object-cover" />
+                              <AvatarFallback className="bg-gradient-to-br from-pink-400 to-purple-500 text-white text-xs">
+                                {getUserInitials(user?.name || 'U')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <Textarea
+                                placeholder="Escreva uma resposta..."
+                                value={replyContent}
+                                onChange={(e) => setReplyContent(e.target.value)}
+                                className="min-h-[60px] text-sm"
+                              />
+                              <div className="flex justify-end space-x-2 mt-2">
+                                <Button 
+                                  onClick={() => setReplyingTo(null)} 
+                                  size="sm" 
+                                  variant="ghost"
+                                  className="h-7 text-xs"
+                                >
+                                  Cancelar
+                                </Button>
+                                <Button 
+                                  onClick={() => submitReply(comment.id)} 
+                                  disabled={!replyContent.trim()}
+                                  size="sm"
+                                  className="h-7 text-xs"
+                                >
+                                  <Send className="w-3 h-3 mr-1" />
+                                  Responder
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Replies list */}
+                        {showReplies[comment.id] && commentReplies[comment.id] && (
+                          <div className="mt-3 space-y-3 pl-4 border-l-2 border-muted">
+                            {commentReplies[comment.id].map((reply: any) => (
+                              <div key={reply.id} className="flex items-start space-x-2">
+                                <Avatar className="w-6 h-6 flex-shrink-0">
+                                  <AvatarImage 
+                                    src={reply.user?.avatar || undefined} 
+                                    alt={reply.user?.name} 
+                                    className="object-cover"
+                                  />
+                                  <AvatarFallback className="bg-gradient-to-br from-green-400 to-teal-500 text-white text-xs">
+                                    {getUserInitials(reply.user?.name || 'U')}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <div className="bg-muted/50 rounded-lg px-2 py-1.5">
+                                    <span className="text-xs font-medium text-foreground">
+                                      {reply.user?.name}
+                                    </span>
+                                    <p className="text-xs text-foreground mt-0.5">{reply.content}</p>
+                                  </div>
+                                  <span className="text-xs text-muted-foreground mt-1 inline-block">
+                                    {formatTimeAgo(reply.createdAt)}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

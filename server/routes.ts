@@ -10,7 +10,7 @@ import {
   insertRaffleSchema, insertRewardSchema, shareSettings, referrals,
   insertNotificationSchema, insertUserNotificationSchema, notifications, userNotifications,
   insertPopupSchema, insertPopupViewSchema, insertCategorySchema,
-  insertUserSchema, coupons, categories // Assuming insertUserSchema is defined elsewhere
+  insertUserSchema, coupons, categories, commentLikes, commentReplies
 } from "../shared/schema";
 import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
@@ -1170,6 +1170,159 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error deleting comment:", error);
       res.status(500).json({ error: "Failed to delete comment" });
+    }
+  });
+
+  // Like/unlike comment
+  app.post("/api/comments/:commentId/like", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    try {
+      const { commentId } = req.params;
+      const userId = req.user!.id;
+
+      // Check if already liked
+      const existingLike = await db
+        .select()
+        .from(commentLikes)
+        .where(and(
+          eq(commentLikes.commentId, commentId),
+          eq(commentLikes.userId, userId)
+        ))
+        .limit(1);
+
+      if (existingLike.length > 0) {
+        // Unlike
+        await db
+          .delete(commentLikes)
+          .where(and(
+            eq(commentLikes.commentId, commentId),
+            eq(commentLikes.userId, userId)
+          ));
+      } else {
+        // Like
+        await db.insert(commentLikes).values({
+          commentId,
+          userId,
+        });
+      }
+
+      // Get updated like count
+      const [updatedComment] = await db
+        .select()
+        .from(comments)
+        .where(eq(comments.id, commentId));
+
+      res.json({
+        liked: existingLike.length === 0,
+        likesCount: updatedComment.likesCount || 0,
+      });
+    } catch (error) {
+      console.error("Error toggling comment like:", error);
+      res.status(500).json({ error: "Failed to toggle like" });
+    }
+  });
+
+  // Get comment replies
+  app.get("/api/comments/:commentId/replies", async (req, res) => {
+    try {
+      const { commentId } = req.params;
+
+      const replies = await db
+        .select({
+          id: commentReplies.id,
+          content: commentReplies.content,
+          createdAt: commentReplies.createdAt,
+          user: {
+            id: users.id,
+            name: users.name,
+            avatar: users.avatar,
+          },
+        })
+        .from(commentReplies)
+        .innerJoin(users, eq(commentReplies.userId, users.id))
+        .where(eq(commentReplies.commentId, commentId))
+        .orderBy(desc(commentReplies.createdAt));
+
+      res.json(replies);
+    } catch (error) {
+      console.error("Error fetching comment replies:", error);
+      res.status(500).json({ error: "Failed to fetch replies" });
+    }
+  });
+
+  // Add reply to comment
+  app.post("/api/comments/:commentId/reply", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    try {
+      const { commentId } = req.params;
+      const { content } = req.body;
+      const userId = req.user!.id;
+
+      if (!content?.trim()) {
+        return res.status(400).json({ error: "Content is required" });
+      }
+
+      const [reply] = await db
+        .insert(commentReplies)
+        .values({
+          commentId,
+          userId,
+          content: content.trim(),
+        })
+        .returning();
+
+      // Get reply with user info
+      const [fullReply] = await db
+        .select({
+          id: commentReplies.id,
+          content: commentReplies.content,
+          createdAt: commentReplies.createdAt,
+          user: {
+            id: users.id,
+            name: users.name,
+            avatar: users.avatar,
+          },
+        })
+        .from(commentReplies)
+        .innerJoin(users, eq(commentReplies.userId, users.id))
+        .where(eq(commentReplies.id, reply.id));
+
+      res.status(201).json(fullReply);
+    } catch (error) {
+      console.error("Error creating reply:", error);
+      res.status(500).json({ error: "Failed to create reply" });
+    }
+  });
+
+  // Check if user liked a comment
+  app.get("/api/comments/:commentId/like-status", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ liked: false });
+    }
+
+    try {
+      const { commentId } = req.params;
+      const userId = req.user!.id;
+
+      const like = await db
+        .select()
+        .from(commentLikes)
+        .where(and(
+          eq(commentLikes.commentId, commentId),
+          eq(commentLikes.userId, userId)
+        ))
+        .limit(1);
+
+      res.json({ liked: like.length > 0 });
+    } catch (error) {
+      console.error("Error checking comment like status:", error);
+      res.status(500).json({ liked: false });
     }
   });
 
