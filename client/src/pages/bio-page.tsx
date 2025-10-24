@@ -61,7 +61,7 @@ export default function BioPage() {
   });
 
   // Buscar cupons ativos com categorias
-  const { data: couponsData } = useQuery<Array<{
+  const { data: couponsData, isLoading: isLoadingCoupons } = useQuery<Array<{
     id: string;
     coverImageUrl: string | null;
     brand: string;
@@ -517,7 +517,29 @@ export default function BioPage() {
           </SheetHeader>
 
           <div className="mt-6 overflow-y-auto max-h-[calc(100vh-120px)]">
-            {!couponsData || couponsData.length === 0 ? (
+            {isLoadingCoupons ? (
+              <div className="space-y-8">
+                {/* Skeleton para categorias */}
+                {[1, 2].map((categoryIndex) => (
+                  <div key={categoryIndex} className="mb-8">
+                    {/* Skeleton do título da categoria */}
+                    <div className="h-6 bg-gray-200 rounded w-32 mb-4 animate-pulse"></div>
+                    
+                    {/* Grid de skeletons para cupons */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {[1, 2, 3, 4].map((couponIndex) => (
+                        <div
+                          key={couponIndex}
+                          className="relative rounded-lg overflow-hidden shadow-md"
+                        >
+                          <div className="w-full aspect-square bg-gray-200 animate-pulse"></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : !couponsData || couponsData.length === 0 ? (
               <div className="text-center py-12">
                 <Gift className="w-16 h-16 mx-auto text-gray-300 mb-4" />
                 <p className="text-gray-500">Nenhum cupom disponível no momento</p>
