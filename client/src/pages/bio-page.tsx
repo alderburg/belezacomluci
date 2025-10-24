@@ -532,7 +532,7 @@ export default function BioPage() {
                           key={couponIndex}
                           className="relative rounded-lg overflow-hidden shadow-md"
                         >
-                          <div className="w-full aspect-[3/4] bg-gray-200 animate-pulse"></div>
+                          <div className="w-full h-24 bg-gray-200 animate-pulse"></div>
                         </div>
                       ))}
                     </div>
