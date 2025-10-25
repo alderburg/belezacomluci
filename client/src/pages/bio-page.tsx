@@ -596,51 +596,68 @@ export default function BioPage() {
                             key={coupon.id}
                             onClick={async (e) => {
                               e.preventDefault();
+                              
+                              // Debug completo
+                              console.log('=== CLIQUE NO CUPOM ===');
+                              console.log('Cupom completo:', JSON.stringify(coupon, null, 2));
+                              console.log('Propriedades do cupom:', Object.keys(coupon));
+                              
                               try {
-                                // Debug: ver o que tem no cupom
-                                console.log('Cupom completo:', coupon);
+                                // Pegar o código - verificar todas as possibilidades
+                                const codigo = coupon.code || '';
+                                console.log('Código encontrado:', codigo);
                                 
-                                // Buscar o código correto do cupom
-                                const codigo = coupon.code || coupon.couponCode || 'SEM CÓDIGO';
-                                
-                                console.log('Código do cupom:', codigo);
-                                
-                                // Copiar código do cupom
-                                if (codigo && codigo !== 'SEM CÓDIGO') {
+                                // Copiar código do cupom se existir
+                                if (codigo && codigo.trim() !== '') {
                                   await navigator.clipboard.writeText(codigo);
+                                  console.log('✅ Código copiado:', codigo);
+                                  
+                                  toast({
+                                    title: `Cupom ${codigo} copiado! 🎉`,
+                                    description: `Abrindo ${coupon.brand || 'loja'}...`,
+                                    duration: 2000,
+                                  });
+                                } else {
+                                  console.log('⚠️ Cupom sem código');
+                                  toast({
+                                    title: "Cupom selecionado! 🎉",
+                                    description: `Abrindo ${coupon.brand || 'loja'}...`,
+                                    duration: 2000,
+                                  });
                                 }
-                                
-                                // Mostrar toast de sucesso com o código do cupom
-                                toast({
-                                  title: `Cupom "${codigo}" copiado! 🎉`,
-                                  description: `Redirecionando para ${coupon.brand || 'loja'}...`,
-                                  duration: 2000,
-                                });
 
-                                // Abrir loja imediatamente em nova aba
+                                // Abrir loja IMEDIATAMENTE (sem setTimeout para evitar bloqueio de popup)
                                 if (coupon.storeUrl) {
-                                  // Garantir que a URL tenha protocolo
                                   let url = coupon.storeUrl.trim();
+                                  console.log('URL original:', url);
+                                  
+                                  // Adicionar protocolo se necessário
                                   if (!url.startsWith('http://') && !url.startsWith('https://')) {
                                     url = 'https://' + url;
                                   }
+                                  console.log('URL formatada:', url);
                                   
-                                  // Usar setTimeout com 100ms para garantir que não seja bloqueado
-                                  setTimeout(() => {
-                                    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-                                    if (!newWindow) {
-                                      toast({
-                                        title: "Bloqueio de popup detectado",
-                                        description: "Por favor, permita popups para este site",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }, 100);
+                                  // Abrir IMEDIATAMENTE - sem setTimeout
+                                  console.log('🚀 Abrindo URL...');
+                                  const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+                                  
+                                  if (!newWindow || newWindow.closed) {
+                                    console.error('❌ Popup bloqueado');
+                                    toast({
+                                      title: "Não foi possível abrir o site",
+                                      description: "Permita popups para este site nas configurações do navegador",
+                                      variant: "destructive",
+                                    });
+                                  } else {
+                                    console.log('✅ Site aberto com sucesso');
+                                  }
+                                } else {
+                                  console.log('⚠️ Cupom sem URL da loja');
                                 }
                               } catch (error) {
-                                console.error('Erro ao processar cupom:', error);
+                                console.error('❌ Erro ao processar cupom:', error);
                                 toast({
-                                  title: "Erro ao copiar cupom",
+                                  title: "Erro ao processar cupom",
                                   description: "Tente novamente",
                                   variant: "destructive",
                                 });

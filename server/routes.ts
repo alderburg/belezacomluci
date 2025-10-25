@@ -430,6 +430,8 @@ export function registerRoutes(app: Express): Server {
           categoryTitle: categories.title,
           couponOrder: coupons.order,
           categoryOrder: categories.order,
+          code: coupons.code,
+          storeUrl: coupons.storeUrl,
         })
         .from(coupons)
         .leftJoin(categories, eq(coupons.categoryId, categories.id))
@@ -448,6 +450,7 @@ export function registerRoutes(app: Express): Server {
         )
         .orderBy(categories.order, coupons.order);
 
+      console.log('🔍 Cupons retornados pela API:', JSON.stringify(result, null, 2));
       res.json(result);
     } catch (error) {
       console.error("Error fetching active coupons with categories:", error);
