@@ -1634,18 +1634,25 @@ export function registerRoutes(app: Express): Server {
       }
 
       const video = videoData.items[0];
+      
+      // Detecta se é uma live (duração P0D ou liveBroadcastContent === 'live' ou 'upcoming')
+      const isLive = video.snippet.liveBroadcastContent === 'live' || 
+                     video.snippet.liveBroadcastContent === 'upcoming' ||
+                     video.contentDetails.duration === 'P0D';
+      
       const result = {
         id: video.id,
         title: video.snippet.title,
         description: video.snippet.description,
         thumbnail: video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url || `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`,
-        duration: convertISO8601ToHHMMSS(video.contentDetails.duration),
+        duration: isLive ? null : convertISO8601ToHHMMSS(video.contentDetails.duration),
+        isLive: isLive,
         views: parseInt(video.statistics.viewCount || '0'),
         likes: parseInt(video.statistics.likeCount || '0'),
         publishedAt: video.snippet.publishedAt
       };
 
-      console.log('Dados do YouTube recuperados com sucesso:', result.title);
+      console.log('Dados do YouTube recuperados com sucesso:', result.title, isLive ? '(LIVE)' : '');
       res.json(result);
 
     } catch (error) {

@@ -1026,8 +1026,14 @@ export default function AdminPage() {
       const videoData = await response.json();
       console.log('Dados recebidos do YouTube:', videoData);
       
-      // Auto-fill duration field - always ensure HH:MM:SS format
-      if (videoData.duration) {
+      // Auto-fill type to "live" if it's a live video
+      if (videoData.isLive) {
+        videoForm.setValue('type', 'live');
+        console.log('Tipo alterado para: live');
+      }
+      
+      // Auto-fill duration field - only for non-live videos
+      if (videoData.duration && !videoData.isLive) {
         const formattedDuration = ensureHHMMSSFormat(videoData.duration);
         videoForm.setValue('duration', formattedDuration);
         console.log('Duração preenchida:', formattedDuration);
@@ -1045,10 +1051,18 @@ export default function AdminPage() {
         console.log('Thumbnail preenchida automaticamente');
       }
       
-      toast({
-        title: "Dados carregados",
-        description: "Descrição e duração foram preenchidos automaticamente do YouTube",
-      });
+      // Show appropriate toast message
+      if (videoData.isLive) {
+        toast({
+          title: "Live detectada!",
+          description: "Tipo alterado para 'Live' e descrição preenchida automaticamente.",
+        });
+      } else {
+        toast({
+          title: "Dados carregados",
+          description: "Descrição e duração foram preenchidos automaticamente do YouTube",
+        });
+      }
     } catch (error) {
       console.error('Erro ao buscar dados do vídeo:', error);
       toast({
