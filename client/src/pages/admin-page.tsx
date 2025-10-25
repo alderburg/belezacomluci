@@ -731,6 +731,24 @@ export default function AdminPage() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [`/api/${variables.type}`] });
+      
+      // Se for vídeo, também invalidar banners, popups e comentários vinculados
+      if (variables.type === 'videos') {
+        queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/popups"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/popups"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/comments"] });
+        
+        // Limpar cache de popups do sessionStorage
+        const keys = Object.keys(sessionStorage);
+        keys.forEach(key => {
+          if (key.startsWith('popup_') && key.endsWith('_seen')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+      }
+      
       // Se for banner, também invalidar a rota admin
       if (variables.type === 'banners') {
         queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });

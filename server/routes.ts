@@ -194,16 +194,30 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      await storage.deleteVideo(req.params.id);
+      const videoId = req.params.id;
+      
+      // Excluir o vídeo e todos os vínculos
+      await storage.deleteVideo(videoId);
 
-      // Broadcast data update
+      // Broadcast data updates para todas as entidades relacionadas
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('videos', 'deleted', { id: req.params.id });
+        // Notificar que o vídeo foi deletado
+        wsService.broadcastDataUpdate('videos', 'deleted', { id: videoId });
+        
+        // Notificar que banners podem ter sido afetados
+        wsService.broadcastDataUpdate('banners', 'deleted', { videoId: videoId });
+        
+        // Notificar que popups podem ter sido afetados
+        wsService.broadcastDataUpdate('popups', 'deleted', { videoId: videoId });
+        
+        // Notificar que comentários podem ter sido afetados
+        wsService.broadcastDataUpdate('comments', 'deleted', { videoId: videoId });
       }
 
       res.status(204).send();
     } catch (error) {
+      console.error('Erro ao deletar vídeo:', error);
       res.status(500).json({ message: "Failed to delete video" });
     }
   });

@@ -367,6 +367,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteVideo(id: string): Promise<void> {
+    // Excluir todos os vínculos antes de excluir o vídeo
+    
+    // 1. Excluir banners vinculados a este vídeo
+    await this.db.delete(banners).where(eq(banners.videoId, id));
+    
+    // 2. Excluir comentários vinculados a este vídeo
+    await this.db.delete(comments).where(eq(comments.videoId, id));
+    
+    // 3. Excluir likes vinculados a este vídeo
+    await this.db.delete(videoLikes).where(eq(videoLikes.videoId, id));
+    
+    // 4. Excluir popups vinculados a este vídeo
+    await this.db.delete(popups).where(eq(popups.targetVideoId, id));
+    
+    // 5. Finalmente, excluir o vídeo
     await this.db.delete(videos).where(eq(videos.id, id));
   }
 
