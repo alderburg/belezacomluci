@@ -1889,6 +1889,21 @@ export default function AdminPage() {
                             />
                             <Label htmlFor="switch-banner-active">Banner Ativo</Label>
                           </div>
+
+                          {/* Campo para abrir modal de cupons - apenas para página bio */}
+                          {bannerForm.watch("page") === "bio" && (
+                            <div className="flex items-center space-x-2">
+                              <Switch
+                                checked={bannerForm.watch("opensCouponsModal") ?? false}
+                                onCheckedChange={(checked) => {
+                                  bannerForm.setValue("opensCouponsModal", checked);
+                                  bannerForm.trigger("opensCouponsModal");
+                                }}
+                                data-testid="switch-banner-opens-coupons-modal"
+                              />
+                              <Label htmlFor="switch-banner-opens-coupons-modal">Abrir Modal de Cupons</Label>
+                            </div>
+                          )}
                         </div>
 
                         <Button

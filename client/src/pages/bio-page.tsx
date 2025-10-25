@@ -388,9 +388,9 @@ export default function BioPage() {
           {/* Banners Empilhados */}
           {banners && banners.length > 0 && (
             <div className="pb-8 space-y-6">
-              {banners.map((banner, index) => {
-                // Se for o segundo banner (índice 1), abre o modal de cupons
-                if (index === 1) {
+              {banners.map((banner) => {
+                // Se o banner tiver opensCouponsModal ativo, abre o modal de cupons
+                if (banner.opensCouponsModal) {
                   return (
                     <div
                       key={banner.id}
