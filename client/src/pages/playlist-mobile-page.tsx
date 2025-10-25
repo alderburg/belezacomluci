@@ -153,7 +153,10 @@ export default function PlaylistMobilePage() {
         throw new Error(`Failed to fetch playlist: ${response.status}`);
       }
 
-      const videos = await response.json();
+      const data = await response.json();
+
+      // A API retorna um objeto com { playlistTitle, playlistDescription, playlistThumbnail, videos }
+      const videos = data.videos || [];
 
       if (!Array.isArray(videos)) {
         return [];

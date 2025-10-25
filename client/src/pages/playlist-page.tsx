@@ -166,11 +166,14 @@ export default function PlaylistPage() {
         throw new Error(`Failed to fetch playlist: ${response.status}`);
       }
 
-      const videos = await response.json();
-      console.log('Vídeos recebidos da API:', videos);
+      const data = await response.json();
+      console.log('Dados recebidos da API:', data);
+
+      // A API retorna um objeto com { playlistTitle, playlistDescription, playlistThumbnail, videos }
+      const videos = data.videos || [];
 
       if (!Array.isArray(videos)) {
-        console.error('API retornou formato inválido:', videos);
+        console.error('API retornou formato inválido:', data);
         return [];
       }
 
