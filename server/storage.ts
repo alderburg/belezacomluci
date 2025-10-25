@@ -481,12 +481,21 @@ export class DatabaseStorage implements IStorage {
     // 1. Excluir comentários relacionados ao produto
     await this.db.delete(comments).where(eq(comments.productId, id));
     
-    // 2. Atualizar popups que referenciam este produto (remover referência)
-    await this.db.update(popups)
-      .set({ targetCourseId: null })
+    // 2. Buscar popups vinculados a este produto
+    const relatedPopups = await this.db
+      .select({ id: popups.id })
+      .from(popups)
       .where(eq(popups.targetCourseId, id));
     
-    // 3. Agora podemos excluir o produto com segurança
+    // 3. Excluir visualizações dos popups vinculados
+    for (const popup of relatedPopups) {
+      await this.db.delete(popupViews).where(eq(popupViews.popupId, popup.id));
+    }
+    
+    // 4. Excluir os popups vinculados ao produto
+    await this.db.delete(popups).where(eq(popups.targetCourseId, id));
+    
+    // 5. Agora podemos excluir o produto com segurança
     await this.db.delete(products).where(eq(products.id, id));
   }
 
