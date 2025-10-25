@@ -1005,6 +1005,15 @@ export default function AdminPage() {
     return null;
   };
 
+  // Function to check if URL is a playlist
+  const isPlaylistUrl = (url: string): boolean => {
+    const playlistPatterns = [
+      /[?&]list=([^&\n?#]+)/,
+      /\/playlist\?list=([^&\n?#]+)/
+    ];
+    return playlistPatterns.some(pattern => pattern.test(url));
+  };
+
   // Function to fetch video data from YouTube API and auto-fill duration, description and thumbnail
   const handleVideoUrlChange = async (url: string) => {
     const videoId = extractYouTubeVideoId(url);
@@ -1015,6 +1024,10 @@ export default function AdminPage() {
 
     try {
       console.log('Buscando dados do YouTube para vídeo:', videoId);
+      
+      // Primeiro, detectar o tipo baseado na URL
+      const isPlaylist = isPlaylistUrl(url);
+      
       const response = await fetch(`/api/youtube/video/${videoId}`);
       
       if (!response.ok) {
@@ -1037,11 +1050,24 @@ export default function AdminPage() {
         console.log('Título preenchido:', videoData.title);
       }
       
-      // Auto-fill type to "live" if it's a live video
+      // Auto-fill type based on detection
+      let detectedType = 'video'; // default
+      let typeMessage = 'vídeo único';
+      
       if (videoData.isLive) {
-        videoForm.setValue('type', 'live');
-        console.log('Tipo alterado para: live');
+        detectedType = 'live';
+        typeMessage = 'live';
+        console.log('Tipo detectado: live');
+      } else if (isPlaylist) {
+        detectedType = 'playlist';
+        typeMessage = 'playlist';
+        console.log('Tipo detectado: playlist');
+      } else {
+        console.log('Tipo detectado: vídeo único');
       }
+      
+      videoForm.setValue('type', detectedType);
+      console.log('Tipo alterado para:', detectedType);
       
       // Auto-fill duration field - only for non-live videos
       if (videoData.duration && !videoData.isLive) {
@@ -1063,17 +1089,10 @@ export default function AdminPage() {
       }
       
       // Show appropriate toast message
-      if (videoData.isLive) {
-        toast({
-          title: "Live detectada!",
-          description: "Título, tipo, descrição e thumbnail preenchidos automaticamente.",
-        });
-      } else {
-        toast({
-          title: "Dados carregados",
-          description: "Título, descrição e duração preenchidos automaticamente do YouTube",
-        });
-      }
+      toast({
+        title: `${typeMessage.charAt(0).toUpperCase() + typeMessage.slice(1)} detectada!`,
+        description: "Título, tipo, descrição e thumbnail preenchidos automaticamente.",
+      });
     } catch (error) {
       console.error('Erro ao buscar dados do vídeo:', error);
       toast({
