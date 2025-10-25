@@ -14,8 +14,12 @@ import type { Banner } from "@shared/schema";
 import { useDataSync } from "@/hooks/use-data-sync";
 
 export default function BioPage() {
-  // Ativar sincronização global de dados
-  useDataSync();
+  // Ativar sincronização global de dados para atualização automática
+  useDataSync([
+    '/api/admin/public-profile',
+    '/api/admin/community-settings',
+    '/api/banners'
+  ]);
 
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
   const [isCouponsModalOpen, setIsCouponsModalOpen] = useState(false);
@@ -34,6 +38,7 @@ export default function BioPage() {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: 0,
+    refetchInterval: false, // Não fazer polling, usar WebSocket
   });
 
   // Buscar configurações da comunidade (título e subtitle)
@@ -45,6 +50,7 @@ export default function BioPage() {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: 0,
+    refetchInterval: false, // Não fazer polling, usar WebSocket
   });
 
 
