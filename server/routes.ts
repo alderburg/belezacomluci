@@ -10,7 +10,7 @@ import {
   insertRaffleSchema, insertRewardSchema, shareSettings, referrals,
   insertNotificationSchema, insertUserNotificationSchema, notifications, userNotifications,
   insertPopupSchema, insertPopupViewSchema, insertCategorySchema,
-  insertUserSchema, coupons, categories, commentLikes, commentReplies
+  insertUserSchema, coupons, categories, commentLikes, commentReplies, products
 } from "../shared/schema";
 import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
@@ -585,8 +585,50 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
+      const categoryId = req.params.id;
       const categoryData = insertCategorySchema.partial().parse(req.body);
-      const category = await storage.updateCategory(req.params.id, categoryData);
+
+      // Se está tentando desativar a categoria, verificar se está em uso
+      if (categoryData.isActive === false) {
+        // Verificar se existem vídeos usando esta categoria
+        const videosWithCategory = await storage.getVideos(undefined, categoryId);
+        
+        // Verificar se existem produtos usando esta categoria
+        const productsWithCategory = await db
+          .select()
+          .from(products)
+          .where(eq(products.categoryId, categoryId));
+
+        // Verificar se existem cupons usando esta categoria
+        const couponsWithCategory = await db
+          .select()
+          .from(coupons)
+          .where(eq(coupons.categoryId, categoryId));
+
+        const linkedItems = [];
+        if (videosWithCategory.length > 0) {
+          linkedItems.push(`${videosWithCategory.length} vídeo(s)`);
+        }
+        if (productsWithCategory.length > 0) {
+          linkedItems.push(`${productsWithCategory.length} produto(s)`);
+        }
+        if (couponsWithCategory.length > 0) {
+          linkedItems.push(`${couponsWithCategory.length} cupom(ns)`);
+        }
+
+        if (linkedItems.length > 0) {
+          return res.status(400).json({
+            message: `Não é possível desativar esta categoria pois ela está vinculada a: ${linkedItems.join(', ')}. Desvincule primeiro os itens antes de desativar.`,
+            linkedItems: {
+              videos: videosWithCategory.length,
+              products: productsWithCategory.length,
+              coupons: couponsWithCategory.length
+            }
+          });
+        }
+      }
+
+      const category = await storage.updateCategory(categoryId, categoryData);
 
       // Notificar via WebSocket sobre categoria atualizada
       const wsService = (global as any).notificationWS;
@@ -610,12 +652,51 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      await storage.deleteCategory(req.params.id);
+      const categoryId = req.params.id;
+
+      // Verificar se existem vídeos usando esta categoria
+      const videosWithCategory = await storage.getVideos(undefined, categoryId);
+      
+      // Verificar se existem produtos usando esta categoria
+      const productsWithCategory = await db
+        .select()
+        .from(products)
+        .where(eq(products.categoryId, categoryId));
+
+      // Verificar se existem cupons usando esta categoria
+      const couponsWithCategory = await db
+        .select()
+        .from(coupons)
+        .where(eq(coupons.categoryId, categoryId));
+
+      const linkedItems = [];
+      if (videosWithCategory.length > 0) {
+        linkedItems.push(`${videosWithCategory.length} vídeo(s)`);
+      }
+      if (productsWithCategory.length > 0) {
+        linkedItems.push(`${productsWithCategory.length} produto(s)`);
+      }
+      if (couponsWithCategory.length > 0) {
+        linkedItems.push(`${couponsWithCategory.length} cupom(ns)`);
+      }
+
+      if (linkedItems.length > 0) {
+        return res.status(400).json({
+          message: `Não é possível excluir esta categoria pois ela está vinculada a: ${linkedItems.join(', ')}. Desvincule primeiro os itens antes de excluir.`,
+          linkedItems: {
+            videos: videosWithCategory.length,
+            products: productsWithCategory.length,
+            coupons: couponsWithCategory.length
+          }
+        });
+      }
+
+      await storage.deleteCategory(categoryId);
 
       // Notificar via WebSocket sobre categoria deletada
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('categories', 'deleted', { id: req.params.id });
+        wsService.broadcastDataUpdate('categories', 'deleted', { id: categoryId });
       }
 
       res.status(204).send();
