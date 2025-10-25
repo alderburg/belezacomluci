@@ -418,7 +418,7 @@ export default function AdminPage() {
       discount: "",
       categoryId: "",
       isExclusive: false,
-      isActive: true,
+      isActive: false,
       storeUrl: "",
       coverImageUrl: "",
       order: 0,
