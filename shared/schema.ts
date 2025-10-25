@@ -124,6 +124,7 @@ export const banners = pgTable("banners", {
   showTitle: boolean("show_title").notNull().default(true),
   showDescription: boolean("show_description").notNull().default(true),
   showButton: boolean("show_button").notNull().default(true),
+  opensCouponsModal: boolean("opens_coupons_modal").default(false), // Para banners da bio que abrem o modal de cupons
   startDateTime: timestamp("start_date_time"), // Data e hora de início para ativação automática
   endDateTime: timestamp("end_date_time"), // Data e hora de fim para desativação automática
   createdAt: timestamp("created_at").default(sql`now()`),
