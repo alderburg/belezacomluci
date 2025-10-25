@@ -10,9 +10,10 @@ interface ImageUploadProps {
   onChange: (base64: string) => void;
   id?: string;
   placeholder?: string;
+  required?: boolean;
 }
 
-export function ImageUpload({ label, value, onChange, id, placeholder }: ImageUploadProps) {
+export function ImageUpload({ label, value, onChange, id, placeholder, required }: ImageUploadProps) {
   const [preview, setPreview] = useState<string>(value || "");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,7 +52,10 @@ export function ImageUpload({ label, value, onChange, id, placeholder }: ImageUp
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id}>
+        {label}
+        {required && <span className="text-destructive"> *</span>}
+      </Label>
       <div className="flex items-center gap-2">
         <Input
           id={id}

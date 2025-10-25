@@ -1943,13 +1943,19 @@ export default function AdminPage() {
                           />
                         </div>
 
-                        <ImageUpload
-                          id="popup-image"
-                          label="Imagem do Popup"
-                          value={popupForm.watch("imageUrl")}
-                          onChange={(base64) => popupForm.setValue("imageUrl", base64)}
-                          placeholder="Selecionar imagem do popup"
-                        />
+                        <div>
+                          <ImageUpload
+                            id="popup-image"
+                            label="Imagem do Popup"
+                            value={popupForm.watch("imageUrl")}
+                            onChange={(base64) => popupForm.setValue("imageUrl", base64)}
+                            placeholder="Selecionar imagem do popup"
+                            required
+                          />
+                          {popupForm.formState.errors.imageUrl && (
+                            <p className="text-sm text-destructive mt-1">{popupForm.formState.errors.imageUrl.message}</p>
+                          )}
+                        </div>
 
                         <div>
                           <Label htmlFor="popup-link">URL de Destino</Label>
@@ -2172,23 +2178,29 @@ export default function AdminPage() {
                     {activeTab === 'notifications' && (
                       <form onSubmit={notificationForm.handleSubmit((data) => createNotificationMutation.mutate(data))} className="space-y-4">
                         <div>
-                          <Label htmlFor="notification-title">Título</Label>
+                          <Label htmlFor="notification-title">Título <span className="text-destructive">*</span></Label>
                           <Input
                             id="notification-title"
                             {...notificationForm.register("title")}
                             placeholder="Digite o título da notificação"
                             data-testid="input-notification-title"
                           />
+                          {notificationForm.formState.errors.title && (
+                            <p className="text-sm text-destructive mt-1">{notificationForm.formState.errors.title.message}</p>
+                          )}
                         </div>
 
                         <div>
-                          <Label htmlFor="notification-description">Descrição</Label>
+                          <Label htmlFor="notification-description">Descrição <span className="text-destructive">*</span></Label>
                           <Textarea
                             id="notification-description"
                             {...notificationForm.register("description")}
                             placeholder="Descrição da notificação"
                             data-testid="textarea-notification-description"
                           />
+                          {notificationForm.formState.errors.description && (
+                            <p className="text-sm text-destructive mt-1">{notificationForm.formState.errors.description.message}</p>
+                          )}
                         </div>
 
                         <ImageUpload
