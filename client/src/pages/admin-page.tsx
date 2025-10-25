@@ -1070,10 +1070,12 @@ export default function AdminPage() {
                   console.log('Título da playlist preenchido:', playlistData.playlistTitle);
                 }
                 
-                // Usar descrição da playlist
-                if (playlistData.playlistDescription) {
+                // Usar descrição da playlist (somente se existir e não estiver vazia)
+                if (playlistData.playlistDescription && playlistData.playlistDescription.trim() !== '') {
                   videoForm.setValue('description', playlistData.playlistDescription);
                   console.log('Descrição da playlist preenchida');
+                } else {
+                  console.log('Playlist não possui descrição, deixando campo vazio');
                 }
                 
                 // Usar thumbnail da playlist
