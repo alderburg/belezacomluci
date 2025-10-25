@@ -604,28 +604,43 @@ export default function BioPage() {
                         {coupons.map((coupon) => (
                           <div
                             key={coupon.id}
-                            onClick={async () => {
+                            onClick={async (e) => {
+                              e.preventDefault();
                               try {
+                                const codigo = coupon.code || 'SEM CÓDIGO';
+                                
                                 // Copiar código do cupom
-                                await navigator.clipboard.writeText(coupon.code || '');
+                                await navigator.clipboard.writeText(codigo);
                                 
                                 // Mostrar toast de sucesso com o código do cupom
                                 toast({
-                                  title: `Cupom ${coupon.code} copiado! 🎉`,
-                                  description: `Redirecionando para ${coupon.brand}...`,
+                                  title: `Cupom "${codigo}" copiado! 🎉`,
+                                  description: `Redirecionando para ${coupon.brand || 'loja'}...`,
                                   duration: 2000,
                                 });
 
-                                // Abrir loja imediatamente em nova aba (não esperar 2 segundos)
+                                // Abrir loja imediatamente em nova aba
                                 if (coupon.storeUrl) {
                                   // Garantir que a URL tenha protocolo
-                                  let url = coupon.storeUrl;
+                                  let url = coupon.storeUrl.trim();
                                   if (!url.startsWith('http://') && !url.startsWith('https://')) {
                                     url = 'https://' + url;
                                   }
-                                  window.open(url, '_blank', 'noopener,noreferrer');
+                                  
+                                  // Usar setTimeout com 100ms para garantir que não seja bloqueado
+                                  setTimeout(() => {
+                                    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+                                    if (!newWindow) {
+                                      toast({
+                                        title: "Bloqueio de popup detectado",
+                                        description: "Por favor, permita popups para este site",
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }, 100);
                                 }
                               } catch (error) {
+                                console.error('Erro ao processar cupom:', error);
                                 toast({
                                   title: "Erro ao copiar cupom",
                                   description: "Tente novamente",
