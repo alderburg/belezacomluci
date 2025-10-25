@@ -1728,13 +1728,16 @@ export default function AdminPage() {
                     {activeTab === 'banners' && (
                       <form onSubmit={bannerForm.handleSubmit((data) => createBannerMutation.mutate(data))} className="space-y-4">
                         <div>
-                          <Label htmlFor="banner-title">Título</Label>
+                          <Label htmlFor="banner-title">Título <span className="text-destructive">*</span></Label>
                           <Input
                             id="banner-title"
                             {...bannerForm.register("title")}
                             placeholder="Digite o título do banner"
                             data-testid="input-banner-title"
                           />
+                          {bannerForm.formState.errors.title && (
+                            <p className="text-sm text-destructive mt-1">{bannerForm.formState.errors.title.message}</p>
+                          )}
                         </div>
 
                         <div>
