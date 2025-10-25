@@ -735,6 +735,11 @@ export default function AdminPage() {
       if (variables.type === 'banners') {
         queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
       }
+      // Se for produto, também invalidar popups (pois podem ter sido deletados)
+      if (variables.type === 'products' || variables.type === 'produtos') {
+        queryClient.invalidateQueries({ queryKey: ["/api/popups"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/popups"] });
+      }
       // Se for popup, também invalidar a rota admin e limpar cache
       if (variables.type === 'popups') {
         queryClient.invalidateQueries({ queryKey: ["/api/admin/popups"] });

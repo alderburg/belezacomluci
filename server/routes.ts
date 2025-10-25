@@ -393,6 +393,8 @@ export function registerRoutes(app: Express): Server {
       const wsService = (global as any).notificationWS;
       if (wsService) {
         wsService.broadcastDataUpdate('products', 'deleted', { id: req.params.id });
+        // Notificar que popups também podem ter sido deletados
+        wsService.broadcastDataUpdate('popups', 'deleted', { productId: req.params.id });
       }
 
       res.status(204).send();
