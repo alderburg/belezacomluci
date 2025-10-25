@@ -120,9 +120,44 @@ export default function ProductCard({ product, viewMode: propViewMode }: Product
   const ProductIcon = getProductIcon();
 
   const handleDownload = () => {
-    // Se for um curso, redireciona para a página de playlist
+    // Se for um curso, verificar se é playlist ou vídeo único
     if (product.type === 'course') {
-      navigate(`/playlist/${product.id}`);
+      // Extrair ID da playlist do YouTube
+      const extractPlaylistId = (url: string): string | null => {
+        const regex = /(?:list=|list\/)([^&\n?#]+)/;
+        const match = url.match(regex);
+        return match ? match[1] : null;
+      };
+
+      // Extrair ID do vídeo do YouTube
+      const extractVideoId = (url: string): string | null => {
+        const regex = /(?:v=|youtu\.be\/|embed\/|watch\?v=|v\/|e\/|watch\?.*&v=)([^&\n?#]+)/;
+        const match = url.match(regex);
+        if (match && match[1]) {
+          let videoId = match[1];
+          // Remove qualquer parâmetro adicional
+          if (videoId.includes('?')) {
+            videoId = videoId.split('?')[0];
+          }
+          if (videoId.includes('&')) {
+            videoId = videoId.split('&')[0];
+          }
+          return videoId;
+        }
+        return null;
+      };
+
+      const playlistId = extractPlaylistId(product.fileUrl);
+      const videoId = extractVideoId(product.fileUrl);
+
+      // Se tem playlist ID, abre como playlist
+      if (playlistId) {
+        navigate(`/playlist/${product.id}`);
+      } 
+      // Se tem apenas vídeo ID (sem playlist), abre como vídeo único
+      else if (videoId) {
+        navigate(`/video/${product.id}`);
+      }
       return;
     }
 
