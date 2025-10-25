@@ -94,7 +94,7 @@ export const products = pgTable("products", {
 
 export const coupons = pgTable("coupons", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  code: text("code").notNull().unique(),
+  code: text("code").notNull(),
   brand: text("brand").notNull(),
   description: text("description").notNull(),
   discount: text("discount").notNull(),
