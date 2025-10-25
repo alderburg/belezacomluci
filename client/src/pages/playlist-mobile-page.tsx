@@ -132,17 +132,28 @@ export default function PlaylistMobilePage() {
   }, [resource, accessControl, navigate, product]);
 
   // Extrair ID da playlist do YouTube
-  const extractPlaylistId = (url: string): string => {
+  const extractPlaylistId = (url: string): string | null => {
     const regex = /(?:list=|list\/)([^&\n?#]+)/;
     const match = url.match(regex);
-    return match ? match[1] : 'pt-16';
+    return match ? match[1] : null;
   };
 
   // Extrair ID do vídeo do YouTube
-  const extractVideoId = (url: string): string => {
+  const extractVideoId = (url: string): string | null => {
     const regex = /(?:v=|youtu\.be\/|embed\/|watch\?v=|v\/|e\/|watch\?.*&v=)([^&\n?#]+)/;
     const match = url.match(regex);
-    return match ? match[1] : 'pt-16';
+    if (match && match[1]) {
+      let videoId = match[1];
+      // Remove qualquer parâmetro adicional
+      if (videoId.includes('?')) {
+        videoId = videoId.split('?')[0];
+      }
+      if (videoId.includes('&')) {
+        videoId = videoId.split('&')[0];
+      }
+      return videoId;
+    }
+    return null;
   };
 
   // Buscar vídeos reais da playlist do YouTube via backend
@@ -191,29 +202,54 @@ export default function PlaylistMobilePage() {
         setIsLoadingPlaylist(true);
 
         if (playlistId) {
+          console.log('Detectada playlist mobile, buscando vídeos...');
           fetchPlaylistVideos(playlistId).then((fetchedVideos) => {
-            setVideos(fetchedVideos);
             if (fetchedVideos.length > 0) {
+              setVideos(fetchedVideos);
               setCurrentVideoId(fetchedVideos[0].id);
-              // Ativar skeleton para aguardar carregamento dos dados do YouTube no carregamento inicial
               setIsLoadingVideoContent(true);
+            } else {
+              console.log('Playlist vazia, tentando vídeo único');
+              if (videoId) {
+                const singleVideo = {
+                  id: videoId,
+                  title: resource.title || (product ? 'Vídeo do Curso' : 'Vídeo'),
+                  thumbnail: resource.thumbnailUrl || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+                  duration: 'N/A'
+                };
+                setVideos([singleVideo]);
+                setCurrentVideoId(videoId);
+                setIsLoadingVideoContent(true);
+              }
             }
             setIsLoadingPlaylist(false);
           }).catch((error) => {
-            console.error('Erro ao carregar playlist:', error);
+            console.error('Erro ao carregar playlist mobile:', error);
+            if (videoId) {
+              console.log('Fallback mobile: Tratando como vídeo único após erro na playlist');
+              const singleVideo = {
+                id: videoId,
+                title: resource.title || (product ? 'Vídeo do Curso' : 'Vídeo'),
+                thumbnail: resource.thumbnailUrl || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+                duration: 'N/A'
+              };
+              setVideos([singleVideo]);
+              setCurrentVideoId(videoId);
+              setIsLoadingVideoContent(true);
+            }
             setIsLoadingPlaylist(false);
           });
         } else if (videoId) {
+          console.log('Detectado vídeo único mobile');
           const singleVideo = {
             id: videoId,
             title: resource.title || (product ? 'Vídeo do Curso' : 'Vídeo'),
-            thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+            thumbnail: resource.thumbnailUrl || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
             duration: 'N/A'
           };
 
           setVideos([singleVideo]);
           setCurrentVideoId(videoId);
-          // Ativar skeleton para aguardar carregamento dos dados do YouTube no carregamento inicial
           setIsLoadingVideoContent(true);
           setIsLoadingPlaylist(false);
         } else {

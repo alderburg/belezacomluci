@@ -1689,15 +1689,102 @@ export default function AdminPage() {
 
                           <div>
                             <Label htmlFor="product-file">
-                              {productForm.watch("type") === "course" ? "URL da Playlist do YouTube" : "URL do Arquivo"} <span className="text-destructive">*</span>
+                              {productForm.watch("type") === "course" ? "URL da Playlist ou Vídeo do YouTube" : "URL do Arquivo"} <span className="text-destructive">*</span>
                             </Label>
                             <Input
                               id="product-file"
                               {...productForm.register("fileUrl")}
                               placeholder={productForm.watch("type") === "course" 
-                                ? "https://www.youtube.com/playlist?list=..." 
+                                ? "https://www.youtube.com/watch?v=... ou https://www.youtube.com/playlist?list=..." 
                                 : "https://..."}
                               data-testid="input-product-file"
+                              onBlur={async (e) => {
+                                const url = e.target.value.trim();
+                                if (!url || productForm.watch("type") !== "course") return;
+
+                                // Verificar se é URL do YouTube
+                                const isYouTubeUrl = /(?:youtube\.com|youtu\.be)/.test(url);
+                                if (!isYouTubeUrl) return;
+
+                                try {
+                                  // Verificar se é playlist
+                                  const isPlaylist = /[?&]list=([^&\n?#]+)/.test(url);
+                                  
+                                  if (isPlaylist) {
+                                    // Buscar dados da playlist
+                                    const playlistIdMatch = url.match(/[?&]list=([^&\n?#]+)/);
+                                    if (playlistIdMatch && playlistIdMatch[1]) {
+                                      const playlistId = playlistIdMatch[1];
+                                      console.log('Detectada playlist de produto, buscando dados:', playlistId);
+                                      
+                                      const playlistResponse = await fetch(`/api/youtube/playlist/${playlistId}`);
+                                      if (playlistResponse.ok) {
+                                        const playlistData = await playlistResponse.json();
+                                        
+                                        if (playlistData && playlistData.videos && playlistData.videos.length > 0) {
+                                          // Preencher título da playlist
+                                          if (playlistData.playlistTitle && !productForm.watch("title")) {
+                                            productForm.setValue('title', playlistData.playlistTitle);
+                                          }
+                                          
+                                          // Preencher descrição se existir
+                                          if (playlistData.playlistDescription && playlistData.playlistDescription.trim() !== '' && !productForm.watch("description")) {
+                                            productForm.setValue('description', playlistData.playlistDescription);
+                                          }
+                                          
+                                          // Preencher thumbnail
+                                          if (playlistData.playlistThumbnail && !productForm.watch("coverImageUrl")) {
+                                            productForm.setValue('coverImageUrl', playlistData.playlistThumbnail);
+                                          }
+                                          
+                                          toast({
+                                            title: "Playlist detectada!",
+                                            description: `${playlistData.videos.length} vídeos encontrados`,
+                                          });
+                                        }
+                                      }
+                                    }
+                                  } else {
+                                    // É vídeo único - extrair ID e buscar dados
+                                    const videoIdMatch = url.match(/(?:v=|youtu\.be\/|embed\/|v\/|watch\?.*&v=)([^&\n?#]+)/);
+                                    if (videoIdMatch && videoIdMatch[1]) {
+                                      let videoId = videoIdMatch[1];
+                                      if (videoId.includes('?')) {
+                                        videoId = videoId.split('?')[0];
+                                      }
+                                      
+                                      console.log('Detectado vídeo único de produto, buscando dados:', videoId);
+                                      
+                                      const videoResponse = await fetch(`/api/youtube/video/${videoId}`);
+                                      if (videoResponse.ok) {
+                                        const videoData = await videoResponse.json();
+                                        
+                                        // Preencher título se não estiver preenchido
+                                        if (videoData.title && !productForm.watch("title")) {
+                                          productForm.setValue('title', videoData.title);
+                                        }
+                                        
+                                        // Preencher descrição se não estiver preenchida
+                                        if (videoData.description && !productForm.watch("description")) {
+                                          productForm.setValue('description', videoData.description);
+                                        }
+                                        
+                                        // Preencher thumbnail
+                                        if (videoData.thumbnail && !productForm.watch("coverImageUrl")) {
+                                          productForm.setValue('coverImageUrl', videoData.thumbnail);
+                                        }
+                                        
+                                        toast({
+                                          title: "Vídeo detectado!",
+                                          description: "Dados carregados automaticamente",
+                                        });
+                                      }
+                                    }
+                                  }
+                                } catch (error) {
+                                  console.error('Erro ao buscar dados do YouTube para produto:', error);
+                                }
+                              }}
                             />
                             {productForm.formState.errors.fileUrl && (
                               <p className="text-sm text-destructive mt-1">{productForm.formState.errors.fileUrl.message}</p>
