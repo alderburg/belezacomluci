@@ -6,6 +6,8 @@ import {
   banners,
   posts,
   comments,
+  commentLikes,
+  commentReplies,
   subscriptions,
   userActivity,
   videoLikes,
