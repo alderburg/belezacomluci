@@ -84,17 +84,7 @@ export default function BioPage() {
   });
 
   // Buscar cupons ativos com categorias
-  const { data: couponsData, isLoading: isLoadingCoupons } = useQuery<Array<{
-    id: string;
-    coverImageUrl: string | null;
-    brand: string;
-    discount: string;
-    categoryId: string | null;
-    categoryTitle: string | null;
-    order: number | null;
-    code: string;
-    storeUrl: string | null;
-  }>>({
+  const { data: couponsData, isLoading: isLoadingCoupons } = useQuery<any[]>({
     queryKey: ["/api/coupons/active-with-categories"],
     enabled: isCouponsModalOpen,
     refetchOnWindowFocus: true,
@@ -103,7 +93,7 @@ export default function BioPage() {
     refetchInterval: false, // Não fazer polling, usar WebSocket
     select: (data) => {
       // Ordenar cupons por campo 'order'
-      return [...data].sort((a, b) => (a.order || 0) - (b.order || 0));
+      return [...data].sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
     },
   });
 
@@ -607,10 +597,18 @@ export default function BioPage() {
                             onClick={async (e) => {
                               e.preventDefault();
                               try {
-                                const codigo = coupon.code || 'SEM CÓDIGO';
+                                // Debug: ver o que tem no cupom
+                                console.log('Cupom completo:', coupon);
+                                
+                                // Buscar o código correto do cupom
+                                const codigo = coupon.code || coupon.couponCode || 'SEM CÓDIGO';
+                                
+                                console.log('Código do cupom:', codigo);
                                 
                                 // Copiar código do cupom
-                                await navigator.clipboard.writeText(codigo);
+                                if (codigo && codigo !== 'SEM CÓDIGO') {
+                                  await navigator.clipboard.writeText(codigo);
+                                }
                                 
                                 // Mostrar toast de sucesso com o código do cupom
                                 toast({
