@@ -1790,9 +1790,9 @@ export function registerRoutes(app: Express): Server {
       // Executa ação no YouTube
       let success = false;
       if (action === 'like') {
-        success = await youtubeOAuth.likeVideo(youtubeVideoId, tokens);
+        success = await youtubeOAuth.likeVideo(videoId, tokens);
       } else if (action === 'unlike') {
-        success = await youtubeOAuth.unlikeVideo(youtubeVideoId, tokens);
+        success = await youtubeOAuth.unlikeVideo(videoId, tokens);
       }
 
       if (success) {
