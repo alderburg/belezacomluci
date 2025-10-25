@@ -417,7 +417,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Cupons ativos com categorias para modal da página /bio
-  app.get("/api/coupons/active-with-categories", async (req, res) => {
+  app.get("/api/coupons/active-with-categories", async (_req, res) => {
     try {
       const now = new Date();
       const result = await db
@@ -1220,15 +1220,15 @@ export function registerRoutes(app: Express): Server {
         .select({ count: sql<number>`count(*)` })
         .from(commentLikes)
         .where(eq(commentLikes.commentId, commentId));
-      
+
       const actualCount = Number(likesCountResult[0]?.count) || 0;
-      
+
       // Update comment with actual count
       await db
         .update(comments)
         .set({ likesCount: actualCount })
         .where(eq(comments.id, commentId));
-      
+
       result.likesCount = actualCount;
 
       // Get the postId from the comment for WebSocket broadcast
@@ -1356,9 +1356,9 @@ export function registerRoutes(app: Express): Server {
         .select({ count: sql<number>`count(*)` })
         .from(commentReplies)
         .where(eq(commentReplies.commentId, commentId));
-      
+
       const actualCount = Number(repliesCountResult[0]?.count) || 0;
-      
+
       // Update comment with actual count
       await db
         .update(comments)

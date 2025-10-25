@@ -88,6 +88,7 @@ export default function BioPage() {
     discount: string;
     categoryId: string | null;
     categoryTitle: string | null;
+    order: number | null;
   }>>({
     queryKey: ["/api/coupons/active-with-categories"],
     enabled: isCouponsModalOpen,
@@ -95,6 +96,10 @@ export default function BioPage() {
     refetchOnMount: true,
     staleTime: 0,
     refetchInterval: false, // Não fazer polling, usar WebSocket
+    select: (data) => {
+      // Ordenar cupons por campo 'order'
+      return [...data].sort((a, b) => (a.order || 0) - (b.order || 0));
+    },
   });
 
   // Verificar se está carregando
