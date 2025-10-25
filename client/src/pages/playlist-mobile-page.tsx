@@ -726,7 +726,7 @@ export default function PlaylistMobilePage() {
         </div>
       </div>
 
-      <PopupSystem trigger="page_specific" targetPage="course_specific" targetCourseId={resourceId} />age_specific" targetPage="playlist_specific" targetCourseId={resourceId} />
+      <PopupSystem trigger="page_specific" targetPage="course_specific" targetCourseId={resourceId} />
 
       {/* Content com padding-top para compensar header fixo */}
       <div className="pt-24 px-4 py-6 space-y-6">
