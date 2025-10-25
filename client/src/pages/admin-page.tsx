@@ -1026,6 +1026,12 @@ export default function AdminPage() {
       const videoData = await response.json();
       console.log('Dados recebidos do YouTube:', videoData);
       
+      // Auto-fill title
+      if (videoData.title) {
+        videoForm.setValue('title', videoData.title);
+        console.log('Título preenchido:', videoData.title);
+      }
+      
       // Auto-fill type to "live" if it's a live video
       if (videoData.isLive) {
         videoForm.setValue('type', 'live');
@@ -1055,12 +1061,12 @@ export default function AdminPage() {
       if (videoData.isLive) {
         toast({
           title: "Live detectada!",
-          description: "Tipo alterado para 'Live' e descrição preenchida automaticamente.",
+          description: "Título, tipo, descrição e thumbnail preenchidos automaticamente.",
         });
       } else {
         toast({
           title: "Dados carregados",
-          description: "Descrição e duração foram preenchidos automaticamente do YouTube",
+          description: "Título, descrição e duração preenchidos automaticamente do YouTube",
         });
       }
     } catch (error) {
