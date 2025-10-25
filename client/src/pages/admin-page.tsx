@@ -1028,6 +1028,70 @@ export default function AdminPage() {
       // Primeiro, detectar o tipo baseado na URL
       const isPlaylist = isPlaylistUrl(url);
       
+      // Se for playlist, calcular duração total
+      if (isPlaylist) {
+        const playlistIdMatch = url.match(/[?&]list=([^&\n?#]+)/);
+        if (playlistIdMatch && playlistIdMatch[1]) {
+          const playlistId = playlistIdMatch[1];
+          console.log('Detectada playlist, buscando vídeos para calcular duração total:', playlistId);
+          
+          try {
+            const playlistResponse = await fetch(`/api/youtube/playlist/${playlistId}`);
+            if (playlistResponse.ok) {
+              const playlistVideos = await playlistResponse.json();
+              
+              if (playlistVideos && playlistVideos.length > 0) {
+                // Calcular duração total
+                let totalSeconds = 0;
+                for (const video of playlistVideos) {
+                  if (video.duration) {
+                    const parts = video.duration.split(':');
+                    if (parts.length === 3) {
+                      const hours = parseInt(parts[0]) || 0;
+                      const minutes = parseInt(parts[1]) || 0;
+                      const seconds = parseInt(parts[2]) || 0;
+                      totalSeconds += hours * 3600 + minutes * 60 + seconds;
+                    }
+                  }
+                }
+                
+                // Converter total de segundos para HH:MM:SS
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                const totalDuration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                videoForm.setValue('duration', totalDuration);
+                console.log(`Duração total da playlist calculada: ${totalDuration} (${playlistVideos.length} vídeos)`);
+                
+                // Pegar título do primeiro vídeo como título padrão
+                if (playlistVideos[0].title) {
+                  videoForm.setValue('title', playlistVideos[0].title);
+                }
+                
+                // Pegar thumbnail do primeiro vídeo
+                if (playlistVideos[0].thumbnail) {
+                  videoForm.setValue('thumbnailUrl', playlistVideos[0].thumbnail);
+                }
+                
+                videoForm.setValue('type', 'playlist');
+                console.log('Tipo alterado para: playlist');
+                
+                toast({
+                  title: "Playlist detectada!",
+                  description: `${playlistVideos.length} vídeos encontrados. Duração total: ${totalDuration}`,
+                });
+                
+                return; // Não precisa buscar dados do vídeo individual
+              }
+            }
+          } catch (error) {
+            console.error('Erro ao buscar dados da playlist:', error);
+          }
+        }
+      }
+      
+      // Se não for playlist ou falhou, buscar dados do vídeo individual
       const response = await fetch(`/api/youtube/video/${videoId}`);
       
       if (!response.ok) {
@@ -1058,10 +1122,6 @@ export default function AdminPage() {
         detectedType = 'live';
         typeMessage = 'live';
         console.log('Tipo detectado: live');
-      } else if (isPlaylist) {
-        detectedType = 'playlist';
-        typeMessage = 'playlist';
-        console.log('Tipo detectado: playlist');
       } else {
         console.log('Tipo detectado: vídeo único');
       }
