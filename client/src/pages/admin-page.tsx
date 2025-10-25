@@ -1011,7 +1011,10 @@ export default function AdminPage() {
       /[?&]list=([^&\n?#]+)/,
       /\/playlist\?list=([^&\n?#]+)/
     ];
-    return playlistPatterns.some(pattern => pattern.test(url));
+    const hasPlaylist = playlistPatterns.some(pattern => pattern.test(url));
+    console.log('Verificando se é playlist:', url);
+    console.log('Contém parâmetro list?', hasPlaylist);
+    return hasPlaylist;
   };
 
   // Function to fetch video data from YouTube API and auto-fill duration, description and thumbnail
@@ -1037,7 +1040,16 @@ export default function AdminPage() {
           
           try {
             const playlistResponse = await fetch(`/api/youtube/playlist/${playlistId}`);
-            if (playlistResponse.ok) {
+            
+            if (!playlistResponse.ok) {
+              console.error('Erro ao buscar playlist:', playlistResponse.status);
+              toast({
+                title: "Aviso",
+                description: "Não foi possível carregar dados da playlist. Ela pode ser privada ou não existir. Buscar dados do vídeo ao invés?",
+                variant: "destructive",
+              });
+              // Continua para buscar dados do vídeo individual
+            } else {
               const playlistData = await playlistResponse.json();
               
               if (playlistData && playlistData.videos && playlistData.videos.length > 0) {
