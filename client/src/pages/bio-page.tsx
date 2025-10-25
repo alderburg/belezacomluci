@@ -36,6 +36,17 @@ export default function BioPage() {
     staleTime: 0,
   });
 
+  // Buscar configurações da comunidade (título e subtitle)
+  const { data: communitySettings } = useQuery<{
+    title: string;
+    subtitle: string;
+  }>({
+    queryKey: ["/api/admin/community-settings"],
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 0,
+  });
+
 
   // Buscar banners da página /bio
   const { data: banners, isLoading: isLoadingBanners } = useQuery<Banner[]>({
@@ -353,7 +364,7 @@ export default function BioPage() {
             </div>
 
             <h1 className="text-3xl md:text-4xl font-bold text-white">
-              @belezacomluci
+              {communitySettings?.title || '@belezacomluci'}
             </h1>
 
             <p className="text-base md:text-lg text-white max-w-lg mx-auto">
@@ -405,7 +416,7 @@ export default function BioPage() {
           {/* Chamada para Redes Sociais */}
           <div className="py-0 pt-4">
             <p className="text-base md:text-lg font-medium text-center leading-relaxed text-white">
-              Siga <span className="font-bold text-white">@belezacomluci</span> nas redes<br />
+              Siga <span className="font-bold text-white">{communitySettings?.title || '@belezacomluci'}</span> nas redes<br />
               sociais e fique por dentro de tudo!
             </p>
 
