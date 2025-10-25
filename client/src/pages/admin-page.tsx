@@ -1698,8 +1698,10 @@ export default function AdminPage() {
                                 ? "https://www.youtube.com/watch?v=... ou https://www.youtube.com/playlist?list=..." 
                                 : "https://..."}
                               data-testid="input-product-file"
-                              onBlur={async (e) => {
+                              onChange={async (e) => {
                                 const url = e.target.value.trim();
+                                productForm.setValue("fileUrl", e.target.value);
+                                
                                 if (!url || productForm.watch("type") !== "course") return;
 
                                 // Verificar se é URL do YouTube
@@ -1723,23 +1725,23 @@ export default function AdminPage() {
                                         
                                         if (playlistData && playlistData.videos && playlistData.videos.length > 0) {
                                           // Preencher título da playlist
-                                          if (playlistData.playlistTitle && !productForm.watch("title")) {
+                                          if (playlistData.playlistTitle) {
                                             productForm.setValue('title', playlistData.playlistTitle);
                                           }
                                           
                                           // Preencher descrição se existir
-                                          if (playlistData.playlistDescription && playlistData.playlistDescription.trim() !== '' && !productForm.watch("description")) {
+                                          if (playlistData.playlistDescription && playlistData.playlistDescription.trim() !== '') {
                                             productForm.setValue('description', playlistData.playlistDescription);
                                           }
                                           
                                           // Preencher thumbnail
-                                          if (playlistData.playlistThumbnail && !productForm.watch("coverImageUrl")) {
+                                          if (playlistData.playlistThumbnail) {
                                             productForm.setValue('coverImageUrl', playlistData.playlistThumbnail);
                                           }
                                           
                                           toast({
                                             title: "Playlist detectada!",
-                                            description: `${playlistData.videos.length} vídeos encontrados`,
+                                            description: `${playlistData.videos.length} vídeos encontrados. Título, descrição e thumbnail preenchidos automaticamente.`,
                                           });
                                         }
                                       }
@@ -1759,30 +1761,35 @@ export default function AdminPage() {
                                       if (videoResponse.ok) {
                                         const videoData = await videoResponse.json();
                                         
-                                        // Preencher título se não estiver preenchido
-                                        if (videoData.title && !productForm.watch("title")) {
+                                        // Preencher título
+                                        if (videoData.title) {
                                           productForm.setValue('title', videoData.title);
                                         }
                                         
-                                        // Preencher descrição se não estiver preenchida
-                                        if (videoData.description && !productForm.watch("description")) {
+                                        // Preencher descrição
+                                        if (videoData.description) {
                                           productForm.setValue('description', videoData.description);
                                         }
                                         
                                         // Preencher thumbnail
-                                        if (videoData.thumbnail && !productForm.watch("coverImageUrl")) {
+                                        if (videoData.thumbnail) {
                                           productForm.setValue('coverImageUrl', videoData.thumbnail);
                                         }
                                         
                                         toast({
                                           title: "Vídeo detectado!",
-                                          description: "Dados carregados automaticamente",
+                                          description: "Título, descrição e thumbnail preenchidos automaticamente.",
                                         });
                                       }
                                     }
                                   }
                                 } catch (error) {
                                   console.error('Erro ao buscar dados do YouTube para produto:', error);
+                                  toast({
+                                    title: "Erro",
+                                    description: "Não foi possível carregar os dados do YouTube",
+                                    variant: "destructive",
+                                  });
                                 }
                               }}
                             />
