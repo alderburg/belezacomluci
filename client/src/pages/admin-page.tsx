@@ -1038,12 +1038,12 @@ export default function AdminPage() {
           try {
             const playlistResponse = await fetch(`/api/youtube/playlist/${playlistId}`);
             if (playlistResponse.ok) {
-              const playlistVideos = await playlistResponse.json();
+              const playlistData = await playlistResponse.json();
               
-              if (playlistVideos && playlistVideos.length > 0) {
+              if (playlistData && playlistData.videos && playlistData.videos.length > 0) {
                 // Calcular duração total
                 let totalSeconds = 0;
-                for (const video of playlistVideos) {
+                for (const video of playlistData.videos) {
                   if (video.duration) {
                     const parts = video.duration.split(':');
                     if (parts.length === 3) {
@@ -1062,16 +1062,24 @@ export default function AdminPage() {
                 const totalDuration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 
                 videoForm.setValue('duration', totalDuration);
-                console.log(`Duração total da playlist calculada: ${totalDuration} (${playlistVideos.length} vídeos)`);
+                console.log(`Duração total da playlist calculada: ${totalDuration} (${playlistData.videos.length} vídeos)`);
                 
-                // Pegar título do primeiro vídeo como título padrão
-                if (playlistVideos[0].title) {
-                  videoForm.setValue('title', playlistVideos[0].title);
+                // Usar título da playlist
+                if (playlistData.playlistTitle) {
+                  videoForm.setValue('title', playlistData.playlistTitle);
+                  console.log('Título da playlist preenchido:', playlistData.playlistTitle);
                 }
                 
-                // Pegar thumbnail do primeiro vídeo
-                if (playlistVideos[0].thumbnail) {
-                  videoForm.setValue('thumbnailUrl', playlistVideos[0].thumbnail);
+                // Usar descrição da playlist
+                if (playlistData.playlistDescription) {
+                  videoForm.setValue('description', playlistData.playlistDescription);
+                  console.log('Descrição da playlist preenchida');
+                }
+                
+                // Usar thumbnail da playlist
+                if (playlistData.playlistThumbnail) {
+                  videoForm.setValue('thumbnailUrl', playlistData.playlistThumbnail);
+                  console.log('Thumbnail da playlist preenchida');
                 }
                 
                 videoForm.setValue('type', 'playlist');
@@ -1079,7 +1087,7 @@ export default function AdminPage() {
                 
                 toast({
                   title: "Playlist detectada!",
-                  description: `${playlistVideos.length} vídeos encontrados. Duração total: ${totalDuration}`,
+                  description: `${playlistData.videos.length} vídeos encontrados. Duração total: ${totalDuration}`,
                 });
                 
                 return; // Não precisa buscar dados do vídeo individual

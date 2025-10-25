@@ -1520,7 +1520,33 @@ export function registerRoutes(app: Express): Server {
         return res.status(500).json({ message: "YouTube API Key not configured" });
       }
 
+      // Buscar informações da playlist (título, descrição, etc)
+      const playlistInfoUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistId}&key=${apiKey}`;
+      
+      const playlistInfoResponse = await new Promise<string>((resolve, reject) => {
+        https.get(playlistInfoUrl, (response) => {
+          let data = '';
 
+          response.on('data', (chunk) => {
+            data += chunk;
+          });
+
+          response.on('end', () => {
+            resolve(data);
+          });
+
+        }).on('error', (err) => {
+          reject(err);
+        });
+      });
+
+      const playlistInfoData = JSON.parse(playlistInfoResponse);
+      const playlistInfo = playlistInfoData.items?.[0];
+
+      if (!playlistInfo) {
+        console.error('Playlist não encontrada:', playlistId);
+        return res.status(404).json({ message: "Playlist not found" });
+      }
 
       // Buscar itens da playlist
       const playlistItemsUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${apiKey}`;
@@ -1546,7 +1572,12 @@ export function registerRoutes(app: Express): Server {
       const videoIds = playlistData.items?.map((item: any) => item.snippet.resourceId.videoId) || [];
 
       if (videoIds.length === 0) {
-        return res.json([]);
+        return res.json({
+          playlistTitle: playlistInfo.snippet.title,
+          playlistDescription: playlistInfo.snippet.description,
+          playlistThumbnail: playlistInfo.snippet.thumbnails.maxres?.url || playlistInfo.snippet.thumbnails.high?.url || playlistInfo.snippet.thumbnails.default?.url,
+          videos: []
+        });
       }
 
       // Buscar detalhes dos vídeos incluindo duração
@@ -1579,7 +1610,12 @@ export function registerRoutes(app: Express): Server {
         duration: convertISO8601ToHHMMSS(video.contentDetails.duration)
       })) || [];
 
-      res.json(videos);
+      res.json({
+        playlistTitle: playlistInfo.snippet.title,
+        playlistDescription: playlistInfo.snippet.description,
+        playlistThumbnail: playlistInfo.snippet.thumbnails.maxres?.url || playlistInfo.snippet.thumbnails.high?.url || playlistInfo.snippet.thumbnails.default?.url,
+        videos: videos
+      });
 
     } catch (error) {
       console.error('Erro ao buscar playlist via API:', error);
