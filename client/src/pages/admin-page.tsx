@@ -418,7 +418,7 @@ export default function AdminPage() {
       discount: "",
       categoryId: "",
       isExclusive: false,
-      isActive: false,
+      isActive: true,
       storeUrl: "",
       coverImageUrl: "",
       order: 0,
@@ -459,9 +459,9 @@ export default function AdminPage() {
       targetPage: "",
       targetVideoId: "",
       showFrequency: "always",
-      showTitle: false,
-      showDescription: false,
-      showButton: false,
+      showTitle: true,
+      showDescription: true,
+      showButton: true,
       isExclusive: false,
       isActive: true,
       startDateTime: "",
@@ -2108,7 +2108,7 @@ export default function AdminPage() {
                         <div className="grid grid-cols-2 gap-4">
                           <div className="flex items-center space-x-2">
                             <Switch
-                              checked={popupForm.watch("showTitle") ?? false}
+                              checked={popupForm.watch("showTitle") ?? true}
                               onCheckedChange={(checked) => {
                                 popupForm.setValue("showTitle", checked);
                                 popupForm.trigger("showTitle");
@@ -2120,7 +2120,7 @@ export default function AdminPage() {
 
                           <div className="flex items-center space-x-2">
                             <Switch
-                              checked={popupForm.watch("showDescription") ?? false}
+                              checked={popupForm.watch("showDescription") ?? true}
                               onCheckedChange={(checked) => {
                                 popupForm.setValue("showDescription", checked);
                                 popupForm.trigger("showDescription");
@@ -2132,7 +2132,7 @@ export default function AdminPage() {
 
                           <div className="flex items-center space-x-2">
                             <Switch
-                              checked={popupForm.watch("showButton") ?? false}
+                              checked={popupForm.watch("showButton") ?? true}
                               onCheckedChange={(checked) => {
                                 popupForm.setValue("showButton", checked);
                                 popupForm.trigger("showButton");
@@ -2146,7 +2146,7 @@ export default function AdminPage() {
                         <div className="grid grid-cols-2 gap-4">
                           <div className="flex items-center space-x-2">
                             <Switch
-                              checked={popupForm.watch("isExclusive") ?? false}
+                              checked={popupForm.watch("isExclusive") || false}
                               onCheckedChange={(checked) => popupForm.setValue("isExclusive", checked)}
                               data-testid="switch-popup-exclusive"
                             />
@@ -2155,7 +2155,7 @@ export default function AdminPage() {
 
                           <div className="flex items-center space-x-2">
                             <Switch
-                              checked={popupForm.watch("isActive") ?? true}
+                              checked={popupForm.watch("isActive") || false}
                               onCheckedChange={(checked) => popupForm.setValue("isActive", checked)}
                               data-testid="switch-popup-active"
                             />

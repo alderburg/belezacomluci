@@ -216,9 +216,9 @@ export const popups = pgTable("popups", {
   targetVideoId: varchar("target_video_id").references(() => videos.id), // Para páginas de vídeo específico
   targetCourseId: varchar("target_course_id").references(() => products.id), // Para páginas de curso específico
   showFrequency: text("show_frequency").notNull().default("always"), // 'always', 'once_per_session'
-  showTitle: boolean("show_title").default(false), // Controla exibição do título
-  showDescription: boolean("show_description").default(false), // Controla exibição da descrição
-  showButton: boolean("show_button").default(false), // Controla exibição do botão
+  showTitle: boolean("show_title").default(true), // Controla exibição do título
+  showDescription: boolean("show_description").default(true), // Controla exibição da descrição
+  showButton: boolean("show_button").default(true), // Controla exibição do botão
   isExclusive: boolean("is_exclusive").default(false), // Para usuários premium
   isActive: boolean("is_active").default(true),
   startDateTime: timestamp("start_date_time"), // Para agendamento
