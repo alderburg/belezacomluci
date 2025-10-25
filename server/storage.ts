@@ -493,10 +493,10 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (conditions.length > 0) {
-      return await this.db.select().from(coupons).where(and(...conditions)).orderBy(desc(coupons.createdAt));
+      return await this.db.select().from(coupons).where(and(...conditions)).orderBy(coupons.order, desc(coupons.createdAt));
     }
 
-    return await this.db.select().from(coupons).orderBy(desc(coupons.createdAt));
+    return await this.db.select().from(coupons).orderBy(coupons.order, desc(coupons.createdAt));
   }
 
   async getCoupon(id: string): Promise<Coupon | undefined> {
@@ -533,10 +533,10 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (conditions.length > 0) {
-      return await this.db.select().from(categories).where(and(...conditions)).orderBy(desc(categories.createdAt));
+      return await this.db.select().from(categories).where(and(...conditions)).orderBy(categories.order, desc(categories.createdAt));
     }
 
-    return await this.db.select().from(categories).orderBy(desc(categories.createdAt));
+    return await this.db.select().from(categories).orderBy(categories.order, desc(categories.createdAt));
   }
 
   async getCategory(id: string): Promise<Category | undefined> {

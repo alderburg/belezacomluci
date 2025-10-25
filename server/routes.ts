@@ -428,6 +428,8 @@ export function registerRoutes(app: Express): Server {
           discount: coupons.discount,
           categoryId: coupons.categoryId,
           categoryTitle: categories.title,
+          couponOrder: coupons.order,
+          categoryOrder: categories.order,
         })
         .from(coupons)
         .leftJoin(categories, eq(coupons.categoryId, categories.id))
@@ -443,7 +445,8 @@ export function registerRoutes(app: Express): Server {
               gte(coupons.endDateTime, now)
             )
           )
-        );
+        )
+        .orderBy(categories.order, coupons.order);
 
       res.json(result);
     } catch (error) {
