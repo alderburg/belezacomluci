@@ -609,19 +609,22 @@ export default function BioPage() {
                                 // Copiar código do cupom
                                 await navigator.clipboard.writeText(coupon.code || '');
                                 
-                                // Mostrar toast de sucesso
+                                // Mostrar toast de sucesso com o código do cupom
                                 toast({
-                                  title: "Cupom Copiado! 🎉",
+                                  title: `Cupom ${coupon.code} copiado! 🎉`,
                                   description: `Redirecionando para ${coupon.brand}...`,
                                   duration: 2000,
                                 });
 
-                                // Abrir loja após 2 segundos
-                                setTimeout(() => {
-                                  if (coupon.storeUrl) {
-                                    window.open(coupon.storeUrl, '_blank');
+                                // Abrir loja imediatamente em nova aba (não esperar 2 segundos)
+                                if (coupon.storeUrl) {
+                                  // Garantir que a URL tenha protocolo
+                                  let url = coupon.storeUrl;
+                                  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                                    url = 'https://' + url;
                                   }
-                                }, 2000);
+                                  window.open(url, '_blank', 'noopener,noreferrer');
+                                }
                               } catch (error) {
                                 toast({
                                   title: "Erro ao copiar cupom",
