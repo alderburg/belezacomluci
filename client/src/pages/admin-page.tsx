@@ -1441,13 +1441,16 @@ export default function AdminPage() {
                     {activeTab === 'products' && (
                       <form onSubmit={productForm.handleSubmit((data) => createProductMutation.mutate(data))} className="space-y-4">
                         <div>
-                          <Label htmlFor="product-title">Título</Label>
+                          <Label htmlFor="product-title">Título <span className="text-destructive">*</span></Label>
                           <Input
                             id="product-title"
                             {...productForm.register("title")}
                             placeholder="Digite o título do produto"
                             data-testid="input-product-title"
                           />
+                          {productForm.formState.errors.title && (
+                            <p className="text-sm text-destructive mt-1">{productForm.formState.errors.title.message}</p>
+                          )}
                         </div>
 
                         <div>
@@ -1481,7 +1484,7 @@ export default function AdminPage() {
 
                           <div>
                             <Label htmlFor="product-file">
-                              {productForm.watch("type") === "course" ? "URL da Playlist do YouTube" : "URL do Arquivo"}
+                              {productForm.watch("type") === "course" ? "URL da Playlist do YouTube" : "URL do Arquivo"} <span className="text-destructive">*</span>
                             </Label>
                             <Input
                               id="product-file"
@@ -1491,19 +1494,28 @@ export default function AdminPage() {
                                 : "https://..."}
                               data-testid="input-product-file"
                             />
+                            {productForm.formState.errors.fileUrl && (
+                              <p className="text-sm text-destructive mt-1">{productForm.formState.errors.fileUrl.message}</p>
+                            )}
                           </div>
                         </div>
 
-                        <ImageUpload
-                          id="product-cover"
-                          label="Imagem de Capa"
-                          value={productForm.watch("coverImageUrl")}
-                          onChange={(base64) => productForm.setValue("coverImageUrl", base64)}
-                          placeholder="Selecionar imagem de capa"
-                        />
+                        <div>
+                          <ImageUpload
+                            id="product-cover"
+                            label="Imagem de Capa"
+                            value={productForm.watch("coverImageUrl")}
+                            onChange={(base64) => productForm.setValue("coverImageUrl", base64)}
+                            placeholder="Selecionar imagem de capa"
+                            required
+                          />
+                          {productForm.formState.errors.coverImageUrl && (
+                            <p className="text-sm text-destructive mt-1">{productForm.formState.errors.coverImageUrl.message}</p>
+                          )}
+                        </div>
 
                         <div>
-                          <Label htmlFor="product-category">Categoria</Label>
+                          <Label htmlFor="product-category">Categoria <span className="text-destructive">*</span></Label>
                           <Select
                             value={productForm.watch("categoryId") || ""}
                             onValueChange={(value) => productForm.setValue("categoryId", value)}
@@ -1519,6 +1531,9 @@ export default function AdminPage() {
                               ))}
                             </SelectContent>
                           </Select>
+                          {productForm.formState.errors.categoryId && (
+                            <p className="text-sm text-destructive mt-1">{productForm.formState.errors.categoryId.message}</p>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
