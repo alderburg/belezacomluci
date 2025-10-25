@@ -766,6 +766,64 @@ export default function AdminPage() {
     },
   });
 
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/categories/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to delete category');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      toast({
+        title: "Categoria excluída",
+        description: "A categoria foi excluída com sucesso.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao excluir categoria",
+        description: error.message || "Não foi possível excluir a categoria.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const res = await fetch(`/api/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to update category');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      toast({
+        title: "Categoria atualizada",
+        description: "A categoria foi atualizada com sucesso.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao atualizar categoria",
+        description: error.message || "Não foi possível atualizar a categoria.",
+        variant: "destructive",
+      });
+    },
+  });
 
 
   const handleEdit = (item: any, type: string) => {
@@ -833,7 +891,11 @@ export default function AdminPage() {
 
   const confirmDelete = () => {
     if (itemToDelete) {
-      deleteMutation.mutate({ type: itemToDelete.type, id: itemToDelete.id });
+      if (itemToDelete.type === 'categories') {
+        deleteCategoryMutation.mutate(itemToDelete.id);
+      } else {
+        deleteMutation.mutate({ type: itemToDelete.type, id: itemToDelete.id });
+      }
       setDeleteDialogOpen(false);
       setItemToDelete(null);
     }
@@ -860,7 +922,12 @@ export default function AdminPage() {
         notificationForm.handleSubmit((data) => createNotificationMutation.mutate(data))();
         break;
       case 'categories':
-        categoryForm.handleSubmit((data) => createCategoryMutation.mutate(data))();
+        // Para categorias, precisamos do ID para a atualização
+        if (editingItem && editingItem.id) {
+          updateCategoryMutation.mutate({ id: editingItem.id, data: categoryForm.getValues() });
+        } else {
+          categoryForm.handleSubmit((data) => createCategoryMutation.mutate(data))();
+        }
         break;
     }
   };
@@ -2283,7 +2350,13 @@ export default function AdminPage() {
 
                     {/* Category Form */}
                     {activeTab === 'categories' && (
-                      <form onSubmit={categoryForm.handleSubmit((data) => createCategoryMutation.mutate(data))} className="space-y-4">
+                      <form onSubmit={categoryForm.handleSubmit((data) => {
+                        if (editingItem && editingItem.id) {
+                          updateCategoryMutation.mutate({ id: editingItem.id, data });
+                        } else {
+                          createCategoryMutation.mutate(data);
+                        }
+                      })} className="space-y-4">
                         <div>
                           <Label htmlFor="category-title">Título <span className="text-destructive">*</span></Label>
                           <Input
@@ -2341,10 +2414,10 @@ export default function AdminPage() {
                         <Button
                           type="submit"
                           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                          disabled={createCategoryMutation.isPending}
+                          disabled={createCategoryMutation.isPending || (editingItem && updateCategoryMutation.isPending)}
                           data-testid="button-save-category"
                         >
-                          {createCategoryMutation.isPending ? "Salvando..." : "Salvar Categoria"}
+                          {createCategoryMutation.isPending || (editingItem && updateCategoryMutation.isPending) ? "Salvando..." : "Salvar Categoria"}
                         </Button>
                       </form>
                     )}
