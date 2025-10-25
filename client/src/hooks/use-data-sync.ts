@@ -162,6 +162,8 @@ export function useDataSync() {
       case 'coupons':
         queryClient.invalidateQueries({ queryKey: ['/api/coupons'] });
         queryClient.invalidateQueries({ queryKey: ['/api/cupons'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/coupons/active-with-categories'] });
+        console.log('Coupons cache invalidated - Bio page modal will refresh with new data');
         break;
 
       case 'banners':
@@ -171,7 +173,8 @@ export function useDataSync() {
 
       case 'categories':
         queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
-        console.log('Categories cache invalidated - UI will refresh with new data');
+        queryClient.invalidateQueries({ queryKey: ['/api/coupons/active-with-categories'] });
+        console.log('Categories cache invalidated - UI and bio page modal will refresh with new data');
         break;
 
       case 'popups':

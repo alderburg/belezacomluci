@@ -18,7 +18,10 @@ export default function BioPage() {
   useDataSync([
     '/api/admin/public-profile',
     '/api/admin/community-settings',
-    '/api/banners'
+    '/api/banners',
+    '/api/coupons/active-with-categories',
+    '/api/coupons',
+    '/api/categories'
   ]);
 
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
@@ -88,6 +91,10 @@ export default function BioPage() {
   }>>({
     queryKey: ["/api/coupons/active-with-categories"],
     enabled: isCouponsModalOpen,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 0,
+    refetchInterval: false, // Não fazer polling, usar WebSocket
   });
 
   // Verificar se está carregando
