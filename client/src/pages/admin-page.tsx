@@ -3319,7 +3319,13 @@ export default function AdminPage() {
                                        popup.targetPage === 'coupons' ? 'Cupons' :
                                        popup.targetPage === 'community' ? 'Comunidade' :
                                        popup.targetPage === 'profile' ? 'Perfil' :
-                                       popup.targetPage === 'video_specific' ? 'Vídeo Específico' : popup.targetPage}
+                                       popup.targetPage === 'video_specific' ? 'Vídeo Específico' :
+                                       popup.targetPage === 'course_specific' ? 'Curso Específico' : popup.targetPage}
+                                    </Badge>
+                                  )}
+                                  {popup.targetPage === 'course_specific' && popup.targetCourseId && (
+                                    <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                                      ID: {popup.targetCourseId.substring(0, 8)}...
                                     </Badge>
                                   )}
                                   {popup.showFrequency === 'once_per_session' && (
