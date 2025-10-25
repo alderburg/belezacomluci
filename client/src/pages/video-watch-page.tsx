@@ -435,8 +435,11 @@ export default function VideoWatchPage() {
         <Sidebar />
         <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0 pt-32' : 'pt-16'}`}>
           <div className="container mx-auto px-6 py-8">
-            <h1 className="text-2xl font-bold mb-4">Problema ao carregar vídeo</h1>
+            <h1 className="text-2xl font-bold mb-4">Vídeo não encontrado</h1>
             <p className="text-muted-foreground mb-4">
+              O vídeo que você está tentando acessar não existe ou foi removido.
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
               ID do vídeo: {videoId || 'Não encontrado'}
             </p>
             {error && (
@@ -447,13 +450,13 @@ export default function VideoWatchPage() {
                 </p>
               </div>
             )}
-            <div className="flex gap-3 justify-center">
-              <Button onClick={() => refetch()} variant="outline">
-                Tentar novamente
-              </Button>
+            <div className="flex gap-3">
               <Button onClick={() => navigate("/videos")}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar para vídeos
+              </Button>
+              <Button onClick={() => refetch()} variant="outline">
+                Tentar novamente
               </Button>
             </div>
           </div>

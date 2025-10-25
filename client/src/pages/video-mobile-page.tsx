@@ -439,26 +439,29 @@ export default function VideoMobilePage() {
           </div>
         </div>
 
-        <div className="pt-16 px-4 py-8 text-center">
-          <h2 className="text-xl font-bold mb-4">Problema ao carregar vídeo</h2>
-          <p className="text-muted-foreground mb-4">
-            ID do vídeo: {videoId || 'Não encontrado'}
+        <div className="pt-24 px-4 py-8 text-center">
+          <h2 className="text-xl font-bold mb-4">Vídeo não encontrado</h2>
+          <p className="text-muted-foreground mb-2">
+            O vídeo que você está tentando acessar não existe ou foi removido.
+          </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            ID: {videoId || 'Não encontrado'}
           </p>
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 text-left">
               <p className="text-red-600 font-medium mb-2">Detalhes do erro:</p>
               <p className="text-red-500 text-sm">
                 {error instanceof Error ? error.message : 'Erro desconhecido ao carregar vídeo'}
               </p>
             </div>
           )}
-          <div className="flex gap-3 justify-center">
-            <Button onClick={() => refetch()} variant="outline">
-              Tentar novamente
-            </Button>
-            <Button onClick={handleBackClick}>
+          <div className="flex flex-col gap-3">
+            <Button onClick={handleBackClick} className="w-full">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar para vídeos
+            </Button>
+            <Button onClick={() => refetch()} variant="outline" className="w-full">
+              Tentar novamente
             </Button>
           </div>
         </div>
