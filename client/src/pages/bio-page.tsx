@@ -364,7 +364,7 @@ export default function BioPage() {
             </div>
 
             <h1 className="text-3xl md:text-4xl font-bold text-white">
-              {communitySettings?.title || '@belezacomluci'}
+              {communitySettings?.title || adminProfile?.name || 'Beleza com Luci'}
             </h1>
 
             <p className="text-base md:text-lg text-white max-w-lg mx-auto">
@@ -416,7 +416,7 @@ export default function BioPage() {
           {/* Chamada para Redes Sociais */}
           <div className="py-0 pt-4">
             <p className="text-base md:text-lg font-medium text-center leading-relaxed text-white">
-              Siga <span className="font-bold text-white">{communitySettings?.title || '@belezacomluci'}</span> nas redes<br />
+              Siga <span className="font-bold text-white">{communitySettings?.title || adminProfile?.name || 'Beleza com Luci'}</span> nas redes<br />
               sociais e fique por dentro de tudo!
             </p>
 
