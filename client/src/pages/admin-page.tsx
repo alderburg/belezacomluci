@@ -420,6 +420,7 @@ export default function AdminPage() {
       isActive: true,
       storeUrl: "",
       coverImageUrl: "",
+      order: 0,
       startDateTime: "",
       endDateTime: "",
     },
@@ -489,6 +490,7 @@ export default function AdminPage() {
       description: "",
       coverImageUrl: "",
       isActive: true,
+      order: 0,
     },
   });
 
@@ -1549,23 +1551,29 @@ export default function AdminPage() {
                       <form onSubmit={couponForm.handleSubmit((data) => createCouponMutation.mutate(data))} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="coupon-code">Código</Label>
+                            <Label htmlFor="coupon-code">Código <span className="text-destructive">*</span></Label>
                             <Input
                               id="coupon-code"
                               {...couponForm.register("code")}
                               placeholder="DESCONTO20"
                               data-testid="input-coupon-code"
                             />
+                            {couponForm.formState.errors.code && (
+                              <p className="text-sm text-destructive mt-1">{couponForm.formState.errors.code.message}</p>
+                            )}
                           </div>
 
                           <div>
-                            <Label htmlFor="coupon-brand">Marca</Label>
+                            <Label htmlFor="coupon-brand">Marca <span className="text-destructive">*</span></Label>
                             <Input
                               id="coupon-brand"
                               {...couponForm.register("brand")}
                               placeholder="Nome da marca"
                               data-testid="input-coupon-brand"
                             />
+                            {couponForm.formState.errors.brand && (
+                              <p className="text-sm text-destructive mt-1">{couponForm.formState.errors.brand.message}</p>
+                            )}
                           </div>
                         </div>
 
@@ -1591,7 +1599,7 @@ export default function AdminPage() {
                           </div>
 
                           <div>
-                            <Label htmlFor="coupon-category">Categoria</Label>
+                            <Label htmlFor="coupon-category">Categoria <span className="text-destructive">*</span></Label>
                             <Select
                               value={couponForm.watch("categoryId") || ""}
                               onValueChange={(value) => couponForm.setValue("categoryId", value)}
@@ -1607,17 +1615,23 @@ export default function AdminPage() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            {couponForm.formState.errors.categoryId && (
+                              <p className="text-sm text-destructive mt-1">{couponForm.formState.errors.categoryId.message}</p>
+                            )}
                           </div>
                         </div>
 
                         <div>
-                          <Label htmlFor="coupon-store">URL da Loja</Label>
+                          <Label htmlFor="coupon-store">URL da Loja <span className="text-destructive">*</span></Label>
                           <Input
                             id="coupon-store"
                             {...couponForm.register("storeUrl")}
                             placeholder="https://..."
                             data-testid="input-coupon-store"
                           />
+                          {couponForm.formState.errors.storeUrl && (
+                            <p className="text-sm text-destructive mt-1">{couponForm.formState.errors.storeUrl.message}</p>
+                          )}
                         </div>
 
                         <ImageUpload
@@ -1627,6 +1641,17 @@ export default function AdminPage() {
                           onChange={(base64) => couponForm.setValue("coverImageUrl", base64)}
                           placeholder="Selecionar imagem de capa"
                         />
+
+                        <div>
+                          <Label htmlFor="coupon-order">Ordem de Exibição</Label>
+                          <Input
+                            id="coupon-order"
+                            type="number"
+                            {...couponForm.register("order", { valueAsNumber: true })}
+                            placeholder="0"
+                            data-testid="input-coupon-order"
+                          />
+                        </div>
 
                         <div className="grid grid-cols-2 gap-4">
                           <div>
@@ -2240,13 +2265,16 @@ export default function AdminPage() {
                     {activeTab === 'categories' && (
                       <form onSubmit={categoryForm.handleSubmit((data) => createCategoryMutation.mutate(data))} className="space-y-4">
                         <div>
-                          <Label htmlFor="category-title">Título</Label>
+                          <Label htmlFor="category-title">Título <span className="text-destructive">*</span></Label>
                           <Input
                             id="category-title"
                             {...categoryForm.register("title")}
                             placeholder="Digite o título da categoria"
                             data-testid="input-category-title"
                           />
+                          {categoryForm.formState.errors.title && (
+                            <p className="text-sm text-destructive mt-1">{categoryForm.formState.errors.title.message}</p>
+                          )}
                         </div>
 
                         <div>
@@ -2266,6 +2294,17 @@ export default function AdminPage() {
                           onChange={(base64) => categoryForm.setValue("coverImageUrl", base64)}
                           placeholder="Selecionar imagem de capa"
                         />
+
+                        <div>
+                          <Label htmlFor="category-order">Ordem de Exibição</Label>
+                          <Input
+                            id="category-order"
+                            type="number"
+                            {...categoryForm.register("order", { valueAsNumber: true })}
+                            placeholder="0"
+                            data-testid="input-category-order"
+                          />
+                        </div>
 
                         <div className="flex items-center space-x-2">
                           <Switch

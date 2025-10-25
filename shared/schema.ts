@@ -76,6 +76,7 @@ export const categories = pgTable("categories", {
   description: text("description"),
   coverImageUrl: text("cover_image_url"),
   isActive: boolean("is_active").default(true),
+  order: integer("order").default(0),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
@@ -104,6 +105,7 @@ export const coupons = pgTable("coupons", {
   isActive: boolean("is_active").default(true),
   storeUrl: text("store_url"),
   coverImageUrl: text("cover_image_url"),
+  order: integer("order").default(0),
   startDateTime: timestamp("start_date_time"), // Data e hora de início para ativação automática
   endDateTime: timestamp("end_date_time"), // Data e hora de fim para desativação automática
   createdAt: timestamp("created_at").default(sql`now()`),
@@ -603,9 +605,15 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true, creat
   })).optional().default([])
 });
 export const insertVideoSchema = createInsertSchema(videos).omit({ id: true, createdAt: true, views: true, likes: true });
-export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true });
+export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true }).extend({
+  title: z.string().min(1, "Título é obrigatório"),
+});
 export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true });
 export const insertCouponSchema = createInsertSchema(coupons).omit({ id: true, createdAt: true }).extend({
+  code: z.string().min(1, "Código é obrigatório"),
+  brand: z.string().min(1, "Marca é obrigatória"),
+  categoryId: z.string().min(1, "Categoria é obrigatória"),
+  storeUrl: z.string().min(1, "URL da loja é obrigatória"),
   startDateTime: z.string().optional().nullable().transform((str) => {
     if (!str || str.trim() === '') return null;
 
