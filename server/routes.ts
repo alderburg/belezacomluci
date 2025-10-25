@@ -1595,13 +1595,17 @@ export function registerRoutes(app: Express): Server {
         videoId = videoId.split('?')[0];
       }
 
+      // Remove qualquer caractere especial ou espaço
+      videoId = videoId.trim();
+
       const apiKey = process.env.YOUTUBE_API_KEY;
 
       if (!apiKey) {
+        console.error('YouTube API Key não encontrada');
         return res.status(500).json({ message: "YouTube API Key not configured" });
       }
 
-
+      console.log('Buscando dados do YouTube para vídeo:', videoId);
 
       const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${videoId}&key=${apiKey}`;
 
@@ -1625,6 +1629,7 @@ export function registerRoutes(app: Express): Server {
       const videoData = JSON.parse(response);
 
       if (!videoData.items || videoData.items.length === 0) {
+        console.error('Vídeo não encontrado no YouTube:', videoId);
         return res.status(404).json({ message: "Video not found" });
       }
 
@@ -1640,6 +1645,7 @@ export function registerRoutes(app: Express): Server {
         publishedAt: video.snippet.publishedAt
       };
 
+      console.log('Dados do YouTube recuperados com sucesso:', result.title);
       res.json(result);
 
     } catch (error) {

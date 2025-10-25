@@ -977,14 +977,24 @@ export default function AdminPage() {
   // Function to extract YouTube video ID from URL
   const extractYouTubeVideoId = (url: string): string | null => {
     const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-      /youtube\.com\/watch\?.*v=([^&\n?#]+)/
+      /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
+      /(?:youtu\.be\/)([^&\n?#\?]+)/,
+      /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
+      /(?:youtube\.com\/v\/)([^&\n?#]+)/
     ];
 
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match && match[1]) {
-        return match[1];
+        // Remove qualquer caractere especial ou query params
+        let videoId = match[1];
+        if (videoId.includes('?')) {
+          videoId = videoId.split('?')[0];
+        }
+        if (videoId.includes('&')) {
+          videoId = videoId.split('&')[0];
+        }
+        return videoId.trim();
       }
     }
     return null;
@@ -993,44 +1003,52 @@ export default function AdminPage() {
   // Function to fetch video data from YouTube API and auto-fill duration, description and thumbnail
   const handleVideoUrlChange = async (url: string) => {
     const videoId = extractYouTubeVideoId(url);
-    if (!videoId) return;
+    if (!videoId) {
+      console.log('Não foi possível extrair o ID do vídeo da URL:', url);
+      return;
+    }
 
     try {
       console.log('Buscando dados do YouTube para vídeo:', videoId);
       const response = await fetch(`/api/youtube/video/${videoId}`);
-      if (response.ok) {
-        const videoData = await response.json();
-        console.log('Dados recebidos do YouTube:', videoData);
-        
-        // Auto-fill duration field - always ensure HH:MM:SS format
-        if (videoData.duration) {
-          const formattedDuration = ensureHHMMSSFormat(videoData.duration);
-          videoForm.setValue('duration', formattedDuration);
-          console.log('Duração preenchida:', formattedDuration);
-        }
-        // Auto-fill description if not already set
-        if (videoData.description) {
-          videoForm.setValue('description', videoData.description);
-          console.log('Descrição preenchida automaticamente');
-        }
-        // Auto-fill thumbnail if not already set
-        if (videoData.thumbnail) {
-          videoForm.setValue('thumbnailUrl', videoData.thumbnail);
-          console.log('Thumbnail preenchida automaticamente');
-        }
-        
-        toast({
-          title: "Dados carregados",
-          description: "Descrição e outros dados foram preenchidos automaticamente do YouTube",
-        });
-      } else {
-        console.error('Erro ao buscar dados do YouTube:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Erro ao buscar dados do YouTube:', response.status, errorText);
         toast({
           title: "Aviso",
           description: "Não foi possível carregar os dados do YouTube",
           variant: "destructive",
         });
+        return;
       }
+
+      const videoData = await response.json();
+      console.log('Dados recebidos do YouTube:', videoData);
+      
+      // Auto-fill duration field - always ensure HH:MM:SS format
+      if (videoData.duration) {
+        const formattedDuration = ensureHHMMSSFormat(videoData.duration);
+        videoForm.setValue('duration', formattedDuration);
+        console.log('Duração preenchida:', formattedDuration);
+      }
+      
+      // Auto-fill description if not already set
+      if (videoData.description) {
+        videoForm.setValue('description', videoData.description);
+        console.log('Descrição preenchida automaticamente');
+      }
+      
+      // Auto-fill thumbnail if not already set
+      if (videoData.thumbnail) {
+        videoForm.setValue('thumbnailUrl', videoData.thumbnail);
+        console.log('Thumbnail preenchida automaticamente');
+      }
+      
+      toast({
+        title: "Dados carregados",
+        description: "Descrição e duração foram preenchidos automaticamente do YouTube",
+      });
     } catch (error) {
       console.error('Erro ao buscar dados do vídeo:', error);
       toast({
