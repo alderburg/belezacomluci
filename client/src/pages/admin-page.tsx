@@ -996,25 +996,48 @@ export default function AdminPage() {
     if (!videoId) return;
 
     try {
+      console.log('Buscando dados do YouTube para vídeo:', videoId);
       const response = await fetch(`/api/youtube/video/${videoId}`);
       if (response.ok) {
         const videoData = await response.json();
+        console.log('Dados recebidos do YouTube:', videoData);
+        
         // Auto-fill duration field - always ensure HH:MM:SS format
         if (videoData.duration) {
           const formattedDuration = ensureHHMMSSFormat(videoData.duration);
           videoForm.setValue('duration', formattedDuration);
+          console.log('Duração preenchida:', formattedDuration);
         }
         // Auto-fill description if not already set
-        if (videoData.description && !videoForm.getValues('description')) {
+        if (videoData.description) {
           videoForm.setValue('description', videoData.description);
+          console.log('Descrição preenchida automaticamente');
         }
         // Auto-fill thumbnail if not already set
-        if (videoData.thumbnail && !videoForm.getValues('thumbnailUrl')) {
+        if (videoData.thumbnail) {
           videoForm.setValue('thumbnailUrl', videoData.thumbnail);
+          console.log('Thumbnail preenchida automaticamente');
         }
+        
+        toast({
+          title: "Dados carregados",
+          description: "Descrição e outros dados foram preenchidos automaticamente do YouTube",
+        });
+      } else {
+        console.error('Erro ao buscar dados do YouTube:', response.status);
+        toast({
+          title: "Aviso",
+          description: "Não foi possível carregar os dados do YouTube",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Erro ao buscar dados do vídeo:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao buscar dados do YouTube",
+        variant: "destructive",
+      });
     }
   };
 
@@ -1354,7 +1377,12 @@ export default function AdminPage() {
                             {...videoForm.register("videoUrl")}
                             placeholder="https://..."
                             data-testid="input-video-url"
-                            onBlur={(e) => handleVideoUrlChange(e.target.value)}
+                            onChange={(e) => {
+                              videoForm.setValue("videoUrl", e.target.value);
+                              if (e.target.value) {
+                                handleVideoUrlChange(e.target.value);
+                              }
+                            }}
                           />
                         </div>
 
