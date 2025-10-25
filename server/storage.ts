@@ -476,6 +476,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteProduct(id: string): Promise<void> {
+    // Excluir dados relacionados primeiro para evitar violação de foreign key
+    
+    // 1. Excluir comentários relacionados ao produto
+    await this.db.delete(comments).where(eq(comments.productId, id));
+    
+    // 2. Atualizar popups que referenciam este produto (remover referência)
+    await this.db.update(popups)
+      .set({ targetCourseId: null })
+      .where(eq(popups.targetCourseId, id));
+    
+    // 3. Agora podemos excluir o produto com segurança
     await this.db.delete(products).where(eq(products.id, id));
   }
 
