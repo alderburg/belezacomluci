@@ -597,65 +597,38 @@ export default function BioPage() {
                             onClick={async (e) => {
                               e.preventDefault();
                               
-                              // Debug completo
-                              console.log('=== CLIQUE NO CUPOM ===');
-                              console.log('Cupom completo:', JSON.stringify(coupon, null, 2));
-                              console.log('Propriedades do cupom:', Object.keys(coupon));
-                              
                               try {
-                                // Pegar o código - verificar todas as possibilidades
                                 const codigo = coupon.code || '';
-                                console.log('Código encontrado:', codigo);
                                 
-                                // Copiar código do cupom se existir
                                 if (codigo && codigo.trim() !== '') {
                                   await navigator.clipboard.writeText(codigo);
-                                  console.log('✅ Código copiado:', codigo);
                                   
                                   toast({
                                     title: `Cupom ${codigo} copiado! 🎉`,
-                                    description: `Abrindo ${coupon.brand || 'loja'}...`,
+                                    description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
                                     duration: 2000,
                                   });
                                 } else {
-                                  console.log('⚠️ Cupom sem código');
                                   toast({
                                     title: "Cupom selecionado! 🎉",
-                                    description: `Abrindo ${coupon.brand || 'loja'}...`,
+                                    description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
                                     duration: 2000,
                                   });
                                 }
 
-                                // Abrir loja IMEDIATAMENTE (sem setTimeout para evitar bloqueio de popup)
                                 if (coupon.storeUrl) {
                                   let url = coupon.storeUrl.trim();
-                                  console.log('URL original:', url);
                                   
-                                  // Adicionar protocolo se necessário
                                   if (!url.startsWith('http://') && !url.startsWith('https://')) {
                                     url = 'https://' + url;
                                   }
-                                  console.log('URL formatada:', url);
                                   
-                                  // Abrir IMEDIATAMENTE - sem setTimeout
-                                  console.log('🚀 Abrindo URL...');
-                                  const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-                                  
-                                  if (!newWindow || newWindow.closed) {
-                                    console.error('❌ Popup bloqueado');
-                                    toast({
-                                      title: "Não foi possível abrir o site",
-                                      description: "Permita popups para este site nas configurações do navegador",
-                                      variant: "destructive",
-                                    });
-                                  } else {
-                                    console.log('✅ Site aberto com sucesso');
-                                  }
-                                } else {
-                                  console.log('⚠️ Cupom sem URL da loja');
+                                  setTimeout(() => {
+                                    window.open(url, '_blank', 'noopener,noreferrer');
+                                  }, 2000);
                                 }
                               } catch (error) {
-                                console.error('❌ Erro ao processar cupom:', error);
+                                console.error('Erro ao processar cupom:', error);
                                 toast({
                                   title: "Erro ao processar cupom",
                                   description: "Tente novamente",
