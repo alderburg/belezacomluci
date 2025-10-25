@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Sparkles, Gift, Heart, Menu, Instagram, Youtube, Music, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import {
   Sheet,
   SheetContent,
@@ -14,6 +15,8 @@ import type { Banner } from "@shared/schema";
 import { useDataSync } from "@/hooks/use-data-sync";
 
 export default function BioPage() {
+  const { toast } = useToast();
+  
   // Ativar sincronização global de dados para atualização automática
   useDataSync([
     '/api/admin/public-profile',
@@ -89,6 +92,8 @@ export default function BioPage() {
     categoryId: string | null;
     categoryTitle: string | null;
     order: number | null;
+    code: string;
+    storeUrl: string | null;
   }>>({
     queryKey: ["/api/coupons/active-with-categories"],
     enabled: isCouponsModalOpen,
@@ -599,6 +604,32 @@ export default function BioPage() {
                         {coupons.map((coupon) => (
                           <div
                             key={coupon.id}
+                            onClick={async () => {
+                              try {
+                                // Copiar código do cupom
+                                await navigator.clipboard.writeText(coupon.code || '');
+                                
+                                // Mostrar toast de sucesso
+                                toast({
+                                  title: "Cupom Copiado! 🎉",
+                                  description: `Redirecionando para ${coupon.brand}...`,
+                                  duration: 2000,
+                                });
+
+                                // Abrir loja após 2 segundos
+                                setTimeout(() => {
+                                  if (coupon.storeUrl) {
+                                    window.open(coupon.storeUrl, '_blank');
+                                  }
+                                }, 2000);
+                              } catch (error) {
+                                toast({
+                                  title: "Erro ao copiar cupom",
+                                  description: "Tente novamente",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
                             className="relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
                           >
                             {coupon.coverImageUrl ? (
