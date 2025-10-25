@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,12 @@ interface ImageUploadProps {
 export function ImageUpload({ label, value, onChange, id, placeholder, required }: ImageUploadProps) {
   const [preview, setPreview] = useState<string>(value || "");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (value !== preview) {
+      setPreview(value || "");
+    }
+  }, [value]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
