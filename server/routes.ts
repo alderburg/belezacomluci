@@ -10,7 +10,7 @@ import {
   insertRaffleSchema, insertRewardSchema, shareSettings, referrals,
   insertNotificationSchema, insertUserNotificationSchema, notifications, userNotifications,
   insertPopupSchema, insertPopupViewSchema, insertCategorySchema,
-  insertUserSchema, coupons, categories, commentLikes, commentReplies, products
+  insertUserSchema, coupons, categories, commentLikes, commentReplies
 } from "../shared/schema";
 import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
@@ -579,97 +579,48 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Update category
-  app.put("/api/categories/:id", requireAuth, async (req, res) => {
-    if (!req.user?.isAdmin) {
-      return res.status(403).json({ message: "Acesso negado" });
+  app.put("/api/categories/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
     }
 
     try {
-      const { id } = req.params;
-      const updateData = req.body;
+      const categoryData = insertCategorySchema.partial().parse(req.body);
+      const category = await storage.updateCategory(req.params.id, categoryData);
 
-      // Se está tentando desativar a categoria, verificar se há itens vinculados
-      if (updateData.isActive === false) {
-        // Verificar se a categoria está sendo usada em vídeos
-        const videosUsingCategory = await storage.getVideosByCategory(id);
-
-        // Verificar se a categoria está sendo usada em produtos
-        const productsUsingCategory = await storage.getProductsByCategory(id);
-
-        // Verificar se a categoria está sendo usada em cupons
-        const couponsUsingCategory = await storage.getCouponsByCategory(id);
-
-        // Se houver itens vinculados, retornar erro com detalhes
-        if (videosUsingCategory.length > 0 || productsUsingCategory.length > 0 || couponsUsingCategory.length > 0) {
-          const linkedItems = [];
-
-          if (videosUsingCategory.length > 0) {
-            linkedItems.push(`${videosUsingCategory.length} vídeo(s)`);
-          }
-          if (productsUsingCategory.length > 0) {
-            linkedItems.push(`${productsUsingCategory.length} produto(s)`);
-          }
-          if (couponsUsingCategory.length > 0) {
-            linkedItems.push(`${couponsUsingCategory.length} cupom/cupons`);
-          }
-
-          return res.status(400).json({
-            message: `Não é possível desativar esta categoria pois ela está vinculada a: ${linkedItems.join(', ')}. Desvincule primeiro os itens antes de desativar.`
-          });
-        }
+      // Notificar via WebSocket sobre categoria atualizada
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('categories', 'updated', category);
       }
 
-      const updatedCategory = await storage.updateCategory(id, updateData);
-      res.json(updatedCategory);
-    } catch (error: any) {
-      console.error('Erro ao atualizar categoria:', error);
-      res.status(500).json({ message: error.message || 'Erro ao atualizar categoria' });
+      res.json(category);
+    } catch (error) {
+      res.status(400).json({
+        message: "Invalid category data",
+        details: error.message,
+        validation: error.issues || []
+      });
     }
   });
 
-  // Delete category
-  app.delete("/api/categories/:id", requireAuth, async (req, res) => {
-    if (!req.user?.isAdmin) {
-      return res.status(403).json({ message: "Acesso negado" });
+  app.delete("/api/categories/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
     }
 
     try {
-      const { id } = req.params;
+      await storage.deleteCategory(req.params.id);
 
-      // Verificar se a categoria está sendo usada em vídeos
-      const videosUsingCategory = await storage.getVideosByCategory(id);
-
-      // Verificar se a categoria está sendo usada em produtos
-      const productsUsingCategory = await storage.getProductsByCategory(id);
-
-      // Verificar se a categoria está sendo usada em cupons
-      const couponsUsingCategory = await storage.getCouponsByCategory(id);
-
-      // Se houver itens vinculados, retornar erro com detalhes
-      if (videosUsingCategory.length > 0 || productsUsingCategory.length > 0 || couponsUsingCategory.length > 0) {
-        const linkedItems = [];
-
-        if (videosUsingCategory.length > 0) {
-          linkedItems.push(`${videosUsingCategory.length} vídeo(s)`);
-        }
-        if (productsUsingCategory.length > 0) {
-          linkedItems.push(`${productsUsingCategory.length} produto(s)`);
-        }
-        if (couponsUsingCategory.length > 0) {
-          linkedItems.push(`${couponsUsingCategory.length} cupom/cupons`);
-        }
-
-        return res.status(400).json({
-          message: `Não é possível excluir esta categoria pois ela está vinculada a: ${linkedItems.join(', ')}. Desvincule primeiro os itens antes de excluir.`
-        });
+      // Notificar via WebSocket sobre categoria deletada
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('categories', 'deleted', { id: req.params.id });
       }
 
-      await storage.deleteCategory(id);
-      res.json({ success: true });
-    } catch (error: any) {
-      console.error('Erro ao excluir categoria:', error);
-      res.status(500).json({ message: error.message || 'Erro ao excluir categoria' });
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete category" });
     }
   });
 
