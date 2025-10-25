@@ -901,6 +901,7 @@ export default function AdminPage() {
           isActive: true,
           storeUrl: "",
           coverImageUrl: "",
+          order: 0,
           startDateTime: "",
           endDateTime: ""
         });
@@ -958,7 +959,8 @@ export default function AdminPage() {
           title: "",
           description: "",
           coverImageUrl: "",
-          isActive: true
+          isActive: true,
+          order: 0
         });
         break;
     }
