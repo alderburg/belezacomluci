@@ -18,14 +18,7 @@ export default function BioPage() {
   const { toast } = useToast();
   
   // Ativar sincronização global de dados para atualização automática
-  useDataSync([
-    '/api/admin/public-profile',
-    '/api/admin/community-settings',
-    '/api/banners',
-    '/api/coupons/active-with-categories',
-    '/api/coupons',
-    '/api/categories'
-  ]);
+  useDataSync();
 
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
   const [isCouponsModalOpen, setIsCouponsModalOpen] = useState(false);
