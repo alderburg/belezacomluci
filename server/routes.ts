@@ -666,8 +666,13 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const bannerData = insertBannerSchema.parse(req.body);
-      const banner = await storage.createBanner(bannerData);
+      const insertData = insertBannerSchema.parse({
+        ...req.body,
+        opensCouponsModal: req.body.opensCouponsModal ?? false,
+        startDateTime: req.body.startDateTime ? new Date(req.body.startDateTime) : null,
+        endDateTime: req.body.endDateTime ? new Date(req.body.endDateTime) : null,
+      });
+      const banner = await storage.createBanner(insertData);
 
       // Broadcast data update
       const wsService = (global as any).notificationWS;
@@ -692,8 +697,14 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const bannerData = insertBannerSchema.partial().parse(req.body);
-      const banner = await storage.updateBanner(req.params.id, bannerData);
+      const { id } = req.params;
+      const updateData = insertBannerSchema.parse({
+        ...req.body,
+        opensCouponsModal: req.body.opensCouponsModal ?? false,
+        startDateTime: req.body.startDateTime ? new Date(req.body.startDateTime) : null,
+        endDateTime: req.body.endDateTime ? new Date(req.body.endDateTime) : null,
+      });
+      const banner = await storage.updateBanner(id, updateData);
 
       // Broadcast data update
       const wsService = (global as any).notificationWS;
@@ -3325,7 +3336,7 @@ export function registerRoutes(app: Express): Server {
       // Broadcast atualização das configurações da comunidade
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('users', 'updated', { 
+        wsService.broadcastDataUpdate('users', 'updated', {
           id: userId,
           isAdmin: true,
           communitySettingsUpdated: true

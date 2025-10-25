@@ -36,6 +36,7 @@ const createCouponSchema = insertCouponSchema;
 const createBannerSchema = insertBannerSchema.extend({
   startDateTime: z.string().optional().nullable(),
   endDateTime: z.string().optional().nullable(),
+  opensCouponsModal: z.boolean().default(false),
 });
 
 const createPopupSchema = insertPopupSchema;
@@ -440,6 +441,7 @@ export default function AdminPage() {
       showTitle: true,
       showDescription: true,
       showButton: true,
+      opensCouponsModal: false,
       startDateTime: "",
       endDateTime: "",
     },
@@ -919,6 +921,7 @@ export default function AdminPage() {
           showDescription: false,
           showButton: false,
           videoId: "",
+          opensCouponsModal: false,
           startDateTime: "",
           endDateTime: ""
         });
