@@ -37,6 +37,7 @@ const createBannerSchema = insertBannerSchema.extend({
   startDateTime: z.string().optional().nullable(),
   endDateTime: z.string().optional().nullable(),
   opensCouponsModal: z.boolean().default(false),
+  imageUrl: z.string().min(1, "A imagem do banner é obrigatória"),
 });
 
 const createPopupSchema = insertPopupSchema;
@@ -915,7 +916,7 @@ export default function AdminPage() {
           imageUrl: "",
           linkUrl: "",
           page: "home",
-          isActive: false,
+          isActive: true,
           order: 0,
           showTitle: false,
           showDescription: false,
@@ -1746,13 +1747,19 @@ export default function AdminPage() {
                           />
                         </div>
 
-                        <ImageUpload
-                          id="banner-image"
-                          label="Imagem do Banner"
-                          value={bannerForm.watch("imageUrl")}
-                          onChange={(base64) => bannerForm.setValue("imageUrl", base64)}
-                          placeholder="Selecionar imagem do banner"
-                        />
+                        <div>
+                          <ImageUpload
+                            id="banner-image"
+                            label="Imagem do Banner"
+                            value={bannerForm.watch("imageUrl")}
+                            onChange={(base64) => bannerForm.setValue("imageUrl", base64)}
+                            placeholder="Selecionar imagem do banner"
+                            required
+                          />
+                          {bannerForm.formState.errors.imageUrl && (
+                            <p className="text-sm text-destructive mt-1">{bannerForm.formState.errors.imageUrl.message}</p>
+                          )}
+                        </div>
 
                         <div>
                           <Label htmlFor="banner-link">URL de Destino</Label>
