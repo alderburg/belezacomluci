@@ -1290,15 +1290,15 @@ export default function AdminPage() {
             {/* Management Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="flex items-center justify-between mb-6">
-                <TabsList className="grid w-full max-w-4xl grid-cols-8">
-                  <TabsTrigger value="videos" data-testid="tab-videos">Vídeos</TabsTrigger>
-                  <TabsTrigger value="products" data-testid="tab-products">Produtos</TabsTrigger>
-                  <TabsTrigger value="coupons" data-testid="tab-coupons">Cupons</TabsTrigger>
-                  <TabsTrigger value="banners" data-testid="tab-banners">Banners</TabsTrigger>
-                  <TabsTrigger value="popups" data-testid="tab-popups">Popups</TabsTrigger>
-                  <TabsTrigger value="notifications" data-testid="tab-notifications" className="min-w-[120px]">Notificações</TabsTrigger>
-                  <TabsTrigger value="categories" data-testid="tab-categories">Categorias</TabsTrigger>
-                  <TabsTrigger value="users" data-testid="tab-users">Usuários</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-8 gap-1">
+                  <TabsTrigger value="videos" data-testid="tab-videos" className="text-xs sm:text-sm">Vídeos</TabsTrigger>
+                  <TabsTrigger value="products" data-testid="tab-products" className="text-xs sm:text-sm">Produtos</TabsTrigger>
+                  <TabsTrigger value="coupons" data-testid="tab-coupons" className="text-xs sm:text-sm">Cupons</TabsTrigger>
+                  <TabsTrigger value="banners" data-testid="tab-banners" className="text-xs sm:text-sm">Banners</TabsTrigger>
+                  <TabsTrigger value="popups" data-testid="tab-popups" className="text-xs sm:text-sm">Popups</TabsTrigger>
+                  <TabsTrigger value="notifications" data-testid="tab-notifications" className="text-xs sm:text-sm">Notificações</TabsTrigger>
+                  <TabsTrigger value="categories" data-testid="tab-categories" className="text-xs sm:text-sm">Categorias</TabsTrigger>
+                  <TabsTrigger value="users" data-testid="tab-users" className="text-xs sm:text-sm">Usuários</TabsTrigger>
                 </TabsList>
 
                 {activeTab !== 'users' && (
