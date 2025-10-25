@@ -1351,27 +1351,33 @@ export default function AdminPage() {
                     {activeTab === 'videos' && (
                       <form onSubmit={videoForm.handleSubmit((data) => createVideoMutation.mutate(data))} className="space-y-4">
                         <div>
-                          <Label htmlFor="video-title">Título</Label>
+                          <Label htmlFor="video-title">Título <span className="text-destructive">*</span></Label>
                           <Input
                             id="video-title"
                             {...videoForm.register("title")}
                             placeholder="Digite o título do vídeo"
                             data-testid="input-video-title"
                           />
+                          {videoForm.formState.errors.title && (
+                            <p className="text-sm text-destructive mt-1">{videoForm.formState.errors.title.message}</p>
+                          )}
                         </div>
 
                         <div>
-                          <Label htmlFor="video-description">Descrição</Label>
+                          <Label htmlFor="video-description">Descrição <span className="text-destructive">*</span></Label>
                           <Textarea
                             id="video-description"
                             {...videoForm.register("description")}
                             placeholder="Descrição do vídeo"
                             data-testid="textarea-video-description"
                           />
+                          {videoForm.formState.errors.description && (
+                            <p className="text-sm text-destructive mt-1">{videoForm.formState.errors.description.message}</p>
+                          )}
                         </div>
 
                         <div>
-                          <Label htmlFor="video-url">URL do Vídeo</Label>
+                          <Label htmlFor="video-url">URL do Vídeo <span className="text-destructive">*</span></Label>
                           <Input
                             id="video-url"
                             {...videoForm.register("videoUrl")}
@@ -1384,6 +1390,9 @@ export default function AdminPage() {
                               }
                             }}
                           />
+                          {videoForm.formState.errors.videoUrl && (
+                            <p className="text-sm text-destructive mt-1">{videoForm.formState.errors.videoUrl.message}</p>
+                          )}
                         </div>
 
                         <ImageUpload
@@ -1396,7 +1405,7 @@ export default function AdminPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="video-type">Tipo</Label>
+                            <Label htmlFor="video-type">Tipo <span className="text-destructive">*</span></Label>
                             <Select
                               value={videoForm.watch("type") || "video"}
                               onValueChange={(value) => videoForm.setValue("type", value)}
@@ -1410,10 +1419,13 @@ export default function AdminPage() {
                                 <SelectItem value="live">Live</SelectItem>
                               </SelectContent>
                             </Select>
+                            {videoForm.formState.errors.type && (
+                              <p className="text-sm text-destructive mt-1">{videoForm.formState.errors.type.message}</p>
+                            )}
                           </div>
 
                           <div>
-                            <Label htmlFor="video-category">Categoria</Label>
+                            <Label htmlFor="video-category">Categoria <span className="text-destructive">*</span></Label>
                             <Select
                               value={videoForm.watch("categoryId") || ""}
                               onValueChange={(value) => videoForm.setValue("categoryId", value)}
@@ -1429,6 +1441,9 @@ export default function AdminPage() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            {videoForm.formState.errors.categoryId && (
+                              <p className="text-sm text-destructive mt-1">{videoForm.formState.errors.categoryId.message}</p>
+                            )}
                           </div>
                         </div>
 

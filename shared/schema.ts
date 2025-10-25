@@ -605,7 +605,13 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true, creat
     url: z.string().optional()
   })).optional().default([])
 });
-export const insertVideoSchema = createInsertSchema(videos).omit({ id: true, createdAt: true, views: true, likes: true });
+export const insertVideoSchema = createInsertSchema(videos).omit({ id: true, createdAt: true, views: true, likes: true }).extend({
+  title: z.string().min(1, "Título é obrigatório"),
+  description: z.string().min(1, "Descrição é obrigatória"),
+  videoUrl: z.string().min(1, "URL do vídeo é obrigatória"),
+  type: z.string().min(1, "Tipo é obrigatório"),
+  categoryId: z.string().min(1, "Categoria é obrigatória"),
+});
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true }).extend({
   title: z.string().min(1, "Título é obrigatório"),
 });
