@@ -80,6 +80,19 @@ export default function PlaylistMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Resetar scroll do modal quando abrir
+  useEffect(() => {
+    if (showPlaylistModal) {
+      // Pequeno delay para garantir que o modal renderizou
+      setTimeout(() => {
+        const scrollArea = document.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollArea) {
+          scrollArea.scrollTop = 0;
+        }
+      }, 0);
+    }
+  }, [showPlaylistModal]);
+
   // Scroll para o topo quando a página carrega
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -995,7 +1008,7 @@ export default function PlaylistMobilePage() {
             </p>
           </DialogHeader>
           
-          <ScrollArea className="flex-1 px-4 pb-4">
+          <ScrollArea key={showPlaylistModal ? 'open' : 'closed'} className="flex-1 px-4 pb-4">
             <div className="space-y-2">
               {videos.map((video, index) => (
                 <Card 
