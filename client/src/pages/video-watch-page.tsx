@@ -558,11 +558,11 @@ export default function VideoWatchPage() {
         <div className="container mx-auto px-6 py-8">
           <Button
             variant="ghost"
-            onClick={() => navigate("/videos")}
+            onClick={() => navigate(product ? "/produtos" : "/videos")}
             className="mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar para vídeos
+            Voltar para {product ? "produtos" : "vídeos"}
           </Button>
 
           {/* Main content with video and banners */}
@@ -572,10 +572,10 @@ export default function VideoWatchPage() {
               {/* Video player */}
               <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden mb-6">
             {/* Thumbnail background */}
-            {video?.thumbnailUrl && (
+            {(product?.coverImageUrl || video?.thumbnailUrl) && (
               <img
-                src={video.thumbnailUrl}
-                alt={video?.title || 'Thumbnail'}
+                src={product?.coverImageUrl || video?.thumbnailUrl}
+                alt={product?.title || video?.title || 'Thumbnail'}
                 className="absolute inset-0 w-full h-full object-cover"
               />
             )}
@@ -616,7 +616,9 @@ export default function VideoWatchPage() {
           {/* Video info */}
           <div className="space-y-4 mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">{video?.title}</h1>
+              <h1 className="text-2xl font-bold text-foreground mb-2">
+                {product?.title || video?.title}
+              </h1>
               <div className="flex flex-wrap items-center gap-4 text-muted-foreground text-sm">
                 <div className="flex items-center gap-1">
                   <Eye className="w-4 h-4" />
@@ -629,10 +631,16 @@ export default function VideoWatchPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  <span>{video?.createdAt ? formatDistanceToNow(new Date(video.createdAt), { addSuffix: true, locale: ptBR }) : 'Data não disponível'}</span>
+                  <span>
+                    {(product?.createdAt || video?.createdAt) 
+                      ? formatDistanceToNow(new Date(product?.createdAt || video?.createdAt), { addSuffix: true, locale: ptBR }) 
+                      : 'Data não disponível'}
+                  </span>
                 </div>
-                {video?.category && (
-                  <Badge variant="outline">{getCategoryLabel(video.category)}</Badge>
+                {(product?.categoryId || video?.category) && (
+                  <Badge variant="outline">
+                    {product ? 'Curso' : getCategoryLabel(video.category)}
+                  </Badge>
                 )}
               </div>
             </div>
@@ -664,15 +672,17 @@ export default function VideoWatchPage() {
                 <Share2 className="w-4 h-4" />
                 Compartilhar
               </Button>
-              {video?.isExclusive && (
+              {(product?.isExclusive || video?.isExclusive) && (
                 <Badge className="bg-purple-100 text-purple-700">Exclusivo</Badge>
               )}
             </div>
 
-            {video?.description && (
+            {(product?.description || video?.description) && (
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-muted-foreground whitespace-pre-wrap">{video.description}</p>
+                  <p className="text-muted-foreground whitespace-pre-wrap">
+                    {product?.description || video?.description}
+                  </p>
                 </CardContent>
               </Card>
             )}
