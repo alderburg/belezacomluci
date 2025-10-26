@@ -4,6 +4,22 @@ This is "Beleza com Luci", a beauty platform built for followers to access exclu
 
 # Recent Changes
 
+## 2025-10-26: Sistema de Diferenciação de Cursos (Vídeo Único vs Playlist)
+- Implementado dois novos tipos de produto: `course_video` (Curso - Vídeo Único) e `course_playlist` (Curso - Playlist)
+- Sistema agora detecta automaticamente o tipo ao inserir URL do YouTube no admin:
+  - URLs com `list=` são identificadas como playlist e o tipo é alterado para `course_playlist`
+  - URLs de vídeo único (sem `list=`) são identificadas como vídeo e o tipo é alterado para `course_video`
+- ProductCard agora navega corretamente:
+  - `course_video` → abre em `/video/{id}` (player de vídeo único)
+  - `course_playlist` → abre em `/playlist/{id}` (player de playlist)
+- Mantida compatibilidade com produtos antigos que têm `type='course'` (detecta automaticamente pela URL)
+- Filtro "Cursos" na página /produtos inclui ambos os tipos (course_video e course_playlist)
+
+## 2025-10-26: Configuração do Banco de Dados Railway
+- Conectado ao banco de dados PostgreSQL do Railway
+- Credenciais configuradas via variáveis de ambiente RAILWAY_DB_*
+- Sistema funcionando com banco de dados externo
+
 ## 2025-10-14: Correção de Espaçamento em /meuperfil Desktop
 - Corrigido padding-top da página /meuperfil para seguir o padrão das outras páginas
 - Aplicado pt-16 (64px) no desktop e pt-32 (128px) no mobile no elemento <main>
