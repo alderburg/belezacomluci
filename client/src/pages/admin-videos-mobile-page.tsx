@@ -30,6 +30,7 @@ export default function AdminVideosMobilePage() {
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -72,6 +73,7 @@ export default function AdminVideosMobilePage() {
   };
 
   const handleEditClick = (videoId: string) => {
+    setEditingId(videoId);
     setLocation(`/admin/videos-mobile/edit/${videoId}`);
   };
 
@@ -164,10 +166,11 @@ export default function AdminVideosMobilePage() {
                     size="sm"
                     className="flex-1"
                     onClick={() => handleEditClick(video.id)}
+                    disabled={editingId === video.id}
                     data-testid={`button-edit-${video.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Editar
+                    {editingId === video.id ? "Carregando..." : "Editar"}
                   </Button>
                   <Button
                     variant="outline"

@@ -22,6 +22,7 @@ export default function AdminCategoriesMobilePage() {
   const { isConnected } = useDataSync();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -64,6 +65,7 @@ export default function AdminCategoriesMobilePage() {
   };
 
   const handleEditClick = (categoryId: string) => {
+    setEditingId(categoryId);
     setLocation(`/admin/categories-mobile/edit/${categoryId}`);
   };
 
@@ -156,10 +158,11 @@ export default function AdminCategoriesMobilePage() {
                     size="sm"
                     className="flex-1"
                     onClick={() => handleEditClick(category.id)}
+                    disabled={editingId === category.id}
                     data-testid={`button-edit-${category.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Editar
+                    {editingId === category.id ? "Carregando..." : "Editar"}
                   </Button>
                   <Button
                     variant="outline"

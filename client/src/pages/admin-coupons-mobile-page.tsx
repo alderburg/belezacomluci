@@ -30,6 +30,7 @@ export default function AdminCouponsMobilePage() {
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
   const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -72,6 +73,7 @@ export default function AdminCouponsMobilePage() {
   };
 
   const handleEditClick = (couponId: string) => {
+    setEditingId(couponId);
     setLocation(`/admin/coupons-mobile/edit/${couponId}`);
   };
 
@@ -166,10 +168,11 @@ export default function AdminCouponsMobilePage() {
                     size="sm"
                     className="flex-1"
                     onClick={() => handleEditClick(coupon.id)}
+                    disabled={editingId === coupon.id}
                     data-testid={`button-edit-${coupon.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Editar
+                    {editingId === coupon.id ? "Carregando..." : "Editar"}
                   </Button>
                   <Button
                     variant="outline"

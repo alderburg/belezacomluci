@@ -30,6 +30,7 @@ export default function AdminProductsMobilePage() {
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -72,6 +73,7 @@ export default function AdminProductsMobilePage() {
   };
 
   const handleEditClick = (productId: string) => {
+    setEditingId(productId);
     setLocation(`/admin/products-mobile/edit/${productId}`);
   };
 
@@ -173,10 +175,11 @@ export default function AdminProductsMobilePage() {
                     size="sm"
                     className="flex-1"
                     onClick={() => handleEditClick(product.id)}
+                    disabled={editingId === product.id}
                     data-testid={`button-edit-${product.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Editar
+                    {editingId === product.id ? "Carregando..." : "Editar"}
                   </Button>
                   <Button
                     variant="outline"

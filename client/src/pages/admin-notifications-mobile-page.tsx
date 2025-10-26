@@ -22,6 +22,7 @@ export default function AdminNotificationsMobilePage() {
   const { isConnected } = useDataSync();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [notificationToDelete, setNotificationToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -86,6 +87,7 @@ export default function AdminNotificationsMobilePage() {
   };
 
   const handleEditClick = (notificationId: string) => {
+    setEditingId(notificationId);
     setLocation(`/admin/notifications-mobile/edit/${notificationId}`);
   };
 
@@ -193,10 +195,11 @@ export default function AdminNotificationsMobilePage() {
                     size="sm"
                     className="flex-1"
                     onClick={() => handleEditClick(notification.id)}
+                    disabled={editingId === notification.id}
                     data-testid={`button-edit-${notification.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Editar
+                    {editingId === notification.id ? "Carregando..." : "Editar"}
                   </Button>
                   <Button
                     variant="outline"

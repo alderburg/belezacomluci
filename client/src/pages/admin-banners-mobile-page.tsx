@@ -22,6 +22,7 @@ export default function AdminBannersMobilePage() {
   const { isConnected } = useDataSync();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bannerToDelete, setBannerToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -65,6 +66,7 @@ export default function AdminBannersMobilePage() {
   };
 
   const handleEditClick = (bannerId: string) => {
+    setEditingId(bannerId);
     setLocation(`/admin/banners-mobile/edit/${bannerId}`);
   };
 
@@ -197,10 +199,11 @@ export default function AdminBannersMobilePage() {
                       size="sm"
                       className="flex-1"
                       onClick={() => handleEditClick(banner.id)}
+                      disabled={editingId === banner.id}
                       data-testid={`button-edit-${banner.id}`}
                     >
                       <Edit className="h-4 w-4 mr-2" />
-                      Editar
+                      {editingId === banner.id ? "Carregando..." : "Editar"}
                     </Button>
                     <Button
                       variant="outline"

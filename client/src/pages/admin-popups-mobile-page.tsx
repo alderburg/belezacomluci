@@ -22,6 +22,7 @@ export default function AdminPopupsMobilePage() {
   const { isConnected } = useDataSync();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [popupToDelete, setPopupToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -65,6 +66,7 @@ export default function AdminPopupsMobilePage() {
   };
 
   const handleEditClick = (popupId: string) => {
+    setEditingId(popupId);
     setLocation(`/admin/popups-mobile/edit/${popupId}`);
   };
 
@@ -160,10 +162,11 @@ export default function AdminPopupsMobilePage() {
                       size="sm"
                       className="flex-1"
                       onClick={() => handleEditClick(popup.id)}
+                      disabled={editingId === popup.id}
                       data-testid={`button-edit-${popup.id}`}
                     >
                       <Edit className="h-4 w-4 mr-2" />
-                      Editar
+                      {editingId === popup.id ? "Carregando..." : "Editar"}
                     </Button>
                     <Button
                       variant="outline"
