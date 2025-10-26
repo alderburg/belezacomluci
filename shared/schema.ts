@@ -617,6 +617,7 @@ export const insertCategorySchema = createInsertSchema(categories).omit({ id: tr
 });
 export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true }).extend({
   title: z.string().min(1, "Título é obrigatório"),
+  description: z.string().min(1, "Descrição é obrigatória"),
   fileUrl: z.string().min(1, "URL do arquivo/playlist é obrigatória"),
   coverImageUrl: z.string().min(1, "Imagem de capa é obrigatória"),
   categoryId: z.string().min(1, "Categoria é obrigatória"),
