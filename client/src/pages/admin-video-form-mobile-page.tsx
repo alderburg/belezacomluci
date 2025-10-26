@@ -40,16 +40,31 @@ export default function AdminVideoFormMobilePage() {
   const queryClient = useQueryClient();
   const isEditing = Boolean(match && videoId);
 
-  const { data: video, isLoading } = useQuery<Video>({
+  const { data: video, isLoading, error } = useQuery<Video>({
     queryKey: ['/api/admin/videos', videoId],
     queryFn: async () => {
       if (!videoId) throw new Error('ID não fornecido');
+      console.log('Buscando vídeo para edição:', videoId);
       const res = await fetch(`/api/admin/videos/${videoId}`);
       if (!res.ok) throw new Error('Erro ao carregar vídeo');
-      return res.json();
+      const data = await res.json();
+      console.log('Vídeo carregado:', data);
+      return data;
     },
     enabled: Boolean(isEditing && videoId),
   });
+
+  // Mostrar erro se houver
+  useEffect(() => {
+    if (error) {
+      console.error('Erro ao carregar vídeo:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível carregar os dados do vídeo",
+      });
+    }
+  }, [error, toast]);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
@@ -72,6 +87,7 @@ export default function AdminVideoFormMobilePage() {
   // Reset form when video data loads or ID changes
   useEffect(() => {
     if (video && isEditing) {
+      console.log('Populando formulário com dados do vídeo:', video);
       form.reset({
         title: video.title,
         description: video.description || "",
@@ -83,6 +99,7 @@ export default function AdminVideoFormMobilePage() {
         isExclusive: video.isExclusive ?? false,
       });
     } else if (!isEditing) {
+      console.log('Resetando formulário para novo vídeo');
       form.reset({
         title: "",
         description: "",
@@ -94,7 +111,7 @@ export default function AdminVideoFormMobilePage() {
         isExclusive: false,
       });
     }
-  }, [videoId, isEditing]);
+  }, [video, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertVideoSchema>) => {
