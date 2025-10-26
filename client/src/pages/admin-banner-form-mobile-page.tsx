@@ -18,7 +18,7 @@ import { useEffect } from 'react';
 
 export default function AdminBannerFormMobilePage() {
   const { user } = useAuth();
-  const [, setLocation, navigation] = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/banners-mobile/edit/:id");
@@ -29,7 +29,7 @@ export default function AdminBannerFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  const bannerFromState = navigation?.state?.bannerData;
+  const bannerFromState = typeof window !== 'undefined' ? (window.history.state as any)?.bannerData : null;
   const banner = bannerFromState;
 
   const form = useForm<z.infer<typeof insertBannerSchema>>({

@@ -19,7 +19,7 @@ import { useEffect } from 'react';
 
 export default function AdminNotificationFormMobilePage() {
   const { user } = useAuth();
-  const [, setLocation, navigation] = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/notifications-mobile/edit/:id");
@@ -29,6 +29,9 @@ export default function AdminNotificationFormMobilePage() {
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
   }
+
+  const notificationFromState = typeof window !== 'undefined' ? (window.history.state as any)?.notificationData : null;
+  const notification = notificationFromState;
 
   const notificationFromState = navigation?.state?.notificationData;
   const notification = notificationFromState;

@@ -19,7 +19,7 @@ import { useEffect } from 'react';
 
 export default function AdminPopupFormMobilePage() {
   const { user } = useAuth();
-  const [, setLocation, navigation] = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/popups-mobile/edit/:id");
@@ -30,7 +30,7 @@ export default function AdminPopupFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  const popupFromState = navigation?.state?.popupData;
+  const popupFromState = typeof window !== 'undefined' ? (window.history.state as any)?.popupData : null;
   const popup = popupFromState;
 
   const form = useForm<z.infer<typeof insertPopupSchema>>({
