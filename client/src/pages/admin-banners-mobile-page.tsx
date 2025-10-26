@@ -65,24 +65,9 @@ export default function AdminBannersMobilePage() {
     setLocation('/admin/banners-mobile/new');
   };
 
-  const handleEditClick = async (bannerId: string) => {
+  const handleEditClick = (bannerId: string) => {
     setEditingId(bannerId);
-    try {
-      const response = await fetch(`/api/admin/banners/${bannerId}`);
-      if (!response.ok) throw new Error('Erro ao carregar banner');
-      const bannerData = await response.json();
-      
-      window.history.replaceState({ bannerData }, '');
-      setLocation(`/admin/banners-mobile/edit/${bannerId}`);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível carregar os dados do banner",
-      });
-    } finally {
-      setEditingId(null);
-    }
+    setLocation(`/admin/banners-mobile/edit/${bannerId}`);
   };
 
   const handleDeleteClick = (banner: Banner) => {

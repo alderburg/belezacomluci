@@ -39,7 +39,7 @@ export default function AdminPopupsMobilePage() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/popups"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/popups"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/popups"] });
       toast({
         title: "Sucesso",
@@ -65,24 +65,9 @@ export default function AdminPopupsMobilePage() {
     setLocation('/admin/popups-mobile/new');
   };
 
-  const handleEditClick = async (popupId: string) => {
+  const handleEditClick = (popupId: string) => {
     setEditingId(popupId);
-    try {
-      const response = await fetch(`/api/admin/popups/${popupId}`);
-      if (!response.ok) throw new Error('Erro ao carregar popup');
-      const popupData = await response.json();
-      
-      window.history.replaceState({ popupData }, '');
-      setLocation(`/admin/popups-mobile/edit/${popupId}`);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível carregar os dados do popup",
-      });
-    } finally {
-      setEditingId(null);
-    }
+    setLocation(`/admin/popups-mobile/edit/${popupId}`);
   };
 
   const handleDeleteClick = (popup: Popup) => {
@@ -180,6 +165,7 @@ export default function AdminPopupsMobilePage() {
                       disabled={editingId === popup.id}
                       data-testid={`button-edit-${popup.id}`}
                     >
+                      <Edit className="h-4 w-4 mr-2" />
                       {editingId === popup.id ? "Carregando..." : "Editar"}
                     </Button>
                     <Button

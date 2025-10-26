@@ -72,24 +72,9 @@ export default function AdminCouponsMobilePage() {
     setLocation('/admin/coupons-mobile/new');
   };
 
-  const handleEditClick = async (couponId: number) => {
-    setEditingId(String(couponId));
-    try {
-      const response = await fetch(`/api/admin/coupons/${couponId}`);
-      if (!response.ok) throw new Error('Erro ao carregar cupom');
-      const couponData = await response.json();
-
-      window.history.replaceState({ couponData }, '');
-      setLocation(`/admin/coupons-mobile/edit/${couponId}`);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível carregar os dados do cupom",
-      });
-    } finally {
-      setEditingId(null);
-    }
+  const handleEditClick = (couponId: string) => {
+    setEditingId(couponId);
+    setLocation(`/admin/coupons-mobile/edit/${couponId}`);
   };
 
   const handleDeleteClick = (coupon: Coupon) => {
@@ -182,7 +167,7 @@ export default function AdminCouponsMobilePage() {
                     variant="outline"
                     size="sm"
                     className="flex-1"
-                    onClick={() => handleEditClick(Number(coupon.id))}
+                    onClick={() => handleEditClick(coupon.id)}
                     disabled={editingId === coupon.id}
                     data-testid={`button-edit-${coupon.id}`}
                   >

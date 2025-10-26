@@ -18,7 +18,7 @@ import { useEffect } from 'react';
 
 export default function AdminCategoryFormMobilePage() {
   const { user } = useAuth();
-  const [, setLocation, navigation] = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/categories-mobile/edit/:id");
@@ -29,8 +29,16 @@ export default function AdminCategoryFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  const categoryFromState = navigation?.state?.categoryData;
-  const category = categoryFromState;
+  const { data: category, isLoading } = useQuery<Category>({
+    queryKey: ['/api/categories', categoryId],
+    queryFn: async () => {
+      if (!categoryId) throw new Error('ID não fornecido');
+      const res = await fetch(`/api/categories/${categoryId}`);
+      if (!res.ok) throw new Error('Erro ao carregar categoria');
+      return res.json();
+    },
+    enabled: Boolean(isEditing && categoryId),
+  });
 
   const form = useForm<z.infer<typeof insertCategorySchema>>({
     resolver: zodResolver(insertCategorySchema),
@@ -115,7 +123,12 @@ export default function AdminCategoryFormMobilePage() {
         </div>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      {isEditing && isLoading ? (
+        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : (
+        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="category-title">Título <span className="text-destructive">*</span></Label>
           <Input
@@ -176,6 +189,7 @@ export default function AdminCategoryFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Categoria" : "Criar Categoria"}
         </Button>
       </form>
+      )}
     </div>
   );
 }

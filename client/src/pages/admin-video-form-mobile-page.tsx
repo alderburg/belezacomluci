@@ -26,15 +26,22 @@ import { useEffect } from 'react';
 export default function AdminVideoFormMobilePage() {
   const [match, params] = useRoute("/admin/videos-mobile/edit/:id");
   const videoId = match && params && params.id ? String(params.id) : undefined;
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = Boolean(match && videoId);
-  
-  // Pegar dados passados via state (usando window.history.state)
-  const videoFromState = typeof window !== 'undefined' ? (window.history.state as any)?.videoData : null;
-  const video = videoFromState;
+
+  const { data: video, isLoading } = useQuery<Video>({
+    queryKey: ['/api/admin/videos', videoId],
+    queryFn: async () => {
+      if (!videoId) throw new Error('ID não fornecido');
+      const res = await fetch(`/api/admin/videos/${videoId}`);
+      if (!res.ok) throw new Error('Erro ao carregar vídeo');
+      return res.json();
+    },
+    enabled: Boolean(isEditing && videoId),
+  });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
@@ -201,7 +208,12 @@ export default function AdminVideoFormMobilePage() {
         </div>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      {isEditing && isLoading ? (
+        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : (
+        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="video-title">Título <span className="text-destructive">*</span></Label>
           <Input
@@ -332,6 +344,7 @@ export default function AdminVideoFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Vídeo" : "Criar Vídeo"}
         </Button>
       </form>
+      )}
     </div>
   );
 }

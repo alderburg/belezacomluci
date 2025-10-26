@@ -64,23 +64,10 @@ export default function AdminCategoriesMobilePage() {
     setLocation('/admin/categories-mobile/new');
   };
 
-  const handleEditClick = async (categoryId: string) => {
+  const handleEditClick = (categoryId: string) => {
     setEditingId(categoryId);
-    try {
-      const response = await fetch(`/api/categories/${categoryId}`);
-      if (!response.ok) throw new Error('Erro ao carregar categoria');
-      const categoryData = await response.json();
-      setLocation(`/admin/categories-mobile/edit/${categoryId}`, { state: { categoryData } });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível carregar os dados da categoria",
-      });
-      setEditingId(null); // Reset editingId on error
-    }
+    setLocation(`/admin/categories-mobile/edit/${categoryId}`);
   };
-
 
   const handleDeleteClick = (category: Category) => {
     setCategoryToDelete({ id: category.id, title: category.title });

@@ -31,9 +31,17 @@ export default function AdminProductFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = Boolean(match && productId);
-  
-  const productFromState = typeof window !== 'undefined' ? (window.history.state as any)?.productData : null;
-  const product = productFromState;
+
+  const { data: product, isLoading } = useQuery<Product>({
+    queryKey: ['/api/admin/products', productId],
+    queryFn: async () => {
+      if (!productId) throw new Error('ID não fornecido');
+      const res = await fetch(`/api/admin/products/${productId}`);
+      if (!res.ok) throw new Error('Erro ao carregar produto');
+      return res.json();
+    },
+    enabled: Boolean(isEditing && productId),
+  });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
@@ -216,7 +224,12 @@ export default function AdminProductFormMobilePage() {
         </div>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      {isEditing && isLoading ? (
+        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : (
+        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="product-title">Título <span className="text-destructive">*</span></Label>
           <Input
@@ -348,6 +361,7 @@ export default function AdminProductFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Produto" : "Criar Produto"}
         </Button>
       </form>
+      )}
     </div>
   );
 }

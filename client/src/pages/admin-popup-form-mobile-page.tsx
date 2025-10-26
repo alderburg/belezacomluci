@@ -30,8 +30,16 @@ export default function AdminPopupFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  const popupFromState = typeof window !== 'undefined' ? (window.history.state as any)?.popupData : null;
-  const popup = popupFromState;
+  const { data: popup, isLoading } = useQuery<Popup>({
+    queryKey: ['/api/admin/popups', popupId],
+    queryFn: async () => {
+      if (!popupId) throw new Error('ID não fornecido');
+      const res = await fetch(`/api/admin/popups/${popupId}`);
+      if (!res.ok) throw new Error('Erro ao carregar popup');
+      return res.json();
+    },
+    enabled: Boolean(isEditing && popupId),
+  });
 
   const form = useForm<z.infer<typeof insertPopupSchema>>({
     resolver: zodResolver(insertPopupSchema),
@@ -141,7 +149,12 @@ export default function AdminPopupFormMobilePage() {
         </div>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      {isEditing && isLoading ? (
+        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : (
+        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="popup-title">Título <span className="text-destructive">*</span></Label>
           <Input
@@ -382,6 +395,7 @@ export default function AdminPopupFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Pop-up" : "Criar Pop-up"}
         </Button>
       </form>
+      )}
     </div>
   );
 }
