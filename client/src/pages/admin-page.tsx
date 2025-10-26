@@ -2772,7 +2772,7 @@ export default function AdminPage() {
                                 <h4 className="font-semibold text-foreground" data-testid={`video-title-${video.id}`}>
                                   {video.title}
                                 </h4>
-                                <p className="text-sm text-muted-foreground">{video.description}</p>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{video.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
                                   <Badge className="bg-blue-100 text-blue-700">{getVideoTypeLabel(video.type || 'video')}</Badge>
                                   {video.isExclusive && (
@@ -2938,7 +2938,7 @@ export default function AdminPage() {
                                 <h4 className="font-semibold text-foreground" data-testid={`product-title-${product.id}`}>
                                   {product.title}
                                 </h4>
-                                <p className="text-sm text-muted-foreground">{product.description}</p>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{product.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
                                   <Badge variant="outline">{getProductTypeLabel(product.type)}</Badge>
                                   {product.isExclusive && (
@@ -3109,7 +3109,7 @@ export default function AdminPage() {
                                   </h4>
                                   <Badge className="bg-primary/10 text-primary">{coupon.discount}</Badge>
                                 </div>
-                                <p className="text-sm text-muted-foreground">{coupon.description}</p>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{coupon.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
                                   <code className="text-xs bg-muted px-2 py-1 rounded">{coupon.code}</code>
                                   {coupon.category && (
@@ -3313,7 +3313,7 @@ export default function AdminPage() {
                                 <h4 className="font-semibold text-foreground" data-testid={`banner-title-${banner.id}`}>
                                   {banner.title}
                                 </h4>
-                                <p className="text-sm text-muted-foreground">{banner.description}</p>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{banner.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
                                   <Badge variant="outline" className="bg-blue-50 text-blue-700">
                                     {banner.page === 'home' ? 'Página Inicial' : 
@@ -3535,7 +3535,7 @@ export default function AdminPage() {
                                 <h4 className="font-semibold text-foreground" data-testid={`popup-title-${popup.id}`}>
                                   {popup.title}
                                 </h4>
-                                <p className="text-sm text-muted-foreground">{popup.description}</p>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{popup.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
                                   <Badge variant="outline" className="bg-blue-50 text-blue-700">
                                     {popup.trigger === 'login' ? 'Login' :
@@ -3955,7 +3955,7 @@ export default function AdminPage() {
                                 <h4 className="font-semibold text-foreground" data-testid={`notification-title-${notification.id}`}>
                                   {notification.title}
                                 </h4>
-                                <p className="text-sm text-muted-foreground">{notification.description}</p>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{notification.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
                                   <Badge variant="outline" className="bg-blue-50 text-blue-700">
                                     {notification.targetAudience === 'all' ? 'Todos' : 
@@ -4185,7 +4185,7 @@ export default function AdminPage() {
                                 <h4 className="font-semibold text-foreground" data-testid={`category-title-${category.id}`}>
                                   {category.title}
                                 </h4>
-                                <p className="text-sm text-muted-foreground">{category.description}</p>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{category.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
                                   {category.isActive ? (
                                     <Badge className="bg-green-100 text-green-700">Ativa</Badge>
