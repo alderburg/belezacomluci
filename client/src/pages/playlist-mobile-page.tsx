@@ -118,14 +118,14 @@ export default function PlaylistMobilePage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const playerContainerRef = useRef<HTMLDivElement>(null); // Ref para o container do player
-  const youtubePlayer = useRef<any>(null); // Ref para a instância do player do YouTube
+  const playerRef = useRef<any>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
 
   // Hook para rastrear progresso do vídeo - DEVE VIR ANTES de usar saveProgress
   const { stopProgressSaving, saveProgress } = useVideoProgress({
     videoId: currentVideoId,
     resourceId: resourceId || '',
-    playerRef: youtubePlayer, // Usando youtubePlayer ref que armazena a instância do player
+    playerRef,
     enabled: !!user && !!currentVideoId && !!resourceId && showVideo
   });
 
@@ -184,7 +184,7 @@ export default function PlaylistMobilePage() {
     return progress?.isCompleted || false;
   };
 
-  // Criar player quando vídeo for mostrado - EXATAMENTE IGUAL AO DESKTOP
+  // Criar player quando vídeo for mostrado
   useEffect(() => {
     if (!showVideo || !currentVideoId || !playerContainerRef.current) {
       return;
@@ -196,13 +196,13 @@ export default function PlaylistMobilePage() {
         if (!playerContainerRef.current) return;
 
         // Limpar player anterior se existir
-        if (youtubePlayer.current && typeof youtubePlayer.current.destroy === 'function') {
+        if (playerRef.current && typeof playerRef.current.destroy === 'function') {
           try {
-            youtubePlayer.current.destroy();
+            playerRef.current.destroy();
           } catch (e) {
             console.log('Error destroying player:', e);
           }
-          youtubePlayer.current = null;
+          playerRef.current = null;
         }
 
         // Limpar o container
@@ -212,7 +212,7 @@ export default function PlaylistMobilePage() {
 
         // Criar novo player
         try {
-          youtubePlayer.current = new window.YT.Player(playerContainerRef.current, {
+          playerRef.current = new window.YT.Player(playerContainerRef.current, {
             videoId: currentVideoId,
             playerVars: {
               autoplay: 1,
@@ -251,16 +251,16 @@ export default function PlaylistMobilePage() {
       if (stopProgressSaving) {
         stopProgressSaving();
       }
-      if (youtubePlayer.current && typeof youtubePlayer.current.destroy === 'function') {
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         try {
-          youtubePlayer.current.destroy();
+          playerRef.current.destroy();
         } catch (e) {
           console.log('Cleanup error:', e);
         }
-        youtubePlayer.current = null;
+        playerRef.current = null;
       }
     };
-  }, [showVideo, currentVideoId, stopProgressSaving, saveProgress]);
+  }, [showVideo, currentVideoId, stopProgressSaving]);
 
   // --- Fim do Rastreamento de progresso ---
 
@@ -462,10 +462,10 @@ export default function PlaylistMobilePage() {
       }
       
       // Destruir player atual antes de mudar
-      if (youtubePlayer.current && typeof youtubePlayer.current.destroy === 'function') {
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         try {
-          youtubePlayer.current.destroy();
-          youtubePlayer.current = null;
+          playerRef.current.destroy();
+          playerRef.current = null;
         } catch (e) {
           console.log('Error destroying player on video change:', e);
         }
