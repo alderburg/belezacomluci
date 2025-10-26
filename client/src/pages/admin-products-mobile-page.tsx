@@ -95,12 +95,14 @@ export default function AdminProductsMobilePage() {
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {product.description}
                     </p>
-                    <div className="flex gap-2 mt-2">
-                      {product.isExclusive && (
+                    {product.isExclusive && (
+                      <div className="flex gap-2 mt-2">
                         <Badge className="bg-purple-100 text-purple-700 text-xs">
                           Premium
                         </Badge>
-                      )}
+                      </div>
+                    )}
+                    <div className="flex gap-2 mt-2">
                       <Badge className={`text-xs ${product.type === 'course_playlist' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
                         {getProductTypeLabel(product.type)}
                       </Badge>

@@ -82,15 +82,17 @@ export default function AdminBannersMobilePage() {
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {banner.description}
                   </p>
-                  <div className="flex gap-2 mt-2">
-                    <Badge className="bg-blue-100 text-blue-700 text-xs">
-                      {banner.page === 'home' ? 'Home' : banner.page}
-                    </Badge>
-                    {!banner.isActive && (
-                      <Badge className="bg-red-100 text-red-700 text-xs">
-                        Inativo
+                  {banner.isExclusive && (
+                    <div className="flex gap-2 mt-2">
+                      <Badge className="bg-purple-100 text-purple-700 text-xs">
+                        Premium
                       </Badge>
-                    )}
+                    </div>
+                  )}
+                  <div className="flex gap-2 mt-2">
+                    <Badge className={`text-xs ${banner.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {banner.isActive ? 'Ativo' : 'Inativo'}
+                    </Badge>
                   </div>
                   <div className="flex gap-2 mt-3 pt-3 border-t border-border">
                     <Button

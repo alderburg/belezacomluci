@@ -80,9 +80,16 @@ export default function AdminCouponsMobilePage() {
                     <h3 className="font-medium text-foreground truncate">
                       {coupon.brand}
                     </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-1">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
                       {coupon.description}
                     </p>
+                    {coupon.isExclusive && (
+                      <div className="flex gap-2 mt-2">
+                        <Badge className="bg-purple-100 text-purple-700 text-xs">
+                          Premium
+                        </Badge>
+                      </div>
+                    )}
                     <div className="flex gap-2 mt-2">
                       <Badge className="bg-green-100 text-green-700 text-xs">
                         {coupon.code}
@@ -90,11 +97,6 @@ export default function AdminCouponsMobilePage() {
                       <Badge className="bg-blue-100 text-blue-700 text-xs">
                         {coupon.discount}
                       </Badge>
-                      {coupon.isExclusive && (
-                        <Badge className="bg-purple-100 text-purple-700 text-xs">
-                          Premium
-                        </Badge>
-                      )}
                       {!coupon.isActive && (
                         <Badge className="bg-red-100 text-red-700 text-xs">
                           Inativo

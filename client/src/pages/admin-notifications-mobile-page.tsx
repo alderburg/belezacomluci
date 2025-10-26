@@ -92,15 +92,17 @@ export default function AdminNotificationsMobilePage() {
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {notification.description}
                     </p>
-                    <div className="flex gap-2 mt-2">
-                      <Badge className="bg-blue-100 text-blue-700 text-xs">
-                        {getTargetAudienceLabel(notification.targetAudience)}
-                      </Badge>
-                      {!notification.isActive && (
-                        <Badge className="bg-red-100 text-red-700 text-xs">
-                          Inativo
+                    {notification.isExclusive && (
+                      <div className="flex gap-2 mt-2">
+                        <Badge className="bg-purple-100 text-purple-700 text-xs">
+                          Premium
                         </Badge>
-                      )}
+                      </div>
+                    )}
+                    <div className="flex gap-2 mt-2">
+                      <Badge className={`text-xs ${notification.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {notification.isActive ? 'Ativo' : 'Inativo'}
+                      </Badge>
                     </div>
                   </div>
                 </div>
