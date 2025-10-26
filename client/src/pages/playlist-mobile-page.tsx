@@ -125,7 +125,7 @@ export default function PlaylistMobilePage() {
   const { stopProgressSaving, saveProgress } = useVideoProgress({
     videoId: currentVideoId,
     resourceId: resourceId || '',
-    playerRef: youtubePlayer,
+    playerRef: youtubePlayer, // Usando youtubePlayer ref que armazena a instância do player
     enabled: !!user && !!currentVideoId && !!resourceId && showVideo
   });
 
@@ -184,77 +184,83 @@ export default function PlaylistMobilePage() {
     return progress?.isCompleted || false;
   };
 
-  // Função para iniciar o player do YouTube
-  const initializeYouTubePlayer = () => {
-    if (window.YT && playerContainerRef.current && currentVideoId) {
-      // Destroi player existente se houver
-      if (youtubePlayer.current) {
-        youtubePlayer.current.destroy();
-      }
-
-      // Cria um novo player e anexa-o ao div container
-      youtubePlayer.current = new window.YT.Player(playerContainerRef.current, {
-        height: '100%',
-        width: '100%',
-        videoId: currentVideoId,
-        playerVars: {
-          autoplay: 1,
-          rel: 0,
-          modestbranding: 1,
-          enablejsapi: 1,
-          origin: window.location.origin,
-        },
-        events: {
-          onReady: (event: { target: any }) => {
-            console.log("YouTube Player Pronto!");
-          },
-          onStateChange: (event: { target: any; data: number }) => {
-            // Salvar progresso quando pausar ou parar
-            if ((event.data === 2 || event.data === 0) && saveProgress) { // 2 = PAUSED, 0 = ENDED
-              saveProgress();
-            }
-          },
-          onError: (event: { target: any; data: number }) => {
-            console.error("YouTube Player Error:", event.data);
-            toast({
-              title: "Erro no player do YouTube",
-              description: `Código do erro: ${event.data}`,
-              variant: "destructive",
-            });
-          },
-        },
-      });
-    }
-  };
-
-  // Efeito para inicializar o player quando o ID do vídeo mudar ou a API estiver pronta
+  // Criar player quando vídeo for mostrado - EXATAMENTE IGUAL AO DESKTOP
   useEffect(() => {
-    const ytApiReadyListener = () => {
-      if (window.YT?.Player) {
-        initializeYouTubePlayer();
-      } else {
-        // Tenta novamente se a API não estiver pronta imediatamente
-        setTimeout(ytApiReadyListener, 100);
-      }
+    if (!showVideo || !currentVideoId || !playerContainerRef.current) {
+      return;
+    }
+
+    const initPlayer = () => {
+      // Aguardar um pouco para garantir que o container está pronto
+      setTimeout(() => {
+        if (!playerContainerRef.current) return;
+
+        // Limpar player anterior se existir
+        if (youtubePlayer.current && typeof youtubePlayer.current.destroy === 'function') {
+          try {
+            youtubePlayer.current.destroy();
+          } catch (e) {
+            console.log('Error destroying player:', e);
+          }
+          youtubePlayer.current = null;
+        }
+
+        // Limpar o container
+        if (playerContainerRef.current) {
+          playerContainerRef.current.innerHTML = '';
+        }
+
+        // Criar novo player
+        try {
+          youtubePlayer.current = new window.YT.Player(playerContainerRef.current, {
+            videoId: currentVideoId,
+            playerVars: {
+              autoplay: 1,
+              rel: 0,
+              modestbranding: 1,
+              enablejsapi: 1,
+            },
+            events: {
+              onReady: (event: any) => {
+                console.log('YouTube player ready for video:', currentVideoId);
+              },
+              onStateChange: (event: any) => {
+                // Salvar progresso quando pausar ou parar
+                if ((event.data === 2 || event.data === 0) && saveProgress) { // 2 = PAUSED, 0 = ENDED
+                  saveProgress();
+                }
+              }
+            },
+          });
+        } catch (e) {
+          console.error('Error creating YouTube player:', e);
+        }
+      }, 100);
     };
 
-    if (window.YT?.Player) {
-      initializeYouTubePlayer();
+    // Se YT já está disponível, inicializar
+    if (window.YT && window.YT.Player) {
+      initPlayer();
     } else {
-      window.onYouTubeIframeAPIReady = ytApiReadyListener;
+      // Caso contrário, aguardar o callback
+      window.onYouTubeIframeAPIReady = initPlayer;
     }
 
-    // Limpa o player ao desmontar o componente ou mudar de vídeo
+    // Cleanup
     return () => {
       if (stopProgressSaving) {
         stopProgressSaving();
       }
-      if (youtubePlayer.current) {
-        youtubePlayer.current.destroy();
+      if (youtubePlayer.current && typeof youtubePlayer.current.destroy === 'function') {
+        try {
+          youtubePlayer.current.destroy();
+        } catch (e) {
+          console.log('Cleanup error:', e);
+        }
         youtubePlayer.current = null;
       }
     };
-  }, [currentVideoId, stopProgressSaving]);
+  }, [showVideo, currentVideoId, stopProgressSaving, saveProgress]);
 
   // --- Fim do Rastreamento de progresso ---
 
@@ -454,7 +460,7 @@ export default function PlaylistMobilePage() {
       if (saveProgress) {
         saveProgress();
       }
-
+      
       // Destruir player atual antes de mudar
       if (youtubePlayer.current && typeof youtubePlayer.current.destroy === 'function') {
         try {
@@ -464,17 +470,17 @@ export default function PlaylistMobilePage() {
           console.log('Error destroying player on video change:', e);
         }
       }
-
+      
       // Reset estados
       setShowVideo(false);
       setIsLoadingVideoContent(true);
-
+      
       // Pequeno delay para garantir cleanup completo
       setTimeout(() => {
         setCurrentVideoId(videoId);
       }, 50);
     }
-
+    
     setShowPlaylistModal(false);
   };
 
