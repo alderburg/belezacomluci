@@ -121,16 +121,24 @@ export default function AdminVideoFormMobilePage() {
   // Função para extrair ID do vídeo do YouTube
   const extractYouTubeVideoId = (url: string): string | null => {
     const patterns = [
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&\n?#]+)/,
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^&\n?#]+)/,
-      /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^&\n?#]+)/,
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([^&\n?#]+)/,
+      /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
+      /(?:youtu\.be\/)([^&\n?#\?]+)/,
+      /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
+      /(?:youtube\.com\/v\/)([^&\n?#]+)/
     ];
 
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match && match[1]) {
-        return match[1];
+        // Remove qualquer caractere especial ou query params
+        let videoId = match[1];
+        if (videoId.includes('?')) {
+          videoId = videoId.split('?')[0];
+        }
+        if (videoId.includes('&')) {
+          videoId = videoId.split('&')[0];
+        }
+        return videoId.trim();
       }
     }
     return null;
@@ -138,50 +146,212 @@ export default function AdminVideoFormMobilePage() {
 
   // Função para detectar se é playlist
   const isPlaylistUrl = (url: string): boolean => {
-    return url.includes('list=');
+    const playlistPatterns = [
+      /[?&]list=([^&\n?#]+)/,
+      /\/playlist\?list=([^&\n?#]+)/
+    ];
+    return playlistPatterns.some(pattern => pattern.test(url));
+  };
+
+  // Função para garantir formato HH:MM:SS
+  const ensureHHMMSSFormat = (duration: string): string => {
+    // Se já está em HH:MM:SS, retorna
+    if (/^\d{2}:\d{2}:\d{2}$/.test(duration)) {
+      return duration;
+    }
+
+    // Se está em MM:SS, adiciona 00:
+    if (/^\d{1,2}:\d{2}$/.test(duration)) {
+      const parts = duration.split(':');
+      const minutes = parseInt(parts[0]);
+      const seconds = parseInt(parts[1]);
+
+      if (minutes >= 60) {
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        return `${hours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      } else {
+        return `00:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+    }
+
+    // Se está em segundos, converte
+    const totalSeconds = parseInt(duration);
+    if (!isNaN(totalSeconds)) {
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    return duration;
   };
 
   // Função para lidar com mudança de URL do vídeo
   const handleVideoUrlChange = async (url: string) => {
     const videoId = extractYouTubeVideoId(url);
     if (!videoId) {
+      console.log('Não foi possível extrair o ID do vídeo da URL:', url);
       return;
     }
 
     try {
+      console.log('Buscando dados do YouTube para vídeo:', videoId);
+      
+      // Detectar o tipo baseado na URL
       const isPlaylist = isPlaylistUrl(url);
       
+      // Se for playlist, calcular duração total
       if (isPlaylist) {
         const playlistIdMatch = url.match(/[?&]list=([^&\n?#]+)/);
         if (playlistIdMatch && playlistIdMatch[1]) {
           const playlistId = playlistIdMatch[1];
+          console.log('Detectada playlist, buscando vídeos para calcular duração total:', playlistId);
           
           try {
-            const response = await fetch(`/api/youtube/playlist-duration/${playlistId}`);
-            if (response.ok) {
-              const data = await response.json();
-              form.setValue('duration', data.totalDuration);
-              form.setValue('type', 'playlist');
+            const playlistResponse = await fetch(`/api/youtube/playlist/${playlistId}`);
+            
+            if (!playlistResponse.ok) {
+              console.error('Erro ao buscar playlist:', playlistResponse.status);
+              toast({
+                title: "Aviso",
+                description: "Não foi possível carregar dados da playlist. Buscar dados do vídeo individual?",
+                variant: "destructive",
+              });
+            } else {
+              const playlistData = await playlistResponse.json();
+              
+              if (playlistData && playlistData.videos && playlistData.videos.length > 0) {
+                // Calcular duração total
+                let totalSeconds = 0;
+                for (const video of playlistData.videos) {
+                  if (video.duration) {
+                    const parts = video.duration.split(':');
+                    if (parts.length === 3) {
+                      const hours = parseInt(parts[0]) || 0;
+                      const minutes = parseInt(parts[1]) || 0;
+                      const seconds = parseInt(parts[2]) || 0;
+                      totalSeconds += hours * 3600 + minutes * 60 + seconds;
+                    }
+                  }
+                }
+                
+                // Converter total de segundos para HH:MM:SS
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                const totalDuration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                form.setValue('duration', totalDuration);
+                console.log(`Duração total da playlist calculada: ${totalDuration} (${playlistData.videos.length} vídeos)`);
+                
+                // Usar título da playlist
+                if (playlistData.playlistTitle) {
+                  form.setValue('title', playlistData.playlistTitle);
+                  console.log('Título da playlist preenchido:', playlistData.playlistTitle);
+                }
+                
+                // Usar descrição da playlist (somente se existir)
+                if (playlistData.playlistDescription && playlistData.playlistDescription.trim() !== '') {
+                  form.setValue('description', playlistData.playlistDescription);
+                  console.log('Descrição da playlist preenchida');
+                } else {
+                  console.log('Playlist não possui descrição');
+                }
+                
+                // Usar thumbnail da playlist
+                if (playlistData.playlistThumbnail) {
+                  form.setValue('thumbnailUrl', playlistData.playlistThumbnail);
+                  console.log('Thumbnail da playlist preenchida');
+                }
+                
+                form.setValue('type', 'playlist');
+                console.log('Tipo alterado para: playlist');
+                
+                toast({
+                  title: "Playlist detectada!",
+                  description: `${playlistData.videos.length} vídeos encontrados. Duração total: ${totalDuration}`,
+                });
+                
+                return; // Não precisa buscar dados do vídeo individual
+              }
             }
           } catch (error) {
-            console.error('Erro ao buscar duração da playlist:', error);
+            console.error('Erro ao buscar dados da playlist:', error);
           }
-        }
-      } else {
-        const response = await fetch(`/api/youtube/video-info/${videoId}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.duration) {
-            form.setValue('duration', data.duration);
-          }
-          if (data.thumbnailUrl && !form.watch('thumbnailUrl')) {
-            form.setValue('thumbnailUrl', data.thumbnailUrl);
-          }
-          form.setValue('type', 'video');
         }
       }
+      
+      // Se não for playlist ou falhou, buscar dados do vídeo individual
+      const response = await fetch(`/api/youtube/video/${videoId}`);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Erro ao buscar dados do YouTube:', response.status, errorText);
+        toast({
+          title: "Aviso",
+          description: "Não foi possível carregar os dados do YouTube",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const videoData = await response.json();
+      console.log('Dados recebidos do YouTube:', videoData);
+      
+      // Auto-fill title
+      if (videoData.title) {
+        form.setValue('title', videoData.title);
+        console.log('Título preenchido:', videoData.title);
+      }
+      
+      // Auto-fill type based on detection
+      let detectedType = 'video'; // default
+      let typeMessage = 'vídeo único';
+      
+      if (videoData.isLive) {
+        detectedType = 'live';
+        typeMessage = 'live';
+        console.log('Tipo detectado: live');
+      } else {
+        console.log('Tipo detectado: vídeo único');
+      }
+      
+      form.setValue('type', detectedType);
+      console.log('Tipo alterado para:', detectedType);
+      
+      // Auto-fill duration field - only for non-live videos
+      if (videoData.duration && !videoData.isLive) {
+        const formattedDuration = ensureHHMMSSFormat(videoData.duration);
+        form.setValue('duration', formattedDuration);
+        console.log('Duração preenchida:', formattedDuration);
+      }
+      
+      // Auto-fill description
+      if (videoData.description) {
+        form.setValue('description', videoData.description);
+        console.log('Descrição preenchida automaticamente');
+      }
+      
+      // Auto-fill thumbnail
+      if (videoData.thumbnail) {
+        form.setValue('thumbnailUrl', videoData.thumbnail);
+        console.log('Thumbnail preenchida automaticamente');
+      }
+      
+      // Show toast message
+      toast({
+        title: `${typeMessage.charAt(0).toUpperCase() + typeMessage.slice(1)} detectada!`,
+        description: "Título, tipo, descrição e thumbnail preenchidos automaticamente.",
+      });
     } catch (error) {
       console.error('Erro ao buscar dados do vídeo:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao buscar dados do YouTube",
+        variant: "destructive",
+      });
     }
   };
 
