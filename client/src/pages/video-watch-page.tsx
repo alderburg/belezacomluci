@@ -113,14 +113,12 @@ export default function VideoWatchPage() {
     retry: false,
   });
 
-  // Determina o ID do vídeo do YouTube
-  const videoUrl = (resource => {
-    if (!resource) return null;
-    if (resource._type === 'product') return resource.fileUrl;
-    if (resource._type === 'video') return resource.videoUrl;
-    return null;
-  })(resource); // Immediately invoke to get resource data after it's loaded
+  // Determina se é produto ou vídeo
+  const product = resource?._type === 'product' ? resource : null;
+  const video = resource?._type === 'video' ? resource : null;
 
+  // Determina o ID do vídeo do YouTube
+  const videoUrl = product?.fileUrl || video?.videoUrl || null;
   const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
 
   // Hook para rastrear progresso do vídeo
@@ -130,11 +128,6 @@ export default function VideoWatchPage() {
     playerRef,
     enabled: !!user && !!youtubeVideoId && !!videoId && showVideo
   });
-
-
-  // Determina se é produto ou vídeo
-  const product = resource?._type === 'product' ? resource : null;
-  const video = resource?._type === 'video' ? resource : null;
 
   // Reset video loaded state when video changes
   useEffect(() => {
