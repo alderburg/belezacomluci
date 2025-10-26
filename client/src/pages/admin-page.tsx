@@ -1663,13 +1663,16 @@ export default function AdminPage() {
                         </div>
 
                         <div>
-                          <Label htmlFor="product-description">Descrição</Label>
+                          <Label htmlFor="product-description">Descrição <span className="text-destructive">*</span></Label>
                           <Textarea
                             id="product-description"
                             {...productForm.register("description")}
                             placeholder="Descrição do produto"
                             data-testid="textarea-product-description"
                           />
+                          {productForm.formState.errors.description && (
+                            <p className="text-sm text-destructive mt-1">{productForm.formState.errors.description.message}</p>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
