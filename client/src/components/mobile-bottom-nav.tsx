@@ -55,6 +55,18 @@ export default function MobileBottomNav() {
     if (href === "/") {
       return location === "/" || location === "";
     }
+    
+    // Lógica especial para Vídeos Exclusivos e Produtos Digitais
+    if (href === "/videos") {
+      // Ativo apenas se estiver na página /videos
+      return location === "/videos";
+    } else if (href === "/produtos") {
+      // Ativo se estiver em /produtos, /video/:id (produto), ou /playlist/:id (produto)
+      return location === "/produtos" || 
+             location.startsWith("/video/") || 
+             location.startsWith("/playlist/");
+    }
+    
     return location.startsWith(href);
   };
 

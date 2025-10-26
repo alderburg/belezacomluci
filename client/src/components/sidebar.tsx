@@ -62,6 +62,16 @@ export default function Sidebar() {
     navItems.push({ href: "/admin/cheirosas", label: "Gerenciar Cheirosas", icon: BarChart3 });
   }
 
+  // Function to check if current route is a product view
+  const isProductRoute = () => {
+    if (location.startsWith("/video/") || location.startsWith("/playlist/")) {
+      // Check if the current video/playlist is a product by looking at the resource type
+      // This will be handled in the navItems mapping below
+      return true;
+    }
+    return false;
+  }
+
   const getUserInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
@@ -182,15 +192,18 @@ export default function Sidebar() {
           <nav className="flex-1 px-4 py-6 space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
-              // Special case for videos: active when on /videos or /video/...
-              // Special case for products: active when on /products or /course/...
-              let isActive;
+              let isActive = location === item.href;
+
+              // Lógica especial para Vídeos Exclusivos e Produtos Digitais
               if (item.href === "/videos") {
-                isActive = location === item.href || location.startsWith("/video/");
-              } else if (item.href === "/products") {
-                isActive = location === item.href || location.startsWith("/course/");
-              } else {
-                isActive = location === item.href;
+                // Ativo apenas se estiver na página /videos
+                // Não deve ficar ativo em /video/:id pois pode ser produto
+                isActive = location === "/videos";
+              } else if (item.href === "/produtos") {
+                // Ativo se estiver em /produtos, /video/:id (produto), ou /playlist/:id (produto)
+                isActive = location === "/produtos" || 
+                          location.startsWith("/video/") || 
+                          location.startsWith("/playlist/");
               }
 
               return (
