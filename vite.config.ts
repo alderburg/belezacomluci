@@ -8,21 +8,7 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [
-    react(),
-    {
-      name: 'remove-vite-client',
-      enforce: 'pre',
-      resolveId(id) {
-        if (id === '@vite/client') {
-          return '\0virtual:empty-client';
-        }
-      },
-      load(id) {
-        if (id === '\0virtual:empty-client') {
-          return 'export default {}';
-        }
-      }
-    }
+    react()
   ],
   root: path.resolve(__dirname, "client"),
   publicDir: path.resolve(__dirname, "client/public"),
@@ -45,6 +31,8 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
+    sourcemap: false,
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {

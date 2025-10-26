@@ -6,39 +6,9 @@ import { db } from "./db";
 import { NotificationWebSocketService } from "./websocket";
 import dotenv from 'dotenv';
 
-// Configurar dotenv com override para suprimir logs completamente
-process.env.DOTENV_CONFIG_DEBUG = '';
-process.env.DOTENV_CONFIG_VERBOSE = '';
-
-// Temporariamente desabilitado para debug
-/*const originalStdoutWrite = process.stdout.write;
-const originalStderrWrite = process.stderr.write;
-
-process.stdout.write = function(chunk: any, ...args: any[]) {
-  const message = chunk.toString();
-  if (!message.includes('[dotenv@') && !message.includes('injecting env')) {
-    return originalStdoutWrite.call(this, chunk, ...args);
-  }
-  return true;
-};
-
-process.stderr.write = function(chunk: any, ...args: any[]) {
-  const message = chunk.toString();
-  if (!message.includes('[dotenv@') && !message.includes('injecting env')) {
-    return originalStderrWrite.call(this, chunk, ...args);
-  }
-  return true;
-};*/
-
 dotenv.config({ debug: false });
 
 console.log('🌸 Beleza com Luci - Servidor iniciando...');
-
-/*// Restaurar stdout e stderr após um pequeno delay
-setTimeout(() => {
-  process.stdout.write = originalStdoutWrite;
-  process.stderr.write = originalStderrWrite;
-}, 100);*/
 
 const app = express();
 
