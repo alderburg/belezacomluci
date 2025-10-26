@@ -33,9 +33,6 @@ export default function AdminNotificationFormMobilePage() {
   const notificationFromState = typeof window !== 'undefined' ? (window.history.state as any)?.notificationData : null;
   const notification = notificationFromState;
 
-  const notificationFromState = navigation?.state?.notificationData;
-  const notification = notificationFromState;
-
   const form = useForm<z.infer<typeof insertNotificationSchema>>({
     resolver: zodResolver(insertNotificationSchema),
     defaultValues: {
