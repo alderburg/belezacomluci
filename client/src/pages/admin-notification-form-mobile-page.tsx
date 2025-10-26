@@ -38,16 +38,31 @@ export default function AdminNotificationFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  const { data: notification, isLoading } = useQuery<Notification>({
+  const { data: notification, isLoading, error } = useQuery<Notification>({
     queryKey: ['/api/admin/notifications', notificationId],
     queryFn: async () => {
       if (!notificationId) throw new Error('ID não fornecido');
+      console.log('Buscando notificação para edição:', notificationId);
       const res = await fetch(`/api/admin/notifications/${notificationId}`);
       if (!res.ok) throw new Error('Erro ao carregar notificação');
-      return res.json();
+      const data = await res.json();
+      console.log('Notificação carregada:', data);
+      return data;
     },
     enabled: Boolean(isEditing && notificationId),
   });
+
+  // Mostrar erro se houver
+  useEffect(() => {
+    if (error) {
+      console.error('Erro ao carregar notificação:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível carregar os dados da notificação",
+      });
+    }
+  }, [error, toast]);
 
   const form = useForm<z.infer<typeof insertNotificationSchema>>({
     resolver: zodResolver(insertNotificationSchema),
@@ -63,8 +78,10 @@ export default function AdminNotificationFormMobilePage() {
     },
   });
 
+  // Reset form when notification data loads or ID changes
   useEffect(() => {
     if (notification && isEditing) {
+      console.log('Populando formulário com dados da notificação:', notification);
       form.reset({
         title: notification.title,
         description: notification.description,
@@ -76,6 +93,18 @@ export default function AdminNotificationFormMobilePage() {
           new Date(notification.startDateTime).toISOString().slice(0, 16) : "",
         endDateTime: notification.endDateTime ? 
           new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
+      });
+    } else if (!isEditing) {
+      console.log('Resetando formulário para nova notificação');
+      form.reset({
+        title: "",
+        description: "",
+        imageUrl: "",
+        linkUrl: "",
+        targetAudience: "all",
+        isActive: false,
+        startDateTime: "",
+        endDateTime: "",
       });
     }
   }, [notification, isEditing, form]);
