@@ -1,0 +1,141 @@
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
+import { Redirect } from "wouter";
+import MobileBottomNav from "@/components/mobile-bottom-nav";
+import { ArrowLeft, Plus, Ticket, Edit, Trash2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Coupon } from "@shared/schema";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+
+export default function AdminCouponsMobilePage() {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+
+  if (!user?.isAdmin) {
+    return <Redirect to="/" />;
+  }
+
+  const { data: coupons, isLoading } = useQuery<Coupon[]>({
+    queryKey: ["/api/coupons"],
+  });
+
+  const handleBackClick = () => {
+    setLocation('/admin');
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground hover:bg-muted"
+            onClick={handleBackClick}
+            data-testid="button-back"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="text-left flex-1 ml-4">
+            <h1 className="text-lg font-semibold text-foreground">Cupons</h1>
+            <p className="text-sm text-muted-foreground">
+              {coupons?.length || 0} cupons cadastrados
+            </p>
+          </div>
+          <Ticket className="h-5 w-5 text-primary" />
+        </div>
+      </div>
+
+      <div className="pt-20 px-4 pb-4">
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+            ))}
+          </div>
+        ) : coupons && coupons.length > 0 ? (
+          <div className="space-y-3">
+            {coupons.map((coupon) => (
+              <div
+                key={coupon.id}
+                className="bg-card rounded-xl border border-border p-4"
+                data-testid={`card-coupon-${coupon.id}`}
+              >
+                <div className="flex gap-3">
+                  {coupon.coverImageUrl && (
+                    <img
+                      src={coupon.coverImageUrl}
+                      alt={coupon.brand}
+                      className="w-20 h-20 rounded-lg object-cover"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-foreground truncate">
+                      {coupon.brand}
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-1">
+                      {coupon.description}
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                      <Badge className="text-xs bg-green-500 text-white">
+                        {coupon.code}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {coupon.discount}
+                      </Badge>
+                      {coupon.isExclusive && (
+                        <Badge variant="secondary" className="text-xs">
+                          Premium
+                        </Badge>
+                      )}
+                      {!coupon.isActive && (
+                        <Badge variant="destructive" className="text-xs">
+                          Inativo
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-3 pt-3 border-t border-border">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    data-testid={`button-edit-${coupon.id}`}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    data-testid={`button-delete-${coupon.id}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <Ticket className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">Nenhum cupom cadastrado</p>
+          </div>
+        )}
+      </div>
+
+      <Button
+        className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
+        data-testid="button-add-coupon"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
+
+      <MobileBottomNav />
+    </div>
+  );
+}
