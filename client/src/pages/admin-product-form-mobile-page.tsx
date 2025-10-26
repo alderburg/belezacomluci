@@ -25,12 +25,12 @@ import { useEffect } from 'react';
 
 export default function AdminProductFormMobilePage() {
   const [match, params] = useRoute("/admin/products-mobile/edit/:id");
-  const productId = match ? params.id : undefined;
+  const productId = match && params?.id ? params.id : undefined;
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const isEditing = Boolean(match && productId);
+  const isEditing = Boolean(productId);
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ['/api/admin/products', productId],

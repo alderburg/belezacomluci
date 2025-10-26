@@ -22,8 +22,8 @@ export default function AdminCategoryFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/categories-mobile/edit/:id");
-  const categoryId = match ? params.id : undefined;
-  const isEditing = Boolean(match && categoryId);
+  const categoryId = match && params?.id ? params.id : undefined;
+  const isEditing = Boolean(categoryId);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;

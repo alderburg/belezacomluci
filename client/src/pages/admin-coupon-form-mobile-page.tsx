@@ -24,12 +24,12 @@ import { useEffect } from 'react';
 
 export default function AdminCouponFormMobilePage() {
   const [match, params] = useRoute("/admin/coupons-mobile/edit/:id");
-  const couponId = match ? params.id : undefined;
+  const couponId = match && params?.id ? params.id : undefined;
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const isEditing = Boolean(match && couponId);
+  const isEditing = Boolean(couponId);
 
   const { data: coupon, isLoading } = useQuery<Coupon>({
     queryKey: ['/api/admin/coupons', couponId],
