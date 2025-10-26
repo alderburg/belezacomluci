@@ -2812,7 +2812,13 @@ export default function AdminPage() {
                                 </h4>
                                 <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{video.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
-                                  <Badge className="bg-blue-100 text-blue-700">{getVideoTypeLabel(video.type || 'video')}</Badge>
+                                  {video.type === 'playlist' ? (
+                                    <Badge className="bg-orange-100 text-orange-700">Playlist</Badge>
+                                  ) : video.type === 'live' ? (
+                                    <Badge className="bg-red-100 text-red-700">Live</Badge>
+                                  ) : (
+                                    <Badge className="bg-blue-100 text-blue-700">Vídeo</Badge>
+                                  )}
                                   {video.isExclusive && (
                                     <Badge className="bg-purple-500/10 text-purple-700">Exclusivo</Badge>
                                   )}
