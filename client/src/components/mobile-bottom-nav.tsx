@@ -52,7 +52,10 @@ const navItems: NavItem[] = [
 
 export default function MobileBottomNav() {
   const [location] = useLocation();
-  const [lastResourceType, setLastResourceType] = useState<'product' | 'video' | null>(null);
+  const [lastResourceType, setLastResourceType] = useState<'product' | 'video' | null>(() => {
+    // Tentar recuperar do localStorage ao iniciar
+    return (localStorage.getItem('mobile-nav-resource-type') as 'product' | 'video' | null) || null;
+  });
   const [previousLocation, setPreviousLocation] = useState<string>('');
 
   // Detectar se está em uma página de vídeo ou playlist
@@ -74,21 +77,38 @@ export default function MobileBottomNav() {
   
   const resourceId = extractResourceId();
 
-  // Determinar tipo inicial baseado na navegação anterior
+  // Determinar tipo baseado na página atual ou navegação
   useEffect(() => {
-    // Se mudou de /produtos para /video ou /playlist, assume que é produto
-    // Se mudou de /videos para /video ou /playlist, assume que é vídeo
-    if (isVideoPage || isPlaylistPage) {
-      if (previousLocation.startsWith('/produtos')) {
-        console.log('[MobileNav] Veio de produtos, setando tipo como product');
-        setLastResourceType('product');
-      } else if (previousLocation.startsWith('/videos')) {
-        console.log('[MobileNav] Veio de vídeos, setando tipo como video');
-        setLastResourceType('video');
-      }
+    console.log('[MobileNav] Location:', location);
+    
+    // Se está em /videos, marcar como video
+    if (location === '/videos' || location.startsWith('/videos/')) {
+      console.log('[MobileNav] ✅ Está em /videos, tipo: video');
+      setLastResourceType('video');
+      localStorage.setItem('mobile-nav-resource-type', 'video');
+    } 
+    // Se está em /produtos, marcar como product
+    else if (location === '/produtos' || location.startsWith('/produtos/')) {
+      console.log('[MobileNav] ✅ Está em /produtos, tipo: product');
+      setLastResourceType('product');
+      localStorage.setItem('mobile-nav-resource-type', 'product');
     }
+    // Se está em /video/ ou /playlist/ e veio de uma página específica
+    else if (isVideoPage || isPlaylistPage) {
+      if (previousLocation.startsWith('/produtos')) {
+        console.log('[MobileNav] ✅ Veio de /produtos, tipo: product');
+        setLastResourceType('product');
+        localStorage.setItem('mobile-nav-resource-type', 'product');
+      } else if (previousLocation.startsWith('/videos')) {
+        console.log('[MobileNav] ✅ Veio de /videos, tipo: video');
+        setLastResourceType('video');
+        localStorage.setItem('mobile-nav-resource-type', 'video');
+      }
+      // Se não veio de nenhum dos dois, manter o último tipo conhecido
+    }
+    
     setPreviousLocation(location);
-  }, [location]);
+  }, [location, isVideoPage, isPlaylistPage]);
 
   // Buscar informações do recurso para identificar se é produto ou vídeo exclusivo
   const { data: currentResource } = useQuery<any>({
