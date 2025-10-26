@@ -26,14 +26,14 @@ import { useEffect } from 'react';
 export default function AdminVideoFormMobilePage() {
   const [match, params] = useRoute("/admin/videos-mobile/edit/:id");
   const videoId = match && params && params.id ? String(params.id) : undefined;
-  const [, setLocation, navigation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = Boolean(match && videoId);
   
-  // Pegar dados passados via state
-  const videoFromState = navigation?.state?.videoData;
+  // Pegar dados passados via state (usando window.history.state)
+  const videoFromState = typeof window !== 'undefined' ? (window.history.state as any)?.videoData : null;
   const video = videoFromState;
 
   const { data: categories = [] } = useQuery({

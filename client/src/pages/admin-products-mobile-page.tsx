@@ -78,7 +78,9 @@ export default function AdminProductsMobilePage() {
       const response = await fetch(`/api/admin/products/${productId}`);
       if (!response.ok) throw new Error('Erro ao carregar produto');
       const productData = await response.json();
-      setLocation(`/admin/products-mobile/edit/${productId}`, { state: { productData } });
+      
+      window.history.replaceState({ productData }, '');
+      setLocation(`/admin/products-mobile/edit/${productId}`);
     } catch (error) {
       toast({
         variant: "destructive",

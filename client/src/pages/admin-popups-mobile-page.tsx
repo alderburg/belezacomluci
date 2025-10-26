@@ -71,7 +71,9 @@ export default function AdminPopupsMobilePage() {
       const response = await fetch(`/api/admin/popups/${popupId}`);
       if (!response.ok) throw new Error('Erro ao carregar popup');
       const popupData = await response.json();
-      setLocation(`/admin/popups-mobile/edit/${popupId}`, { state: { popupData } });
+      
+      window.history.replaceState({ popupData }, '');
+      setLocation(`/admin/popups-mobile/edit/${popupId}`);
     } catch (error) {
       toast({
         variant: "destructive",

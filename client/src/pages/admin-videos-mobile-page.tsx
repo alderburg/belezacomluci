@@ -78,7 +78,10 @@ export default function AdminVideosMobilePage() {
       const response = await fetch(`/api/admin/videos/${id}`);
       if (!response.ok) throw new Error('Erro ao carregar vídeo');
       const videoData = await response.json();
-      setLocation(`/admin/videos-mobile/edit/${id}`, { state: { videoData } });
+      
+      // Armazenar os dados no history state antes de navegar
+      window.history.replaceState({ videoData }, '');
+      setLocation(`/admin/videos-mobile/edit/${id}`);
     } catch (error) {
       toast({
         variant: "destructive",

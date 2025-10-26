@@ -71,7 +71,9 @@ export default function AdminBannersMobilePage() {
       const response = await fetch(`/api/admin/banners/${bannerId}`);
       if (!response.ok) throw new Error('Erro ao carregar banner');
       const bannerData = await response.json();
-      setLocation(`/admin/banners-mobile/edit/${bannerId}`, { state: { bannerData } });
+      
+      window.history.replaceState({ bannerData }, '');
+      setLocation(`/admin/banners-mobile/edit/${bannerId}`);
     } catch (error) {
       toast({
         variant: "destructive",

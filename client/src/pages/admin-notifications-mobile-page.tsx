@@ -92,7 +92,9 @@ export default function AdminNotificationsMobilePage() {
       const response = await fetch(`/api/admin/notifications/${notificationId}`);
       if (!response.ok) throw new Error('Erro ao carregar notificação');
       const notificationData = await response.json();
-      setLocation(`/admin/notifications-mobile/edit/${notificationId}`, { state: { notificationData } });
+      
+      window.history.replaceState({ notificationData }, '');
+      setLocation(`/admin/notifications-mobile/edit/${notificationId}`);
     } catch (error) {
       toast({
         variant: "destructive",
