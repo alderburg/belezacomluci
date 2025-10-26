@@ -10,6 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Redirect, useLocation, useRoute } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -61,7 +69,7 @@ export default function AdminProductFormMobilePage() {
     },
   });
 
-  // Reset form when product data loads
+  // Reset form when product data loads or ID changes
   useEffect(() => {
     if (product && isEditing) {
       form.reset({
@@ -74,8 +82,19 @@ export default function AdminProductFormMobilePage() {
         isExclusive: product.isExclusive ?? false,
         isActive: product.isActive ?? true,
       });
+    } else if (!isEditing) {
+      form.reset({
+        title: "",
+        description: "",
+        type: "ebook",
+        fileUrl: "",
+        coverImageUrl: "",
+        categoryId: "",
+        isExclusive: false,
+        isActive: true,
+      });
     }
-  }, [product, isEditing]);
+  }, [productId, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertProductSchema>) => {
@@ -256,24 +275,30 @@ export default function AdminProductFormMobilePage() {
           )}
         </div>
 
-        <div>
-          <Label htmlFor="product-type">Tipo</Label>
-          <Select
-            value={form.watch("type") || ""}
-            onValueChange={(value) => form.setValue("type", value)}
-          >
-            <SelectTrigger data-testid="select-product-type">
-              <SelectValue placeholder="Selecione o tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ebook">E-book</SelectItem>
-              <SelectItem value="course_video">Curso - Vídeo Único</SelectItem>
-              <SelectItem value="course_playlist">Curso - Playlist</SelectItem>
-              <SelectItem value="pdf">PDF</SelectItem>
-              <SelectItem value="checklist">Checklist</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger data-testid="select-product-type">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="ebook">E-book</SelectItem>
+                  <SelectItem value="course_video">Curso - Vídeo Único</SelectItem>
+                  <SelectItem value="course_playlist">Curso - Playlist</SelectItem>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                  <SelectItem value="checklist">Checklist</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div>
           <Label htmlFor="product-file">
@@ -310,27 +335,30 @@ export default function AdminProductFormMobilePage() {
           )}
         </div>
 
-        <div>
-          <Label htmlFor="product-category">Categoria <span className="text-destructive">*</span></Label>
-          <Select
-            value={form.watch("categoryId") || ""}
-            onValueChange={(value) => form.setValue("categoryId", value)}
-          >
-            <SelectTrigger data-testid="select-product-category">
-              <SelectValue placeholder="Selecione uma categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories?.filter((cat: any) => cat.isActive).map((category: any) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {form.formState.errors.categoryId && (
-            <p className="text-sm text-destructive mt-1">{form.formState.errors.categoryId.message}</p>
+        <FormField
+          control={form.control}
+          name="categoryId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoria <span className="text-destructive">*</span></FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger data-testid="select-product-category">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories?.filter((cat: any) => cat.isActive).map((category: any) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
           )}
-        </div>
+        />
 
         <div className="space-y-3">
           <div className="flex items-center space-x-2">

@@ -9,6 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Redirect, useLocation, useRoute } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -64,7 +72,7 @@ export default function AdminCouponFormMobilePage() {
     },
   });
 
-  // Reset form when coupon data loads
+  // Reset form when coupon data loads or ID changes
   useEffect(() => {
     if (coupon && isEditing) {
       form.reset({
@@ -83,8 +91,23 @@ export default function AdminCouponFormMobilePage() {
         isExclusive: coupon.isExclusive ?? false,
         isActive: coupon.isActive ?? true,
       });
+    } else if (!isEditing) {
+      form.reset({
+        code: "",
+        brand: "",
+        description: "",
+        discount: "",
+        categoryId: "",
+        storeUrl: "",
+        coverImageUrl: "",
+        order: 0,
+        startDateTime: "",
+        endDateTime: "",
+        isExclusive: false,
+        isActive: true,
+      });
     }
-  }, [coupon, isEditing]);
+  }, [couponId, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCouponSchema>) => {
@@ -206,27 +229,30 @@ export default function AdminCouponFormMobilePage() {
             />
           </div>
 
-          <div>
-            <Label htmlFor="coupon-category">Categoria <span className="text-destructive">*</span></Label>
-            <Select
-              value={form.watch("categoryId") || ""}
-              onValueChange={(value) => form.setValue("categoryId", value)}
-            >
-              <SelectTrigger data-testid="select-coupon-category">
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories?.filter((cat: any) => cat.isActive).map((category: any) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {form.formState.errors.categoryId && (
-              <p className="text-sm text-destructive mt-1">{form.formState.errors.categoryId.message}</p>
+          <FormField
+            control={form.control}
+            name="categoryId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Categoria <span className="text-destructive">*</span></FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-coupon-category">
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories?.filter((cat: any) => cat.isActive).map((category: any) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
+          />
         </div>
 
         <div>
