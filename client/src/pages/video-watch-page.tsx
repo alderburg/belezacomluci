@@ -18,9 +18,10 @@ import { Badge } from "@/components/ui/badge";
 import { MainContent } from "@/components/main-content";
 import { PopupSystem } from "@/components/popup-system";
 import { ThumbsUp, Eye, MessageCircle, ArrowLeft, Send, Calendar, Play, Trash2, Share2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useVideoProgress } from "@/hooks/use-video-progress";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -79,6 +80,15 @@ export default function VideoWatchPage() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [hasWatchedRegistered, setHasWatchedRegistered] = useState(false);
   const accessControl = useAccessControl();
+  const playerRef = useRef<any>(null);
+
+  // Hook para rastrear progresso do vídeo
+  useVideoProgress({
+    videoId: youtubeVideoId || '',
+    resourceId: videoId || '',
+    playerRef,
+    enabled: !!user && !!youtubeVideoId && !!videoId && showVideo
+  });
 
   // Buscar recurso (produto ou vídeo) de forma inteligente
   const { data: resource, isLoading, error, refetch } = useQuery<any>({
@@ -596,18 +606,20 @@ export default function VideoWatchPage() {
 
             {/* YouTube iframe - só carrega quando showVideo for true */}
             {showVideo && youtubeVideoId ? (
-              <iframe
-                src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&rel=0&modestbranding=1`}
-                title={video?.title || 'Vídeo'}
-                className="absolute inset-0 w-full h-full z-10"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                onLoad={() => {
-                  console.log('Video iframe loaded');
-                  setVideoLoaded(true);
-                }}
-              ></iframe>
+              <div id="youtube-player-container" ref={playerRef} className="absolute inset-0 w-full h-full z-10">
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`}
+                  title={video?.title || 'Vídeo'}
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  onLoad={() => {
+                    console.log('Video iframe loaded');
+                    setVideoLoaded(true);
+                  }}
+                />
+              </div>
             ) : !youtubeVideoId ? (
               <div className="absolute inset-0 flex items-center justify-center text-white z-10">
                 <p>URL do vídeo inválida</p>

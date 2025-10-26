@@ -1,6 +1,6 @@
 import { useLocation } from 'wouter';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Sidebar from '@/components/sidebar';
 import ShareModal from '@/components/share-modal';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -32,6 +32,7 @@ import { MainContent } from '@/components/main-content';
 import { PremiumUpgradeModal } from '@/components/premium-upgrade-modal';
 import { useAccessControl } from '@/lib/premium-access';
 import { PopupSystem } from '@/components/popup-system';
+import { useVideoProgress } from '@/hooks/use-video-progress';
 
 interface Product {
   id: string;
@@ -82,6 +83,15 @@ export default function PlaylistPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const playerRef = useRef<any>(null);
+
+  // Hook para rastrear progresso do vídeo
+  useVideoProgress({
+    videoId: currentVideoId,
+    resourceId: resourceId || '',
+    playerRef,
+    enabled: !!user && !!currentVideoId && !!resourceId && showVideo
+  });
 
 
   // Buscar recurso (produto ou vídeo) de forma inteligente
@@ -811,14 +821,16 @@ export default function PlaylistPage() {
 
                 {/* YouTube iframe */}
                 {showVideo && currentVideoId && (
-                  <iframe
-                    src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1`}
-                    title={currentVideo?.title || 'Vídeo'}
-                    className="absolute inset-0 w-full h-full z-10"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                  <div id="youtube-player-container" ref={playerRef} className="absolute inset-0 w-full h-full z-10">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`}
+                      title={currentVideo?.title || 'Vídeo'}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
                 )}
               </div>
 
