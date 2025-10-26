@@ -1,5 +1,6 @@
 import { Home, Play, Download, Tag, Sparkles, Users } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -51,17 +52,57 @@ const navItems: NavItem[] = [
 export default function MobileBottomNav() {
   const [location] = useLocation();
 
+  // Detectar se está em uma página de vídeo ou playlist
+  const isVideoPage = location.startsWith('/video/');
+  const isPlaylistPage = location.startsWith('/playlist/');
+  const resourceId = isVideoPage 
+    ? location.split('/video/')[1] 
+    : isPlaylistPage 
+    ? location.split('/playlist/')[1] 
+    : null;
+
+  // Buscar informações do recurso para identificar se é produto ou vídeo exclusivo
+  const { data: currentResource } = useQuery<any>({
+    queryKey: [`/api/resource/${resourceId}`],
+    queryFn: async () => {
+      if (!resourceId) return null;
+      
+      // Tenta buscar como produto primeiro
+      let response = await fetch(`/api/produtos/${resourceId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return { ...data, _type: 'product' };
+      }
+      
+      // Se não encontrou como produto, tenta como vídeo
+      response = await fetch(`/api/videos/${resourceId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return { ...data, _type: 'video' };
+      }
+      
+      return null;
+    },
+    enabled: !!resourceId && (isVideoPage || isPlaylistPage),
+    retry: false,
+    staleTime: 5 * 60 * 1000, // Cache por 5 minutos
+  });
+
   const isActive = (href: string) => {
     if (href === "/") {
       return location === "/" || location === "";
     }
     
     // Lógica especial para Vídeos Exclusivos e Produtos Digitais
-    // A diferenciação será feita pelas páginas individuais através do botão "Voltar"
+    // Quando estiver em uma página de vídeo/playlist, verifica se é produto ou vídeo exclusivo
     if (href === "/videos") {
-      return location === "/videos";
+      // Ativa se estiver na lista de vídeos OU se estiver vendo um vídeo exclusivo
+      return location === "/videos" || 
+        ((isVideoPage || isPlaylistPage) && currentResource?._type === 'video');
     } else if (href === "/produtos") {
-      return location === "/produtos";
+      // Ativa se estiver na lista de produtos OU se estiver vendo um produto digital
+      return location === "/produtos" || 
+        ((isVideoPage || isPlaylistPage) && currentResource?._type === 'product');
     }
     
     return location.startsWith(href);

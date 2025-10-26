@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebar } from "@/contexts/sidebar-context";
@@ -33,6 +34,42 @@ export default function Sidebar() {
   const [showExitPopup, setShowExitPopup] = useState(false);
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { viewMode, setViewMode } = useAdmin();
+
+  // Detectar se está em uma página de vídeo ou playlist
+  const isVideoPage = location.startsWith('/video/');
+  const isPlaylistPage = location.startsWith('/playlist/');
+  const resourceId = isVideoPage 
+    ? location.split('/video/')[1] 
+    : isPlaylistPage 
+    ? location.split('/playlist/')[1] 
+    : null;
+
+  // Buscar informações do recurso para identificar se é produto ou vídeo exclusivo
+  const { data: currentResource } = useQuery<any>({
+    queryKey: [`/api/resource/${resourceId}`],
+    queryFn: async () => {
+      if (!resourceId) return null;
+      
+      // Tenta buscar como produto primeiro
+      let response = await fetch(`/api/produtos/${resourceId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return { ...data, _type: 'product' };
+      }
+      
+      // Se não encontrou como produto, tenta como vídeo
+      response = await fetch(`/api/videos/${resourceId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return { ...data, _type: 'video' };
+      }
+      
+      return null;
+    },
+    enabled: !!resourceId && (isVideoPage || isPlaylistPage),
+    retry: false,
+    staleTime: 5 * 60 * 1000, // Cache por 5 minutos
+  });
 
   // Close mobile sidebar when route changes
   useEffect(() => {
@@ -185,12 +222,15 @@ export default function Sidebar() {
               let isActive = location === item.href;
 
               // Lógica especial para Vídeos Exclusivos e Produtos Digitais
-              // A diferenciação será feita pelas páginas individuais através do botão "Voltar"
-              // Aqui mantemos apenas a ativação pela rota exata
+              // Quando estiver em uma página de vídeo/playlist, verifica se é produto ou vídeo exclusivo
               if (item.href === "/videos") {
-                isActive = location === "/videos";
+                // Ativa se estiver na lista de vídeos OU se estiver vendo um vídeo exclusivo
+                isActive = location === "/videos" || 
+                  ((isVideoPage || isPlaylistPage) && currentResource?._type === 'video');
               } else if (item.href === "/produtos") {
-                isActive = location === "/produtos";
+                // Ativa se estiver na lista de produtos OU se estiver vendo um produto digital
+                isActive = location === "/produtos" || 
+                  ((isVideoPage || isPlaylistPage) && currentResource?._type === 'product');
               }
 
               return (
