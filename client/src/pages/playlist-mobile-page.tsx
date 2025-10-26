@@ -991,7 +991,7 @@ export default function PlaylistMobilePage() {
       {/* Playlist Modal */}
       <Dialog open={showPlaylistModal} onOpenChange={setShowPlaylistModal}>
         <DialogContent className="mx-auto w-[calc(100vw-32px)] max-w-lg h-[80vh] p-0 rounded-2xl" onOpenAutoFocus={(e) => e.preventDefault()}>
-          <DialogHeader className="p-4 pb-0 pt-12">
+          <DialogHeader className="p-4 pb-2 pt-6">
             <DialogTitle className="text-lg font-semibold">
               Conteúdo de {resource?.title}
             </DialogTitle>
@@ -1008,7 +1008,7 @@ export default function PlaylistMobilePage() {
             </p>
           </DialogHeader>
           
-          <ScrollArea key={showPlaylistModal ? 'open' : 'closed'} className="flex-1 px-4 pb-4">
+          <ScrollArea key={showPlaylistModal ? 'open' : 'closed'} className="flex-1 px-4 pt-2 pb-4">
             <div className="space-y-2">
               {videos.map((video, index) => (
                 <Card 
