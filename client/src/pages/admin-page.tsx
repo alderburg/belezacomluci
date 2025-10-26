@@ -4,7 +4,8 @@ import {
   Video, Product, Coupon, Banner, Popup, User, Notification, Category,
   insertVideoSchema, insertProductSchema, insertCouponSchema, insertBannerSchema, insertPopupSchema, insertNotificationSchema, insertCategorySchema
 } from "@shared/schema";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,11 +100,36 @@ export default function AdminPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { isAdminMode, viewMode, setAdminMode, setViewMode } = useAdmin();
-  const [activeTab, setActiveTab] = useState("videos");
+  const [location, setLocation] = useLocation();
+  
+  // Extrair a aba da URL
+  const getTabFromUrl = () => {
+    const path = location.replace('/admin/', '').replace('/admin', '');
+    const validTabs = ['videos', 'products', 'coupons', 'banners', 'popups', 'notifications', 'categories', 'users'];
+    return validTabs.includes(path) ? path : 'videos';
+  };
+  
+  const [activeTab, setActiveTab] = useState(getTabFromUrl());
   const [editingItem, setEditingItem] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{id: string, type: string, title?: string} | null>(null);
+  
+  // Atualizar URL quando a aba mudar
+  useEffect(() => {
+    const newPath = `/admin/${activeTab}`;
+    if (location !== newPath) {
+      setLocation(newPath);
+    }
+  }, [activeTab]);
+  
+  // Atualizar aba quando a URL mudar
+  useEffect(() => {
+    const tabFromUrl = getTabFromUrl();
+    if (tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [location]);
 
 
 

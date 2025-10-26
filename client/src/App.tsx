@@ -77,6 +77,7 @@ function Router() {
       <ProtectedRoute path="/ajuda" component={AjudaMobilePage} />
       <ProtectedRoute path="/mobile-menu" component={MobileMenuPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
+      <ProtectedRoute path="/admin/:tab" component={AdminPage} />
       <ProtectedRoute path="/admin/cheirosas" component={AdminCheirosasPage} />
       <Route path="/bio" component={BioPage} />
       <Route path="/auth" component={AuthPage} />
