@@ -42,7 +42,9 @@ export default function AdminPopupFormMobilePage() {
     queryKey: ['/api/admin/popups', popupId],
     queryFn: async () => {
       if (!popupId) throw new Error('ID não fornecido');
-      const res = await fetch(`/api/admin/popups/${popupId}`);
+      const res = await fetch(`/api/admin/popups/${popupId}`, {
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error('Erro ao carregar popup');
       return res.json();
     },
@@ -99,17 +101,9 @@ export default function AdminPopupFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertPopupSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/popups/${popupId}`, {
-          method: 'PUT',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('PUT', `/api/popups/${popupId}`, data);
       } else {
-        return await apiRequest('/api/popups', {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('POST', '/api/popups', data);
       }
     },
     onSuccess: () => {

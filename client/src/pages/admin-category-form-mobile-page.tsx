@@ -68,17 +68,9 @@ export default function AdminCategoryFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCategorySchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/categories/${categoryId}`, {
-          method: 'PUT',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('PUT', `/api/categories/${categoryId}`, data);
       } else {
-        return await apiRequest('/api/categories', {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('POST', '/api/categories', data);
       }
     },
     onSuccess: () => {

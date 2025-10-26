@@ -45,7 +45,9 @@ export default function AdminProductFormMobilePage() {
     queryFn: async () => {
       if (!productId) throw new Error('ID não fornecido');
       console.log('Buscando produto para edição:', productId);
-      const res = await fetch(`/api/admin/products/${productId}`);
+      const res = await fetch(`/api/admin/products/${productId}`, {
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error('Erro ao carregar produto');
       const data = await res.json();
       console.log('Produto carregado:', data);
@@ -116,17 +118,9 @@ export default function AdminProductFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertProductSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/products/${productId}`, {
-          method: 'PUT',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('PUT', `/api/products/${productId}`, data);
       } else {
-        return await apiRequest('/api/products', {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('POST', '/api/products', data);
       }
     },
     onSuccess: () => {

@@ -34,9 +34,7 @@ export default function AdminNotificationsMobilePage() {
 
   const sendNotificationMutation = useMutation({
     mutationFn: async (notificationId: string) => {
-      return await apiRequest(`/api/admin/notifications/${notificationId}/send`, {
-        method: 'POST',
-      });
+      return await apiRequest('POST', `/api/admin/notifications/${notificationId}/send`);
     },
     onSuccess: () => {
       toast({
@@ -55,9 +53,7 @@ export default function AdminNotificationsMobilePage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/admin/notifications/${id}`, {
-        method: 'DELETE',
-      });
+      return await apiRequest('DELETE', `/api/admin/notifications/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });

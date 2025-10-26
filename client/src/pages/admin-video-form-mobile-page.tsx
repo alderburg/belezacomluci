@@ -38,7 +38,9 @@ export default function AdminVideoFormMobilePage() {
     queryFn: async () => {
       if (!videoId) throw new Error('ID não fornecido');
       console.log('Buscando vídeo para edição:', videoId);
-      const res = await fetch(`/api/admin/videos/${videoId}`);
+      const res = await fetch(`/api/admin/videos/${videoId}`, {
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error('Erro ao carregar vídeo');
       const data = await res.json();
       console.log('Vídeo carregado:', data);
@@ -109,17 +111,9 @@ export default function AdminVideoFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertVideoSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/videos/${videoId}`, {
-          method: 'PUT',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('PUT', `/api/videos/${videoId}`, data);
       } else {
-        return await apiRequest('/api/videos', {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('POST', '/api/videos', data);
       }
     },
     onSuccess: () => {

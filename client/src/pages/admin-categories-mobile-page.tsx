@@ -34,9 +34,7 @@ export default function AdminCategoriesMobilePage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/categories/${id}`, {
-        method: 'DELETE',
-      });
+      return await apiRequest('DELETE', `/api/categories/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });

@@ -43,7 +43,9 @@ export default function AdminNotificationFormMobilePage() {
     queryFn: async () => {
       if (!notificationId) throw new Error('ID não fornecido');
       console.log('Buscando notificação para edição:', notificationId);
-      const res = await fetch(`/api/admin/notifications/${notificationId}`);
+      const res = await fetch(`/api/admin/notifications/${notificationId}`, {
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error('Erro ao carregar notificação');
       const data = await res.json();
       console.log('Notificação carregada:', data);
@@ -112,17 +114,9 @@ export default function AdminNotificationFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/notifications/${notificationId}`, {
-          method: 'PUT',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('PUT', `/api/notifications/${notificationId}`, data);
       } else {
-        return await apiRequest('/api/notifications', {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('POST', '/api/notifications', data);
       }
     },
     onSuccess: () => {

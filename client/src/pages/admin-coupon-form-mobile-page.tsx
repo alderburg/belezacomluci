@@ -43,7 +43,9 @@ export default function AdminCouponFormMobilePage() {
     queryKey: ['/api/admin/coupons', couponId],
     queryFn: async () => {
       if (!couponId) throw new Error('ID não fornecido');
-      const res = await fetch(`/api/admin/coupons/${couponId}`);
+      const res = await fetch(`/api/admin/coupons/${couponId}`, {
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error('Erro ao carregar cupom');
       return res.json();
     },
@@ -112,17 +114,9 @@ export default function AdminCouponFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCouponSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/coupons/${couponId}`, {
-          method: 'PUT',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('PUT', `/api/coupons/${couponId}`, data);
       } else {
-        return await apiRequest('/api/coupons', {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return await apiRequest('POST', '/api/coupons', data);
       }
     },
     onSuccess: () => {
