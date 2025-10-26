@@ -15,16 +15,18 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
 import { PopupSystem } from "@/components/popup-system";
+import { useRef } from "react";
+import { useVideoProgress } from "@/hooks/use-video-progress"; // Importar o hook
 
-import { 
-  ThumbsUp, 
-  Eye, 
-  MessageCircle, 
-  ArrowLeft, 
-  Send, 
-  Calendar, 
-  Play, 
-  Trash2, 
+import {
+  ThumbsUp,
+  Eye,
+  MessageCircle,
+  ArrowLeft,
+  Send,
+  Calendar,
+  Play,
+  Trash2,
   Share2,
   X
 } from "lucide-react";
@@ -64,7 +66,7 @@ const getCategoryLabel = (category: string) => {
 export default function VideoMobilePage() {
   const [location, navigate] = useLocation();
   // Extract video ID from URL - suporta /video/:id, /videos/video/:id, /produtos/video/:id
-  const videoId = location.includes('/video/') 
+  const videoId = location.includes('/video/')
     ? location.split('/video/')[1]?.split('?')[0]
     : null;
 
@@ -84,31 +86,38 @@ export default function VideoMobilePage() {
   const [hasWatchedRegistered, setHasWatchedRegistered] = useState(false);
   const accessControl = useAccessControl();
 
-  // Scroll para o topo quando a página carrega
+  const playerRef = useRef<any>(null);
+
+  // Inicializar YouTube IFrame API
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location]);
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+  }, []);
 
   // Buscar recurso (produto ou vídeo) de forma inteligente
   const { data: resource, isLoading, error, refetch } = useQuery<any>({
     queryKey: [`/api/resource/${videoId}`],
     queryFn: async () => {
       if (!videoId) throw new Error('No resource ID');
-      
+
       // Tenta buscar como produto primeiro
       let response = await fetch(`/api/produtos/${videoId}`);
       if (response.ok) {
         const data = await response.json();
         return { ...data, _type: 'product' };
       }
-      
+
       // Se não encontrou como produto, tenta como vídeo
       response = await fetch(`/api/videos/${videoId}`);
       if (response.ok) {
         const data = await response.json();
         return { ...data, _type: 'video' };
       }
-      
+
       // Se nenhum dos dois funcionou, retorna erro
       throw new Error('Resource not found');
     },
@@ -480,6 +489,114 @@ export default function VideoMobilePage() {
 
   const videoUrl = video?.videoUrl || product?.fileUrl;
   const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
+  console.log("Resource data:", resource);
+  console.log("Product:", product);
+  console.log("Video:", video);
+  console.log("Video URL:", videoUrl);
+  console.log("YouTube video ID:", youtubeVideoId);
+
+  // Hook para rastrear progresso do vídeo
+  const { stopProgressSaving, saveProgress } = useVideoProgress({
+    videoId: youtubeVideoId || '',
+    resourceId: videoId || '',
+    playerRef,
+    enabled: !!user && !!youtubeVideoId && !!videoId && showVideo
+  });
+
+  // Salvar progresso antes de sair da página
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (saveProgress) {
+        saveProgress();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && saveProgress) {
+        saveProgress();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [saveProgress]);
+
+  // Criar player quando vídeo for mostrado
+  useEffect(() => {
+    if (!showVideo || !youtubeVideoId) {
+      return;
+    }
+
+    const initPlayer = () => {
+      setTimeout(() => {
+        // Limpar player anterior se existir
+        if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+          try {
+            playerRef.current.destroy();
+          } catch (e) {
+            console.log('Error destroying player:', e);
+          }
+          playerRef.current = null;
+        }
+
+        // Criar novo player
+        try {
+          if (window.YT && window.YT.Player) {
+            playerRef.current = new window.YT.Player('youtube-player-container-mobile', {
+              videoId: youtubeVideoId,
+              playerVars: {
+                autoplay: 1,
+                rel: 0,
+                modestbranding: 1,
+                enablejsapi: 1,
+              },
+              events: {
+                onReady: (event: any) => {
+                  console.log('YouTube player ready for video:', youtubeVideoId);
+                },
+                onStateChange: (event: any) => {
+                  // Salvar progresso quando pausar ou parar
+                  if ((event.data === 2 || event.data === 0) && saveProgress) {
+                    saveProgress();
+                  }
+                }
+              },
+            });
+          }
+        } catch (e) {
+          console.error('Error creating YouTube player:', e);
+        }
+      }, 100);
+    };
+
+    // Se YT já está disponível, inicializar
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+    } else {
+      // Caso contrário, aguardar o callback
+      window.onYouTubeIframeAPIReady = initPlayer;
+    }
+
+    // Cleanup
+    return () => {
+      if (stopProgressSaving) {
+        stopProgressSaving();
+      }
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {
+          console.log('Cleanup error:', e);
+        }
+        playerRef.current = null;
+      }
+    };
+  }, [showVideo, youtubeVideoId, stopProgressSaving, saveProgress]);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -579,22 +696,14 @@ export default function VideoMobilePage() {
             </div>
           )}
 
-          {showVideo && youtubeVideoId && (
-            <iframe
-              src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&rel=0&modestbranding=1`}
-              title={video?.title || 'Vídeo'}
-              className="absolute inset-0 w-full h-full z-10"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          )}
-
-          {!youtubeVideoId && (
+          {/* YouTube player - só carrega quando showVideo for true */}
+          {showVideo && youtubeVideoId ? (
+            <div id="youtube-player-container-mobile" className="absolute inset-0 w-full h-full z-10" />
+          ) : !youtubeVideoId ? (
             <div className="absolute inset-0 flex items-center justify-center text-white z-10">
               <p>URL do vídeo inválida</p>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Video info */}
@@ -616,8 +725,8 @@ export default function VideoMobilePage() {
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
                 <span>
-                  {(product?.createdAt || video?.createdAt) 
-                    ? formatDistanceToNow(new Date(product?.createdAt || video?.createdAt), { addSuffix: true, locale: ptBR }) 
+                  {(product?.createdAt || video?.createdAt)
+                    ? formatDistanceToNow(new Date(product?.createdAt || video?.createdAt), { addSuffix: true, locale: ptBR })
                     : 'Data não disponível'}
                 </span>
               </div>

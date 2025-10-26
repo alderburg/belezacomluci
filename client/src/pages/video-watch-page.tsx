@@ -82,6 +82,16 @@ export default function VideoWatchPage() {
   const accessControl = useAccessControl();
   const playerRef = useRef<any>(null);
 
+  // Determina o ID do vídeo do YouTube
+  const videoUrl = (resource => {
+    if (!resource) return null;
+    if (resource._type === 'product') return resource.fileUrl;
+    if (resource._type === 'video') return resource.videoUrl;
+    return null;
+  })(resource); // Immediately invoke to get resource data after it's loaded
+
+  const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
+
   // Hook para rastrear progresso do vídeo
   useVideoProgress({
     videoId: youtubeVideoId || '',
@@ -90,14 +100,15 @@ export default function VideoWatchPage() {
     enabled: !!user && !!youtubeVideoId && !!videoId && showVideo
   });
 
+
   // Buscar recurso (produto ou vídeo) de forma inteligente
   const { data: resource, isLoading, error, refetch } = useQuery<any>({
     queryKey: [`/api/resource/${videoId}`],
     queryFn: async () => {
       if (!videoId) throw new Error('No resource ID');
-      
+
       console.log('Fetching video with ID:', videoId);
-      
+
       // Tenta buscar como produto primeiro
       let response = await fetch(`/api/produtos/${videoId}`);
       if (response.ok) {
@@ -105,7 +116,7 @@ export default function VideoWatchPage() {
         console.log('Found as product:', data);
         return { ...data, _type: 'product' };
       }
-      
+
       // Se não encontrou como produto, tenta como vídeo
       response = await fetch(`/api/videos/${videoId}`);
       if (response.ok) {
@@ -113,7 +124,7 @@ export default function VideoWatchPage() {
         console.log('Found as video:', data);
         return { ...data, _type: 'video' };
       }
-      
+
       // Se nenhum dos dois funcionou, retorna erro
       throw new Error('Resource not found');
     },
@@ -482,8 +493,6 @@ export default function VideoWatchPage() {
     );
   }
 
-  const videoUrl = video?.videoUrl || product?.fileUrl;
-  const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
   console.log("Resource data:", resource);
   console.log("Product:", product);
   console.log("Video:", video);
