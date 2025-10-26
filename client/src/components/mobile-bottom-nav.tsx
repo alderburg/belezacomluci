@@ -57,14 +57,11 @@ export default function MobileBottomNav() {
     }
     
     // Lógica especial para Vídeos Exclusivos e Produtos Digitais
+    // A diferenciação será feita pelas páginas individuais através do botão "Voltar"
     if (href === "/videos") {
-      // Ativo apenas se estiver na página /videos
       return location === "/videos";
     } else if (href === "/produtos") {
-      // Ativo se estiver em /produtos, /video/:id (produto), ou /playlist/:id (produto)
-      return location === "/produtos" || 
-             location.startsWith("/video/") || 
-             location.startsWith("/playlist/");
+      return location === "/produtos";
     }
     
     return location.startsWith(href);
