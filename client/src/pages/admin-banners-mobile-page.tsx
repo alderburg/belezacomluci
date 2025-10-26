@@ -82,17 +82,65 @@ export default function AdminBannersMobilePage() {
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {banner.description}
                   </p>
-                  {banner.isExclusive && (
-                    <div className="flex gap-2 mt-2">
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+                      {banner.page === 'home' ? 'Página Inicial' : 
+                       banner.page === 'videos' ? 'Vídeos Exclusivos' :
+                       banner.page === 'products' ? 'Produtos Digitais' :
+                       banner.page === 'coupons' ? 'Cupons' :
+                       banner.page === 'community' ? 'Comunidade' :
+                       banner.page === 'profile' ? 'Perfil' :
+                       banner.page === 'video_specific' ? 'Vídeo Específico' :
+                       banner.page === 'bio' ? 'Bio' : banner.page}
+                    </Badge>
+                    {banner.page === 'video_specific' && banner.videoId && (
+                      <Badge variant="outline" className="bg-purple-50 text-purple-700 text-xs">
+                        ID: {banner.videoId.substring(0, 8)}...
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className="text-xs">Ordem: {banner.order}</Badge>
+                    {banner.isExclusive && (
                       <Badge className="bg-purple-100 text-purple-700 text-xs">
                         Premium
                       </Badge>
-                    </div>
-                  )}
-                  <div className="flex gap-2 mt-2">
-                    <Badge className={`text-xs ${banner.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {banner.isActive ? 'Ativo' : 'Inativo'}
-                    </Badge>
+                    )}
+                    {(() => {
+                      const now = new Date();
+
+                      const parseLocalDate = (dateString: string) => {
+                        if (!dateString) return null;
+
+                        if (dateString.includes('T')) {
+                          const [datePart, timePart] = dateString.split('T');
+                          const [year, month, day] = datePart.split('-').map(Number);
+                          const [hour, minute] = timePart.split(':').map(Number);
+
+                          return new Date(year, month - 1, day, hour, minute);
+                        }
+                        return new Date(dateString);
+                      };
+
+                      const startDate = parseLocalDate(banner.startDateTime);
+                      const endDate = parseLocalDate(banner.endDateTime);
+
+                      if (startDate || endDate) {
+                        if (endDate && now > endDate) {
+                          return <Badge className="bg-gray-100 text-gray-700 text-xs">Expirado</Badge>;
+                        } else if (startDate && now < startDate) {
+                          return <Badge className="bg-orange-100 text-orange-700 text-xs">Programado</Badge>;
+                        } else if (banner.isActive && 
+                                  (!startDate || now >= startDate) && 
+                                  (!endDate || now <= endDate)) {
+                          return <Badge className="bg-blue-100 text-blue-700 text-xs">Em Vinculação</Badge>;
+                        }
+                      }
+
+                      return banner.isActive ? (
+                        <Badge className="bg-green-100 text-green-700 text-xs">Ativo</Badge>
+                      ) : (
+                        <Badge variant="secondary" className="text-xs">Inativo</Badge>
+                      );
+                    })()}
                   </div>
                   <div className="flex gap-2 mt-3 pt-3 border-t border-border">
                     <Button

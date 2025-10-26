@@ -92,14 +92,15 @@ export default function AdminPopupsMobilePage() {
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {popup.description}
                   </p>
-                  {popup.isExclusive && (
-                    <div className="flex gap-2 mt-2">
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+                      {getTriggerLabel(popup.trigger)}
+                    </Badge>
+                    {popup.isExclusive && (
                       <Badge className="bg-purple-100 text-purple-700 text-xs">
                         Premium
                       </Badge>
-                    </div>
-                  )}
-                  <div className="flex gap-2 mt-2">
+                    )}
                     <Badge className={`text-xs ${popup.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                       {popup.isActive ? 'Ativo' : 'Inativo'}
                     </Badge>

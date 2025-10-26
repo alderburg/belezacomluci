@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDataSync } from '@/hooks/use-data-sync';
 import { Category } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 export default function AdminCategoriesMobilePage() {
   const { user } = useAuth();
@@ -68,12 +69,22 @@ export default function AdminCategoriesMobilePage() {
                 data-testid={`card-category-${category.id}`}
               >
                 <div className="flex gap-3">
-                  {category.coverImageUrl && (
+                  {category.coverImageUrl ? (
                     <img
                       src={category.coverImageUrl}
                       alt={category.title}
                       className="w-20 h-20 rounded-lg object-cover"
                     />
+                  ) : (
+                    <div className="w-20 h-20 flex items-center justify-center bg-amber-100 rounded-lg">
+                      <div className="w-8 h-8 text-amber-500">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+                          <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/>
+                          <line x1="8" y1="1" x2="8" y2="4"/>
+                          <line x1="16" y1="1" x2="16" y2="4"/>
+                        </svg>
+                      </div>
+                    </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-foreground truncate">
@@ -82,6 +93,13 @@ export default function AdminCategoriesMobilePage() {
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {category.description}
                     </p>
+                    <div className="flex gap-2 mt-2">
+                      {category.isActive ? (
+                        <Badge className="bg-green-100 text-green-700 text-xs">Ativa</Badge>
+                      ) : (
+                        <Badge variant="secondary" className="text-xs">Inativa</Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3 pt-3 border-t border-border">

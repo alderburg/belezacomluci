@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { ArrowLeft, Plus, Bell, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Bell, Edit, Trash2, Send } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useDataSync } from '@/hooks/use-data-sync';
 import { Notification } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { apiRequest } from '@/lib/queryClient';
 
 export default function AdminNotificationsMobilePage() {
   const { user } = useAuth();
@@ -26,6 +27,27 @@ export default function AdminNotificationsMobilePage() {
     queryKey: ["/api/admin/notifications"],
   });
 
+  const sendNotificationMutation = useMutation({
+    mutationFn: async (notificationId: string) => {
+      return await apiRequest(`/api/admin/notifications/${notificationId}/send`, {
+        method: 'POST',
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sucesso",
+        description: "Notificação enviada com sucesso!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao enviar notificação",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleBackClick = () => {
     setLocation('/admin');
   };
@@ -33,7 +55,7 @@ export default function AdminNotificationsMobilePage() {
   const getTargetAudienceLabel = (audience: string) => {
     const labels: Record<string, string> = {
       'all': 'Todos',
-      'free': 'Free',
+      'free': 'Gratuitos',
       'premium': 'Premium'
     };
     return labels[audience] || audience;
@@ -92,14 +114,15 @@ export default function AdminNotificationsMobilePage() {
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {notification.description}
                     </p>
-                    {notification.isExclusive && (
-                      <div className="flex gap-2 mt-2">
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+                        {getTargetAudienceLabel(notification.targetAudience)}
+                      </Badge>
+                      {notification.isExclusive && (
                         <Badge className="bg-purple-100 text-purple-700 text-xs">
                           Premium
                         </Badge>
-                      </div>
-                    )}
-                    <div className="flex gap-2 mt-2">
+                      )}
                       <Badge className={`text-xs ${notification.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                         {notification.isActive ? 'Ativo' : 'Inativo'}
                       </Badge>
@@ -107,6 +130,16 @@ export default function AdminNotificationsMobilePage() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3 pt-3 border-t border-border">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => sendNotificationMutation.mutate(notification.id)}
+                    disabled={sendNotificationMutation.isPending}
+                    className="text-green-600 border-green-300 hover:bg-green-50"
+                    data-testid={`button-send-${notification.id}`}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { ArrowLeft, Users, Edit } from "lucide-react";
+import { ArrowLeft, Users } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useDataSync } from '@/hooks/use-data-sync';
@@ -102,13 +102,6 @@ export default function AdminUsersMobilePage() {
                       )}
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    data-testid={`button-edit-${userData.id}`}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
             ))}
