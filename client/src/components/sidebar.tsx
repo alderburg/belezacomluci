@@ -35,77 +35,7 @@ export default function Sidebar() {
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { viewMode, setViewMode } = useAdmin();
   
-  // Detectar tipo de recurso IMEDIATAMENTE da URL (via search params)
-  const searchParams = new URLSearchParams(window.location.search);
-  const urlResourceType = searchParams.get('from') as 'product' | 'video' | null;
   
-  // Inicializar lastResourceType com prioridade: URL > sessionStorage
-  const [lastResourceType, setLastResourceType] = useState<'product' | 'video' | null>(() => {
-    if (urlResourceType) return urlResourceType;
-    const stored = sessionStorage.getItem('lastResourceType');
-    return stored as 'product' | 'video' | null;
-  });
-
-  // Detectar se está em uma página de vídeo ou playlist
-  const isVideoPage = location.startsWith('/video/');
-  const isPlaylistPage = location.startsWith('/playlist/');
-  const resourceId = isVideoPage 
-    ? location.split('/video/')[1]?.split('?')[0]
-    : isPlaylistPage 
-    ? location.split('/playlist/')[1]?.split('?')[0]
-    : null;
-
-  // Atualizar lastResourceType quando detectar parâmetro na URL
-  useEffect(() => {
-    if (urlResourceType && (isVideoPage || isPlaylistPage)) {
-      setLastResourceType(urlResourceType);
-      sessionStorage.setItem('lastResourceType', urlResourceType);
-    }
-  }, [urlResourceType, isVideoPage, isPlaylistPage]);
-
-  // Buscar informações do recurso para confirmar o tipo (mas não depender disso para UI)
-  const { data: currentResource } = useQuery<any>({
-    queryKey: [`/api/resource/${resourceId}`],
-    queryFn: async () => {
-      if (!resourceId) return null;
-      
-      // Tenta buscar como produto primeiro
-      let response = await fetch(`/api/produtos/${resourceId}`);
-      if (response.ok) {
-        const data = await response.json();
-        return { ...data, _type: 'product' };
-      }
-      
-      // Se não encontrou como produto, tenta como vídeo
-      response = await fetch(`/api/videos/${resourceId}`);
-      if (response.ok) {
-        const data = await response.json();
-        return { ...data, _type: 'video' };
-      }
-      
-      return null;
-    },
-    enabled: !!resourceId && (isVideoPage || isPlaylistPage),
-    retry: false,
-    staleTime: Infinity, // Cache permanente durante a sessão
-    cacheTime: Infinity,
-  });
-
-  // Atualizar/confirmar o tipo quando os dados carregarem (mas já temos uma estimativa)
-  useEffect(() => {
-    if (currentResource?._type) {
-      setLastResourceType(currentResource._type);
-      sessionStorage.setItem('lastResourceType', currentResource._type);
-    }
-  }, [currentResource]);
-
-  // Resetar quando sair de uma página de vídeo/playlist
-  useEffect(() => {
-    if (!isVideoPage && !isPlaylistPage) {
-      setLastResourceType(null);
-      sessionStorage.removeItem('lastResourceType');
-    }
-  }, [isVideoPage, isPlaylistPage]);
 
   // Close mobile sidebar when route changes
   useEffect(() => {
@@ -258,19 +188,11 @@ export default function Sidebar() {
               let isActive = location === item.href;
 
               // Lógica especial para Vídeos Exclusivos e Produtos Digitais
-              // Quando estiver em uma página de vídeo/playlist, verifica se é produto ou vídeo exclusivo
+              // Verifica se a rota atual começa com o caminho do item
               if (item.href === "/videos") {
-                // Ativa se estiver na lista de vídeos OU se estiver vendo um vídeo exclusivo
-                // Usa o último tipo conhecido para evitar piscar durante o carregamento
-                const resourceType = currentResource?._type || lastResourceType;
-                isActive = location === "/videos" || 
-                  ((isVideoPage || isPlaylistPage) && resourceType === 'video');
+                isActive = location === "/videos" || location.startsWith("/videos/");
               } else if (item.href === "/produtos") {
-                // Ativa se estiver na lista de produtos OU se estiver vendo um produto digital
-                // Usa o último tipo conhecido para evitar piscar durante o carregamento
-                const resourceType = currentResource?._type || lastResourceType;
-                isActive = location === "/produtos" || 
-                  ((isVideoPage || isPlaylistPage) && resourceType === 'product');
+                isActive = location === "/produtos" || location.startsWith("/produtos/");
               }
 
               return (

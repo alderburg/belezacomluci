@@ -132,13 +132,13 @@ export default function ProductCard({ product, viewMode: propViewMode }: Product
   const handleDownload = () => {
     // Se for curso de playlist, abre como playlist
     if (product.type === 'course_playlist') {
-      navigate(`/playlist/${product.id}?from=product`);
+      navigate(`/produtos/playlist/${product.id}`);
       return;
     }
 
     // Se for curso de vídeo único, abre como vídeo
     if (product.type === 'course_video') {
-      navigate(`/video/${product.id}?from=product`);
+      navigate(`/produtos/video/${product.id}`);
       return;
     }
 
@@ -170,9 +170,9 @@ export default function ProductCard({ product, viewMode: propViewMode }: Product
       const videoId = extractVideoId(product.fileUrl);
 
       if (playlistId) {
-        navigate(`/playlist/${product.id}?from=product`);
+        navigate(`/produtos/playlist/${product.id}`);
       } else if (videoId) {
-        navigate(`/video/${product.id}?from=product`);
+        navigate(`/produtos/video/${product.id}`);
       }
       return;
     }

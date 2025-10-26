@@ -59,10 +59,10 @@ export default function VideoCard({ video, viewMode: propViewMode }: VideoCardPr
   const handleWatchVideo = () => {
     // Se for playlist, navega para a página de playlist
     if (video.type === 'playlist') {
-      navigate(`/playlist/${video.id}?from=video`);
+      navigate(`/videos/playlist/${video.id}`);
     } else {
       // Para vídeos normais e live, navega para a página de vídeo
-      navigate(`/video/${video.id}?from=video`);
+      navigate(`/videos/video/${video.id}`);
     }
   };
 

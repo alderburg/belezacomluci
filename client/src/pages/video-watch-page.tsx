@@ -54,8 +54,10 @@ const getCategoryLabel = (category: string) => {
 
 export default function VideoWatchPage() {
   const [location, navigate] = useLocation();
-  // Extract video ID from URL path manually
-  const videoId = location.split('/').pop();
+  // Extract video ID from URL - suporta /video/:id, /videos/video/:id, /produtos/video/:id
+  const videoId = location.includes('/video/') 
+    ? location.split('/video/')[1]?.split('?')[0]
+    : null;
 
   console.log("VideoWatchPage - Current location:", location);
   console.log("VideoWatchPage - Extracted video ID:", videoId);

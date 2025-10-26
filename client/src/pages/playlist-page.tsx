@@ -55,8 +55,10 @@ interface PlaylistVideo {
 
 export default function PlaylistPage() {
   const [location, navigate] = useLocation();
-  // Extract ID from URL (format: /playlist/:id)
-  const resourceId = location.split('/playlist/')[1];
+  // Extract ID from URL - suporta /playlist/:id, /videos/playlist/:id, /produtos/playlist/:id
+  const resourceId = location.includes('/playlist/') 
+    ? location.split('/playlist/')[1]?.split('?')[0]
+    : null;
 
   
   const isMobile = useIsMobile();

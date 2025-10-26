@@ -58,9 +58,14 @@ function Router() {
       </Route>
       <ProtectedRoute path="/" component={ResponsiveHomePage} />
       <ProtectedRoute path="/videos" component={ResponsiveVideosPage} />
+      <ProtectedRoute path="/videos/video/:id" component={isMobile ? VideoMobilePage : VideoWatchPage} />
+      <ProtectedRoute path="/videos/playlist/:id" component={isMobile ? PlaylistMobilePage : PlaylistPage} />
+      <ProtectedRoute path="/produtos" component={ResponsiveProductsPage} />
+      <ProtectedRoute path="/produtos/video/:id" component={isMobile ? VideoMobilePage : VideoWatchPage} />
+      <ProtectedRoute path="/produtos/playlist/:id" component={isMobile ? PlaylistMobilePage : PlaylistPage} />
+      {/* Rotas antigas para compatibilidade */}
       <ProtectedRoute path="/video/:id" component={isMobile ? VideoMobilePage : VideoWatchPage} />
       <ProtectedRoute path="/playlist/:id" component={isMobile ? PlaylistMobilePage : PlaylistPage} />
-      <ProtectedRoute path="/produtos" component={ResponsiveProductsPage} />
       <ProtectedRoute path="/cupons" component={ResponsiveCouponsPage} />
       <ProtectedRoute path="/comunidade" component={isMobile ? ComunidadeMobilePage : CommunityPage} />
       <ProtectedRoute path="/perfil" component={isMobile ? ProfileMobilePage : ProfilePage} />
