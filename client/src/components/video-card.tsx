@@ -11,25 +11,17 @@ import { useAdmin } from "@/contexts/admin-context";
 import { useAuth } from "@/hooks/use-auth";
 import { PremiumUpgradeModal } from "@/components/premium-upgrade-modal";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 interface VideoCardProps {
   video: Video;
   viewMode?: 'premium' | 'free';
 }
 
-const getCategoryLabel = (category: string) => {
-  switch (category) {
-    case 'makeup':
-      return 'Maquiagem';
-    case 'skincare':
-      return 'Skincare';
-    case 'hair':
-      return 'Cabelos';
-    case 'nails':
-      return 'Unhas';
-    default:
-      return category;
-  }
+const getCategoryLabel = (categoryId: string, categories?: any[]) => {
+  if (!categoryId || !categories) return null;
+  const category = categories.find(cat => cat.id === categoryId);
+  return category ? category.title : null;
 };
 
 const getButtonLabel = (type: string) => {
@@ -52,6 +44,11 @@ export default function VideoCard({ video, viewMode: propViewMode }: VideoCardPr
   const youtubeStats = useYouTubeStats(video.videoUrl);
   const { viewMode: adminViewMode } = useAdmin();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+
+  // Buscar categorias para exibir o nome correto
+  const { data: categories } = useQuery({
+    queryKey: ["/api/categories"],
+  });
 
   // For admins, always use admin view mode; for others, use prop or default to premium
   const effectiveViewMode = (user?.isAdmin ? adminViewMode : propViewMode) || 'premium';
@@ -115,9 +112,9 @@ export default function VideoCard({ video, viewMode: propViewMode }: VideoCardPr
       <CardContent className="p-4 flex flex-col flex-1">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            {video.category && (
+            {video.categoryId && categories && (
               <Badge variant="outline" className="text-xs">
-                {getCategoryLabel(video.category)}
+                {getCategoryLabel(video.categoryId, categories)}
               </Badge>
             )}
             {video.isExclusive ? (

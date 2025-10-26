@@ -333,7 +333,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (category) {
-      conditions.push(eq(videos.category, category));
+      conditions.push(eq(videos.categoryId, category));
     }
 
     if (conditions.length > 0) {
@@ -345,15 +345,27 @@ export class DatabaseStorage implements IStorage {
 
   async getVideo(id: string): Promise<Video | undefined> {
     try {
-      // console.log(`Storage: Buscando vídeo no banco: ${id}`);
+      console.log(`Storage: Buscando vídeo no banco: ${id}`);
       const [video] = await this.db.select().from(videos).where(eq(videos.id, id));
-      // console.log(`Storage: Resultado da busca:`, video ? 'encontrado' : 'não encontrado');
+      console.log(`Storage: Resultado da busca:`, video ? {
+        id: video.id,
+        title: video.title,
+        type: video.type,
+        categoryId: video.categoryId,
+        isExclusive: video.isExclusive
+      } : 'não encontrado');
+      
       if (video) {
         // Sincroniza o contador de likes antes de retornar o vídeo
         await this.syncVideoLikesCount(id);
 
         // Busca novamente o vídeo com o contador atualizado
         const [updatedVideo] = await this.db.select().from(videos).where(eq(videos.id, id));
+        console.log(`Storage: Vídeo atualizado:`, updatedVideo ? {
+          id: updatedVideo.id,
+          type: updatedVideo.type,
+          categoryId: updatedVideo.categoryId
+        } : 'não encontrado');
         return updatedVideo || undefined;
       }
 
