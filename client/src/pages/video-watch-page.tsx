@@ -17,7 +17,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { MainContent } from "@/components/main-content";
 import { PopupSystem } from "@/components/popup-system";
-import { ThumbsUp, Eye, MessageCircle, ArrowLeft, Send, Calendar, Play, Trash2, Share2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { ThumbsUp, Eye, MessageCircle, ArrowLeft, Send, Calendar, Play, Trash2, Share2, Check } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -324,6 +325,18 @@ export default function VideoWatchPage() {
       return Array.isArray(result) ? result : [];
     },
     enabled: !!videoId,
+  });
+
+  // Buscar progresso do vídeo
+  const { data: videoProgressData } = useQuery<any>({
+    queryKey: ['/api/video-progress', videoId, youtubeVideoId],
+    queryFn: async () => {
+      if (!youtubeVideoId || !videoId) return null;
+      const response = await fetch(`/api/video-progress/${videoId}/${youtubeVideoId}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!user && !!youtubeVideoId && !!videoId,
   });
 
 
@@ -735,6 +748,27 @@ export default function VideoWatchPage() {
               </div>
             ) : null}
           </div>
+
+          {/* Barra de Progresso */}
+          {user && videoProgressData && videoProgressData.progressPercentage > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted-foreground">
+                  Progresso do vídeo
+                </span>
+                <span className="text-sm font-medium text-foreground flex items-center gap-1">
+                  {videoProgressData.isCompleted && (
+                    <Check className="w-4 h-4 text-green-500" />
+                  )}
+                  {Math.round(videoProgressData.progressPercentage)}%
+                </span>
+              </div>
+              <Progress 
+                value={videoProgressData.progressPercentage} 
+                className="h-2"
+              />
+            </div>
+          )}
 
           {/* Video info */}
           <div className="space-y-4 mb-8">

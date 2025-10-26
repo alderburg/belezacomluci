@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
 import { PopupSystem } from "@/components/popup-system";
 import { useRef } from "react";
@@ -28,7 +29,8 @@ import {
   Play,
   Trash2,
   Share2,
-  X
+  X,
+  Check
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -308,6 +310,18 @@ export default function VideoMobilePage() {
       return Array.isArray(result) ? result : [];
     },
     enabled: !!videoId,
+  });
+
+  // Buscar progresso do vídeo
+  const { data: videoProgressData } = useQuery<any>({
+    queryKey: ['/api/video-progress', videoId, youtubeVideoId],
+    queryFn: async () => {
+      if (!youtubeVideoId || !videoId) return null;
+      const response = await fetch(`/api/video-progress/${videoId}/${youtubeVideoId}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!user && !!youtubeVideoId && !!videoId,
   });
 
   // Comment mutation
@@ -702,6 +716,27 @@ export default function VideoMobilePage() {
             </div>
           ) : null}
         </div>
+
+        {/* Barra de Progresso */}
+        {user && videoProgressData && videoProgressData.progressPercentage > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground">
+                Progresso do vídeo
+              </span>
+              <span className="text-sm font-medium text-foreground flex items-center gap-1">
+                {videoProgressData.isCompleted && (
+                  <Check className="w-4 h-4 text-green-500" />
+                )}
+                {Math.round(videoProgressData.progressPercentage)}%
+              </span>
+            </div>
+            <Progress 
+              value={videoProgressData.progressPercentage} 
+              className="h-2"
+            />
+          </div>
+        )}
 
         {/* Video info */}
         <div className="space-y-4">
