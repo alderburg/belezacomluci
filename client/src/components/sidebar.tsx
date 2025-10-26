@@ -34,7 +34,12 @@ export default function Sidebar() {
   const [showExitPopup, setShowExitPopup] = useState(false);
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { viewMode, setViewMode } = useAdmin();
-  const [lastResourceType, setLastResourceType] = useState<'product' | 'video' | null>(null);
+  
+  // Inicializar lastResourceType do sessionStorage se disponível
+  const [lastResourceType, setLastResourceType] = useState<'product' | 'video' | null>(() => {
+    const stored = sessionStorage.getItem('lastResourceType');
+    return stored as 'product' | 'video' | null;
+  });
   const [previousLocation, setPreviousLocation] = useState<string>('');
 
   // Detectar se está em uma página de vídeo ou playlist
@@ -46,21 +51,30 @@ export default function Sidebar() {
     ? location.split('/playlist/')[1] 
     : null;
 
-  // Determinar tipo inicial baseado na navegação anterior
+  // Determinar tipo inicial baseado na navegação anterior - IMEDIATAMENTE
   useEffect(() => {
-    // Se mudou de /produtos para /video ou /playlist, assume que é produto
-    // Se mudou de /videos para /video ou /playlist, assume que é vídeo
-    if ((isVideoPage || isPlaylistPage) && !lastResourceType) {
-      if (previousLocation === '/produtos') {
-        setLastResourceType('product');
-      } else if (previousLocation === '/videos') {
-        setLastResourceType('video');
+    // Atualiza a localização anterior
+    if (location !== previousLocation) {
+      // Se está entrando em uma página de vídeo/playlist vindo de /produtos ou /videos
+      if ((isVideoPage || isPlaylistPage) && !lastResourceType) {
+        let inferredType: 'product' | 'video' | null = null;
+        
+        if (previousLocation === '/produtos' || previousLocation.startsWith('/produtos')) {
+          inferredType = 'product';
+        } else if (previousLocation === '/videos' || previousLocation.startsWith('/videos')) {
+          inferredType = 'video';
+        }
+        
+        if (inferredType) {
+          setLastResourceType(inferredType);
+          sessionStorage.setItem('lastResourceType', inferredType);
+        }
       }
+      setPreviousLocation(location);
     }
-    setPreviousLocation(location);
-  }, [location]);
+  }, [location, isVideoPage, isPlaylistPage, previousLocation, lastResourceType]);
 
-  // Buscar informações do recurso para identificar se é produto ou vídeo exclusivo
+  // Buscar informações do recurso para confirmar o tipo (mas não depender disso para UI)
   const { data: currentResource } = useQuery<any>({
     queryKey: [`/api/resource/${resourceId}`],
     queryFn: async () => {
@@ -84,13 +98,15 @@ export default function Sidebar() {
     },
     enabled: !!resourceId && (isVideoPage || isPlaylistPage),
     retry: false,
-    staleTime: 5 * 60 * 1000, // Cache por 5 minutos
+    staleTime: Infinity, // Cache permanente durante a sessão
+    cacheTime: Infinity,
   });
 
-  // Atualizar o último tipo de recurso conhecido quando os dados carregarem
+  // Atualizar/confirmar o tipo quando os dados carregarem (mas já temos uma estimativa)
   useEffect(() => {
     if (currentResource?._type) {
       setLastResourceType(currentResource._type);
+      sessionStorage.setItem('lastResourceType', currentResource._type);
     }
   }, [currentResource]);
 
@@ -98,6 +114,7 @@ export default function Sidebar() {
   useEffect(() => {
     if (!isVideoPage && !isPlaylistPage) {
       setLastResourceType(null);
+      sessionStorage.removeItem('lastResourceType');
     }
   }, [isVideoPage, isPlaylistPage]);
 
