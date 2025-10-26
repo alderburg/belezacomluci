@@ -2294,23 +2294,29 @@ export default function AdminPage() {
                     {activeTab === 'popups' && (
                       <form onSubmit={popupForm.handleSubmit((data) => createPopupMutation.mutate(data))} className="space-y-4">
                         <div>
-                          <Label htmlFor="popup-title">Título</Label>
+                          <Label htmlFor="popup-title">Título <span className="text-destructive">*</span></Label>
                           <Input
                             id="popup-title"
                             {...popupForm.register("title")}
                             placeholder="Digite o título do popup"
                             data-testid="input-popup-title"
                           />
+                          {popupForm.formState.errors.title && (
+                            <p className="text-sm text-destructive mt-1">{popupForm.formState.errors.title.message}</p>
+                          )}
                         </div>
 
                         <div>
-                          <Label htmlFor="popup-description">Descrição</Label>
+                          <Label htmlFor="popup-description">Descrição <span className="text-destructive">*</span></Label>
                           <Textarea
                             id="popup-description"
                             {...popupForm.register("description")}
                             placeholder="Descrição do popup"
                             data-testid="textarea-popup-description"
                           />
+                          {popupForm.formState.errors.description && (
+                            <p className="text-sm text-destructive mt-1">{popupForm.formState.errors.description.message}</p>
+                          )}
                         </div>
 
                         <div>
