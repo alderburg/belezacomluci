@@ -31,7 +31,8 @@ import {
   shareSettings,
   referrals,
   categories,
-  type User, type InsertUser, type Video, type InsertVideo,
+  videoProgress,
+  type User, type InsertUser, type Video, type InsertVideo, type VideoProgress, type InsertVideoProgress,
   type Product, type InsertProduct, type Coupon, type InsertCoupon,
   type Banner, type InsertBanner, type Post, type InsertPost,
   type Comment, type InsertComment, type Subscription, type InsertSubscription,
@@ -203,6 +204,11 @@ export interface IStorage {
   getAchievements(isActive?: boolean): Promise<Achievement[]>;
   getUserAchievements(userId: string): Promise<(UserAchievement & { achievement: Achievement })[]>;
   checkAndUnlockAchievements(userId: string): Promise<Achievement[]>;
+
+  // Video Progress methods
+  getVideoProgress(userId: string, videoId: string, resourceId: string): Promise<VideoProgress | undefined>;
+  updateVideoProgress(userId: string, videoId: string, resourceId: string, currentTime: number, duration: number): Promise<VideoProgress>;
+  getUserVideoProgressByResource(userId: string, resourceId: string): Promise<VideoProgress[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2678,6 +2684,87 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
       console.error('Error counting shares:', error);
       return 0;
     }
+  }
+
+  // ========== VIDEO PROGRESS METHODS ==========
+
+  async getVideoProgress(userId: string, videoId: string, resourceId: string): Promise<VideoProgress | undefined> {
+    const [progress] = await this.db
+      .select()
+      .from(videoProgress)
+      .where(and(
+        eq(videoProgress.userId, userId),
+        eq(videoProgress.videoId, videoId),
+        eq(videoProgress.resourceId, resourceId)
+      ))
+      .limit(1);
+
+    return progress || undefined;
+  }
+
+  async updateVideoProgress(
+    userId: string, 
+    videoId: string, 
+    resourceId: string, 
+    currentTime: number, 
+    duration: number
+  ): Promise<VideoProgress> {
+    const existing = await this.getVideoProgress(userId, videoId, resourceId);
+    
+    // Só atualiza se o tempo atual for maior que o máximo já assistido
+    if (existing && currentTime <= existing.maxTimeWatched) {
+      return existing;
+    }
+
+    const maxTimeWatched = existing ? Math.max(existing.maxTimeWatched, currentTime) : currentTime;
+    const progressPercentage = duration > 0 ? Math.floor((maxTimeWatched / duration) * 100) : 0;
+    const isCompleted = progressPercentage >= 90;
+
+    if (existing) {
+      // Atualiza existente
+      const [updated] = await this.db
+        .update(videoProgress)
+        .set({
+          maxTimeWatched,
+          duration,
+          progressPercentage,
+          isCompleted,
+          lastWatchedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(videoProgress.id, existing.id))
+        .returning();
+
+      return updated;
+    } else {
+      // Cria novo registro
+      const [created] = await this.db
+        .insert(videoProgress)
+        .values({
+          userId,
+          videoId,
+          resourceId,
+          maxTimeWatched,
+          duration,
+          progressPercentage,
+          isCompleted,
+          lastWatchedAt: new Date()
+        })
+        .returning();
+
+      return created;
+    }
+  }
+
+  async getUserVideoProgressByResource(userId: string, resourceId: string): Promise<VideoProgress[]> {
+    return await this.db
+      .select()
+      .from(videoProgress)
+      .where(and(
+        eq(videoProgress.userId, userId),
+        eq(videoProgress.resourceId, resourceId)
+      ))
+      .orderBy(desc(videoProgress.lastWatchedAt));
   }
 }
 

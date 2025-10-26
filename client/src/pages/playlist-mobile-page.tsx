@@ -1,7 +1,6 @@
-
 import { useLocation } from 'wouter';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ShareModal from '@/components/share-modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -53,11 +52,45 @@ interface PlaylistVideo {
   duration?: string;
 }
 
+// --- Novas importações e tipos para rastreamento de progresso ---
+interface VideoProgress {
+  videoId: string;
+  userId: string;
+  progress: number; // Em segundos
+  lastPlayedAt: string;
+}
+
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady: () => void;
+    YT: {
+      Player: new (
+        playerId: string,
+        options: {
+          height: string;
+          width: string;
+          videoId: string;
+          playerVars?: { [key: string]: string | number };
+          events?: {
+            onReady: (event: { target: any }) => void;
+            onStateChange: (event: { target: any; data: number }) => void;
+            onPlaybackQualityChange: (event: { target: any; data: string }) => void;
+            onError: (event: { target: any; data: number }) => void;
+            onApiChange: (event: { target: any }) => void;
+          };
+        }
+      ) => any; // Tipo genérico para o player, pode ser aprimorado
+    };
+  }
+}
+
+const YOUTUBE_API_URL = 'https://www.youtube.com/iframe_api';
+
 export default function PlaylistMobilePage() {
-  
+
   const [location, navigate] = useLocation();
   // Extract ID from URL - suporta /playlist/:id, /videos/playlist/:id, /produtos/playlist/:id
-  const resourceId = location.includes('/playlist/') 
+  const resourceId = location.includes('/playlist/')
     ? location.split('/playlist/')[1]?.split('?')[0]
     : null;
 
@@ -79,6 +112,224 @@ export default function PlaylistMobilePage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const playerRef = useRef<HTMLIFrameElement>(null); // Ref para o iframe do player
+  const youtubePlayer = useRef<any>(null); // Ref para a instância do player do YouTube
+  const playerState = useRef({
+    isReady: false,
+    isBuffering: false,
+    currentTime: 0,
+    duration: 0,
+    progressInterval: null as NodeJS.Timeout | null,
+    lastSavedProgress: 0,
+  });
+
+  // Carregar a API do YouTube IFrame Player
+  useEffect(() => {
+    const loadYouTubeAPI = () => {
+      if (!window.YT) {
+        const tag = document.createElement('script');
+        tag.src = YOUTUBE_API_URL;
+        document.body.appendChild(tag);
+      }
+    };
+    loadYouTubeAPI();
+  }, []);
+
+  // --- Rastreamento de progresso ---
+  // Hook para buscar o progresso salvo do vídeo
+  const { data: videoProgress, isLoading: isLoadingVideoProgress } = useQuery<VideoProgress | null>({
+    queryKey: ['videoProgress', user?.id, currentVideoId],
+    queryFn: async () => {
+      if (!user?.id || !currentVideoId) return null;
+      try {
+        const response = await fetch(`/api/progress/${currentVideoId}`);
+        if (!response.ok) {
+          if (response.status === 404) return null; // Progresso não encontrado
+          throw new Error('Failed to fetch video progress');
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Erro ao buscar progresso do vídeo:", error);
+        return null;
+      }
+    },
+    enabled: !!user?.id && !!currentVideoId,
+    retry: false,
+  });
+
+  // Mutação para salvar o progresso do vídeo
+  const saveVideoProgressMutation = useMutation({
+    mutationFn: async (progressData: { videoId: string; progress: number }) => {
+      const response = await fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...progressData, userId: user?.id }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to save video progress');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      playerState.current.lastSavedProgress = playerState.current.currentTime;
+      console.log(`Progresso salvo: ${playerState.current.currentTime.toFixed(2)}s`);
+    },
+    onError: (error: any) => {
+      console.error("Erro ao salvar progresso:", error.message);
+      toast({
+        title: "Erro ao salvar progresso",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Função para iniciar o player do YouTube
+  const initializeYouTubePlayer = () => {
+    if (window.YT && playerRef.current && currentVideoId) {
+      // Destroi player existente se houver
+      if (youtubePlayer.current) {
+        youtubePlayer.current.destroy();
+      }
+
+      youtubePlayer.current = new window.YT.Player(playerRef.current, {
+        height: '100%',
+        width: '100%',
+        videoId: currentVideoId,
+        playerVars: {
+          autoplay: 1,
+          rel: 0,
+          modestbranding: 1,
+          enablejsapi: 1, // Habilita a API
+          origin: window.location.origin, // Necessário para a API funcionar corretamente
+        },
+        events: {
+          onReady: (event: { target: any }) => {
+            console.log("YouTube Player Pronto!");
+            playerState.current.isReady = true;
+            playerState.current.duration = event.target.getDuration();
+            playerState.current.currentTime = 0; // Resetar tempo
+
+            // Carregar progresso salvo se existir
+            if (videoProgress && videoProgress.progress > 0 && videoProgress.progress < playerState.current.duration) {
+              console.log(`Carregando progresso salvo: ${videoProgress.progress.toFixed(2)}s`);
+              event.target.seekTo(videoProgress.progress, true);
+              playerState.current.currentTime = videoProgress.progress;
+              playerState.current.lastSavedProgress = videoProgress.progress;
+            } else {
+              // Se não houver progresso salvo ou for inválido, busca o tempo inicial
+              playerState.current.lastSavedProgress = 0;
+            }
+
+            // Iniciar o loop de salvamento de progresso
+            startProgressSaving(event.target);
+          },
+          onStateChange: (event: { target: any; data: number }) => {
+            const state = event.data;
+            playerState.current.currentTime = event.target.getCurrentTime(); // Atualiza o tempo atual
+
+            switch (state) {
+              case window.YT.PlayerState.PLAYING:
+                console.log("Player: PLAYING");
+                playerState.current.isBuffering = false;
+                break;
+              case window.YT.PlayerState.PAUSED:
+                console.log("Player: PAUSED");
+                // Salvar progresso ao pausar, caso o usuário não retome
+                if (playerState.current.currentTime > playerState.current.lastSavedProgress + 5) { // Só salva se houver avanço significativo
+                  saveVideoProgressMutation.mutate({ videoId: currentVideoId, progress: playerState.current.currentTime });
+                }
+                stopProgressSaving();
+                break;
+              case window.YT.PlayerState.BUFFERING:
+                console.log("Player: BUFFERING");
+                playerState.current.isBuffering = true;
+                break;
+              case window.YT.PlayerState.ENDED:
+                console.log("Player: ENDED");
+                stopProgressSaving();
+                // Marcar como concluído ou salvar progresso final
+                saveVideoProgressMutation.mutate({ videoId: currentVideoId, progress: playerState.current.duration });
+                break;
+              case window.YT.PlayerState.CUED:
+                console.log("Player: CUED");
+                break;
+            }
+          },
+          onError: (event: { target: any; data: number }) => {
+            console.error("YouTube Player Error:", event.data);
+            stopProgressSaving();
+            toast({
+              title: "Erro no player do YouTube",
+              description: `Código do erro: ${event.data}`,
+              variant: "destructive",
+            });
+          },
+        },
+      });
+    }
+  };
+
+  // Função para iniciar o salvamento periódico de progresso
+  const startProgressSaving = (player: any) => {
+    stopProgressSaving(); // Garante que não haja múltiplos intervalos
+    if (!player || !player.getCurrentTime || !currentVideoId || !user) return;
+
+    playerState.current.progressInterval = setInterval(() => {
+      if (!player || !playerState.current.isReady || playerState.current.isBuffering) return;
+
+      const currentTime = player.getCurrentTime();
+      playerState.current.currentTime = currentTime;
+
+      // Salva se houve um avanço significativo desde o último salvamento
+      const timeSinceLastSave = currentTime - playerState.current.lastSavedProgress;
+      const threshold = 10; // Salva a cada 10 segundos de avanço, ou quando o vídeo termina
+      const isNearEnd = player.getDuration() - currentTime < 5; // Verifica se está perto do fim
+
+      if (timeSinceLastSave >= threshold || isNearEnd) {
+        saveVideoProgressMutation.mutate({ videoId: currentVideoId, progress: currentTime });
+      }
+    }, 10000); // Tenta salvar a cada 10 segundos
+  };
+
+  // Função para parar o salvamento de progresso
+  const stopProgressSaving = () => {
+    if (playerState.current.progressInterval) {
+      clearInterval(playerState.current.progressInterval);
+      playerState.current.progressInterval = null;
+    }
+  };
+
+  // Efeito para inicializar o player quando o ID do vídeo mudar ou a API estiver pronta
+  useEffect(() => {
+    const ytApiReadyListener = () => {
+      if (window.YT?.Player) {
+        initializeYouTubePlayer();
+      } else {
+        // Tenta novamente se a API não estiver pronta imediatamente
+        setTimeout(ytApiReadyListener, 100);
+      }
+    };
+
+    if (window.YT?.Player) {
+      initializeYouTubePlayer();
+    } else {
+      window.onYouTubeIframeAPIReady = ytApiReadyListener;
+    }
+
+    // Limpa o player e o intervalo ao desmontar o componente ou mudar de vídeo
+    return () => {
+      stopProgressSaving();
+      if (youtubePlayer.current) {
+        youtubePlayer.current.destroy();
+        youtubePlayer.current = null;
+      }
+    };
+  }, [currentVideoId, videoProgress]); // Depende de currentVideoId e videoProgress para carregar o tempo inicial
+
+  // --- Fim do Rastreamento de progresso ---
+
+  // Resto do código original...
 
   // Resetar scroll do modal quando abrir
   useEffect(() => {
@@ -103,21 +354,21 @@ export default function PlaylistMobilePage() {
     queryKey: [`/api/resource/${resourceId}`],
     queryFn: async () => {
       if (!resourceId) throw new Error('No resource ID');
-      
+
       // Tenta buscar como produto primeiro
       let response = await fetch(`/api/produtos/${resourceId}`);
       if (response.ok) {
         const data = await response.json();
         return { ...data, _type: 'product' };
       }
-      
+
       // Se não encontrou como produto, tenta como vídeo
       response = await fetch(`/api/videos/${resourceId}`);
       if (response.ok) {
         const data = await response.json();
         return { ...data, _type: 'video' };
       }
-      
+
       // Se nenhum dos dois funcionou, retorna erro
       throw new Error('Resource not found');
     },
@@ -204,7 +455,7 @@ export default function PlaylistMobilePage() {
   useEffect(() => {
     if (resource) {
       const resourceUrl = product ? resource.fileUrl : (video ? resource.videoUrl : null);
-      
+
       if (resourceUrl) {
         const playlistId = extractPlaylistId(resourceUrl);
         const videoId = extractVideoId(resourceUrl);
@@ -270,16 +521,18 @@ export default function PlaylistMobilePage() {
   }, [resource, product]);
 
   const handleVideoSelect = (videoId: string) => {
+    stopProgressSaving(); // Para o salvamento de progresso do vídeo anterior
     setIsLoadingVideoContent(true);
     setCurrentVideoId(videoId);
     setShowVideo(false);
     setShowPlaylistModal(false);
+    // O useEffect que lida com currentVideoId irá inicializar o novo player
   };
 
   const currentVideo = videos.find(v => v.id === currentVideoId);
 
   // Get YouTube stats for current video
-  const currentVideoYouTubeUrl = currentVideoId ? `https://youtu.be/${currentVideoId}` : 'pt-16';
+  const currentVideoYouTubeUrl = currentVideoId ? `https://www.youtube.com/watch?v=${currentVideoId}` : 'pt-16';
   const youtubeStats = useYouTubeStats(currentVideoYouTubeUrl);
 
   // YouTube description query
@@ -337,7 +590,7 @@ export default function PlaylistMobilePage() {
     const commentsReady = !isLoadingComments;
     const statsReady = !youtubeStats.loading;
     const hasRequiredIds = currentVideoId && resourceId;
-    
+
     if (descriptionReady && commentsReady && statsReady && hasRequiredIds) {
       // Adiciona um pequeno delay para garantir que a descrição seja renderizada
       setTimeout(() => {
@@ -372,10 +625,10 @@ export default function PlaylistMobilePage() {
       });
     },
     onError: (error: any) => {
-      toast({ 
-        title: "Erro ao comentar", 
+      toast({
+        title: "Erro ao comentar",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive"
       });
     }
   });
@@ -458,16 +711,16 @@ export default function PlaylistMobilePage() {
       await queryClient.invalidateQueries({ queryKey: ['comments', resourceId] });
       setShowDeleteDialog(false);
       setDeleteCommentId(null);
-      toast({ 
+      toast({
         title: "Comentário excluído!",
         description: "O comentário foi removido com sucesso"
       });
     },
     onError: (error: any) => {
-      toast({ 
-        title: "Erro ao excluir comentário", 
+      toast({
+        title: "Erro ao excluir comentário",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive"
       });
     }
   });
@@ -619,8 +872,6 @@ export default function PlaylistMobilePage() {
     );
   }
 
-  
-
   return (
     <div className="min-h-screen bg-background pb-20 overflow-x-hidden">
       {/* Google Auth Modal */}
@@ -711,16 +962,22 @@ export default function PlaylistMobilePage() {
       <div className="pt-24 px-4 py-6 space-y-6">
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
-          {currentVideo?.thumbnail && !showVideo && (
+          {!showVideo && currentVideoId && (
             <img
-              src={currentVideo.thumbnail}
+              src={currentVideo?.thumbnail || `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`}
               alt={currentVideo?.title || 'Thumbnail'}
               className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => {
+                // Tenta carregar uma imagem padrão se a miniatura falhar
+                const target = e.target as HTMLImageElement;
+                target.onerror = null; // Evita loop infinito
+                target.src = `https://img.youtube.com/vi/${currentVideoId}/hqdefault.jpg`;
+              }}
             />
           )}
 
           {!showVideo && currentVideoId && (
-            <div 
+            <div
               className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer z-20 group"
               onClick={() => setShowVideo(true)}
             >
@@ -732,7 +989,8 @@ export default function PlaylistMobilePage() {
 
           {showVideo && currentVideoId && (
             <iframe
-              src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1`}
+              ref={playerRef} // Ref para o iframe
+              src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1&origin=${window.location.origin}`}
               title={currentVideo?.title || 'Vídeo'}
               className="absolute inset-0 w-full h-full z-10"
               frameBorder="0"
@@ -769,8 +1027,8 @@ export default function PlaylistMobilePage() {
                 <div className="flex items-center gap-1">
                   <Eye className="w-4 h-4" />
                   <span>
-                    {youtubeStats.loading 
-                      ? 'Carregando...' 
+                    {youtubeStats.loading
+                      ? 'Carregando...'
                       : `${youtubeStats.views.toLocaleString()} visualizações`
                     }
                   </span>
@@ -797,10 +1055,10 @@ export default function PlaylistMobilePage() {
                     className="flex items-center gap-2"
                   >
                     <ThumbsUp className="w-4 h-4" />
-                    {youtubeLikeMutation.isPending 
-                      ? "Curtindo..." 
-                      : youtubeStats.loading 
-                        ? "0" 
+                    {youtubeLikeMutation.isPending
+                      ? "Curtindo..."
+                      : youtubeStats.loading
+                        ? "0"
                         : youtubeStats.likes.toLocaleString()
                     }
                   </Button>
@@ -826,7 +1084,6 @@ export default function PlaylistMobilePage() {
             </div>
           </div>
         )}
-
 
         {/* Comments section */}
         <Card>
@@ -921,9 +1178,9 @@ export default function PlaylistMobilePage() {
                           {comment.user.name}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), { 
-                            addSuffix: true, 
-                            locale: ptBR 
+                          {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), {
+                            addSuffix: true,
+                            locale: ptBR
                           }) : 'Agora'}
                         </span>
                       </div>
@@ -979,7 +1236,7 @@ export default function PlaylistMobilePage() {
         title={resource?.title || (product ? 'Curso' : 'Vídeo')}
         description={resource?.description}
       />
-      
+
       {/* Premium Upgrade Modal */}
       <PremiumUpgradeModal
         open={showPremiumModal}
@@ -1001,18 +1258,18 @@ export default function PlaylistMobilePage() {
               </p>
             )}
             <p className="text-sm text-muted-foreground mt-1 text-left">
-              {currentVideoId && videos.length > 0 
+              {currentVideoId && videos.length > 0
                 ? `${videos.findIndex(video => video.id === currentVideoId) + 1} de ${videos.length} vídeos`
                 : `${videos.length} vídeos`
               }
             </p>
           </DialogHeader>
-          
+
           <div className="flex-1 min-h-0 overflow-hidden">
             <ScrollArea key={showPlaylistModal ? 'open' : 'closed'} className="h-full px-4 pb-4">
               <div className="space-y-2">
                 {videos.map((video, index) => (
-                <Card 
+                <Card
                   key={video.id}
                   className={`cursor-pointer transition-colors hover:bg-accent mx-2 my-1 ${
                     currentVideoId === video.id ? 'ring-2 ring-primary bg-accent' : ''

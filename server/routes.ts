@@ -195,7 +195,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const videoId = req.params.id;
-      
+
       // Excluir o vídeo e todos os vínculos
       await storage.deleteVideo(videoId);
 
@@ -204,13 +204,13 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         // Notificar que o vídeo foi deletado
         wsService.broadcastDataUpdate('videos', 'deleted', { id: videoId });
-        
+
         // Notificar que banners podem ter sido afetados
         wsService.broadcastDataUpdate('banners', 'deleted', { videoId: videoId });
-        
+
         // Notificar que popups podem ter sido afetados
         wsService.broadcastDataUpdate('popups', 'deleted', { videoId: videoId });
-        
+
         // Notificar que comentários podem ter sido afetados
         wsService.broadcastDataUpdate('comments', 'deleted', { videoId: videoId });
       }
@@ -1536,7 +1536,7 @@ export function registerRoutes(app: Express): Server {
 
       // Buscar informações da playlist (título, descrição, etc)
       const playlistInfoUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistId}&key=${apiKey}`;
-      
+
       const playlistInfoResponse = await new Promise<string>((resolve, reject) => {
         https.get(playlistInfoUrl, (response) => {
           let data = '';
@@ -1686,12 +1686,12 @@ export function registerRoutes(app: Express): Server {
       }
 
       const video = videoData.items[0];
-      
+
       // Detecta se é uma live (duração P0D ou liveBroadcastContent === 'live' ou 'upcoming')
-      const isLive = video.snippet.liveBroadcastContent === 'live' || 
+      const isLive = video.snippet.liveBroadcastContent === 'live' ||
                      video.snippet.liveBroadcastContent === 'upcoming' ||
                      video.contentDetails.duration === 'P0D';
-      
+
       const result = {
         id: video.id,
         title: video.snippet.title,
@@ -1880,24 +1880,50 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Função auxiliar para extrair YouTube video ID
-  function extractYouTubeVideoId(url: string): string | null {
-    const patterns = [
-      /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
-      /(?:youtu\.be\/)([^&\n?#\?]+)/,
-      /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
-      /(?:youtube\.com\/v\/)([^&\n?#]+)/
-    ];
-
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match) {
-        return match[1];
-      }
+  // Video progress tracking endpoint
+  app.post("/api/video-progress", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
     }
 
-    return null;
-  }
+    try {
+      const { videoId, resourceId, currentTime, duration } = req.body;
+
+      if (!videoId || !resourceId || currentTime === undefined || !duration) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      const progress = await storage.updateVideoProgress(
+        req.user!.id,
+        videoId,
+        resourceId,
+        Math.floor(currentTime),
+        Math.floor(duration)
+      );
+
+      res.json(progress);
+    } catch (error) {
+      console.error('Error updating video progress:', error);
+      res.status(500).json({ error: "Failed to update video progress" });
+    }
+  });
+
+  // Get user progress for a resource (playlist or single video)
+  app.get("/api/video-progress/:resourceId", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    try {
+      const { resourceId } = req.params;
+      const progressList = await storage.getUserVideoProgressByResource(req.user!.id, resourceId);
+
+      res.json(progressList);
+    } catch (error) {
+      console.error('Error fetching video progress:', error);
+      res.status(500).json({ error: "Failed to fetch video progress" });
+    }
+  });
 
   // Popup routes
   app.get("/api/popups", async (req, res) => {

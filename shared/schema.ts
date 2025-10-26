@@ -5,6 +5,12 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Helper function to generate UUIDs (assuming createId is defined elsewhere or needs to be imported/defined)
+// For demonstration purposes, let's assume a simple uuid function if createId is not globally available.
+// In a real project, you would import this from a library like 'uuid' or '@paralleldrive/react-hook-form-auto-generate-fields'.
+const createId = () => Math.random().toString(36).substring(2, 15);
+
+
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
@@ -282,6 +288,26 @@ export const shareSettings = pgTable("share_settings", {
   updatedBy: varchar("updated_by").references(() => users.id),
 });
 
+// Tabela para rastrear o progresso de visualização de vídeos
+export const videoProgress = pgTable('video_progress', {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  videoId: varchar("video_id").notNull(), // YouTube video ID
+  resourceId: varchar("resource_id").notNull(), // ID do vídeo ou produto (para playlists)
+  maxTimeWatched: integer("max_time_watched").notNull().default(0), // Tempo máximo em segundos
+  duration: integer("duration"), // Duração total em segundos
+  progressPercentage: integer("progress_percentage").default(0), // 0-100
+  isCompleted: boolean("is_completed").default(false), // Se assistiu mais de 90%
+  lastWatchedAt: timestamp("last_watched_at").default(sql`now()`),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+}, (table) => {
+  return {
+    uniqueUserVideo: unique("unique_user_video").on(table.userId, table.videoId, table.resourceId),
+  };
+});
+
+
 // Sistema de referrals/indicações
 export const referrals = pgTable("referrals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -442,6 +468,7 @@ export const userRelations = relations(users, ({ many, one }) => ({
   referralsMade: many(referrals, { relationName: "referrer" }),
   referralsReceived: many(referrals, { relationName: "referred" }),
   userNotifications: many(userNotifications),
+  videoProgress: many(videoProgress), // Relation to videoProgress
 }));
 
 export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
@@ -452,6 +479,7 @@ export const videoRelations = relations(videos, ({ many, one }) => ({
   comments: many(comments),
   likes: many(videoLikes),
   category: one(categories, { fields: [videos.categoryId], references: [categories.id] }),
+  progress: many(videoProgress), // Relation to videoProgress
 }));
 
 export const categoryRelations = relations(categories, ({ many }) => ({
@@ -583,6 +611,13 @@ export const referralRelations = relations(referrals, ({ one }) => ({
   referrer: one(users, { fields: [referrals.referrerId], references: [users.id], relationName: "referrer" }),
   referred: one(users, { fields: [referrals.referredId], references: [users.id], relationName: "referred" }),
 }));
+
+// Relation for videoProgress
+export const videoProgressRelations = relations(videoProgress, ({ one }) => ({
+  user: one(users, { fields: [videoProgress.userId], references: [users.id] }),
+  video: one(videos, { fields: [videoProgress.videoId], references: [videos.id] }),
+}));
+
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true }).extend({
@@ -852,6 +887,22 @@ export const insertUserAchievementSchema = createInsertSchema(userAchievements).
 export const insertShareSettingsSchema = createInsertSchema(shareSettings).omit({ id: true, updatedAt: true });
 export const insertReferralSchema = createInsertSchema(referrals).omit({ id: true, createdAt: true });
 
+// Insert schema for video progress
+export const insertVideoProgressSchema = createInsertSchema(videoProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  userId: z.string().min(1, "User ID is required"),
+  videoId: z.string().min(1, "Video ID is required"),
+  resourceId: z.string().min(1, "Resource ID is required"),
+  maxTimeWatched: z.number().min(0).default(0),
+  duration: z.number().optional().nullable(),
+  progressPercentage: z.number().min(0).max(100).default(0),
+  isCompleted: z.boolean().default(false),
+});
+
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -913,3 +964,7 @@ export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
 export type UserAchievement = typeof userAchievements.$inferSelect;
+
+// ========== VIDEO PROGRESS TYPES ==========
+export type VideoProgress = typeof videoProgress.$inferSelect;
+export type InsertVideoProgress = z.infer<typeof insertVideoProgressSchema>;
