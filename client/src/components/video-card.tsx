@@ -52,17 +52,17 @@ export default function VideoCard({ video, viewMode: propViewMode }: VideoCardPr
   const youtubeStats = useYouTubeStats(video.videoUrl);
   const { viewMode: adminViewMode } = useAdmin();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  
+
   // For admins, always use admin view mode; for others, use prop or default to premium
   const effectiveViewMode = (user?.isAdmin ? adminViewMode : propViewMode) || 'premium';
 
   const handleWatchVideo = () => {
     // Se for playlist, navega para a página de playlist
     if (video.type === 'playlist') {
-      navigate(`/playlist/${video.id}`);
+      navigate(`/playlist/${video.id}?from=video`);
     } else {
       // Para vídeos normais e live, navega para a página de vídeo
-      navigate(`/video/${video.id}`);
+      navigate(`/video/${video.id}?from=video`);
     }
   };
 
@@ -75,7 +75,7 @@ export default function VideoCard({ video, viewMode: propViewMode }: VideoCardPr
     if (typeof duration === 'string' && duration.includes(':')) {
       return duration;
     }
-    
+
     // Se for número (minutos decimais), converter para HH:MM:SS
     if (typeof duration === 'number') {
       const totalSeconds = Math.round(duration * 60);
@@ -85,7 +85,7 @@ export default function VideoCard({ video, viewMode: propViewMode }: VideoCardPr
 
       return `${hours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
-    
+
     return '00:00:00';
   };
 
@@ -101,7 +101,7 @@ export default function VideoCard({ video, viewMode: propViewMode }: VideoCardPr
               <Play className="w-8 h-8 text-primary ml-1" />
             </div>
           </div>
-          
+
           {/* Bolinha vermelha "AO VIVO" no canto superior direito */}
           {video.type === 'live' && (
             <div className="absolute top-2 right-2 flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">

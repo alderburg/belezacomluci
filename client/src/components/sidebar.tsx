@@ -35,44 +35,33 @@ export default function Sidebar() {
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { viewMode, setViewMode } = useAdmin();
   
-  // Inicializar lastResourceType do sessionStorage se disponível
+  // Detectar tipo de recurso IMEDIATAMENTE da URL (via search params)
+  const searchParams = new URLSearchParams(window.location.search);
+  const urlResourceType = searchParams.get('from') as 'product' | 'video' | null;
+  
+  // Inicializar lastResourceType com prioridade: URL > sessionStorage
   const [lastResourceType, setLastResourceType] = useState<'product' | 'video' | null>(() => {
+    if (urlResourceType) return urlResourceType;
     const stored = sessionStorage.getItem('lastResourceType');
     return stored as 'product' | 'video' | null;
   });
-  const [previousLocation, setPreviousLocation] = useState<string>('');
 
   // Detectar se está em uma página de vídeo ou playlist
   const isVideoPage = location.startsWith('/video/');
   const isPlaylistPage = location.startsWith('/playlist/');
   const resourceId = isVideoPage 
-    ? location.split('/video/')[1] 
+    ? location.split('/video/')[1]?.split('?')[0]
     : isPlaylistPage 
-    ? location.split('/playlist/')[1] 
+    ? location.split('/playlist/')[1]?.split('?')[0]
     : null;
 
-  // Determinar tipo inicial baseado na navegação anterior - IMEDIATAMENTE
+  // Atualizar lastResourceType quando detectar parâmetro na URL
   useEffect(() => {
-    // Atualiza a localização anterior
-    if (location !== previousLocation) {
-      // Se está entrando em uma página de vídeo/playlist vindo de /produtos ou /videos
-      if ((isVideoPage || isPlaylistPage) && !lastResourceType) {
-        let inferredType: 'product' | 'video' | null = null;
-        
-        if (previousLocation === '/produtos' || previousLocation.startsWith('/produtos')) {
-          inferredType = 'product';
-        } else if (previousLocation === '/videos' || previousLocation.startsWith('/videos')) {
-          inferredType = 'video';
-        }
-        
-        if (inferredType) {
-          setLastResourceType(inferredType);
-          sessionStorage.setItem('lastResourceType', inferredType);
-        }
-      }
-      setPreviousLocation(location);
+    if (urlResourceType && (isVideoPage || isPlaylistPage)) {
+      setLastResourceType(urlResourceType);
+      sessionStorage.setItem('lastResourceType', urlResourceType);
     }
-  }, [location, isVideoPage, isPlaylistPage, previousLocation, lastResourceType]);
+  }, [urlResourceType, isVideoPage, isPlaylistPage]);
 
   // Buscar informações do recurso para confirmar o tipo (mas não depender disso para UI)
   const { data: currentResource } = useQuery<any>({
