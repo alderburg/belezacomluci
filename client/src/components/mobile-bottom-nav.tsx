@@ -58,20 +58,32 @@ export default function MobileBottomNav() {
   // Detectar se está em uma página de vídeo ou playlist
   const isVideoPage = location.startsWith('/video/');
   const isPlaylistPage = location.startsWith('/playlist/');
-  const resourceId = isVideoPage 
-    ? location.split('/video/')[1] 
-    : isPlaylistPage 
-    ? location.split('/playlist/')[1] 
-    : null;
+  
+  // Extrair o ID de forma mais robusta, removendo query params e trailing slashes
+  const extractResourceId = () => {
+    if (isVideoPage) {
+      const id = location.split('/video/')[1];
+      return id ? id.split('?')[0].split('/')[0] : null;
+    }
+    if (isPlaylistPage) {
+      const id = location.split('/playlist/')[1];
+      return id ? id.split('?')[0].split('/')[0] : null;
+    }
+    return null;
+  };
+  
+  const resourceId = extractResourceId();
 
   // Determinar tipo inicial baseado na navegação anterior
   useEffect(() => {
     // Se mudou de /produtos para /video ou /playlist, assume que é produto
     // Se mudou de /videos para /video ou /playlist, assume que é vídeo
-    if ((isVideoPage || isPlaylistPage) && !lastResourceType) {
-      if (previousLocation === '/produtos') {
+    if (isVideoPage || isPlaylistPage) {
+      if (previousLocation.startsWith('/produtos')) {
+        console.log('[MobileNav] Veio de produtos, setando tipo como product');
         setLastResourceType('product');
-      } else if (previousLocation === '/videos') {
+      } else if (previousLocation.startsWith('/videos')) {
+        console.log('[MobileNav] Veio de vídeos, setando tipo como video');
         setLastResourceType('video');
       }
     }
@@ -84,21 +96,46 @@ export default function MobileBottomNav() {
     queryFn: async () => {
       if (!resourceId) return null;
       
-      // Tenta buscar como produto primeiro
-      let response = await fetch(`/api/produtos/${resourceId}`);
-      if (response.ok) {
-        const data = await response.json();
-        return { ...data, _type: 'product' };
+      console.log('[MobileNav] Buscando recurso:', resourceId, 'tipo presumido:', lastResourceType);
+      
+      // Busca na ordem baseada no tipo presumido para melhor performance
+      if (lastResourceType === 'product') {
+        // Tenta buscar como produto primeiro
+        let response = await fetch(`/api/produtos/${resourceId}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[MobileNav] Encontrado como produto:', data.title || data.name);
+          return { ...data, _type: 'product' };
+        }
+        
+        // Fallback para vídeo
+        response = await fetch(`/api/videos/${resourceId}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[MobileNav] Encontrado como vídeo (fallback):', data.title || data.name);
+          return { ...data, _type: 'video' };
+        }
+      } else {
+        // Tenta buscar como vídeo primeiro (padrão ou quando lastResourceType === 'video')
+        let response = await fetch(`/api/videos/${resourceId}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[MobileNav] Encontrado como vídeo:', data.title || data.name);
+          return { ...data, _type: 'video' };
+        }
+        
+        // Fallback para produto
+        response = await fetch(`/api/produtos/${resourceId}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[MobileNav] Encontrado como produto (fallback):', data.title || data.name);
+          return { ...data, _type: 'product' };
+        }
       }
       
-      // Se não encontrou como produto, tenta como vídeo
-      response = await fetch(`/api/videos/${resourceId}`);
-      if (response.ok) {
-        const data = await response.json();
-        return { ...data, _type: 'video' };
-      }
-      
-      return null;
+      console.log('[MobileNav] Recurso não encontrado nas APIs, mantendo tipo:', lastResourceType);
+      // Retorna um objeto com o tipo presumido mesmo se não encontrou
+      return lastResourceType ? { _type: lastResourceType } : null;
     },
     enabled: !!resourceId && (isVideoPage || isPlaylistPage),
     retry: false,
@@ -108,6 +145,7 @@ export default function MobileBottomNav() {
   // Atualizar o último tipo de recurso conhecido quando os dados carregarem
   useEffect(() => {
     if (currentResource?._type) {
+      console.log('[MobileNav] Atualizando tipo de recurso:', currentResource._type);
       setLastResourceType(currentResource._type);
     }
   }, [currentResource]);
@@ -130,14 +168,26 @@ export default function MobileBottomNav() {
       // Ativa se estiver na lista de vídeos OU se estiver vendo um vídeo exclusivo
       // Usa o último tipo conhecido para evitar piscar durante o carregamento
       const resourceType = currentResource?._type || lastResourceType;
-      return location === "/videos" || 
+      const isVideoActive = location === "/videos" || 
         ((isVideoPage || isPlaylistPage) && resourceType === 'video');
+      
+      if (isVideoPage || isPlaylistPage) {
+        console.log('[MobileNav] Verificando /videos - resourceType:', resourceType, 'isActive:', isVideoActive);
+      }
+      
+      return isVideoActive;
     } else if (href === "/produtos") {
       // Ativa se estiver na lista de produtos OU se estiver vendo um produto digital
       // Usa o último tipo conhecido para evitar piscar durante o carregamento
       const resourceType = currentResource?._type || lastResourceType;
-      return location === "/produtos" || 
+      const isProductActive = location === "/produtos" || 
         ((isVideoPage || isPlaylistPage) && resourceType === 'product');
+      
+      if (isVideoPage || isPlaylistPage) {
+        console.log('[MobileNav] Verificando /produtos - resourceType:', resourceType, 'isActive:', isProductActive);
+      }
+      
+      return isProductActive;
     }
     
     return location.startsWith(href);
