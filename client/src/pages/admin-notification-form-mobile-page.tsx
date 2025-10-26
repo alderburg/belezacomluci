@@ -14,7 +14,7 @@ import { insertNotificationSchema, type Notification } from "@shared/schema";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { ImageUpload } from '@/components/image-upload';
+import { ImageUpload } from '@/components/ui/image-upload';
 import type { z } from 'zod';
 
 export default function AdminNotificationFormMobilePage() {

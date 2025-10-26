@@ -17,7 +17,7 @@ import { insertCouponSchema, type Coupon } from "@shared/schema";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { ImageUpload } from '@/components/image-upload';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { useAuth } from '@/hooks/use-auth';
 import { z } from 'zod';
 
