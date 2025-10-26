@@ -32,7 +32,7 @@ export default function AdminPopupFormMobilePage() {
   }
 
   const { data: popup, isLoading } = useQuery<Popup>({
-    queryKey: ["/api/admin/popups", popupId],
+    queryKey: [`/api/admin/popups/${popupId}`],
     enabled: isEditing,
   });
 

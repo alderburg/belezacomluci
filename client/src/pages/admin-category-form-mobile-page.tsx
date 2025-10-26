@@ -31,7 +31,7 @@ export default function AdminCategoryFormMobilePage() {
   }
 
   const { data: category, isLoading } = useQuery<Category>({
-    queryKey: ["/api/categories", categoryId],
+    queryKey: [`/api/categories/${categoryId}`],
     enabled: isEditing,
   });
 

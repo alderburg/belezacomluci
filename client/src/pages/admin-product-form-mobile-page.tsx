@@ -32,7 +32,7 @@ export default function AdminProductFormMobilePage() {
   const isEditing = Boolean(productId);
 
   const { data: product, isLoading } = useQuery<Product>({
-    queryKey: ["/api/admin/products", productId],
+    queryKey: [`/api/admin/products/${productId}`],
     enabled: isEditing,
   });
 

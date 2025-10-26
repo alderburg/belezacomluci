@@ -31,7 +31,7 @@ export default function AdminCouponFormMobilePage() {
   const isEditing = Boolean(couponId);
 
   const { data: coupon, isLoading } = useQuery<Coupon>({
-    queryKey: ["/api/admin/coupons", couponId],
+    queryKey: [`/api/admin/coupons/${couponId}`],
     enabled: isEditing,
   });
 

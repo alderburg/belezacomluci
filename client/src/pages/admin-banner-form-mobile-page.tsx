@@ -32,7 +32,7 @@ export default function AdminBannerFormMobilePage() {
 
   // Buscar banner se estiver editando
   const { data: banner, isLoading } = useQuery<Banner>({
-    queryKey: ["/api/admin/banners", bannerId],
+    queryKey: [`/api/admin/banners/${bannerId}`],
     enabled: isEditing,
   });
 

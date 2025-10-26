@@ -32,7 +32,7 @@ export default function AdminVideoFormMobilePage() {
   const isEditing = Boolean(videoId);
 
   const { data: video, isLoading } = useQuery<Video>({
-    queryKey: ["/api/admin/videos", videoId],
+    queryKey: [`/api/admin/videos/${videoId}`],
     enabled: isEditing,
   });
 

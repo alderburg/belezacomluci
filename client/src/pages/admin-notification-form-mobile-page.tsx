@@ -32,7 +32,7 @@ export default function AdminNotificationFormMobilePage() {
   }
 
   const { data: notification, isLoading } = useQuery<Notification>({
-    queryKey: ["/api/admin/notifications", notificationId],
+    queryKey: [`/api/admin/notifications/${notificationId}`],
     enabled: isEditing,
   });
 
