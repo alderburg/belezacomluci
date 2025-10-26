@@ -4,7 +4,10 @@ import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
 import { ArrowLeft, Users, Edit } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'wouter';
+import { useDataSync } from '@/hooks/use-data-sync';
 import { User } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +16,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export default function AdminUsersMobilePage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [, navigate] = useNavigate();
+  const queryClient = useQueryClient();
+  const { isConnected } = useDataSync();
+
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
