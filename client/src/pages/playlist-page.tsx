@@ -7,9 +7,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Play, Clock, List, X, Eye, Heart, ThumbsUp, Calendar, MessageCircle, Send, Trash2, Share2 } from 'lucide-react';
+import { ArrowLeft, Play, Clock, List, X, Eye, Heart, ThumbsUp, Calendar, MessageCircle, Send, Trash2, Share2, Check } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
 import { useYouTubeStats } from '@/hooks/use-youtube-stats';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -54,6 +55,18 @@ interface PlaylistVideo {
   duration?: string;
 }
 
+interface VideoProgress {
+  id: string;
+  userId: string;
+  videoId: string;
+  resourceId: string;
+  maxTimeWatched: number;
+  duration: number | null;
+  progressPercentage: number;
+  isCompleted: boolean;
+  lastWatchedAt: string;
+}
+
 export default function PlaylistPage() {
   const [location, navigate] = useLocation();
   // Extract ID from URL - suporta /playlist/:id, /videos/playlist/:id, /produtos/playlist/:id
@@ -92,6 +105,26 @@ export default function PlaylistPage() {
     playerRef,
     enabled: !!user && !!currentVideoId && !!resourceId && showVideo
   });
+
+  // Buscar progresso de todos os vídeos da playlist
+  const { data: videoProgressData } = useQuery<VideoProgress[]>({
+    queryKey: ['/api/video-progress', resourceId],
+    enabled: !!user && !!resourceId,
+  });
+
+  // Função helper para obter progresso de um vídeo específico
+  const getVideoProgress = (videoId: string): number => {
+    if (!videoProgressData) return 0;
+    const progress = videoProgressData.find(p => p.videoId === videoId);
+    return progress?.progressPercentage || 0;
+  };
+
+  // Função helper para verificar se vídeo está completo
+  const isVideoCompleted = (videoId: string): boolean => {
+    if (!videoProgressData) return false;
+    const progress = videoProgressData.find(p => p.videoId === videoId);
+    return progress?.isCompleted || false;
+  };
 
 
   // Buscar recurso (produto ou vídeo) de forma inteligente
@@ -1069,53 +1102,74 @@ export default function PlaylistPage() {
 
                   <ScrollArea className="h-[600px]">
                     <div className="p-2">
-                      {videos.map((video, index) => (
-                        <Card 
-                          key={video.id}
-                          className={`mb-2 cursor-pointer transition-colors hover:bg-accent ${
-                            currentVideoId === video.id ? 'ring-2 ring-primary bg-accent' : ''
-                          }`}
-                          onClick={() => handleVideoSelect(video.id)}
-                        >
-                          <CardContent className="p-3">
-                            <div className="flex space-x-3">
-                              <div className="relative w-20 h-12 flex-shrink-0 rounded overflow-hidden bg-muted">
-                                <img
-                                  src={video.thumbnail}
-                                  alt={video.title}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                  }}
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                  {currentVideoId === video.id ? (
-                                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                                  ) : (
-                                    <Play className="w-3 h-3 text-white" />
-                                  )}
+                      {videos.map((video, index) => {
+                        const progress = getVideoProgress(video.id);
+                        const completed = isVideoCompleted(video.id);
+                        
+                        return (
+                          <Card 
+                            key={video.id}
+                            className={`mb-2 cursor-pointer transition-colors hover:bg-accent ${
+                              currentVideoId === video.id ? 'ring-2 ring-primary bg-accent' : ''
+                            }`}
+                            onClick={() => handleVideoSelect(video.id)}
+                            data-testid={`card-video-${video.id}`}
+                          >
+                            <CardContent className="p-3">
+                              <div className="flex space-x-3">
+                                <div className="relative w-20 h-12 flex-shrink-0 rounded overflow-hidden bg-muted">
+                                  <img
+                                    src={video.thumbnail}
+                                    alt={video.title}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).style.display = 'none';
+                                    }}
+                                  />
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                    {currentVideoId === video.id ? (
+                                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                                    ) : completed ? (
+                                      <Check className="w-4 h-4 text-green-500" />
+                                    ) : (
+                                      <Play className="w-3 h-3 text-white" />
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
 
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between">
-                                  <span className="text-xs text-muted-foreground font-medium">
-                                    {index + 1}
-                                  </span>
-                                  {video.duration && (
-                                    <span className="text-xs text-muted-foreground">
-                                      {video.duration}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start justify-between">
+                                    <span className="text-xs text-muted-foreground font-medium">
+                                      {index + 1}
                                     </span>
+                                    {video.duration && (
+                                      <span className="text-xs text-muted-foreground">
+                                        {video.duration}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <h4 className="text-sm font-medium text-foreground line-clamp-2 mt-1">
+                                    {video.title}
+                                  </h4>
+                                  
+                                  {/* Barra de Progresso */}
+                                  {user && progress > 0 && (
+                                    <div className="mt-2" data-testid={`progress-bar-${video.id}`}>
+                                      <Progress 
+                                        value={progress} 
+                                        className="h-1"
+                                      />
+                                      <span className="text-xs text-muted-foreground mt-1 block">
+                                        {progress}% assistido
+                                      </span>
+                                    </div>
                                   )}
                                 </div>
-                                <h4 className="text-sm font-medium text-foreground line-clamp-2 mt-1">
-                                  {video.title}
-                                </h4>
                               </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                     </div>
                   </ScrollArea>
                 </Card>
