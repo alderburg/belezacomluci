@@ -99,6 +99,14 @@ export default function PlaylistPage() {
   const playerRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
+  // Hook para rastrear progresso do vídeo - DEVE VIR ANTES de usar saveProgress
+  const { stopProgressSaving, saveProgress } = useVideoProgress({
+    videoId: currentVideoId,
+    resourceId: resourceId || '',
+    playerRef,
+    enabled: !!user && !!currentVideoId && !!resourceId && showVideo
+  });
+
   // Inicializar YouTube IFrame API
   useEffect(() => {
     // Carregar script da YouTube IFrame API
@@ -210,14 +218,6 @@ export default function PlaylistPage() {
       }
     };
   }, [showVideo, currentVideoId, stopProgressSaving]);
-
-  // Hook para rastrear progresso do vídeo
-  const { stopProgressSaving, saveProgress } = useVideoProgress({
-    videoId: currentVideoId,
-    resourceId: resourceId || '',
-    playerRef,
-    enabled: !!user && !!currentVideoId && !!resourceId && showVideo
-  });
 
   // Buscar progresso de todos os vídeos da playlist
   const { data: videoProgressData } = useQuery<VideoProgress[]>({

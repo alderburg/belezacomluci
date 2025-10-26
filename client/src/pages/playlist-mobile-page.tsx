@@ -121,6 +121,14 @@ export default function PlaylistMobilePage() {
   const playerRef = useRef<HTMLIFrameElement>(null); // Ref para o iframe do player
   const youtubePlayer = useRef<any>(null); // Ref para a instância do player do YouTube
 
+  // Hook para rastrear progresso do vídeo - DEVE VIR ANTES de usar saveProgress
+  const { stopProgressSaving, saveProgress } = useVideoProgress({
+    videoId: currentVideoId,
+    resourceId: resourceId || '',
+    playerRef: youtubePlayer,
+    enabled: !!user && !!currentVideoId && !!resourceId && showVideo
+  });
+
   // Carregar a API do YouTube IFrame Player
   useEffect(() => {
     const loadYouTubeAPI = () => {
@@ -155,14 +163,6 @@ export default function PlaylistMobilePage() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [saveProgress]);
-
-  // Hook para rastrear progresso do vídeo
-  const { stopProgressSaving, saveProgress } = useVideoProgress({
-    videoId: currentVideoId,
-    resourceId: resourceId || '',
-    playerRef: youtubePlayer,
-    enabled: !!user && !!currentVideoId && !!resourceId && showVideo
-  });
 
   // Buscar progresso de todos os vídeos da playlist
   const { data: videoProgressData } = useQuery<VideoProgress[]>({
