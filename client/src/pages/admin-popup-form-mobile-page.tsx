@@ -162,7 +162,8 @@ export default function AdminPopupFormMobilePage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="popup-title">Título <span className="text-destructive">*</span></Label>
           <Input
@@ -423,7 +424,8 @@ export default function AdminPopupFormMobilePage() {
         >
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Pop-up" : "Criar Pop-up"}
         </Button>
-      </form>
+        </form>
+        </Form>
       )}
     </div>
   );

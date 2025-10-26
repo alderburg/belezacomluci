@@ -179,7 +179,8 @@ export default function AdminCouponFormMobilePage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="coupon-code">Código <span className="text-destructive">*</span></Label>
@@ -351,7 +352,8 @@ export default function AdminCouponFormMobilePage() {
         >
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Cupom" : "Criar Cupom"}
         </Button>
-      </form>
+        </form>
+        </Form>
       )}
     </div>
   );
