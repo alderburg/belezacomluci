@@ -54,9 +54,9 @@ export default function AdminVideoFormMobilePage() {
     },
   });
 
-  // Reset form when video data loads (only if form is not dirty)
+  // Reset form when video data loads
   useEffect(() => {
-    if (video && isEditing && !form.formState.isDirty) {
+    if (video && isEditing) {
       form.reset({
         title: video.title,
         description: video.description || "",
@@ -68,7 +68,7 @@ export default function AdminVideoFormMobilePage() {
         isExclusive: video.isExclusive ?? false,
       });
     }
-  }, [video, isEditing, form]);
+  }, [video, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertVideoSchema>) => {

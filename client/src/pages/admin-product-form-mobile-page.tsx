@@ -54,9 +54,9 @@ export default function AdminProductFormMobilePage() {
     },
   });
 
-  // Reset form when product data loads (only if form is not dirty)
+  // Reset form when product data loads
   useEffect(() => {
-    if (product && isEditing && !form.formState.isDirty) {
+    if (product && isEditing) {
       form.reset({
         title: product.title,
         description: product.description || "",
@@ -68,7 +68,7 @@ export default function AdminProductFormMobilePage() {
         isActive: product.isActive ?? true,
       });
     }
-  }, [product, isEditing, form]);
+  }, [product, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertProductSchema>) => {

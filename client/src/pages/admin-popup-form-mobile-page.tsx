@@ -59,7 +59,7 @@ export default function AdminPopupFormMobilePage() {
   });
 
   useEffect(() => {
-    if (popup && isEditing && !form.formState.isDirty) {
+    if (popup && isEditing) {
       form.reset({
         title: popup.title,
         description: popup.description,
@@ -81,7 +81,7 @@ export default function AdminPopupFormMobilePage() {
           new Date(popup.endDateTime).toISOString().slice(0, 16) : "",
       });
     }
-  }, [popup, isEditing, form]);
+  }, [popup, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertPopupSchema>) => {

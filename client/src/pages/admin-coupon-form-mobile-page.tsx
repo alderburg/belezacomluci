@@ -57,9 +57,9 @@ export default function AdminCouponFormMobilePage() {
     },
   });
 
-  // Reset form when coupon data loads (only if form is not dirty)
+  // Reset form when coupon data loads
   useEffect(() => {
-    if (coupon && isEditing && !form.formState.isDirty) {
+    if (coupon && isEditing) {
       form.reset({
         code: coupon.code,
         brand: coupon.brand,
@@ -77,7 +77,7 @@ export default function AdminCouponFormMobilePage() {
         isActive: coupon.isActive ?? true,
       });
     }
-  }, [coupon, isEditing, form]);
+  }, [coupon, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCouponSchema>) => {
