@@ -87,50 +87,36 @@ export default function VideoMobilePage() {
     window.scrollTo(0, 0);
   }, [location]);
 
-  // Tentar buscar como produto primeiro
-  const { data: product, isLoading: isLoadingProduct } = useQuery({
-    queryKey: ["product", videoId],
+  // Buscar recurso (produto ou vídeo) de forma inteligente
+  const { data: resource, isLoading, error, refetch } = useQuery<any>({
+    queryKey: [`/api/resource/${videoId}`],
     queryFn: async () => {
-      if (!videoId) return null;
-      try {
-        const response = await apiRequest("GET", `/api/products/${videoId}`);
-        if (!response.ok) return null;
-        return await response.json();
-      } catch {
-        return null;
+      if (!videoId) throw new Error('No resource ID');
+      
+      // Tenta buscar como produto primeiro
+      let response = await fetch(`/api/produtos/${videoId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return { ...data, _type: 'product' };
       }
+      
+      // Se não encontrou como produto, tenta como vídeo
+      response = await fetch(`/api/videos/${videoId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return { ...data, _type: 'video' };
+      }
+      
+      // Se nenhum dos dois funcionou, retorna erro
+      throw new Error('Resource not found');
     },
     enabled: !!videoId,
     retry: false,
   });
 
-  // Tentar buscar como vídeo se não for produto
-  const { data: video, isLoading: isLoadingVideo, error, refetch } = useQuery({
-    queryKey: ["video", videoId],
-    queryFn: async () => {
-      if (!videoId) throw new Error("ID do vídeo não encontrado");
-
-      try {
-        const response = await apiRequest("GET", `/api/videos/${videoId}`);
-
-        if (!response.ok) {
-          throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        return result;
-      } catch (err) {
-        console.error("Erro ao buscar vídeo:", err);
-        throw err;
-      }
-    },
-    enabled: !!videoId && !product,
-    retry: 3,
-    retryDelay: 1000,
-  });
-
-  const isLoading = isLoadingProduct || isLoadingVideo;
-  const resource = product || video;
+  // Determina se é produto ou vídeo
+  const product = resource?._type === 'product' ? resource : null;
+  const video = resource?._type === 'video' ? resource : null;
 
   // Reset video loaded state when video changes
   useEffect(() => {
@@ -490,7 +476,7 @@ export default function VideoMobilePage() {
     );
   }
 
-  const videoUrl = resource?.videoUrl || resource?.fileUrl;
+  const videoUrl = video?.videoUrl || product?.fileUrl;
   const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
 
   return (
