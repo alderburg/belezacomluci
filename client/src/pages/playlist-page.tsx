@@ -82,41 +82,36 @@ export default function PlaylistPage() {
   const queryClient = useQueryClient();
 
 
-  // Primeiro tenta buscar como produto, depois como vídeo
-  const { data: product, isLoading: isLoadingProduct, error: productError } = useQuery<Product>({
-    queryKey: [`/api/produtos/${resourceId}`],
+  // Buscar recurso (produto ou vídeo) de forma inteligente
+  const { data: resource, isLoading, error: hasError } = useQuery<any>({
+    queryKey: [`/api/resource/${resourceId}`],
     queryFn: async () => {
       if (!resourceId) throw new Error('No resource ID');
-      const response = await fetch(`/api/produtos/${resourceId}`);
-      if (!response.ok) {
-        if (response.status === 404) return null;
-        throw new Error('Product not found');
+      
+      // Tenta buscar como produto primeiro
+      let response = await fetch(`/api/produtos/${resourceId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return { ...data, _type: 'product' };
       }
-      return response.json();
+      
+      // Se não encontrou como produto, tenta como vídeo
+      response = await fetch(`/api/videos/${resourceId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return { ...data, _type: 'video' };
+      }
+      
+      // Se nenhum dos dois funcionou, retorna erro
+      throw new Error('Resource not found');
     },
     enabled: !!resourceId,
     retry: false,
   });
 
-  const { data: video, isLoading: isLoadingVideo, error: videoError } = useQuery<any>({
-    queryKey: [`/api/videos/${resourceId}`],
-    queryFn: async () => {
-      if (!resourceId) throw new Error('No resource ID');
-      const response = await fetch(`/api/videos/${resourceId}`);
-      if (!response.ok) {
-        if (response.status === 404) return null;
-        throw new Error('Video not found');
-      }
-      return response.json();
-    },
-    enabled: !!resourceId && !product && !isLoadingProduct,
-    retry: false,
-  });
-
-  // Determina qual tipo de conteúdo estamos lidando
-  const resource = product || video;
-  const isLoading = isLoadingProduct || isLoadingVideo;
-  const hasError = productError || videoError;
+  // Determina se é produto ou vídeo
+  const product = resource?._type === 'product' ? resource : null;
+  const video = resource?._type === 'video' ? resource : null;
 
   // Check access when resource loads
   useEffect(() => {
@@ -210,7 +205,7 @@ export default function PlaylistPage() {
   useEffect(() => {
     if (resource) {
       // Para produtos usa fileUrl, para vídeos usa videoUrl
-      const resourceUrl = product ? resource.fileUrl : resource.videoUrl;
+      const resourceUrl = product ? resource.fileUrl : (video ? resource.videoUrl : null);
       
       if (resourceUrl) {
         const playlistId = extractPlaylistId(resourceUrl);
