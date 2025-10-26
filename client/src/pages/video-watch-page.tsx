@@ -78,8 +78,25 @@ export default function VideoWatchPage() {
   const [hasWatchedRegistered, setHasWatchedRegistered] = useState(false);
   const accessControl = useAccessControl();
 
-  // Fetch video data
-  const { data: video, isLoading, error, refetch } = useQuery({
+  // Tentar buscar como produto primeiro
+  const { data: product, isLoading: isLoadingProduct } = useQuery({
+    queryKey: ["product", videoId],
+    queryFn: async () => {
+      if (!videoId) return null;
+      try {
+        const response = await apiRequest("GET", `/api/products/${videoId}`);
+        if (!response.ok) return null;
+        return await response.json();
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!videoId,
+    retry: false,
+  });
+
+  // Tentar buscar como vídeo se não for produto
+  const { data: video, isLoading: isLoadingVideo, error, refetch } = useQuery({
     queryKey: ["video", videoId],
     queryFn: async () => {
       if (!videoId) throw new Error("ID do vídeo não encontrado");
@@ -100,10 +117,13 @@ export default function VideoWatchPage() {
         throw err;
       }
     },
-    enabled: !!videoId,
+    enabled: !!videoId && !product,
     retry: 3,
     retryDelay: 1000,
   });
+
+  const isLoading = isLoadingProduct || isLoadingVideo;
+  const resource = product || video;
 
   // Reset video loaded state when video changes
   useEffect(() => {
@@ -113,20 +133,20 @@ export default function VideoWatchPage() {
     setHasWatchedRegistered(false); // Reset watch registration for new video
   }, [videoId]);
 
-  // Check access when video loads
+  // Check access when resource loads
   useEffect(() => {
-    if (video && video.isExclusive) {
-      const accessResult = accessControl.checkAccess(video.isExclusive);
+    if (resource && resource.isExclusive) {
+      const accessResult = accessControl.checkAccess(resource.isExclusive);
       if (!accessResult.hasAccess) {
         // Redireciona imediatamente para home com o nome do conteúdo
-        const encodedTitle = encodeURIComponent(video.title);
+        const encodedTitle = encodeURIComponent(resource.title);
         navigate(`/?showPremiumModal=true&contentType=video&contentTitle=${encodedTitle}`);
       }
     }
-  }, [video, accessControl, navigate]);
+  }, [resource, accessControl, navigate]);
 
   // Get YouTube stats for the video
-  const youtubeStats = useYouTubeStats(video?.videoUrl || '');
+  const youtubeStats = useYouTubeStats(resource?.videoUrl || resource?.fileUrl || '');
 
   // Mutation to register video watched activity
   const watchedMutation = useMutation({
@@ -423,10 +443,10 @@ export default function VideoWatchPage() {
     );
   }
 
-  console.log("VideoWatchPage state:", { videoId, isLoading, error, video });
+  console.log("VideoWatchPage state:", { videoId, isLoading, error, video, product, resource });
 
-  if (error || (!video && !isLoading)) {
-    console.log("Error or no video:", { error, video, videoId, isLoading });
+  if (error || (!resource && !isLoading)) {
+    console.log("Error or no resource:", { error, resource, videoId, isLoading });
     return (
       <div className="min-h-screen bg-background flex">
         <Sidebar />
@@ -462,9 +482,10 @@ export default function VideoWatchPage() {
     );
   }
 
-  const youtubeVideoId = video?.videoUrl ? getYouTubeVideoId(video.videoUrl) : null;
-  console.log("Video data:", video);
-  console.log("Video URL:", video?.videoUrl);
+  const videoUrl = resource?.videoUrl || resource?.fileUrl;
+  const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
+  console.log("Resource data:", resource);
+  console.log("Video URL:", videoUrl);
   console.log("YouTube video ID:", youtubeVideoId);
 
   return (

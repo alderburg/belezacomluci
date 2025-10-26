@@ -87,8 +87,25 @@ export default function VideoMobilePage() {
     window.scrollTo(0, 0);
   }, [location]);
 
-  // Fetch video data
-  const { data: video, isLoading, error, refetch } = useQuery({
+  // Tentar buscar como produto primeiro
+  const { data: product, isLoading: isLoadingProduct } = useQuery({
+    queryKey: ["product", videoId],
+    queryFn: async () => {
+      if (!videoId) return null;
+      try {
+        const response = await apiRequest("GET", `/api/products/${videoId}`);
+        if (!response.ok) return null;
+        return await response.json();
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!videoId,
+    retry: false,
+  });
+
+  // Tentar buscar como vídeo se não for produto
+  const { data: video, isLoading: isLoadingVideo, error, refetch } = useQuery({
     queryKey: ["video", videoId],
     queryFn: async () => {
       if (!videoId) throw new Error("ID do vídeo não encontrado");
@@ -107,10 +124,13 @@ export default function VideoMobilePage() {
         throw err;
       }
     },
-    enabled: !!videoId,
+    enabled: !!videoId && !product,
     retry: 3,
     retryDelay: 1000,
   });
+
+  const isLoading = isLoadingProduct || isLoadingVideo;
+  const resource = product || video;
 
   // Reset video loaded state when video changes
   useEffect(() => {
@@ -119,19 +139,19 @@ export default function VideoMobilePage() {
     setHasWatchedRegistered(false);
   }, [videoId]);
 
-  // Check access when video loads
+  // Check access when resource loads
   useEffect(() => {
-    if (video && video.isExclusive) {
-      const accessResult = accessControl.checkAccess(video.isExclusive);
+    if (resource && resource.isExclusive) {
+      const accessResult = accessControl.checkAccess(resource.isExclusive);
       if (!accessResult.hasAccess) {
-        const encodedTitle = encodeURIComponent(video.title);
+        const encodedTitle = encodeURIComponent(resource.title);
         navigate(`/?showPremiumModal=true&contentType=video&contentTitle=${encodedTitle}`);
       }
     }
-  }, [video, accessControl, navigate]);
+  }, [resource, accessControl, navigate]);
 
   // Get YouTube stats for the video
-  const youtubeStats = useYouTubeStats(video?.videoUrl || '');
+  const youtubeStats = useYouTubeStats(resource?.videoUrl || resource?.fileUrl || '');
 
   // Mutation to register video watched activity
   const watchedMutation = useMutation({
@@ -416,7 +436,7 @@ export default function VideoMobilePage() {
     );
   }
 
-  if (error || (!video && !isLoading)) {
+  if (error || (!resource && !isLoading)) {
     return (
       <div className="min-h-screen bg-background pb-20">
         {/* Header - Fixo */}
@@ -470,7 +490,8 @@ export default function VideoMobilePage() {
     );
   }
 
-  const youtubeVideoId = video?.videoUrl ? getYouTubeVideoId(video.videoUrl) : null;
+  const videoUrl = resource?.videoUrl || resource?.fileUrl;
+  const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
 
   return (
     <div className="min-h-screen bg-background pb-20">
