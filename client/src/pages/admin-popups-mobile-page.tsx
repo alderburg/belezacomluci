@@ -82,8 +82,8 @@ export default function AdminPopupsMobilePage() {
   const getTriggerLabel = (trigger: string) => {
     const labels: Record<string, string> = {
       'login': 'Login',
-      'page_visit': 'Visita',
-      'time_based': 'Tempo',
+      'logout': 'Logout',
+      'page_specific': 'Página Específica',
       'scheduled': 'Agendado'
     };
     return labels[trigger] || trigger;
