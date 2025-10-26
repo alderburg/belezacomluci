@@ -63,8 +63,10 @@ const getCategoryLabel = (category: string) => {
 
 export default function VideoMobilePage() {
   const [location, navigate] = useLocation();
-  // Extract video ID from URL path manually
-  const videoId = location.split('/').pop();
+  // Extract video ID from URL - suporta /video/:id, /videos/video/:id, /produtos/video/:id
+  const videoId = location.includes('/video/') 
+    ? location.split('/video/')[1]?.split('?')[0]
+    : null;
 
   const { user } = useAuth();
   const { toast } = useToast();
