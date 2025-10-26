@@ -2718,7 +2718,7 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
 
     const maxTimeWatched = existing ? Math.max(existing.maxTimeWatched, currentTime) : currentTime;
     const progressPercentage = duration > 0 ? Math.floor((maxTimeWatched / duration) * 100) : 0;
-    const isCompleted = progressPercentage >= 90;
+    const isCompleted = progressPercentage >= 95;
 
     if (existing) {
       // Atualiza existente

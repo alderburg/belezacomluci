@@ -770,11 +770,11 @@ export default function VideoWatchPage() {
                   {videoProgressData.isCompleted && (
                     <Check className="w-4 h-4 text-green-500" />
                   )}
-                  {Math.round(videoProgressData.progressPercentage)}%
+                  {videoProgressData.isCompleted ? '100' : Math.round(videoProgressData.progressPercentage)}%
                 </span>
               </div>
               <Progress 
-                value={videoProgressData.progressPercentage} 
+                value={videoProgressData.isCompleted ? 100 : videoProgressData.progressPercentage} 
                 className="h-2"
               />
             </div>
