@@ -1261,17 +1261,19 @@ export default function PlaylistMobilePage() {
                         {/* Progress bar */}
                         {user && getVideoProgress(video.id) > 0 && (
                           <div className="mt-1.5 space-y-0.5">
+                            <div className="flex items-center justify-between mb-0.5">
+                              <span className="text-xs text-muted-foreground">
+                                {isVideoCompleted(video.id) ? '100' : getVideoProgress(video.id)}%
+                              </span>
+                              {isVideoCompleted(video.id) && (
+                                <Check className="w-3 h-3 text-green-600" />
+                              )}
+                            </div>
                             <Progress 
-                              value={getVideoProgress(video.id)} 
+                              value={isVideoCompleted(video.id) ? 100 : getVideoProgress(video.id)} 
                               className="h-1"
                               data-testid={`progress-video-${video.id}`}
                             />
-                            {isVideoCompleted(video.id) && (
-                              <div className="flex items-center gap-1">
-                                <Check className="w-3 h-3 text-green-600" />
-                                <span className="text-xs text-green-600">Concluído</span>
-                              </div>
-                            )}
                           </div>
                         )}
                       </div>

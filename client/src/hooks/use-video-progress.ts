@@ -28,6 +28,7 @@ export const useVideoProgress = ({
     try {
       const player = playerRef.current;
       if (!player || typeof player.getCurrentTime !== 'function') {
+        console.log('Player não disponível ou sem getCurrentTime');
         return;
       }
 
@@ -35,12 +36,21 @@ export const useVideoProgress = ({
       const duration = player.getDuration();
 
       if (!duration || duration === 0 || currentTime <= 0) {
+        console.log('Duração ou tempo atual inválido:', { duration, currentTime });
         return;
       }
 
       isSavingRef.current = true;
 
-      await fetch('/api/video-progress', {
+      console.log('Salvando progresso:', { 
+        videoId, 
+        resourceId, 
+        currentTime: Math.floor(currentTime), 
+        duration: Math.floor(duration),
+        percentage: Math.floor((currentTime / duration) * 100)
+      });
+
+      const response = await fetch('/api/video-progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -51,6 +61,12 @@ export const useVideoProgress = ({
           duration: Math.floor(duration)
         })
       });
+
+      if (!response.ok) {
+        console.error('Erro ao salvar progresso:', await response.text());
+      } else {
+        console.log('Progresso salvo com sucesso!');
+      }
 
       lastSavedTime.current = currentTime;
       
