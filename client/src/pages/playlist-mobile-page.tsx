@@ -1008,9 +1008,10 @@ export default function PlaylistMobilePage() {
             </p>
           </DialogHeader>
           
-          <ScrollArea key={showPlaylistModal ? 'open' : 'closed'} className="flex-1 px-4 pb-4">
-            <div className="space-y-2">
-              {videos.map((video, index) => (
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea key={showPlaylistModal ? 'open' : 'closed'} className="h-full px-4 pb-4">
+              <div className="space-y-2">
+                {videos.map((video, index) => (
                 <Card 
                   key={video.id}
                   className={`cursor-pointer transition-colors hover:bg-accent mx-2 my-1 ${
@@ -1056,9 +1057,10 @@ export default function PlaylistMobilePage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          </ScrollArea>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
 
