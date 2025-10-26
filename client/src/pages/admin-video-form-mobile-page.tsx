@@ -116,13 +116,13 @@ export default function AdminVideoFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertVideoSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/admin/videos/${videoId}`, {
+        return await apiRequest(`/api/videos/${videoId}`, {
           method: 'PUT',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },
         });
       } else {
-        return await apiRequest('/api/admin/videos', {
+        return await apiRequest('/api/videos', {
           method: 'POST',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },
@@ -130,6 +130,7 @@ export default function AdminVideoFormMobilePage() {
       }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/videos'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/videos'] });
       toast({
         title: "Sucesso!",
