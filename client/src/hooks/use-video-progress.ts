@@ -1,5 +1,6 @@
 
 import { useEffect, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './use-auth';
 
 interface UseVideoProgressProps {
@@ -16,6 +17,7 @@ export const useVideoProgress = ({
   enabled = true 
 }: UseVideoProgressProps) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedTime = useRef<number>(0);
   const isSavingRef = useRef<boolean>(false);
@@ -51,19 +53,22 @@ export const useVideoProgress = ({
       });
 
       lastSavedTime.current = currentTime;
+      
+      // Invalidar a query para atualizar a UI em tempo real
+      queryClient.invalidateQueries({ queryKey: ['/api/video-progress', resourceId] });
     } catch (error) {
       console.error('Error saving video progress:', error);
     } finally {
       isSavingRef.current = false;
     }
-  }, [videoId, resourceId, playerRef]);
+  }, [videoId, resourceId, playerRef, queryClient]);
 
   const stopProgressSaving = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    // Salva uma última vez antes de parar
+    // Salva uma última vez antes de parar e invalida a query
     saveProgress();
   }, [saveProgress]);
 
