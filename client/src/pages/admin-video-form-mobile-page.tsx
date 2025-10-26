@@ -234,20 +234,20 @@ export default function AdminVideoFormMobilePage() {
 
     try {
       console.log('Buscando dados do YouTube para vídeo:', videoId);
-      
+
       // Detectar o tipo baseado na URL
       const isPlaylist = isPlaylistUrl(url);
-      
+
       // Se for playlist, calcular duração total
       if (isPlaylist) {
         const playlistIdMatch = url.match(/[?&]list=([^&\n?#]+)/);
         if (playlistIdMatch && playlistIdMatch[1]) {
           const playlistId = playlistIdMatch[1];
           console.log('Detectada playlist, buscando vídeos para calcular duração total:', playlistId);
-          
+
           try {
             const playlistResponse = await fetch(`/api/youtube/playlist/${playlistId}`);
-            
+
             if (!playlistResponse.ok) {
               console.error('Erro ao buscar playlist:', playlistResponse.status);
               toast({
@@ -257,7 +257,7 @@ export default function AdminVideoFormMobilePage() {
               });
             } else {
               const playlistData = await playlistResponse.json();
-              
+
               if (playlistData && playlistData.videos && playlistData.videos.length > 0) {
                 // Calcular duração total
                 let totalSeconds = 0;
@@ -272,22 +272,22 @@ export default function AdminVideoFormMobilePage() {
                     }
                   }
                 }
-                
+
                 // Converter total de segundos para HH:MM:SS
                 const hours = Math.floor(totalSeconds / 3600);
                 const minutes = Math.floor((totalSeconds % 3600) / 60);
                 const seconds = totalSeconds % 60;
                 const totalDuration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
+
                 form.setValue('duration', totalDuration);
                 console.log(`Duração total da playlist calculada: ${totalDuration} (${playlistData.videos.length} vídeos)`);
-                
+
                 // Usar título da playlist
                 if (playlistData.playlistTitle) {
                   form.setValue('title', playlistData.playlistTitle);
                   console.log('Título da playlist preenchido:', playlistData.playlistTitle);
                 }
-                
+
                 // Usar descrição da playlist (somente se existir)
                 if (playlistData.playlistDescription && playlistData.playlistDescription.trim() !== '') {
                   form.setValue('description', playlistData.playlistDescription);
@@ -295,21 +295,21 @@ export default function AdminVideoFormMobilePage() {
                 } else {
                   console.log('Playlist não possui descrição');
                 }
-                
+
                 // Usar thumbnail da playlist
                 if (playlistData.playlistThumbnail) {
                   form.setValue('thumbnailUrl', playlistData.playlistThumbnail);
                   console.log('Thumbnail da playlist preenchida');
                 }
-                
+
                 form.setValue('type', 'playlist');
                 console.log('Tipo alterado para: playlist');
-                
+
                 toast({
                   title: "Playlist detectada!",
                   description: `${playlistData.videos.length} vídeos encontrados. Duração total: ${totalDuration}`,
                 });
-                
+
                 return; // Não precisa buscar dados do vídeo individual
               }
             }
@@ -318,10 +318,10 @@ export default function AdminVideoFormMobilePage() {
           }
         }
       }
-      
+
       // Se não for playlist ou falhou, buscar dados do vídeo individual
       const response = await fetch(`/api/youtube/video/${videoId}`);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Erro ao buscar dados do YouTube:', response.status, errorText);
@@ -335,17 +335,17 @@ export default function AdminVideoFormMobilePage() {
 
       const videoData = await response.json();
       console.log('Dados recebidos do YouTube:', videoData);
-      
+
       // Auto-fill title
       if (videoData.title) {
         form.setValue('title', videoData.title);
         console.log('Título preenchido:', videoData.title);
       }
-      
+
       // Auto-fill type based on detection
       let detectedType = 'video'; // default
       let typeMessage = 'vídeo único';
-      
+
       if (videoData.isLive) {
         detectedType = 'live';
         typeMessage = 'live';
@@ -353,29 +353,29 @@ export default function AdminVideoFormMobilePage() {
       } else {
         console.log('Tipo detectado: vídeo único');
       }
-      
+
       form.setValue('type', detectedType);
       console.log('Tipo alterado para:', detectedType);
-      
+
       // Auto-fill duration field - only for non-live videos
       if (videoData.duration && !videoData.isLive) {
         const formattedDuration = ensureHHMMSSFormat(videoData.duration);
         form.setValue('duration', formattedDuration);
         console.log('Duração preenchida:', formattedDuration);
       }
-      
+
       // Auto-fill description
       if (videoData.description) {
         form.setValue('description', videoData.description);
         console.log('Descrição preenchida automaticamente');
       }
-      
+
       // Auto-fill thumbnail
       if (videoData.thumbnail) {
         form.setValue('thumbnailUrl', videoData.thumbnail);
         console.log('Thumbnail preenchida automaticamente');
       }
-      
+
       // Show toast message
       toast({
         title: `${typeMessage.charAt(0).toUpperCase() + typeMessage.slice(1)} detectada!`,
@@ -419,6 +419,7 @@ export default function AdminVideoFormMobilePage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : (
+        <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="video-title">Título <span className="text-destructive">*</span></Label>
@@ -556,6 +557,7 @@ export default function AdminVideoFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Vídeo" : "Criar Vídeo"}
         </Button>
       </form>
+      </Form>
       )}
     </div>
   );
