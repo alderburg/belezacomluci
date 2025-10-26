@@ -32,8 +32,13 @@ export default function AdminProductFormMobilePage() {
   const isEditing = Boolean(productId);
 
   const { data: product, isLoading } = useQuery<Product>({
-    queryKey: [`/api/admin/products/${productId}`],
-    enabled: isEditing,
+    queryKey: ['/api/admin/products', productId],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/products/${productId}`);
+      if (!res.ok) throw new Error('Erro ao carregar produto');
+      return res.json();
+    },
+    enabled: isEditing && !!productId,
   });
 
   const { data: categories = [] } = useQuery({

@@ -31,8 +31,13 @@ export default function AdminCouponFormMobilePage() {
   const isEditing = Boolean(couponId);
 
   const { data: coupon, isLoading } = useQuery<Coupon>({
-    queryKey: [`/api/admin/coupons/${couponId}`],
-    enabled: isEditing,
+    queryKey: ['/api/admin/coupons', couponId],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/coupons/${couponId}`);
+      if (!res.ok) throw new Error('Erro ao carregar cupom');
+      return res.json();
+    },
+    enabled: isEditing && !!couponId,
   });
 
   const { data: categories = [] } = useQuery({

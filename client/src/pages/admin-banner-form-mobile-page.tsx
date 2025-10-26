@@ -32,8 +32,13 @@ export default function AdminBannerFormMobilePage() {
 
   // Buscar banner se estiver editando
   const { data: banner, isLoading } = useQuery<Banner>({
-    queryKey: [`/api/admin/banners/${bannerId}`],
-    enabled: isEditing,
+    queryKey: ['/api/admin/banners', bannerId],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/banners/${bannerId}`);
+      if (!res.ok) throw new Error('Erro ao carregar banner');
+      return res.json();
+    },
+    enabled: isEditing && !!bannerId,
   });
 
   const form = useForm<z.infer<typeof insertBannerSchema>>({

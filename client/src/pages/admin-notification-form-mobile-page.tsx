@@ -32,8 +32,13 @@ export default function AdminNotificationFormMobilePage() {
   }
 
   const { data: notification, isLoading } = useQuery<Notification>({
-    queryKey: [`/api/admin/notifications/${notificationId}`],
-    enabled: isEditing,
+    queryKey: ['/api/admin/notifications', notificationId],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/notifications/${notificationId}`);
+      if (!res.ok) throw new Error('Erro ao carregar notificação');
+      return res.json();
+    },
+    enabled: isEditing && !!notificationId,
   });
 
   const form = useForm<z.infer<typeof insertNotificationSchema>>({

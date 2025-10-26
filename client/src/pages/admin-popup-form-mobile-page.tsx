@@ -32,8 +32,13 @@ export default function AdminPopupFormMobilePage() {
   }
 
   const { data: popup, isLoading } = useQuery<Popup>({
-    queryKey: [`/api/admin/popups/${popupId}`],
-    enabled: isEditing,
+    queryKey: ['/api/admin/popups', popupId],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/popups/${popupId}`);
+      if (!res.ok) throw new Error('Erro ao carregar popup');
+      return res.json();
+    },
+    enabled: isEditing && !!popupId,
   });
 
   const form = useForm<z.infer<typeof insertPopupSchema>>({

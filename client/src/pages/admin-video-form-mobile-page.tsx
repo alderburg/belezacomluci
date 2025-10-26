@@ -32,8 +32,13 @@ export default function AdminVideoFormMobilePage() {
   const isEditing = Boolean(videoId);
 
   const { data: video, isLoading } = useQuery<Video>({
-    queryKey: [`/api/admin/videos/${videoId}`],
-    enabled: isEditing,
+    queryKey: ['/api/admin/videos', videoId],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/videos/${videoId}`);
+      if (!res.ok) throw new Error('Erro ao carregar vídeo');
+      return res.json();
+    },
+    enabled: isEditing && !!videoId,
   });
 
   const { data: categories = [] } = useQuery({

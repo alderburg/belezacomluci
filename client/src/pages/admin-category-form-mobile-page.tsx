@@ -31,8 +31,13 @@ export default function AdminCategoryFormMobilePage() {
   }
 
   const { data: category, isLoading } = useQuery<Category>({
-    queryKey: [`/api/categories/${categoryId}`],
-    enabled: isEditing,
+    queryKey: ['/api/categories', categoryId],
+    queryFn: async () => {
+      const res = await fetch(`/api/categories/${categoryId}`);
+      if (!res.ok) throw new Error('Erro ao carregar categoria');
+      return res.json();
+    },
+    enabled: isEditing && !!categoryId,
   });
 
   const form = useForm<z.infer<typeof insertCategorySchema>>({
