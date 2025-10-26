@@ -4,8 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { useLocation } from "wouter";
-import { Redirect, useParams } from "wouter";
+import { useLocation, useRoute, Redirect } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,8 +21,8 @@ export default function AdminBannerFormMobilePage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const params = useParams() as { id?: string };
-  const bannerId = params.id;
+  const [match, params] = useRoute("/admin/banners-mobile/edit/:id");
+  const bannerId = params?.id;
   const isEditing = !!bannerId;
 
   if (!user?.isAdmin) {

@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Redirect, useParams, useLocation } from "wouter";
+import { Redirect, useLocation, useRoute } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,8 +24,8 @@ import { z } from 'zod';
 import { useEffect } from 'react';
 
 export default function AdminProductFormMobilePage() {
-  const params = useParams() as { id?: string };
-  const productId = params.id;
+  const [match, params] = useRoute("/admin/products-mobile/edit/:id");
+  const productId = params?.id;
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();

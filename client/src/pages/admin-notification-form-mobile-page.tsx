@@ -5,8 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useLocation } from "wouter";
-import { Redirect, useParams } from "wouter";
+import { useLocation, useRoute, Redirect } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,8 +22,8 @@ export default function AdminNotificationFormMobilePage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const params = useParams() as { id?: string };
-  const notificationId = params.id;
+  const [match, params] = useRoute("/admin/notifications-mobile/edit/:id");
+  const notificationId = params?.id;
   const isEditing = !!notificationId;
 
   if (!user?.isAdmin) {
