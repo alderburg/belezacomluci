@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import type { z } from 'zod';
+import { useEffect } from 'react';
 
 export default function AdminCategoryFormMobilePage() {
   const { user } = useAuth();
@@ -43,14 +44,19 @@ export default function AdminCategoryFormMobilePage() {
       order: 0,
       isActive: true,
     },
-    values: category && isEditing ? {
-      title: category.title,
-      description: category.description || "",
-      coverImageUrl: category.coverImageUrl || "",
-      order: category.order || 0,
-      isActive: category.isActive ?? true,
-    } : undefined,
   });
+
+  useEffect(() => {
+    if (category && isEditing && !form.formState.isDirty) {
+      form.reset({
+        title: category.title,
+        description: category.description || "",
+        coverImageUrl: category.coverImageUrl || "",
+        order: category.order || 0,
+        isActive: category.isActive ?? true,
+      });
+    }
+  }, [category, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCategorySchema>) => {

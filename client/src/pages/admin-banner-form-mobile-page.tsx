@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import type { z } from 'zod';
+import { useEffect } from 'react';
 
 export default function AdminBannerFormMobilePage() {
   const { user } = useAuth();
@@ -53,25 +54,30 @@ export default function AdminBannerFormMobilePage() {
       endDateTime: "",
       videoId: "",
     },
-    values: banner && isEditing ? {
-      title: banner.title,
-      description: banner.description,
-      imageUrl: banner.imageUrl,
-      linkUrl: banner.linkUrl || "",
-      page: banner.page,
-      order: banner.order,
-      showTitle: banner.showTitle ?? true,
-      showDescription: banner.showDescription ?? true,
-      showButton: banner.showButton ?? true,
-      isActive: banner.isActive,
-      opensCouponsModal: banner.opensCouponsModal ?? false,
-      startDateTime: banner.startDateTime ? 
-        new Date(banner.startDateTime).toISOString().slice(0, 16) : "",
-      endDateTime: banner.endDateTime ? 
-        new Date(banner.endDateTime).toISOString().slice(0, 16) : "",
-      videoId: banner.videoId || "",
-    } : undefined,
   });
+
+  useEffect(() => {
+    if (banner && isEditing && !form.formState.isDirty) {
+      form.reset({
+        title: banner.title,
+        description: banner.description,
+        imageUrl: banner.imageUrl,
+        linkUrl: banner.linkUrl || "",
+        page: banner.page,
+        order: banner.order,
+        showTitle: banner.showTitle ?? true,
+        showDescription: banner.showDescription ?? true,
+        showButton: banner.showButton ?? true,
+        isActive: banner.isActive,
+        opensCouponsModal: banner.opensCouponsModal ?? false,
+        startDateTime: banner.startDateTime ? 
+          new Date(banner.startDateTime).toISOString().slice(0, 16) : "",
+        endDateTime: banner.endDateTime ? 
+          new Date(banner.endDateTime).toISOString().slice(0, 16) : "",
+        videoId: banner.videoId || "",
+      });
+    }
+  }, [banner, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {

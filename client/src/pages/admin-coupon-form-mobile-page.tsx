@@ -20,6 +20,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { useAuth } from '@/hooks/use-auth';
 import { z } from 'zod';
+import { useEffect } from 'react';
 
 export default function AdminCouponFormMobilePage() {
   const { id: couponId } = useParams<{ id?: string }>();
@@ -56,25 +57,27 @@ export default function AdminCouponFormMobilePage() {
     },
   });
 
-  // Reset form when coupon data loads
-  if (coupon && !form.formState.isDirty) {
-    form.reset({
-      code: coupon.code,
-      brand: coupon.brand,
-      description: coupon.description,
-      discount: coupon.discount,
-      categoryId: coupon.categoryId || "",
-      storeUrl: coupon.storeUrl || "",
-      coverImageUrl: coupon.coverImageUrl || "",
-      order: coupon.order ?? 0,
-      startDateTime: coupon.startDateTime ? 
-        new Date(coupon.startDateTime).toISOString().slice(0, 16) : "",
-      endDateTime: coupon.endDateTime ? 
-        new Date(coupon.endDateTime).toISOString().slice(0, 16) : "",
-      isExclusive: coupon.isExclusive ?? false,
-      isActive: coupon.isActive ?? true,
-    });
-  }
+  // Reset form when coupon data loads (only if form is not dirty)
+  useEffect(() => {
+    if (coupon && isEditing && !form.formState.isDirty) {
+      form.reset({
+        code: coupon.code,
+        brand: coupon.brand,
+        description: coupon.description,
+        discount: coupon.discount,
+        categoryId: coupon.categoryId || "",
+        storeUrl: coupon.storeUrl || "",
+        coverImageUrl: coupon.coverImageUrl || "",
+        order: coupon.order ?? 0,
+        startDateTime: coupon.startDateTime ? 
+          new Date(coupon.startDateTime).toISOString().slice(0, 16) : "",
+        endDateTime: coupon.endDateTime ? 
+          new Date(coupon.endDateTime).toISOString().slice(0, 16) : "",
+        isExclusive: coupon.isExclusive ?? false,
+        isActive: coupon.isActive ?? true,
+      });
+    }
+  }, [coupon, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCouponSchema>) => {

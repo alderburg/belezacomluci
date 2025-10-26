@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import type { z } from 'zod';
+import { useEffect } from 'react';
 
 export default function AdminPopupFormMobilePage() {
   const { user } = useAuth();
@@ -55,27 +56,32 @@ export default function AdminPopupFormMobilePage() {
       startDateTime: "",
       endDateTime: "",
     },
-    values: popup && isEditing ? {
-      title: popup.title,
-      description: popup.description,
-      imageUrl: popup.imageUrl,
-      linkUrl: popup.linkUrl || "",
-      trigger: popup.trigger,
-      targetPage: popup.targetPage || "",
-      targetVideoId: popup.targetVideoId || "",
-      targetCourseId: popup.targetCourseId || "",
-      showFrequency: popup.showFrequency,
-      showTitle: popup.showTitle ?? true,
-      showDescription: popup.showDescription ?? true,
-      showButton: popup.showButton ?? true,
-      isExclusive: popup.isExclusive || false,
-      isActive: popup.isActive,
-      startDateTime: popup.startDateTime ? 
-        new Date(popup.startDateTime).toISOString().slice(0, 16) : "",
-      endDateTime: popup.endDateTime ? 
-        new Date(popup.endDateTime).toISOString().slice(0, 16) : "",
-    } : undefined,
   });
+
+  useEffect(() => {
+    if (popup && isEditing && !form.formState.isDirty) {
+      form.reset({
+        title: popup.title,
+        description: popup.description,
+        imageUrl: popup.imageUrl,
+        linkUrl: popup.linkUrl || "",
+        trigger: popup.trigger,
+        targetPage: popup.targetPage || "",
+        targetVideoId: popup.targetVideoId || "",
+        targetCourseId: popup.targetCourseId || "",
+        showFrequency: popup.showFrequency,
+        showTitle: popup.showTitle ?? true,
+        showDescription: popup.showDescription ?? true,
+        showButton: popup.showButton ?? true,
+        isExclusive: popup.isExclusive || false,
+        isActive: popup.isActive,
+        startDateTime: popup.startDateTime ? 
+          new Date(popup.startDateTime).toISOString().slice(0, 16) : "",
+        endDateTime: popup.endDateTime ? 
+          new Date(popup.endDateTime).toISOString().slice(0, 16) : "",
+      });
+    }
+  }, [popup, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertPopupSchema>) => {

@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import type { z } from 'zod';
+import { useEffect } from 'react';
 
 export default function AdminNotificationFormMobilePage() {
   const { user } = useAuth();
@@ -47,19 +48,24 @@ export default function AdminNotificationFormMobilePage() {
       startDateTime: "",
       endDateTime: "",
     },
-    values: notification && isEditing ? {
-      title: notification.title,
-      description: notification.description,
-      imageUrl: notification.imageUrl || "",
-      linkUrl: notification.linkUrl || "",
-      targetAudience: notification.targetAudience,
-      isActive: notification.isActive,
-      startDateTime: notification.startDateTime ? 
-        new Date(notification.startDateTime).toISOString().slice(0, 16) : "",
-      endDateTime: notification.endDateTime ? 
-        new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
-    } : undefined,
   });
+
+  useEffect(() => {
+    if (notification && isEditing && !form.formState.isDirty) {
+      form.reset({
+        title: notification.title,
+        description: notification.description,
+        imageUrl: notification.imageUrl || "",
+        linkUrl: notification.linkUrl || "",
+        targetAudience: notification.targetAudience,
+        isActive: notification.isActive,
+        startDateTime: notification.startDateTime ? 
+          new Date(notification.startDateTime).toISOString().slice(0, 16) : "",
+        endDateTime: notification.endDateTime ? 
+          new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
+      });
+    }
+  }, [notification, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {

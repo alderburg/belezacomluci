@@ -21,6 +21,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { useAuth } from '@/hooks/use-auth';
 import { z } from 'zod';
+import { useEffect } from 'react';
 
 export default function AdminVideoFormMobilePage() {
   const { id: videoId } = useParams<{ id?: string }>();
@@ -53,19 +54,21 @@ export default function AdminVideoFormMobilePage() {
     },
   });
 
-  // Reset form when video data loads
-  if (video && !form.formState.isDirty) {
-    form.reset({
-      title: video.title,
-      description: video.description || "",
-      videoUrl: video.videoUrl,
-      thumbnailUrl: video.thumbnailUrl || "",
-      type: video.type,
-      categoryId: video.categoryId || "",
-      duration: video.duration || "",
-      isExclusive: video.isExclusive ?? false,
-    });
-  }
+  // Reset form when video data loads (only if form is not dirty)
+  useEffect(() => {
+    if (video && isEditing && !form.formState.isDirty) {
+      form.reset({
+        title: video.title,
+        description: video.description || "",
+        videoUrl: video.videoUrl,
+        thumbnailUrl: video.thumbnailUrl || "",
+        type: video.type,
+        categoryId: video.categoryId || "",
+        duration: video.duration || "",
+        isExclusive: video.isExclusive ?? false,
+      });
+    }
+  }, [video, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertVideoSchema>) => {

@@ -21,6 +21,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { useAuth } from '@/hooks/use-auth';
 import { z } from 'zod';
+import { useEffect } from 'react';
 
 export default function AdminProductFormMobilePage() {
   const { id: productId } = useParams<{ id?: string }>();
@@ -53,19 +54,21 @@ export default function AdminProductFormMobilePage() {
     },
   });
 
-  // Reset form when product data loads
-  if (product && !form.formState.isDirty) {
-    form.reset({
-      title: product.title,
-      description: product.description || "",
-      type: product.type,
-      fileUrl: product.fileUrl || "",
-      coverImageUrl: product.coverImageUrl || "",
-      categoryId: product.categoryId || "",
-      isExclusive: product.isExclusive ?? false,
-      isActive: product.isActive ?? true,
-    });
-  }
+  // Reset form when product data loads (only if form is not dirty)
+  useEffect(() => {
+    if (product && isEditing && !form.formState.isDirty) {
+      form.reset({
+        title: product.title,
+        description: product.description || "",
+        type: product.type,
+        fileUrl: product.fileUrl || "",
+        coverImageUrl: product.coverImageUrl || "",
+        categoryId: product.categoryId || "",
+        isExclusive: product.isExclusive ?? false,
+        isActive: product.isActive ?? true,
+      });
+    }
+  }, [product, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertProductSchema>) => {
