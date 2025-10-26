@@ -95,11 +95,11 @@ export default function AdminNotificationsMobilePage() {
                       {notification.description}
                     </p>
                     <div className="flex gap-2 mt-2">
-                      <Badge variant="outline" className="text-xs">
+                      <Badge className="bg-blue-100 text-blue-700 text-xs">
                         {getTargetAudienceLabel(notification.targetAudience)}
                       </Badge>
                       {!notification.isActive && (
-                        <Badge variant="destructive" className="text-xs">
+                        <Badge className="bg-red-100 text-red-700 text-xs">
                           Inativo
                         </Badge>
                       )}

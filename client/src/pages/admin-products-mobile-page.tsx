@@ -97,15 +97,15 @@ export default function AdminProductsMobilePage() {
                     </p>
                     <div className="flex gap-2 mt-2">
                       {product.isExclusive && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge className="bg-purple-100 text-purple-700 text-xs">
                           Premium
                         </Badge>
                       )}
-                      <Badge variant="outline" className="text-xs">
+                      <Badge className="bg-blue-100 text-blue-700 text-xs">
                         {getProductTypeLabel(product.type)}
                       </Badge>
                       {!product.isActive && (
-                        <Badge variant="destructive" className="text-xs">
+                        <Badge className="bg-red-100 text-red-700 text-xs">
                           Inativo
                         </Badge>
                       )}

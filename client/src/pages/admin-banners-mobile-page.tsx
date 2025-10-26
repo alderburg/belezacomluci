@@ -85,11 +85,11 @@ export default function AdminBannersMobilePage() {
                     {banner.description}
                   </p>
                   <div className="flex gap-2 mt-2">
-                    <Badge variant="outline" className="text-xs">
+                    <Badge className="bg-blue-100 text-blue-700 text-xs">
                       {banner.page === 'home' ? 'Home' : banner.page}
                     </Badge>
                     {!banner.isActive && (
-                      <Badge variant="destructive" className="text-xs">
+                      <Badge className="bg-red-100 text-red-700 text-xs">
                         Inativo
                       </Badge>
                     )}

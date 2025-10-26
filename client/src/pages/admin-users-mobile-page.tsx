@@ -91,13 +91,14 @@ export default function AdminUsersMobilePage() {
                     </p>
                     <div className="flex gap-2 mt-2">
                       <Badge 
-                        variant={userData.planType === 'premium' ? 'default' : 'secondary'}
-                        className="text-xs"
+                        className={userData.planType === 'premium' 
+                          ? 'bg-purple-100 text-purple-700 text-xs' 
+                          : 'bg-blue-100 text-blue-700 text-xs'}
                       >
                         {userData.planType === 'premium' ? 'Premium' : 'Free'}
                       </Badge>
                       {userData.isAdmin && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge className="bg-orange-100 text-orange-700 text-xs">
                           Admin
                         </Badge>
                       )}
