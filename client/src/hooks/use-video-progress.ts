@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './use-auth';
 
 interface UseVideoProgressProps {
@@ -18,63 +18,80 @@ export const useVideoProgress = ({
   const { user } = useAuth();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedTime = useRef<number>(0);
+  const isSavingRef = useRef<boolean>(false);
+
+  const saveProgress = useCallback(async () => {
+    if (isSavingRef.current) return;
+    
+    try {
+      const player = playerRef.current;
+      if (!player || typeof player.getCurrentTime !== 'function') {
+        return;
+      }
+
+      const currentTime = player.getCurrentTime();
+      const duration = player.getDuration();
+
+      if (!duration || duration === 0 || currentTime <= 0) {
+        return;
+      }
+
+      isSavingRef.current = true;
+
+      await fetch('/api/video-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          videoId,
+          resourceId,
+          currentTime: Math.floor(currentTime),
+          duration: Math.floor(duration)
+        })
+      });
+
+      lastSavedTime.current = currentTime;
+    } catch (error) {
+      console.error('Error saving video progress:', error);
+    } finally {
+      isSavingRef.current = false;
+    }
+  }, [videoId, resourceId, playerRef]);
+
+  const stopProgressSaving = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    // Salva uma última vez antes de parar
+    saveProgress();
+  }, [saveProgress]);
 
   useEffect(() => {
-    if (!enabled || !user || !videoId || !resourceId || !playerRef.current) {
+    if (!enabled || !user || !videoId || !resourceId) {
       return;
     }
 
-    const saveProgress = async () => {
-      try {
-        const player = playerRef.current;
-        if (!player || typeof player.getCurrentTime !== 'function') {
-          return;
-        }
+    // Limpar intervalo anterior
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
-        const currentTime = player.getCurrentTime();
-        const duration = player.getDuration();
-
-        if (!duration || duration === 0) {
-          return;
-        }
-
-        // Só salva se:
-        // 1. Passou pelo menos 5 segundos desde a última gravação
-        // 2. O tempo atual é maior que o último tempo salvo
-        const timeDiff = Math.abs(currentTime - lastSavedTime.current);
-        if (timeDiff < 5 || currentTime <= lastSavedTime.current) {
-          return;
-        }
-
-        await fetch('/api/video-progress', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            videoId,
-            resourceId,
-            currentTime,
-            duration
-          })
-        });
-
-        lastSavedTime.current = currentTime;
-      } catch (error) {
-        console.error('Error saving video progress:', error);
+    // Aguardar um pouco para o player estar pronto
+    const startTimer = setTimeout(() => {
+      if (playerRef.current) {
+        // Salva o progresso a cada 5 segundos
+        intervalRef.current = setInterval(saveProgress, 5000);
       }
-    };
+    }, 2000);
 
-    // Salva o progresso a cada 10 segundos
-    intervalRef.current = setInterval(saveProgress, 10000);
-
-    // Salva ao desmontar o componente
+    // Cleanup ao desmontar ou trocar de vídeo
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      saveProgress(); // Salva uma última vez ao sair
+      clearTimeout(startTimer);
+      stopProgressSaving();
     };
-  }, [videoId, resourceId, playerRef, enabled, user]);
+  }, [videoId, resourceId, enabled, user, saveProgress, stopProgressSaving, playerRef]);
 
-  return null;
+  return { stopProgressSaving, saveProgress };
 };

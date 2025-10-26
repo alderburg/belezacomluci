@@ -110,6 +110,29 @@ export default function PlaylistPage() {
     }
   }, []);
 
+  // Salvar progresso antes de sair da página
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (saveProgress) {
+        saveProgress();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && saveProgress) {
+        saveProgress();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [saveProgress]);
+
   // Criar player quando vídeo for mostrado
   useEffect(() => {
     if (!showVideo || !currentVideoId || !playerContainerRef.current) {
@@ -150,6 +173,12 @@ export default function PlaylistPage() {
               onReady: (event: any) => {
                 console.log('YouTube player ready for video:', currentVideoId);
               },
+              onStateChange: (event: any) => {
+                // Salvar progresso quando pausar ou parar
+                if ((event.data === 2 || event.data === 0) && saveProgress) { // 2 = PAUSED, 0 = ENDED
+                  saveProgress();
+                }
+              }
             },
           });
         } catch (e) {
@@ -168,6 +197,9 @@ export default function PlaylistPage() {
 
     // Cleanup
     return () => {
+      if (stopProgressSaving) {
+        stopProgressSaving();
+      }
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         try {
           playerRef.current.destroy();
@@ -177,10 +209,10 @@ export default function PlaylistPage() {
         playerRef.current = null;
       }
     };
-  }, [showVideo, currentVideoId]);
+  }, [showVideo, currentVideoId, stopProgressSaving]);
 
   // Hook para rastrear progresso do vídeo
-  useVideoProgress({
+  const { stopProgressSaving, saveProgress } = useVideoProgress({
     videoId: currentVideoId,
     resourceId: resourceId || '',
     playerRef,
@@ -413,6 +445,11 @@ export default function PlaylistPage() {
   const handleVideoSelect = (videoId: string) => {
     // Se estiver mudando para um vídeo diferente
     if (videoId !== currentVideoId) {
+      // Salvar progresso do vídeo atual antes de trocar
+      if (saveProgress) {
+        saveProgress();
+      }
+      
       // Destruir player atual antes de mudar
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         try {

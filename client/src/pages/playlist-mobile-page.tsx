@@ -133,8 +133,31 @@ export default function PlaylistMobilePage() {
     loadYouTubeAPI();
   }, []);
 
+  // Salvar progresso antes de sair da página
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (saveProgress) {
+        saveProgress();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && saveProgress) {
+        saveProgress();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [saveProgress]);
+
   // Hook para rastrear progresso do vídeo
-  useVideoProgress({
+  const { stopProgressSaving, saveProgress } = useVideoProgress({
     videoId: currentVideoId,
     resourceId: resourceId || '',
     playerRef: youtubePlayer,
@@ -184,6 +207,12 @@ export default function PlaylistMobilePage() {
           onReady: (event: { target: any }) => {
             console.log("YouTube Player Pronto!");
           },
+          onStateChange: (event: { target: any; data: number }) => {
+            // Salvar progresso quando pausar ou parar
+            if ((event.data === 2 || event.data === 0) && saveProgress) { // 2 = PAUSED, 0 = ENDED
+              saveProgress();
+            }
+          },
           onError: (event: { target: any; data: number }) => {
             console.error("YouTube Player Error:", event.data);
             toast({
@@ -214,15 +243,17 @@ export default function PlaylistMobilePage() {
       window.onYouTubeIframeAPIReady = ytApiReadyListener;
     }
 
-    // Limpa o player e o intervalo ao desmontar o componente ou mudar de vídeo
+    // Limpa o player ao desmontar o componente ou mudar de vídeo
     return () => {
-      stopProgressSaving();
+      if (stopProgressSaving) {
+        stopProgressSaving();
+      }
       if (youtubePlayer.current) {
         youtubePlayer.current.destroy();
         youtubePlayer.current = null;
       }
     };
-  }, [currentVideoId, videoProgress]); // Depende de currentVideoId e videoProgress para carregar o tempo inicial
+  }, [currentVideoId, stopProgressSaving]);
 
   // --- Fim do Rastreamento de progresso ---
 
@@ -420,8 +451,10 @@ export default function PlaylistMobilePage() {
   const handleVideoSelect = (videoId: string) => {
     // Se estiver mudando para um vídeo diferente
     if (videoId !== currentVideoId) {
-      // Para o salvamento de progresso do vídeo anterior
-      stopProgressSaving();
+      // Salvar progresso do vídeo atual antes de trocar
+      if (saveProgress) {
+        saveProgress();
+      }
       
       // Destruir player atual antes de mudar
       if (youtubePlayer.current && typeof youtubePlayer.current.destroy === 'function') {
