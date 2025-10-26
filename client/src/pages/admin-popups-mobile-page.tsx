@@ -65,9 +65,22 @@ export default function AdminPopupsMobilePage() {
     setLocation('/admin/popups-mobile/new');
   };
 
-  const handleEditClick = (popupId: string) => {
+  const handleEditClick = async (popupId: string) => {
     setEditingId(popupId);
-    setLocation(`/admin/popups-mobile/edit/${popupId}`);
+    try {
+      const response = await fetch(`/api/admin/popups/${popupId}`);
+      if (!response.ok) throw new Error('Erro ao carregar popup');
+      const popupData = await response.json();
+      setLocation(`/admin/popups-mobile/edit/${popupId}`, { state: { popupData } });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível carregar os dados do popup",
+      });
+    } finally {
+      setEditingId(null);
+    }
   };
 
   const handleDeleteClick = (popup: Popup) => {

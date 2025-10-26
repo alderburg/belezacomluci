@@ -86,9 +86,22 @@ export default function AdminNotificationsMobilePage() {
     setLocation('/admin/notifications-mobile/new');
   };
 
-  const handleEditClick = (notificationId: string) => {
+  const handleEditClick = async (notificationId: string) => {
     setEditingId(notificationId);
-    setLocation(`/admin/notifications-mobile/edit/${notificationId}`);
+    try {
+      const response = await fetch(`/api/admin/notifications/${notificationId}`);
+      if (!response.ok) throw new Error('Erro ao carregar notificação');
+      const notificationData = await response.json();
+      setLocation(`/admin/notifications-mobile/edit/${notificationId}`, { state: { notificationData } });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível carregar os dados da notificação",
+      });
+    } finally {
+      setEditingId(null);
+    }
   };
 
   const handleDeleteClick = (notification: Notification) => {

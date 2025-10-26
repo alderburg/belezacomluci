@@ -72,12 +72,22 @@ export default function AdminProductsMobilePage() {
     setLocation('/admin/products-mobile/new');
   };
 
-  const handleEditClick = (productId: string) => {
+  const handleEditClick = async (productId: string) => {
     setEditingId(productId);
-    setTimeout(() => {
-      setLocation(`/admin/products-mobile/edit/${productId}`);
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`);
+      if (!response.ok) throw new Error('Erro ao carregar produto');
+      const productData = await response.json();
+      setLocation(`/admin/products-mobile/edit/${productId}`, { state: { productData } });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível carregar os dados do produto",
+      });
+    } finally {
       setEditingId(null);
-    }, 100);
+    }
   };
 
   const handleDeleteClick = (product: Product) => {

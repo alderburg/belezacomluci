@@ -73,6 +73,7 @@ export default function AdminVideosMobilePage() {
   };
 
   const handleEdit = async (id: number) => {
+    setEditingId(String(id));
     try {
       const response = await fetch(`/api/admin/videos/${id}`);
       if (!response.ok) throw new Error('Erro ao carregar vídeo');
@@ -84,6 +85,8 @@ export default function AdminVideosMobilePage() {
         title: "Erro",
         description: "Não foi possível carregar os dados do vídeo",
       });
+    } finally {
+      setEditingId(null);
     }
   };
 
