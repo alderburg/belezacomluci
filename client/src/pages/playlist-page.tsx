@@ -307,12 +307,14 @@ export default function PlaylistPage() {
     queryFn: async () => {
       if (!currentVideoId) return null;
       try {
+        console.log('Buscando descrição do YouTube para vídeo:', currentVideoId);
         const response = await fetch(`/api/youtube/video/${currentVideoId}`);
         if (!response.ok) {
           console.log('YouTube description fetch failed:', response.status);
           return null;
         }
         const data = await response.json();
+        console.log('Descrição do YouTube recebida:', data.description ? 'SIM' : 'NÃO');
         return data.description || null;
       } catch (error) {
         console.log('YouTube description fetch error:', error);
@@ -900,7 +902,7 @@ export default function PlaylistPage() {
                     </div>
 
                     {/* Descrição do YouTube em card */}
-                    {youtubeDescription && (
+                    {!isLoadingDescription && youtubeDescription && (
                       <Card>
                         <CardContent className="p-4">
                           <p className="text-muted-foreground whitespace-pre-wrap">{youtubeDescription}</p>

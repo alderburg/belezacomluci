@@ -275,13 +275,17 @@ export default function PlaylistMobilePage() {
     queryFn: async () => {
       if (!currentVideoId) return null;
       try {
+        console.log('Buscando descrição do YouTube (mobile) para vídeo:', currentVideoId);
         const response = await fetch(`/api/youtube/video/${currentVideoId}`);
         if (!response.ok) {
+          console.log('YouTube description fetch failed (mobile):', response.status);
           return null;
         }
         const data = await response.json();
+        console.log('Descrição do YouTube recebida (mobile):', data.description ? 'SIM' : 'NÃO');
         return data.description || null;
       } catch (error) {
+        console.log('YouTube description fetch error (mobile):', error);
         return null;
       }
     },
@@ -799,7 +803,7 @@ export default function PlaylistMobilePage() {
                 </Button>
               </div>
 
-              {youtubeDescription && (
+              {!isLoadingDescription && youtubeDescription && (
                 <Card>
                   <CardContent className="p-4">
                     <p className="text-muted-foreground whitespace-pre-wrap text-sm">{youtubeDescription}</p>
