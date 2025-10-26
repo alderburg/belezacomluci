@@ -97,6 +97,64 @@ export default function PlaylistPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const playerRef = useRef<any>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+
+  // Inicializar YouTube IFrame API
+  useEffect(() => {
+    // Carregar script da YouTube IFrame API
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+  }, []);
+
+  // Criar player quando vídeo for mostrado
+  useEffect(() => {
+    if (!showVideo || !currentVideoId || !playerContainerRef.current) {
+      return;
+    }
+
+    const initPlayer = () => {
+      // Limpar player anterior se existir
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+        playerRef.current.destroy();
+      }
+
+      // Criar novo player
+      playerRef.current = new window.YT.Player(playerContainerRef.current!, {
+        videoId: currentVideoId,
+        playerVars: {
+          autoplay: 1,
+          rel: 0,
+          modestbranding: 1,
+          enablejsapi: 1,
+        },
+        events: {
+          onReady: (event: any) => {
+            console.log('YouTube player ready');
+          },
+        },
+      });
+    };
+
+    // Se YT já está disponível, inicializar
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+    } else {
+      // Caso contrário, aguardar o callback
+      window.onYouTubeIframeAPIReady = initPlayer;
+    }
+
+    // Cleanup
+    return () => {
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
+    };
+  }, [showVideo, currentVideoId]);
 
   // Hook para rastrear progresso do vídeo
   useVideoProgress({
@@ -852,18 +910,9 @@ export default function PlaylistPage() {
                   </div>
                 )}
 
-                {/* YouTube iframe */}
+                {/* YouTube player */}
                 {showVideo && currentVideoId && (
-                  <div id="youtube-player-container" ref={playerRef} className="absolute inset-0 w-full h-full z-10">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`}
-                      title={currentVideo?.title || 'Vídeo'}
-                      className="w-full h-full"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
+                  <div id="youtube-player-container" ref={playerContainerRef} className="absolute inset-0 w-full h-full z-10" />
                 )}
               </div>
 

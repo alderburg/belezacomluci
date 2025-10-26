@@ -5,7 +5,7 @@ import ShareModal from '@/components/share-modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Play, Clock, List, X, Eye, Heart, ThumbsUp, Calendar, MessageCircle, Send, Trash2, Share2 } from 'lucide-react';
+import { ArrowLeft, Play, Clock, List, X, Eye, Heart, ThumbsUp, Calendar, MessageCircle, Send, Trash2, Share2, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,6 +31,8 @@ import { PremiumUpgradeModal } from '@/components/premium-upgrade-modal';
 import { useAccessControl } from '@/lib/premium-access';
 import { PopupSystem } from '@/components/popup-system';
 import MobileBottomNav from '@/components/mobile-bottom-nav';
+import { useVideoProgress } from '@/hooks/use-video-progress';
+import { Progress } from '@/components/ui/progress';
 
 interface Product {
   id: string;
@@ -52,12 +54,16 @@ interface PlaylistVideo {
   duration?: string;
 }
 
-// --- Novas importações e tipos para rastreamento de progresso ---
 interface VideoProgress {
-  videoId: string;
+  id: string;
   userId: string;
-  progress: number; // Em segundos
-  lastPlayedAt: string;
+  videoId: string;
+  resourceId: string;
+  maxTimeWatched: number;
+  duration: number | null;
+  progressPercentage: number;
+  isCompleted: boolean;
+  lastWatchedAt: string;
 }
 
 declare global {
@@ -114,14 +120,6 @@ export default function PlaylistMobilePage() {
   const queryClient = useQueryClient();
   const playerRef = useRef<HTMLIFrameElement>(null); // Ref para o iframe do player
   const youtubePlayer = useRef<any>(null); // Ref para a instância do player do YouTube
-  const playerState = useRef({
-    isReady: false,
-    isBuffering: false,
-    currentTime: 0,
-    duration: 0,
-    progressInterval: null as NodeJS.Timeout | null,
-    lastSavedProgress: 0,
-  });
 
   // Carregar a API do YouTube IFrame Player
   useEffect(() => {
@@ -135,54 +133,33 @@ export default function PlaylistMobilePage() {
     loadYouTubeAPI();
   }, []);
 
-  // --- Rastreamento de progresso ---
-  // Hook para buscar o progresso salvo do vídeo
-  const { data: videoProgress, isLoading: isLoadingVideoProgress } = useQuery<VideoProgress | null>({
-    queryKey: ['videoProgress', user?.id, currentVideoId],
-    queryFn: async () => {
-      if (!user?.id || !currentVideoId) return null;
-      try {
-        const response = await fetch(`/api/progress/${currentVideoId}`);
-        if (!response.ok) {
-          if (response.status === 404) return null; // Progresso não encontrado
-          throw new Error('Failed to fetch video progress');
-        }
-        return await response.json();
-      } catch (error) {
-        console.error("Erro ao buscar progresso do vídeo:", error);
-        return null;
-      }
-    },
-    enabled: !!user?.id && !!currentVideoId,
-    retry: false,
+  // Hook para rastrear progresso do vídeo
+  useVideoProgress({
+    videoId: currentVideoId,
+    resourceId: resourceId || '',
+    playerRef: youtubePlayer,
+    enabled: !!user && !!currentVideoId && !!resourceId && showVideo
   });
 
-  // Mutação para salvar o progresso do vídeo
-  const saveVideoProgressMutation = useMutation({
-    mutationFn: async (progressData: { videoId: string; progress: number }) => {
-      const response = await fetch('/api/progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...progressData, userId: user?.id }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to save video progress');
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      playerState.current.lastSavedProgress = playerState.current.currentTime;
-      console.log(`Progresso salvo: ${playerState.current.currentTime.toFixed(2)}s`);
-    },
-    onError: (error: any) => {
-      console.error("Erro ao salvar progresso:", error.message);
-      toast({
-        title: "Erro ao salvar progresso",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+  // Buscar progresso de todos os vídeos da playlist
+  const { data: videoProgressData } = useQuery<VideoProgress[]>({
+    queryKey: ['/api/video-progress', resourceId],
+    enabled: !!user && !!resourceId,
   });
+
+  // Função helper para obter progresso de um vídeo específico
+  const getVideoProgress = (videoId: string): number => {
+    if (!videoProgressData) return 0;
+    const progress = videoProgressData.find(p => p.videoId === videoId);
+    return progress?.progressPercentage || 0;
+  };
+
+  // Função helper para verificar se vídeo está completo
+  const isVideoCompleted = (videoId: string): boolean => {
+    if (!videoProgressData) return false;
+    const progress = videoProgressData.find(p => p.videoId === videoId);
+    return progress?.isCompleted || false;
+  };
 
   // Função para iniciar o player do YouTube
   const initializeYouTubePlayer = () => {
@@ -200,65 +177,15 @@ export default function PlaylistMobilePage() {
           autoplay: 1,
           rel: 0,
           modestbranding: 1,
-          enablejsapi: 1, // Habilita a API
-          origin: window.location.origin, // Necessário para a API funcionar corretamente
+          enablejsapi: 1,
+          origin: window.location.origin,
         },
         events: {
           onReady: (event: { target: any }) => {
             console.log("YouTube Player Pronto!");
-            playerState.current.isReady = true;
-            playerState.current.duration = event.target.getDuration();
-            playerState.current.currentTime = 0; // Resetar tempo
-
-            // Carregar progresso salvo se existir
-            if (videoProgress && videoProgress.progress > 0 && videoProgress.progress < playerState.current.duration) {
-              console.log(`Carregando progresso salvo: ${videoProgress.progress.toFixed(2)}s`);
-              event.target.seekTo(videoProgress.progress, true);
-              playerState.current.currentTime = videoProgress.progress;
-              playerState.current.lastSavedProgress = videoProgress.progress;
-            } else {
-              // Se não houver progresso salvo ou for inválido, busca o tempo inicial
-              playerState.current.lastSavedProgress = 0;
-            }
-
-            // Iniciar o loop de salvamento de progresso
-            startProgressSaving(event.target);
-          },
-          onStateChange: (event: { target: any; data: number }) => {
-            const state = event.data;
-            playerState.current.currentTime = event.target.getCurrentTime(); // Atualiza o tempo atual
-
-            switch (state) {
-              case window.YT.PlayerState.PLAYING:
-                console.log("Player: PLAYING");
-                playerState.current.isBuffering = false;
-                break;
-              case window.YT.PlayerState.PAUSED:
-                console.log("Player: PAUSED");
-                // Salvar progresso ao pausar, caso o usuário não retome
-                if (playerState.current.currentTime > playerState.current.lastSavedProgress + 5) { // Só salva se houver avanço significativo
-                  saveVideoProgressMutation.mutate({ videoId: currentVideoId, progress: playerState.current.currentTime });
-                }
-                stopProgressSaving();
-                break;
-              case window.YT.PlayerState.BUFFERING:
-                console.log("Player: BUFFERING");
-                playerState.current.isBuffering = true;
-                break;
-              case window.YT.PlayerState.ENDED:
-                console.log("Player: ENDED");
-                stopProgressSaving();
-                // Marcar como concluído ou salvar progresso final
-                saveVideoProgressMutation.mutate({ videoId: currentVideoId, progress: playerState.current.duration });
-                break;
-              case window.YT.PlayerState.CUED:
-                console.log("Player: CUED");
-                break;
-            }
           },
           onError: (event: { target: any; data: number }) => {
             console.error("YouTube Player Error:", event.data);
-            stopProgressSaving();
             toast({
               title: "Erro no player do YouTube",
               description: `Código do erro: ${event.data}`,
@@ -267,36 +194,6 @@ export default function PlaylistMobilePage() {
           },
         },
       });
-    }
-  };
-
-  // Função para iniciar o salvamento periódico de progresso
-  const startProgressSaving = (player: any) => {
-    stopProgressSaving(); // Garante que não haja múltiplos intervalos
-    if (!player || !player.getCurrentTime || !currentVideoId || !user) return;
-
-    playerState.current.progressInterval = setInterval(() => {
-      if (!player || !playerState.current.isReady || playerState.current.isBuffering) return;
-
-      const currentTime = player.getCurrentTime();
-      playerState.current.currentTime = currentTime;
-
-      // Salva se houve um avanço significativo desde o último salvamento
-      const timeSinceLastSave = currentTime - playerState.current.lastSavedProgress;
-      const threshold = 10; // Salva a cada 10 segundos de avanço, ou quando o vídeo termina
-      const isNearEnd = player.getDuration() - currentTime < 5; // Verifica se está perto do fim
-
-      if (timeSinceLastSave >= threshold || isNearEnd) {
-        saveVideoProgressMutation.mutate({ videoId: currentVideoId, progress: currentTime });
-      }
-    }, 10000); // Tenta salvar a cada 10 segundos
-  };
-
-  // Função para parar o salvamento de progresso
-  const stopProgressSaving = () => {
-    if (playerState.current.progressInterval) {
-      clearInterval(playerState.current.progressInterval);
-      playerState.current.progressInterval = null;
     }
   };
 
@@ -1310,6 +1207,22 @@ export default function PlaylistMobilePage() {
                         <h4 className="text-sm font-medium text-foreground line-clamp-2 mt-1">
                           {video.title}
                         </h4>
+                        {/* Progress bar */}
+                        {user && getVideoProgress(video.id) > 0 && (
+                          <div className="mt-1.5 space-y-0.5">
+                            <Progress 
+                              value={getVideoProgress(video.id)} 
+                              className="h-1"
+                              data-testid={`progress-video-${video.id}`}
+                            />
+                            {isVideoCompleted(video.id) && (
+                              <div className="flex items-center gap-1">
+                                <Check className="w-3 h-3 text-green-600" />
+                                <span className="text-xs text-green-600">Concluído</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>
