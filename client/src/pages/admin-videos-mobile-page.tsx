@@ -10,6 +10,18 @@ import { useDataSync } from '@/hooks/use-data-sync';
 import { Video } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { apiRequest } from '@/lib/queryClient';
 
 export default function AdminVideosMobilePage() {
   const { user } = useAuth();
@@ -17,6 +29,7 @@ export default function AdminVideosMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
+  const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -26,8 +39,50 @@ export default function AdminVideosMobilePage() {
     queryKey: ["/api/videos"],
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/admin/videos/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/videos'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/videos'] });
+      toast({
+        title: "Sucesso!",
+        description: "Vídeo excluído com sucesso",
+      });
+      setVideoToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error.message || "Erro ao excluir vídeo",
+      });
+    },
+  });
+
   const handleBackClick = () => {
     setLocation('/admin');
+  };
+
+  const handleCreateClick = () => {
+    setLocation('/admin/videos-mobile/new');
+  };
+
+  const handleEditClick = (videoId: string) => {
+    setLocation(`/admin/videos-mobile/edit/${videoId}`);
+  };
+
+  const handleDeleteClick = (video: Video) => {
+    setVideoToDelete(video);
+  };
+
+  const confirmDelete = () => {
+    if (videoToDelete) {
+      deleteMutation.mutate(videoToDelete.id);
+    }
   };
 
   return (
@@ -108,6 +163,7 @@ export default function AdminVideosMobilePage() {
                     variant="outline"
                     size="sm"
                     className="flex-1"
+                    onClick={() => handleEditClick(video.id)}
                     data-testid={`button-edit-${video.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -117,6 +173,7 @@ export default function AdminVideosMobilePage() {
                     variant="outline"
                     size="sm"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    onClick={() => handleDeleteClick(video)}
                     data-testid={`button-delete-${video.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -135,10 +192,31 @@ export default function AdminVideosMobilePage() {
 
       <Button
         className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
+        onClick={handleCreateClick}
         data-testid="button-add-video"
       >
         <Plus className="h-6 w-6" />
       </Button>
+
+      <AlertDialog open={!!videoToDelete} onOpenChange={() => setVideoToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o vídeo "{videoToDelete?.title}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <MobileBottomNav />
     </div>

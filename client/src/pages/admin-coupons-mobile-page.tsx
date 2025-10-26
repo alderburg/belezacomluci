@@ -10,6 +10,18 @@ import { useDataSync } from '@/hooks/use-data-sync';
 import { Coupon } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { apiRequest } from '@/lib/queryClient';
 
 export default function AdminCouponsMobilePage() {
   const { user } = useAuth();
@@ -17,6 +29,7 @@ export default function AdminCouponsMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
+  const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -26,8 +39,50 @@ export default function AdminCouponsMobilePage() {
     queryKey: ["/api/coupons"],
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/admin/coupons/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/coupons'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/coupons'] });
+      toast({
+        title: "Sucesso!",
+        description: "Cupom excluído com sucesso",
+      });
+      setCouponToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error.message || "Erro ao excluir cupom",
+      });
+    },
+  });
+
   const handleBackClick = () => {
     setLocation('/admin');
+  };
+
+  const handleCreateClick = () => {
+    setLocation('/admin/coupons-mobile/new');
+  };
+
+  const handleEditClick = (couponId: string) => {
+    setLocation(`/admin/coupons-mobile/edit/${couponId}`);
+  };
+
+  const handleDeleteClick = (coupon: Coupon) => {
+    setCouponToDelete(coupon);
+  };
+
+  const confirmDelete = () => {
+    if (couponToDelete) {
+      deleteMutation.mutate(couponToDelete.id);
+    }
   };
 
   return (
@@ -110,6 +165,7 @@ export default function AdminCouponsMobilePage() {
                     variant="outline"
                     size="sm"
                     className="flex-1"
+                    onClick={() => handleEditClick(coupon.id)}
                     data-testid={`button-edit-${coupon.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -119,6 +175,7 @@ export default function AdminCouponsMobilePage() {
                     variant="outline"
                     size="sm"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    onClick={() => handleDeleteClick(coupon)}
                     data-testid={`button-delete-${coupon.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -137,10 +194,31 @@ export default function AdminCouponsMobilePage() {
 
       <Button
         className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
+        onClick={handleCreateClick}
         data-testid="button-add-coupon"
       >
         <Plus className="h-6 w-6" />
       </Button>
+
+      <AlertDialog open={!!couponToDelete} onOpenChange={() => setCouponToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o cupom da marca "{couponToDelete?.brand}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <MobileBottomNav />
     </div>

@@ -10,6 +10,9 @@ import { useDataSync } from '@/hooks/use-data-sync';
 import { Category } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { apiRequest } from '@/lib/queryClient';
+import { useState } from "react";
 
 export default function AdminCategoriesMobilePage() {
   const { user } = useAuth();
@@ -17,6 +20,8 @@ export default function AdminCategoriesMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<{ id: string; title: string } | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -26,8 +31,51 @@ export default function AdminCategoriesMobilePage() {
     queryKey: ["/api/categories"],
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/categories/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      toast({
+        title: "Sucesso",
+        description: "Categoria excluída com sucesso!",
+      });
+      setDeleteDialogOpen(false);
+      setCategoryToDelete(null);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir categoria",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleBackClick = () => {
     setLocation('/admin');
+  };
+
+  const handleAddClick = () => {
+    setLocation('/admin/categories-mobile/new');
+  };
+
+  const handleEditClick = (categoryId: string) => {
+    setLocation(`/admin/categories-mobile/edit/${categoryId}`);
+  };
+
+  const handleDeleteClick = (category: Category) => {
+    setCategoryToDelete({ id: category.id, title: category.title });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (categoryToDelete) {
+      deleteMutation.mutate(categoryToDelete.id);
+    }
   };
 
   return (
@@ -107,6 +155,7 @@ export default function AdminCategoriesMobilePage() {
                     variant="outline"
                     size="sm"
                     className="flex-1"
+                    onClick={() => handleEditClick(category.id)}
                     data-testid={`button-edit-${category.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -116,6 +165,7 @@ export default function AdminCategoriesMobilePage() {
                     variant="outline"
                     size="sm"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    onClick={() => handleDeleteClick(category)}
                     data-testid={`button-delete-${category.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -134,10 +184,31 @@ export default function AdminCategoriesMobilePage() {
 
       <Button
         className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
+        onClick={handleAddClick}
         data-testid="button-add-category"
       >
         <Plus className="h-6 w-6" />
       </Button>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a categoria "{categoryToDelete?.title}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <MobileBottomNav />
     </div>

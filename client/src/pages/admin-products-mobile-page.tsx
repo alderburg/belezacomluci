@@ -10,6 +10,18 @@ import { useDataSync } from '@/hooks/use-data-sync';
 import { Product } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { apiRequest } from '@/lib/queryClient';
 
 export default function AdminProductsMobilePage() {
   const { user } = useAuth();
@@ -17,6 +29,7 @@ export default function AdminProductsMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -26,8 +39,50 @@ export default function AdminProductsMobilePage() {
     queryKey: ["/api/products"],
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/admin/products/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/products'] });
+      toast({
+        title: "Sucesso!",
+        description: "Produto excluído com sucesso",
+      });
+      setProductToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error.message || "Erro ao excluir produto",
+      });
+    },
+  });
+
   const handleBackClick = () => {
     setLocation('/admin');
+  };
+
+  const handleCreateClick = () => {
+    setLocation('/admin/products-mobile/new');
+  };
+
+  const handleEditClick = (productId: string) => {
+    setLocation(`/admin/products-mobile/edit/${productId}`);
+  };
+
+  const handleDeleteClick = (product: Product) => {
+    setProductToDelete(product);
+  };
+
+  const confirmDelete = () => {
+    if (productToDelete) {
+      deleteMutation.mutate(productToDelete.id);
+    }
   };
 
   const getProductTypeLabel = (type: string) => {
@@ -117,6 +172,7 @@ export default function AdminProductsMobilePage() {
                     variant="outline"
                     size="sm"
                     className="flex-1"
+                    onClick={() => handleEditClick(product.id)}
                     data-testid={`button-edit-${product.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -126,6 +182,7 @@ export default function AdminProductsMobilePage() {
                     variant="outline"
                     size="sm"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    onClick={() => handleDeleteClick(product)}
                     data-testid={`button-delete-${product.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -144,10 +201,31 @@ export default function AdminProductsMobilePage() {
 
       <Button
         className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
+        onClick={handleCreateClick}
         data-testid="button-add-product"
       >
         <Plus className="h-6 w-6" />
       </Button>
+
+      <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o produto "{productToDelete?.title}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <MobileBottomNav />
     </div>

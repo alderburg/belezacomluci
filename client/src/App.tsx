@@ -51,6 +51,13 @@ import AdminPopupsMobilePage from "@/pages/admin-popups-mobile-page";
 import AdminNotificationsMobilePage from "@/pages/admin-notifications-mobile-page";
 import AdminCategoriesMobilePage from "@/pages/admin-categories-mobile-page";
 import AdminUsersMobilePage from "@/pages/admin-users-mobile-page";
+import AdminBannerFormMobilePage from "@/pages/admin-banner-form-mobile-page";
+import AdminPopupFormMobilePage from "@/pages/admin-popup-form-mobile-page";
+import AdminNotificationFormMobilePage from "@/pages/admin-notification-form-mobile-page";
+import AdminCategoryFormMobilePage from "@/pages/admin-category-form-mobile-page";
+import AdminVideoFormMobilePage from "@/pages/admin-video-form-mobile-page";
+import AdminProductFormMobilePage from "@/pages/admin-product-form-mobile-page";
+import AdminCouponFormMobilePage from "@/pages/admin-coupon-form-mobile-page";
 
 
 import { useNotificationsWebSocket } from './hooks/use-notifications-websocket';
@@ -86,12 +93,33 @@ function Router() {
       <ProtectedRoute path="/ajuda" component={AjudaMobilePage} />
       <ProtectedRoute path="/mobile-menu" component={MobileMenuPage} />
       <ProtectedRoute path="/admin" component={isMobile ? AdminMobilePage : AdminPage} />
+      <ProtectedRoute path="/admin/videos-mobile/new" component={AdminVideoFormMobilePage} />
+      <ProtectedRoute path="/admin/videos-mobile/edit/:id" component={AdminVideoFormMobilePage} />
+      <ProtectedRoute path="/admin/videos-mobile" component={AdminVideosMobilePage} />
       <ProtectedRoute path="/admin/videos" component={isMobile ? AdminVideosMobilePage : AdminPage} />
+      <ProtectedRoute path="/admin/products-mobile/new" component={AdminProductFormMobilePage} />
+      <ProtectedRoute path="/admin/products-mobile/edit/:id" component={AdminProductFormMobilePage} />
+      <ProtectedRoute path="/admin/products-mobile" component={AdminProductsMobilePage} />
       <ProtectedRoute path="/admin/products" component={isMobile ? AdminProductsMobilePage : AdminPage} />
+      <ProtectedRoute path="/admin/coupons-mobile/new" component={AdminCouponFormMobilePage} />
+      <ProtectedRoute path="/admin/coupons-mobile/edit/:id" component={AdminCouponFormMobilePage} />
+      <ProtectedRoute path="/admin/coupons-mobile" component={AdminCouponsMobilePage} />
       <ProtectedRoute path="/admin/coupons" component={isMobile ? AdminCouponsMobilePage : AdminPage} />
+      <ProtectedRoute path="/admin/banners-mobile/new" component={AdminBannerFormMobilePage} />
+      <ProtectedRoute path="/admin/banners-mobile/edit/:id" component={AdminBannerFormMobilePage} />
+      <ProtectedRoute path="/admin/banners-mobile" component={AdminBannersMobilePage} />
       <ProtectedRoute path="/admin/banners" component={isMobile ? AdminBannersMobilePage : AdminPage} />
+      <ProtectedRoute path="/admin/popups-mobile/new" component={AdminPopupFormMobilePage} />
+      <ProtectedRoute path="/admin/popups-mobile/edit/:id" component={AdminPopupFormMobilePage} />
+      <ProtectedRoute path="/admin/popups-mobile" component={AdminPopupsMobilePage} />
       <ProtectedRoute path="/admin/popups" component={isMobile ? AdminPopupsMobilePage : AdminPage} />
+      <ProtectedRoute path="/admin/notifications-mobile/new" component={AdminNotificationFormMobilePage} />
+      <ProtectedRoute path="/admin/notifications-mobile/edit/:id" component={AdminNotificationFormMobilePage} />
+      <ProtectedRoute path="/admin/notifications-mobile" component={AdminNotificationsMobilePage} />
       <ProtectedRoute path="/admin/notifications" component={isMobile ? AdminNotificationsMobilePage : AdminPage} />
+      <ProtectedRoute path="/admin/categories-mobile/new" component={AdminCategoryFormMobilePage} />
+      <ProtectedRoute path="/admin/categories-mobile/edit/:id" component={AdminCategoryFormMobilePage} />
+      <ProtectedRoute path="/admin/categories-mobile" component={AdminCategoriesMobilePage} />
       <ProtectedRoute path="/admin/categories" component={isMobile ? AdminCategoriesMobilePage : AdminPage} />
       <ProtectedRoute path="/admin/users" component={isMobile ? AdminUsersMobilePage : AdminPage} />
       <ProtectedRoute path="/admin/cheirosas" component={AdminCheirosasPage} />

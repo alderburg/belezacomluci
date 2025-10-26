@@ -10,6 +10,9 @@ import { useDataSync } from '@/hooks/use-data-sync';
 import { Popup } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { apiRequest } from '@/lib/queryClient';
+import { useState } from "react";
 
 export default function AdminPopupsMobilePage() {
   const { user } = useAuth();
@@ -17,6 +20,8 @@ export default function AdminPopupsMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [popupToDelete, setPopupToDelete] = useState<{ id: string; title: string } | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -26,8 +31,52 @@ export default function AdminPopupsMobilePage() {
     queryKey: ["/api/admin/popups"],
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/admin/popups/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/popups"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/popups"] });
+      toast({
+        title: "Sucesso",
+        description: "Pop-up excluído com sucesso!",
+      });
+      setDeleteDialogOpen(false);
+      setPopupToDelete(null);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir pop-up",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleBackClick = () => {
     setLocation('/admin');
+  };
+
+  const handleAddClick = () => {
+    setLocation('/admin/popups-mobile/new');
+  };
+
+  const handleEditClick = (popupId: string) => {
+    setLocation(`/admin/popups-mobile/edit/${popupId}`);
+  };
+
+  const handleDeleteClick = (popup: Popup) => {
+    setPopupToDelete({ id: popup.id, title: popup.title });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (popupToDelete) {
+      deleteMutation.mutate(popupToDelete.id);
+    }
   };
 
   const getTriggerLabel = (trigger: string) => {
@@ -110,6 +159,7 @@ export default function AdminPopupsMobilePage() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
+                      onClick={() => handleEditClick(popup.id)}
                       data-testid={`button-edit-${popup.id}`}
                     >
                       <Edit className="h-4 w-4 mr-2" />
@@ -119,6 +169,7 @@ export default function AdminPopupsMobilePage() {
                       variant="outline"
                       size="sm"
                       className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => handleDeleteClick(popup)}
                       data-testid={`button-delete-${popup.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -138,10 +189,31 @@ export default function AdminPopupsMobilePage() {
 
       <Button
         className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
+        onClick={handleAddClick}
         data-testid="button-add-popup"
       >
         <Plus className="h-6 w-6" />
       </Button>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o pop-up "{popupToDelete?.title}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <MobileBottomNav />
     </div>

@@ -10,6 +10,9 @@ import { useDataSync } from '@/hooks/use-data-sync';
 import { Banner } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { apiRequest } from '@/lib/queryClient';
+import { useState } from "react";
 
 export default function AdminBannersMobilePage() {
   const { user } = useAuth();
@@ -17,6 +20,8 @@ export default function AdminBannersMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [bannerToDelete, setBannerToDelete] = useState<{ id: string; title: string } | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -26,8 +31,52 @@ export default function AdminBannersMobilePage() {
     queryKey: ["/api/admin/banners"],
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/admin/banners/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      toast({
+        title: "Sucesso",
+        description: "Banner excluído com sucesso!",
+      });
+      setDeleteDialogOpen(false);
+      setBannerToDelete(null);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir banner",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleBackClick = () => {
     setLocation('/admin');
+  };
+
+  const handleAddClick = () => {
+    setLocation('/admin/banners-mobile/new');
+  };
+
+  const handleEditClick = (bannerId: string) => {
+    setLocation(`/admin/banners-mobile/edit/${bannerId}`);
+  };
+
+  const handleDeleteClick = (banner: Banner) => {
+    setBannerToDelete({ id: banner.id, title: banner.title });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (bannerToDelete) {
+      deleteMutation.mutate(bannerToDelete.id);
+    }
   };
 
   return (
@@ -147,6 +196,7 @@ export default function AdminBannersMobilePage() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
+                      onClick={() => handleEditClick(banner.id)}
                       data-testid={`button-edit-${banner.id}`}
                     >
                       <Edit className="h-4 w-4 mr-2" />
@@ -156,6 +206,7 @@ export default function AdminBannersMobilePage() {
                       variant="outline"
                       size="sm"
                       className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => handleDeleteClick(banner)}
                       data-testid={`button-delete-${banner.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -175,10 +226,31 @@ export default function AdminBannersMobilePage() {
 
       <Button
         className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
+        onClick={handleAddClick}
         data-testid="button-add-banner"
       >
         <Plus className="h-6 w-6" />
       </Button>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o banner "{bannerToDelete?.title}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <MobileBottomNav />
     </div>

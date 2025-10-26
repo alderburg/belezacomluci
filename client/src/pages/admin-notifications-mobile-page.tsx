@@ -11,6 +11,8 @@ import { Notification } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from '@/lib/queryClient';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 export default function AdminNotificationsMobilePage() {
   const { user } = useAuth();
@@ -18,6 +20,8 @@ export default function AdminNotificationsMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [notificationToDelete, setNotificationToDelete] = useState<{ id: string; title: string } | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -48,8 +52,52 @@ export default function AdminNotificationsMobilePage() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/admin/notifications/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
+      toast({
+        title: "Sucesso",
+        description: "Notificação excluída com sucesso!",
+      });
+      setDeleteDialogOpen(false);
+      setNotificationToDelete(null);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir notificação",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleBackClick = () => {
     setLocation('/admin');
+  };
+
+  const handleAddClick = () => {
+    setLocation('/admin/notifications-mobile/new');
+  };
+
+  const handleEditClick = (notificationId: string) => {
+    setLocation(`/admin/notifications-mobile/edit/${notificationId}`);
+  };
+
+  const handleDeleteClick = (notification: Notification) => {
+    setNotificationToDelete({ id: notification.id, title: notification.title });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (notificationToDelete) {
+      deleteMutation.mutate(notificationToDelete.id);
+    }
   };
 
   const getTargetAudienceLabel = (audience: string) => {
@@ -144,6 +192,7 @@ export default function AdminNotificationsMobilePage() {
                     variant="outline"
                     size="sm"
                     className="flex-1"
+                    onClick={() => handleEditClick(notification.id)}
                     data-testid={`button-edit-${notification.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -153,6 +202,7 @@ export default function AdminNotificationsMobilePage() {
                     variant="outline"
                     size="sm"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    onClick={() => handleDeleteClick(notification)}
                     data-testid={`button-delete-${notification.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -171,10 +221,31 @@ export default function AdminNotificationsMobilePage() {
 
       <Button
         className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
+        onClick={handleAddClick}
         data-testid="button-add-notification"
       >
         <Plus className="h-6 w-6" />
       </Button>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a notificação "{notificationToDelete?.title}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <MobileBottomNav />
     </div>
