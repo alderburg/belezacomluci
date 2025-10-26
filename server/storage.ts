@@ -376,44 +376,44 @@ export class DatabaseStorage implements IStorage {
 
   async deleteVideo(id: string): Promise<void> {
     // Excluir todos os vínculos antes de excluir o vídeo
-    
+
     // 1. Buscar comentários vinculados ao vídeo
     const videoComments = await this.db
       .select({ id: comments.id })
       .from(comments)
       .where(eq(comments.videoId, id));
-    
+
     // 2. Excluir likes e respostas dos comentários do vídeo
     for (const comment of videoComments) {
       await this.db.delete(commentLikes).where(eq(commentLikes.commentId, comment.id));
       await this.db.delete(commentReplies).where(eq(commentReplies.commentId, comment.id));
     }
-    
+
     // 3. Excluir comentários vinculados a este vídeo
     await this.db.delete(comments).where(eq(comments.videoId, id));
-    
+
     // 4. Excluir banners vinculados a este vídeo
     await this.db.delete(banners).where(eq(banners.videoId, id));
-    
+
     // 5. Excluir likes vinculados a este vídeo
     await this.db.delete(videoLikes).where(eq(videoLikes.videoId, id));
-    
+
     // 6. Buscar e excluir visualizações de popups vinculados ao vídeo
     const videoPopups = await this.db
       .select({ id: popups.id })
       .from(popups)
       .where(eq(popups.targetVideoId, id));
-    
+
     for (const popup of videoPopups) {
       await this.db.delete(popupViews).where(eq(popupViews.popupId, popup.id));
     }
-    
+
     // 7. Excluir popups vinculados a este vídeo
     await this.db.delete(popups).where(eq(popups.targetVideoId, id));
-    
+
     // 8. Excluir atividades vinculadas a este vídeo
     await this.db.delete(userActivity).where(eq(userActivity.resourceId, id));
-    
+
     // 9. Finalmente, excluir o vídeo
     await this.db.delete(videos).where(eq(videos.id, id));
   }
@@ -525,24 +525,24 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProduct(id: string): Promise<void> {
     // Excluir dados relacionados primeiro para evitar violação de foreign key
-    
+
     // 1. Excluir comentários relacionados ao produto
     await this.db.delete(comments).where(eq(comments.productId, id));
-    
+
     // 2. Buscar popups vinculados a este produto
     const relatedPopups = await this.db
       .select({ id: popups.id })
       .from(popups)
       .where(eq(popups.targetCourseId, id));
-    
+
     // 3. Excluir visualizações dos popups vinculados
     for (const popup of relatedPopups) {
       await this.db.delete(popupViews).where(eq(popupViews.popupId, popup.id));
     }
-    
+
     // 4. Excluir os popups vinculados ao produto
     await this.db.delete(popups).where(eq(popups.targetCourseId, id));
-    
+
     // 5. Agora podemos excluir o produto com segurança
     await this.db.delete(products).where(eq(products.id, id));
   }
@@ -772,7 +772,7 @@ export class DatabaseStorage implements IStorage {
 
   async createPost(post: InsertPost, taggedUserIds?: string[]): Promise<Post> {
     const [newPost] = await this.db.insert(posts).values(post).returning();
-    
+
     // Save tagged users if provided
     if (taggedUserIds && taggedUserIds.length > 0) {
       await this.db.insert(postTags).values(
@@ -782,7 +782,7 @@ export class DatabaseStorage implements IStorage {
         }))
       );
     }
-    
+
     return newPost;
   }
 
@@ -2073,7 +2073,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateRaffle(id: string, raffle: Partial<InsertRaffle>): Promise<Raffle> {
-    const [updatedRaffle] = await this.db.update(rafflesTable).set(raffle).where(eq(rafflesTable.id, id)).returning();
+    const [updatedRaffle] = await this.db.update(rafflesTable).set(raffle)
+      .where(eq(rafflesTable.id, id)).returning();
     return updatedRaffle;
   }
 
@@ -2703,22 +2704,27 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
   }
 
   async updateVideoProgress(
-    userId: string, 
-    videoId: string, 
-    resourceId: string, 
-    currentTime: number, 
+    userId: string,
+    videoId: string,
+    resourceId: string,
+    currentTime: number,
     duration: number
   ): Promise<VideoProgress> {
     const existing = await this.getVideoProgress(userId, videoId, resourceId);
-    
+
     // Só atualiza se o tempo atual for maior que o máximo já assistido
     if (existing && currentTime <= existing.maxTimeWatched) {
       return existing;
     }
 
     const maxTimeWatched = existing ? Math.max(existing.maxTimeWatched, currentTime) : currentTime;
-    const progressPercentage = duration > 0 ? Math.floor((maxTimeWatched / duration) * 100) : 0;
+    let progressPercentage = duration > 0 ? Math.floor((maxTimeWatched / duration) * 100) : 0;
     const isCompleted = progressPercentage >= 95;
+
+    // Se o vídeo está completo (>=95%), atualiza o progresso para 100% no banco
+    if (isCompleted) {
+      progressPercentage = 100;
+    }
 
     if (existing) {
       // Atualiza existente
@@ -2732,12 +2738,16 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
           lastWatchedAt: new Date(),
           updatedAt: new Date()
         })
-        .where(eq(videoProgress.id, existing.id))
+        .where(and(
+          eq(videoProgress.userId, userId),
+          eq(videoProgress.videoId, videoId),
+          eq(videoProgress.resourceId, resourceId)
+        ))
         .returning();
 
       return updated;
     } else {
-      // Cria novo registro
+      // Cria novo
       const [created] = await this.db
         .insert(videoProgress)
         .values({

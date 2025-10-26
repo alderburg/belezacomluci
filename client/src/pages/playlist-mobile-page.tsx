@@ -157,7 +157,7 @@ export default function PlaylistMobilePage() {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -256,8 +256,6 @@ export default function PlaylistMobilePage() {
   }, [currentVideoId, stopProgressSaving]);
 
   // --- Fim do Rastreamento de progresso ---
-
-  // Resto do código original...
 
   // Resetar scroll do modal quando abrir
   useEffect(() => {
@@ -455,7 +453,7 @@ export default function PlaylistMobilePage() {
       if (saveProgress) {
         saveProgress();
       }
-      
+
       // Destruir player atual antes de mudar
       if (youtubePlayer.current && typeof youtubePlayer.current.destroy === 'function') {
         try {
@@ -465,17 +463,17 @@ export default function PlaylistMobilePage() {
           console.log('Error destroying player on video change:', e);
         }
       }
-      
+
       // Reset estados
       setShowVideo(false);
       setIsLoadingVideoContent(true);
-      
+
       // Pequeno delay para garantir cleanup completo
       setTimeout(() => {
         setCurrentVideoId(videoId);
       }, 50);
     }
-    
+
     setShowPlaylistModal(false);
   };
 
@@ -578,7 +576,7 @@ export default function PlaylistMobilePage() {
       toast({
         title: "Erro ao comentar",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   });
@@ -670,7 +668,7 @@ export default function PlaylistMobilePage() {
       toast({
         title: "Erro ao excluir comentário",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   });
@@ -1264,7 +1262,7 @@ export default function PlaylistMobilePage() {
                         {user && getVideoProgress(video.id) > 0 && (
                           <div className="mt-1.5 space-y-0.5">
                             <Progress 
-                              value={isVideoCompleted(video.id) ? 100 : getVideoProgress(video.id)} 
+                              value={getVideoProgress(video.id)} 
                               className="h-1"
                               data-testid={`progress-video-${video.id}`}
                             />
