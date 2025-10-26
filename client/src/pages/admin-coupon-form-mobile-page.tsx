@@ -132,10 +132,6 @@ export default function AdminCouponFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  if (isEditing && isLoading) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-background pb-8">
       <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
@@ -155,7 +151,12 @@ export default function AdminCouponFormMobilePage() {
         </div>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      {isEditing && isLoading ? (
+        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : (
+        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="coupon-code">Código <span className="text-destructive">*</span></Label>
@@ -325,6 +326,7 @@ export default function AdminCouponFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Cupom" : "Criar Cupom"}
         </Button>
       </form>
+      )}
     </div>
   );
 }

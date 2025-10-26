@@ -189,10 +189,6 @@ export default function AdminVideoFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  if (isEditing && isLoading) {
-    return null; // Não renderizar nada enquanto carrega na edição
-  }
-
   return (
     <div className="min-h-screen bg-background pb-8">
       <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
@@ -212,7 +208,12 @@ export default function AdminVideoFormMobilePage() {
         </div>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      {isEditing && isLoading ? (
+        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : (
+        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="video-title">Título <span className="text-destructive">*</span></Label>
           <Input
@@ -343,6 +344,7 @@ export default function AdminVideoFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Vídeo" : "Criar Vídeo"}
         </Button>
       </form>
+      )}
     </div>
   );
 }

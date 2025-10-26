@@ -202,10 +202,6 @@ export default function AdminProductFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  if (isEditing && isLoading) {
-    return null;
-  }
-
   const productType = form.watch("type");
   const isYouTubeProduct = productType === "course_video" || productType === "course_playlist";
 
@@ -228,7 +224,12 @@ export default function AdminProductFormMobilePage() {
         </div>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      {isEditing && isLoading ? (
+        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : (
+        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="product-title">Título <span className="text-destructive">*</span></Label>
           <Input
@@ -360,6 +361,7 @@ export default function AdminProductFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Produto" : "Criar Produto"}
         </Button>
       </form>
+      )}
     </div>
   );
 }
