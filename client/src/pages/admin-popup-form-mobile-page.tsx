@@ -23,8 +23,8 @@ export default function AdminPopupFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/popups-mobile/edit/:id");
-  const popupId = params?.id;
-  const isEditing = !!popupId;
+  const popupId = match ? params.id : undefined;
+  const isEditing = Boolean(match && popupId);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;

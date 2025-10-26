@@ -22,8 +22,8 @@ export default function AdminBannerFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/banners-mobile/edit/:id");
-  const bannerId = params?.id;
-  const isEditing = !!bannerId;
+  const bannerId = match ? params.id : undefined;
+  const isEditing = Boolean(match && bannerId);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;

@@ -25,12 +25,12 @@ import { useEffect } from 'react';
 
 export default function AdminVideoFormMobilePage() {
   const [match, params] = useRoute("/admin/videos-mobile/edit/:id");
-  const videoId = params?.id;
+  const videoId = match ? params.id : undefined;
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const isEditing = Boolean(videoId);
+  const isEditing = Boolean(match && videoId);
 
   const { data: video, isLoading } = useQuery<Video>({
     queryKey: ['/api/admin/videos', videoId],
