@@ -4,6 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useLocation, useRoute, Redirect } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -30,13 +38,7 @@ export default function AdminBannerFormMobilePage() {
   }
 
   const { data: banner, isLoading } = useQuery<Banner>({
-    queryKey: ['/api/admin/banners', bannerId],
-    queryFn: async () => {
-      if (!bannerId) throw new Error('ID não fornecido');
-      const res = await fetch(`/api/admin/banners/${bannerId}`);
-      if (!res.ok) throw new Error('Erro ao carregar banner');
-      return res.json();
-    },
+    queryKey: [`/api/admin/banners/${bannerId}`],
     enabled: Boolean(isEditing && bannerId),
   });
 
