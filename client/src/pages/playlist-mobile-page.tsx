@@ -991,16 +991,16 @@ export default function PlaylistMobilePage() {
       {/* Playlist Modal */}
       <Dialog open={showPlaylistModal} onOpenChange={setShowPlaylistModal}>
         <DialogContent className="mx-auto w-[calc(100vw-32px)] max-w-lg h-[80vh] p-0 rounded-2xl flex flex-col gap-0" onOpenAutoFocus={(e) => e.preventDefault()}>
-          <DialogHeader className="p-4 pb-3 pt-6 flex-shrink-0">
-            <DialogTitle className="text-lg font-semibold">
-              Conteúdo de {resource?.title}
+          <DialogHeader className="p-4 pb-3 pt-6 flex-shrink-0 text-left">
+            <DialogTitle className="text-lg font-semibold text-left">
+              {resource?.title}
             </DialogTitle>
             {resource?.description && (
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1 text-left">
                 {resource.description}
               </p>
             )}
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1 text-left">
               {currentVideoId && videos.length > 0 
                 ? `${videos.findIndex(video => video.id === currentVideoId) + 1} de ${videos.length} vídeos`
                 : `${videos.length} vídeos`

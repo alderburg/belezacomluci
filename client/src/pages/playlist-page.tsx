@@ -1040,14 +1040,14 @@ export default function PlaylistPage() {
             {!isMobile && videos.length > 0 && (
               <div className="lg:col-span-1">
                 <Card>
-                  <div className="p-4 border-b border-border">
-                    <h3 className="font-semibold text-foreground">Conteúdo de {resource?.title || 'Playlist'}</h3>
+                  <div className="p-4 border-b border-border text-left">
+                    <h3 className="font-semibold text-foreground text-left">{resource?.title || 'Playlist'}</h3>
                     {resource?.description && (
-                      <p className="text-sm text-muted-foreground mt-2">
+                      <p className="text-sm text-muted-foreground mt-2 text-left">
                         {resource.description}
                       </p>
                     )}
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-muted-foreground mt-1 text-left">
                       {currentVideoId && videos.length > 0 
                         ? `${videos.findIndex(video => video.id === currentVideoId) + 1} de ${videos.length} vídeos`
                         : `${videos.length} vídeos`
@@ -1116,9 +1116,9 @@ export default function PlaylistPage() {
         {isMobile && showPlaylist && videos.length > 0 && (
           <div className="fixed inset-0 bg-background z-50">
             <div className="h-full flex flex-col">
-              <div className="p-4 border-b border-border">
+              <div className="p-4 border-b border-border text-left">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-foreground">Conteúdo de {resource?.title || 'Playlist'}</h3>
+                  <h3 className="font-semibold text-foreground text-left">{resource?.title || 'Playlist'}</h3>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -1128,11 +1128,11 @@ export default function PlaylistPage() {
                   </Button>
                 </div>
                 {resource?.description && (
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-sm text-muted-foreground mt-2 text-left">
                     {resource.description}
                   </p>
                 )}
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1 text-left">
                   {currentVideoId && videos.length > 0 
                     ? `${videos.findIndex(video => video.id === currentVideoId) + 1} de ${videos.length} vídeos`
                     : `${videos.length} vídeos`
