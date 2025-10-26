@@ -118,7 +118,7 @@ export default function PlaylistMobilePage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const playerRef = useRef<HTMLIFrameElement>(null); // Ref para o iframe do player
+  const playerContainerRef = useRef<HTMLDivElement>(null); // Ref para o container do player
   const youtubePlayer = useRef<any>(null); // Ref para a instância do player do YouTube
 
   // Hook para rastrear progresso do vídeo - DEVE VIR ANTES de usar saveProgress
@@ -186,13 +186,14 @@ export default function PlaylistMobilePage() {
 
   // Função para iniciar o player do YouTube
   const initializeYouTubePlayer = () => {
-    if (window.YT && playerRef.current && currentVideoId) {
+    if (window.YT && playerContainerRef.current && currentVideoId) {
       // Destroi player existente se houver
       if (youtubePlayer.current) {
         youtubePlayer.current.destroy();
       }
 
-      youtubePlayer.current = new window.YT.Player(playerRef.current, {
+      // Cria um novo player e anexa-o ao div container
+      youtubePlayer.current = new window.YT.Player(playerContainerRef.current, {
         height: '100%',
         width: '100%',
         videoId: currentVideoId,
@@ -936,15 +937,7 @@ export default function PlaylistMobilePage() {
           )}
 
           {showVideo && currentVideoId && (
-            <iframe
-              ref={playerRef} // Ref para o iframe
-              src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1&origin=${window.location.origin}`}
-              title={currentVideo?.title || 'Vídeo'}
-              className="absolute inset-0 w-full h-full z-10"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            <div ref={playerContainerRef} className="w-full h-full"></div>
           )}
         </div>
 
@@ -1269,8 +1262,8 @@ export default function PlaylistMobilePage() {
                                 <Check className="w-3 h-3 text-green-600" />
                               )}
                             </div>
-                            <Progress 
-                              value={isVideoCompleted(video.id) ? 100 : getVideoProgress(video.id)} 
+                            <Progress
+                              value={isVideoCompleted(video.id) ? 100 : getVideoProgress(video.id)}
                               className="h-1"
                               data-testid={`progress-video-${video.id}`}
                             />
