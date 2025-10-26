@@ -37,7 +37,15 @@ export default function ProductsPage() {
   const filteredProducts = products?.filter((product) => {
     // Filtrar apenas produtos ativos
     const isActive = product.isActive;
-    const matchesType = !type || type === "all" || product.type === type;
+    
+    // Lógica de filtro por tipo - "course" agora inclui course_video e course_playlist
+    let matchesType = !type || type === "all";
+    if (!matchesType && type === "course") {
+      matchesType = product.type === "course" || product.type === "course_video" || product.type === "course_playlist";
+    } else if (!matchesType) {
+      matchesType = product.type === type;
+    }
+    
     const matchesCategory = !category || category === "all" || product.categoryId === category;
     const matchesSearch = !searchTerm ||
       product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

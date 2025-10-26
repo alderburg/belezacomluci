@@ -84,7 +84,7 @@ export const products = pgTable("products", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   description: text("description"),
-  type: text("type").notNull(), // 'ebook', 'course', 'pdf', 'checklist'
+  type: text("type").notNull(), // 'ebook', 'course_video', 'course_playlist', 'pdf', 'checklist'
   fileUrl: text("file_url"),
   coverImageUrl: text("cover_image_url"),
   categoryId: varchar("category_id").references(() => categories.id),

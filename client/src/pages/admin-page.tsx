@@ -68,6 +68,10 @@ const getProductTypeLabel = (type: string) => {
       return 'E-book';
     case 'course':
       return 'Curso';
+    case 'course_video':
+      return 'Curso - Vídeo Único';
+    case 'course_playlist':
+      return 'Curso - Playlist';
     case 'pdf':
       return 'PDF';
     case 'checklist':
@@ -1680,7 +1684,8 @@ export default function AdminPage() {
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="ebook">E-book</SelectItem>
-                                <SelectItem value="course">Curso</SelectItem>
+                                <SelectItem value="course_video">Curso - Vídeo Único</SelectItem>
+                                <SelectItem value="course_playlist">Curso - Playlist</SelectItem>
                                 <SelectItem value="pdf">PDF</SelectItem>
                                 <SelectItem value="checklist">Checklist</SelectItem>
                               </SelectContent>
@@ -1689,12 +1694,12 @@ export default function AdminPage() {
 
                           <div>
                             <Label htmlFor="product-file">
-                              {productForm.watch("type") === "course" ? "URL da Playlist ou Vídeo do YouTube" : "URL do Arquivo"} <span className="text-destructive">*</span>
+                              {(productForm.watch("type") === "course_video" || productForm.watch("type") === "course_playlist") ? "URL do YouTube" : "URL do Arquivo"} <span className="text-destructive">*</span>
                             </Label>
                             <Input
                               id="product-file"
                               {...productForm.register("fileUrl")}
-                              placeholder={productForm.watch("type") === "course" 
+                              placeholder={(productForm.watch("type") === "course_video" || productForm.watch("type") === "course_playlist")
                                 ? "https://www.youtube.com/watch?v=... ou https://www.youtube.com/playlist?list=..." 
                                 : "https://..."}
                               data-testid="input-product-file"
@@ -1708,14 +1713,18 @@ export default function AdminPage() {
                                 const isYouTubeUrl = /(?:youtube\.com|youtu\.be)/.test(url);
                                 
                                 if (isYouTubeUrl) {
-                                  // Mudar automaticamente para tipo "course" quando for YouTube
-                                  productForm.setValue("type", "course");
-                                  console.log('URL do YouTube detectada, tipo alterado para: course');
+                                  // Verificar se é playlist ou vídeo único
+                                  const isPlaylist = /[?&]list=([^&\n?#]+)/.test(url);
+                                  
+                                  if (isPlaylist) {
+                                    productForm.setValue("type", "course_playlist");
+                                    console.log('URL de Playlist do YouTube detectada, tipo alterado para: course_playlist');
+                                  } else {
+                                    productForm.setValue("type", "course_video");
+                                    console.log('URL de Vídeo Único do YouTube detectada, tipo alterado para: course_video');
+                                  }
 
                                   try {
-                                    // Verificar se é playlist
-                                    const isPlaylist = /[?&]list=([^&\n?#]+)/.test(url);
-                                    
                                     if (isPlaylist) {
                                       // Buscar dados da playlist
                                       const playlistIdMatch = url.match(/[?&]list=([^&\n?#]+)/);
@@ -1745,7 +1754,7 @@ export default function AdminPage() {
                                             
                                             toast({
                                               title: "Playlist detectada!",
-                                              description: `${playlistData.videos.length} vídeos encontrados. Tipo alterado para "Curso".`,
+                                              description: `${playlistData.videos.length} vídeos encontrados. Tipo alterado para "Curso - Playlist".`,
                                             });
                                           }
                                         }
@@ -1782,7 +1791,7 @@ export default function AdminPage() {
                                           
                                           toast({
                                             title: "Vídeo do YouTube detectado!",
-                                            description: "Tipo alterado para 'Curso'. Dados preenchidos automaticamente.",
+                                            description: "Tipo alterado para 'Curso - Vídeo Único'. Dados preenchidos automaticamente.",
                                           });
                                         }
                                       }

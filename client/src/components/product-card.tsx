@@ -62,6 +62,8 @@ export default function ProductCard({ product, viewMode: propViewMode }: Product
       case 'ebook':
         return Book;
       case 'course':
+      case 'course_video':
+      case 'course_playlist':
         return Play;
       case 'pdf':
         return FileText;
@@ -77,6 +79,8 @@ export default function ProductCard({ product, viewMode: propViewMode }: Product
       case 'ebook':
         return 'gradient-gold';
       case 'course':
+      case 'course_video':
+      case 'course_playlist':
         return 'gradient-primary';
       case 'pdf':
         return 'bg-gradient-to-br from-purple-500 to-pink-500';
@@ -93,6 +97,10 @@ export default function ProductCard({ product, viewMode: propViewMode }: Product
         return 'E-book';
       case 'course':
         return 'Curso';
+      case 'course_video':
+        return 'Curso - Vídeo Único';
+      case 'course_playlist':
+        return 'Curso - Playlist';
       case 'pdf':
         return 'PDF';
       case 'checklist':
@@ -105,6 +113,8 @@ export default function ProductCard({ product, viewMode: propViewMode }: Product
   const getActionText = () => {
     switch (product.type) {
       case 'course':
+      case 'course_video':
+      case 'course_playlist':
         return 'Iniciar Curso';
       case 'ebook':
         return 'Baixar E-book';
@@ -120,22 +130,31 @@ export default function ProductCard({ product, viewMode: propViewMode }: Product
   const ProductIcon = getProductIcon();
 
   const handleDownload = () => {
-    // Se for um curso, verificar se é playlist ou vídeo único
+    // Se for curso de playlist, abre como playlist
+    if (product.type === 'course_playlist') {
+      navigate(`/playlist/${product.id}`);
+      return;
+    }
+    
+    // Se for curso de vídeo único, abre como vídeo
+    if (product.type === 'course_video') {
+      navigate(`/video/${product.id}`);
+      return;
+    }
+
+    // Compatibilidade com tipo antigo 'course' - verificar URL para decidir
     if (product.type === 'course') {
-      // Extrair ID da playlist do YouTube
       const extractPlaylistId = (url: string): string | null => {
         const regex = /(?:list=|list\/)([^&\n?#]+)/;
         const match = url.match(regex);
         return match ? match[1] : null;
       };
 
-      // Extrair ID do vídeo do YouTube
       const extractVideoId = (url: string): string | null => {
         const regex = /(?:v=|youtu\.be\/|embed\/|watch\?v=|v\/|e\/|watch\?.*&v=)([^&\n?#]+)/;
         const match = url.match(regex);
         if (match && match[1]) {
           let videoId = match[1];
-          // Remove qualquer parâmetro adicional
           if (videoId.includes('?')) {
             videoId = videoId.split('?')[0];
           }
@@ -150,12 +169,9 @@ export default function ProductCard({ product, viewMode: propViewMode }: Product
       const playlistId = extractPlaylistId(product.fileUrl);
       const videoId = extractVideoId(product.fileUrl);
 
-      // Se tem playlist ID, abre como playlist
       if (playlistId) {
         navigate(`/playlist/${product.id}`);
-      } 
-      // Se tem apenas vídeo ID (sem playlist), abre como vídeo único
-      else if (videoId) {
+      } else if (videoId) {
         navigate(`/video/${product.id}`);
       }
       return;
