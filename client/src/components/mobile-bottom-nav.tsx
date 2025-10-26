@@ -1,6 +1,7 @@
 import { Home, Play, Download, Tag, Sparkles, Users } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -51,6 +52,7 @@ const navItems: NavItem[] = [
 
 export default function MobileBottomNav() {
   const [location] = useLocation();
+  const [lastResourceType, setLastResourceType] = useState<'product' | 'video' | null>(null);
 
   // Detectar se está em uma página de vídeo ou playlist
   const isVideoPage = location.startsWith('/video/');
@@ -88,6 +90,20 @@ export default function MobileBottomNav() {
     staleTime: 5 * 60 * 1000, // Cache por 5 minutos
   });
 
+  // Atualizar o último tipo de recurso conhecido quando os dados carregarem
+  useEffect(() => {
+    if (currentResource?._type) {
+      setLastResourceType(currentResource._type);
+    }
+  }, [currentResource]);
+
+  // Resetar quando sair de uma página de vídeo/playlist
+  useEffect(() => {
+    if (!isVideoPage && !isPlaylistPage) {
+      setLastResourceType(null);
+    }
+  }, [isVideoPage, isPlaylistPage]);
+
   const isActive = (href: string) => {
     if (href === "/") {
       return location === "/" || location === "";
@@ -97,12 +113,16 @@ export default function MobileBottomNav() {
     // Quando estiver em uma página de vídeo/playlist, verifica se é produto ou vídeo exclusivo
     if (href === "/videos") {
       // Ativa se estiver na lista de vídeos OU se estiver vendo um vídeo exclusivo
+      // Usa o último tipo conhecido para evitar piscar durante o carregamento
+      const resourceType = currentResource?._type || lastResourceType;
       return location === "/videos" || 
-        ((isVideoPage || isPlaylistPage) && currentResource?._type === 'video');
+        ((isVideoPage || isPlaylistPage) && resourceType === 'video');
     } else if (href === "/produtos") {
       // Ativa se estiver na lista de produtos OU se estiver vendo um produto digital
+      // Usa o último tipo conhecido para evitar piscar durante o carregamento
+      const resourceType = currentResource?._type || lastResourceType;
       return location === "/produtos" || 
-        ((isVideoPage || isPlaylistPage) && currentResource?._type === 'product');
+        ((isVideoPage || isPlaylistPage) && resourceType === 'product');
     }
     
     return location.startsWith(href);

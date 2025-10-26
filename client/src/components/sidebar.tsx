@@ -34,6 +34,7 @@ export default function Sidebar() {
   const [showExitPopup, setShowExitPopup] = useState(false);
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { viewMode, setViewMode } = useAdmin();
+  const [lastResourceType, setLastResourceType] = useState<'product' | 'video' | null>(null);
 
   // Detectar se está em uma página de vídeo ou playlist
   const isVideoPage = location.startsWith('/video/');
@@ -70,6 +71,20 @@ export default function Sidebar() {
     retry: false,
     staleTime: 5 * 60 * 1000, // Cache por 5 minutos
   });
+
+  // Atualizar o último tipo de recurso conhecido quando os dados carregarem
+  useEffect(() => {
+    if (currentResource?._type) {
+      setLastResourceType(currentResource._type);
+    }
+  }, [currentResource]);
+
+  // Resetar quando sair de uma página de vídeo/playlist
+  useEffect(() => {
+    if (!isVideoPage && !isPlaylistPage) {
+      setLastResourceType(null);
+    }
+  }, [isVideoPage, isPlaylistPage]);
 
   // Close mobile sidebar when route changes
   useEffect(() => {
@@ -225,12 +240,16 @@ export default function Sidebar() {
               // Quando estiver em uma página de vídeo/playlist, verifica se é produto ou vídeo exclusivo
               if (item.href === "/videos") {
                 // Ativa se estiver na lista de vídeos OU se estiver vendo um vídeo exclusivo
+                // Usa o último tipo conhecido para evitar piscar durante o carregamento
+                const resourceType = currentResource?._type || lastResourceType;
                 isActive = location === "/videos" || 
-                  ((isVideoPage || isPlaylistPage) && currentResource?._type === 'video');
+                  ((isVideoPage || isPlaylistPage) && resourceType === 'video');
               } else if (item.href === "/produtos") {
                 // Ativa se estiver na lista de produtos OU se estiver vendo um produto digital
+                // Usa o último tipo conhecido para evitar piscar durante o carregamento
+                const resourceType = currentResource?._type || lastResourceType;
                 isActive = location === "/produtos" || 
-                  ((isVideoPage || isPlaylistPage) && currentResource?._type === 'product');
+                  ((isVideoPage || isPlaylistPage) && resourceType === 'product');
               }
 
               return (
