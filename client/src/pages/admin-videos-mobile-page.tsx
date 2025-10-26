@@ -87,13 +87,19 @@ export default function AdminVideosMobilePage() {
                     </p>
                     <div className="flex gap-2 mt-2">
                       {video.isExclusive && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge className="bg-purple-100 text-purple-700 text-xs">
                           Premium
                         </Badge>
                       )}
-                      <Badge variant="outline" className="text-xs">
-                        {video.type === 'playlist' ? 'Playlist' : 'Vídeo'}
-                      </Badge>
+                      {video.type === 'playlist' ? (
+                        <Badge className="bg-orange-100 text-orange-700 text-xs">
+                          Playlist
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-blue-100 text-blue-700 text-xs">
+                          Vídeo
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
