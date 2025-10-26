@@ -314,12 +314,17 @@ export default function VideoMobilePage() {
 
   // Buscar progresso do vídeo
   const { data: videoProgressData } = useQuery<any>({
-    queryKey: ['/api/video-progress', videoId, youtubeVideoId],
+    queryKey: ['/api/video-progress', videoId],
     queryFn: async () => {
-      if (!youtubeVideoId || !videoId) return null;
-      const response = await fetch(`/api/video-progress/${videoId}/${youtubeVideoId}`);
+      if (!videoId) return null;
+      const response = await fetch(`/api/video-progress/${videoId}`);
       if (!response.ok) return null;
-      return response.json();
+      const data = await response.json();
+      // A API retorna um array, pegamos o primeiro item se existir
+      if (Array.isArray(data) && data.length > 0) {
+        return data.find(p => p.videoId === youtubeVideoId) || data[0];
+      }
+      return null;
     },
     enabled: !!user && !!youtubeVideoId && !!videoId,
   });

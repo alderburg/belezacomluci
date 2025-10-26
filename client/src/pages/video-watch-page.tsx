@@ -139,7 +139,7 @@ export default function VideoWatchPage() {
   const videoUrl = product?.fileUrl || video?.videoUrl || null;
   const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
 
-  // Hook para rastrear progresso do vídeo - CAPTURANDO O RETORNO
+  // Hook para rastrear progresso do vídeo - DEVE VIR ANTES de usar saveProgress
   const { stopProgressSaving, saveProgress } = useVideoProgress({
     videoId: youtubeVideoId || '',
     resourceId: videoId || '',
@@ -149,11 +149,16 @@ export default function VideoWatchPage() {
 
   // Reset video loaded state when video changes
   useEffect(() => {
+    // Salvar progresso antes de trocar de vídeo
+    if (saveProgress) {
+      saveProgress();
+    }
+    
     setVideoLoaded(false);
     setShowVideo(false);
-    setIsLoadingVideoContent(true); // Ativar skeleton ao mudar de vídeo
-    setHasWatchedRegistered(false); // Reset watch registration for new video
-  }, [videoId]);
+    setIsLoadingVideoContent(true);
+    setHasWatchedRegistered(false);
+  }, [videoId, saveProgress]);
 
   // Salvar progresso antes de sair da página
   useEffect(() => {
@@ -257,10 +262,10 @@ export default function VideoWatchPage() {
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         try {
           playerRef.current.destroy();
+          playerRef.current = null;
         } catch (e) {
           console.log('Cleanup error:', e);
         }
-        playerRef.current = null;
       }
     };
   }, [showVideo, youtubeVideoId, stopProgressSaving, saveProgress]);
@@ -329,12 +334,17 @@ export default function VideoWatchPage() {
 
   // Buscar progresso do vídeo
   const { data: videoProgressData } = useQuery<any>({
-    queryKey: ['/api/video-progress', videoId, youtubeVideoId],
+    queryKey: ['/api/video-progress', videoId],
     queryFn: async () => {
-      if (!youtubeVideoId || !videoId) return null;
-      const response = await fetch(`/api/video-progress/${videoId}/${youtubeVideoId}`);
+      if (!videoId) return null;
+      const response = await fetch(`/api/video-progress/${videoId}`);
       if (!response.ok) return null;
-      return response.json();
+      const data = await response.json();
+      // A API retorna um array, pegamos o primeiro item se existir
+      if (Array.isArray(data) && data.length > 0) {
+        return data.find(p => p.videoId === youtubeVideoId) || data[0];
+      }
+      return null;
     },
     enabled: !!user && !!youtubeVideoId && !!videoId,
   });
