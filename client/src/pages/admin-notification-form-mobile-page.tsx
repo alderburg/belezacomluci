@@ -5,6 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useLocation, useRoute, Redirect } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -70,7 +78,7 @@ export default function AdminNotificationFormMobilePage() {
           new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
       });
     }
-  }, [notification, isEditing]);
+  }, [notificationId, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {
@@ -183,22 +191,28 @@ export default function AdminNotificationFormMobilePage() {
           />
         </div>
 
-        <div>
-          <Label htmlFor="notification-audience">Público-Alvo</Label>
-          <Select
-            value={form.watch("targetAudience")}
-            onValueChange={(value) => form.setValue("targetAudience", value)}
-          >
-            <SelectTrigger data-testid="select-notification-audience">
-              <SelectValue placeholder="Selecione o público-alvo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os usuários</SelectItem>
-              <SelectItem value="free">Usuários gratuitos</SelectItem>
-              <SelectItem value="premium">Usuários premium</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <FormField
+          control={form.control}
+          name="targetAudience"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Público-Alvo</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger data-testid="select-notification-audience">
+                    <SelectValue placeholder="Selecione o público-alvo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="all">Todos os usuários</SelectItem>
+                  <SelectItem value="free">Usuários gratuitos</SelectItem>
+                  <SelectItem value="premium">Usuários premium</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className="grid grid-cols-2 gap-4">
           <div>

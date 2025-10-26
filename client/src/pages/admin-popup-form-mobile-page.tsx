@@ -5,6 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useLocation, useRoute, Redirect } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -86,7 +94,7 @@ export default function AdminPopupFormMobilePage() {
           new Date(popup.endDateTime).toISOString().slice(0, 16) : "",
       });
     }
-  }, [popup, isEditing]);
+  }, [popupId, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertPopupSchema>) => {
@@ -206,78 +214,99 @@ export default function AdminPopupFormMobilePage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="popup-trigger">Gatilho de Exibição</Label>
-            <Select
-              value={form.watch("trigger") || ""}
-              onValueChange={(value) => {
-                form.setValue("trigger", value);
-                if (value === "scheduled") {
-                  form.setValue("showFrequency", "once_per_session");
-                }
-              }}
-            >
-              <SelectTrigger data-testid="select-popup-trigger">
-                <SelectValue placeholder="Selecione o gatilho" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="login">Ao fazer login</SelectItem>
-                <SelectItem value="logout">Ao sair do sistema</SelectItem>
-                <SelectItem value="page_specific">Página específica</SelectItem>
-                <SelectItem value="scheduled">Agendado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="popup-frequency">Frequência</Label>
-            {form.watch("trigger") === "scheduled" ? (
-              <Input
-                value="Uma vez por sessão"
-                disabled
-                className="bg-gray-100 text-gray-600"
-                data-testid="input-popup-frequency-scheduled"
-              />
-            ) : (
-              <Select
-                value={form.watch("showFrequency") || ""}
-                onValueChange={(value) => form.setValue("showFrequency", value)}
-              >
-                <SelectTrigger data-testid="select-popup-frequency">
-                  <SelectValue placeholder="Selecione a frequência" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="always">Sempre mostrar</SelectItem>
-                  <SelectItem value="once_per_session">Uma vez por sessão</SelectItem>
-                </SelectContent>
-              </Select>
+          <FormField
+            control={form.control}
+            name="trigger"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gatilho de Exibição</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    if (value === "scheduled") {
+                      form.setValue("showFrequency", "once_per_session");
+                    }
+                  }}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger data-testid="select-popup-trigger">
+                      <SelectValue placeholder="Selecione o gatilho" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="login">Ao fazer login</SelectItem>
+                    <SelectItem value="logout">Ao sair do sistema</SelectItem>
+                    <SelectItem value="page_specific">Página específica</SelectItem>
+                    <SelectItem value="scheduled">Agendado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
+          />
+
+          <FormField
+            control={form.control}
+            name="showFrequency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Frequência</FormLabel>
+                {form.watch("trigger") === "scheduled" ? (
+                  <Input
+                    value="Uma vez por sessão"
+                    disabled
+                    className="bg-gray-100 text-gray-600"
+                    data-testid="input-popup-frequency-scheduled"
+                  />
+                ) : (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-popup-frequency">
+                        <SelectValue placeholder="Selecione a frequência" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="always">Sempre mostrar</SelectItem>
+                      <SelectItem value="once_per_session">Uma vez por sessão</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         {form.watch("trigger") === "page_specific" && (
           <>
-            <div>
-              <Label htmlFor="popup-target-page">Página de Destino</Label>
-              <Select
-                value={form.watch("targetPage") || ""}
-                onValueChange={(value) => form.setValue("targetPage", value)}
-              >
-                <SelectTrigger data-testid="select-popup-target-page">
-                  <SelectValue placeholder="Selecione a página" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="home">Página Inicial</SelectItem>
-                  <SelectItem value="videos">Vídeos Exclusivos</SelectItem>
-                  <SelectItem value="products">Produtos Digitais</SelectItem>
-                  <SelectItem value="coupons">Cupons</SelectItem>
-                  <SelectItem value="community">Comunidade</SelectItem>
-                  <SelectItem value="profile">Perfil</SelectItem>
-                  <SelectItem value="video_specific">Vídeo Específico</SelectItem>
-                  <SelectItem value="course_specific">Curso Específico</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <FormField
+              control={form.control}
+              name="targetPage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Página de Destino</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-popup-target-page">
+                        <SelectValue placeholder="Selecione a página" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="home">Página Inicial</SelectItem>
+                      <SelectItem value="videos">Vídeos Exclusivos</SelectItem>
+                      <SelectItem value="products">Produtos Digitais</SelectItem>
+                      <SelectItem value="coupons">Cupons</SelectItem>
+                      <SelectItem value="community">Comunidade</SelectItem>
+                      <SelectItem value="profile">Perfil</SelectItem>
+                      <SelectItem value="video_specific">Vídeo Específico</SelectItem>
+                      <SelectItem value="course_specific">Curso Específico</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {form.watch("targetPage") === "video_specific" && (
               <div>
