@@ -56,7 +56,7 @@ const getCategoryLabel = (category: string) => {
 export default function VideoWatchPage() {
   const [location, navigate] = useLocation();
   // Extract video ID from URL - suporta /video/:id, /videos/video/:id, /produtos/video/:id
-  const videoId = location.includes('/video/') 
+  const videoId = location.includes('/video/')
     ? location.split('/video/')[1]?.split('?')[0]
     : null;
 
@@ -81,25 +81,6 @@ export default function VideoWatchPage() {
   const [hasWatchedRegistered, setHasWatchedRegistered] = useState(false);
   const accessControl = useAccessControl();
   const playerRef = useRef<any>(null);
-
-  // Determina o ID do vídeo do YouTube
-  const videoUrl = (resource => {
-    if (!resource) return null;
-    if (resource._type === 'product') return resource.fileUrl;
-    if (resource._type === 'video') return resource.videoUrl;
-    return null;
-  })(resource); // Immediately invoke to get resource data after it's loaded
-
-  const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
-
-  // Hook para rastrear progresso do vídeo
-  useVideoProgress({
-    videoId: youtubeVideoId || '',
-    resourceId: videoId || '',
-    playerRef,
-    enabled: !!user && !!youtubeVideoId && !!videoId && showVideo
-  });
-
 
   // Buscar recurso (produto ou vídeo) de forma inteligente
   const { data: resource, isLoading, error, refetch } = useQuery<any>({
@@ -131,6 +112,25 @@ export default function VideoWatchPage() {
     enabled: !!videoId,
     retry: false,
   });
+
+  // Determina o ID do vídeo do YouTube
+  const videoUrl = (resource => {
+    if (!resource) return null;
+    if (resource._type === 'product') return resource.fileUrl;
+    if (resource._type === 'video') return resource.videoUrl;
+    return null;
+  })(resource); // Immediately invoke to get resource data after it's loaded
+
+  const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
+
+  // Hook para rastrear progresso do vídeo
+  useVideoProgress({
+    videoId: youtubeVideoId || '',
+    resourceId: videoId || '',
+    playerRef,
+    enabled: !!user && !!youtubeVideoId && !!videoId && showVideo
+  });
+
 
   // Determina se é produto ou vídeo
   const product = resource?._type === 'product' ? resource : null;
@@ -655,8 +655,8 @@ export default function VideoWatchPage() {
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
                   <span>
-                    {(product?.createdAt || video?.createdAt) 
-                      ? formatDistanceToNow(new Date(product?.createdAt || video?.createdAt), { addSuffix: true, locale: ptBR }) 
+                    {(product?.createdAt || video?.createdAt)
+                      ? formatDistanceToNow(new Date(product?.createdAt || video?.createdAt), { addSuffix: true, locale: ptBR })
                       : 'Data não disponível'}
                   </span>
                 </div>
