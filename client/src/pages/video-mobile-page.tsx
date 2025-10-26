@@ -63,6 +63,25 @@ const getCategoryLabel = (category: string) => {
   }
 };
 
+// Função para extrair ID do vídeo do YouTube - MOVIDA PARA FORA DO COMPONENTE
+const getYouTubeVideoId = (url: string) => {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
+    /(?:youtu\.be\/)([^&\n?#\?]+)/,
+    /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
+    /(?:youtube\.com\/v\/)([^&\n?#]+)/
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) {
+      return match[1];
+    }
+  }
+
+  return null;
+};
+
 export default function VideoMobilePage() {
   const [location, navigate] = useLocation();
   // Extract video ID from URL - suporta /video/:id, /videos/video/:id, /produtos/video/:id
@@ -129,12 +148,119 @@ export default function VideoMobilePage() {
   const product = resource?._type === 'product' ? resource : null;
   const video = resource?._type === 'video' ? resource : null;
 
+  // Determina o ID do vídeo do YouTube ANTES do hook
+  const videoUrl = video?.videoUrl || product?.fileUrl;
+  const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
+
+  // Hook para rastrear progresso do vídeo - MOVIDO PARA O TOPO, ANTES DOS RETURNS
+  const { stopProgressSaving, saveProgress } = useVideoProgress({
+    videoId: youtubeVideoId || '',
+    resourceId: videoId || '',
+    playerRef,
+    enabled: !!user && !!youtubeVideoId && !!videoId && showVideo
+  });
+
   // Reset video loaded state when video changes
   useEffect(() => {
     setShowVideo(false);
     setIsLoadingVideoContent(true);
     setHasWatchedRegistered(false);
   }, [videoId]);
+
+  // Salvar progresso antes de sair da página
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (saveProgress) {
+        saveProgress();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && saveProgress) {
+        saveProgress();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [saveProgress]);
+
+  // Criar player quando vídeo for mostrado
+  useEffect(() => {
+    if (!showVideo || !youtubeVideoId) {
+      return;
+    }
+
+    const initPlayer = () => {
+      setTimeout(() => {
+        // Limpar player anterior se existir
+        if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+          try {
+            playerRef.current.destroy();
+          } catch (e) {
+            console.log('Error destroying player:', e);
+          }
+          playerRef.current = null;
+        }
+
+        // Criar novo player
+        try {
+          if (window.YT && window.YT.Player) {
+            playerRef.current = new window.YT.Player('youtube-player-container-mobile', {
+              videoId: youtubeVideoId,
+              playerVars: {
+                autoplay: 1,
+                rel: 0,
+                modestbranding: 1,
+                enablejsapi: 1,
+              },
+              events: {
+                onReady: (event: any) => {
+                  console.log('YouTube player ready for video:', youtubeVideoId);
+                },
+                onStateChange: (event: any) => {
+                  // Salvar progresso quando pausar ou parar
+                  if ((event.data === 2 || event.data === 0) && saveProgress) {
+                    saveProgress();
+                  }
+                }
+              },
+            });
+          }
+        } catch (e) {
+          console.error('Error creating YouTube player:', e);
+        }
+      }, 100);
+    };
+
+    // Se YT já está disponível, inicializar
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+    } else {
+      // Caso contrário, aguardar o callback
+      window.onYouTubeIframeAPIReady = initPlayer;
+    }
+
+    // Cleanup
+    return () => {
+      if (stopProgressSaving) {
+        stopProgressSaving();
+      }
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {
+          console.log('Cleanup error:', e);
+        }
+        playerRef.current = null;
+      }
+    };
+  }, [showVideo, youtubeVideoId, stopProgressSaving, saveProgress]);
 
   // Check access when resource loads
   useEffect(() => {
@@ -349,24 +475,6 @@ export default function VideoMobilePage() {
     navigate(product ? '/produtos' : '/videos');
   };
 
-  const getYouTubeVideoId = (url: string) => {
-    const patterns = [
-      /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
-      /(?:youtu\.be\/)([^&\n?#\?]+)/,
-      /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
-      /(?:youtube\.com\/v\/)([^&\n?#]+)/
-    ];
-
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match) {
-        return match[1];
-      }
-    }
-
-    return null;
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -486,117 +594,6 @@ export default function VideoMobilePage() {
       </div>
     );
   }
-
-  const videoUrl = video?.videoUrl || product?.fileUrl;
-  const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
-  console.log("Resource data:", resource);
-  console.log("Product:", product);
-  console.log("Video:", video);
-  console.log("Video URL:", videoUrl);
-  console.log("YouTube video ID:", youtubeVideoId);
-
-  // Hook para rastrear progresso do vídeo
-  const { stopProgressSaving, saveProgress } = useVideoProgress({
-    videoId: youtubeVideoId || '',
-    resourceId: videoId || '',
-    playerRef,
-    enabled: !!user && !!youtubeVideoId && !!videoId && showVideo
-  });
-
-  // Salvar progresso antes de sair da página
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (saveProgress) {
-        saveProgress();
-      }
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden && saveProgress) {
-        saveProgress();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [saveProgress]);
-
-  // Criar player quando vídeo for mostrado
-  useEffect(() => {
-    if (!showVideo || !youtubeVideoId) {
-      return;
-    }
-
-    const initPlayer = () => {
-      setTimeout(() => {
-        // Limpar player anterior se existir
-        if (playerRef.current && typeof playerRef.current.destroy === 'function') {
-          try {
-            playerRef.current.destroy();
-          } catch (e) {
-            console.log('Error destroying player:', e);
-          }
-          playerRef.current = null;
-        }
-
-        // Criar novo player
-        try {
-          if (window.YT && window.YT.Player) {
-            playerRef.current = new window.YT.Player('youtube-player-container-mobile', {
-              videoId: youtubeVideoId,
-              playerVars: {
-                autoplay: 1,
-                rel: 0,
-                modestbranding: 1,
-                enablejsapi: 1,
-              },
-              events: {
-                onReady: (event: any) => {
-                  console.log('YouTube player ready for video:', youtubeVideoId);
-                },
-                onStateChange: (event: any) => {
-                  // Salvar progresso quando pausar ou parar
-                  if ((event.data === 2 || event.data === 0) && saveProgress) {
-                    saveProgress();
-                  }
-                }
-              },
-            });
-          }
-        } catch (e) {
-          console.error('Error creating YouTube player:', e);
-        }
-      }, 100);
-    };
-
-    // Se YT já está disponível, inicializar
-    if (window.YT && window.YT.Player) {
-      initPlayer();
-    } else {
-      // Caso contrário, aguardar o callback
-      window.onYouTubeIframeAPIReady = initPlayer;
-    }
-
-    // Cleanup
-    return () => {
-      if (stopProgressSaving) {
-        stopProgressSaving();
-      }
-      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
-        try {
-          playerRef.current.destroy();
-        } catch (e) {
-          console.log('Cleanup error:', e);
-        }
-        playerRef.current = null;
-      }
-    };
-  }, [showVideo, youtubeVideoId, stopProgressSaving, saveProgress]);
 
   return (
     <div className="min-h-screen bg-background pb-20">

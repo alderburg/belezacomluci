@@ -51,7 +51,24 @@ const getCategoryLabel = (category: string) => {
   }
 };
 
+// Função para extrair ID do vídeo do YouTube - MOVIDA PARA FORA DO COMPONENTE
+const getYouTubeVideoId = (url: string) => {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
+    /(?:youtu\.be\/)([^&\n?#\?]+)/,
+    /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
+    /(?:youtube\.com\/v\/)([^&\n?#]+)/
+  ];
 
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) {
+      return match[1];
+    }
+  }
+
+  return null;
+};
 
 export default function VideoWatchPage() {
   const [location, navigate] = useLocation();
@@ -121,8 +138,8 @@ export default function VideoWatchPage() {
   const videoUrl = product?.fileUrl || video?.videoUrl || null;
   const youtubeVideoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
 
-  // Hook para rastrear progresso do vídeo
-  useVideoProgress({
+  // Hook para rastrear progresso do vídeo - CAPTURANDO O RETORNO
+  const { stopProgressSaving, saveProgress } = useVideoProgress({
     videoId: youtubeVideoId || '',
     resourceId: videoId || '',
     playerRef,
@@ -136,6 +153,116 @@ export default function VideoWatchPage() {
     setIsLoadingVideoContent(true); // Ativar skeleton ao mudar de vídeo
     setHasWatchedRegistered(false); // Reset watch registration for new video
   }, [videoId]);
+
+  // Salvar progresso antes de sair da página
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (saveProgress) {
+        saveProgress();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && saveProgress) {
+        saveProgress();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [saveProgress]);
+
+  // Inicializar YouTube IFrame API e criar player quando vídeo for mostrado
+  useEffect(() => {
+    // Carregar script da YouTube IFrame API
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+  }, []);
+
+  // Criar player quando vídeo for mostrado
+  useEffect(() => {
+    if (!showVideo || !youtubeVideoId) {
+      return;
+    }
+
+    const initPlayer = () => {
+      setTimeout(() => {
+        const playerContainer = document.getElementById('youtube-player-container');
+        if (!playerContainer) return;
+
+        // Limpar player anterior se existir
+        if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+          try {
+            playerRef.current.destroy();
+          } catch (e) {
+            console.log('Error destroying player:', e);
+          }
+          playerRef.current = null;
+        }
+
+        // Limpar o container
+        playerContainer.innerHTML = '';
+
+        // Criar novo player
+        try {
+          playerRef.current = new window.YT.Player(playerContainer, {
+            videoId: youtubeVideoId,
+            playerVars: {
+              autoplay: 1,
+              rel: 0,
+              modestbranding: 1,
+              enablejsapi: 1,
+            },
+            events: {
+              onReady: (event: any) => {
+                console.log('YouTube player ready for video:', youtubeVideoId);
+              },
+              onStateChange: (event: any) => {
+                // Salvar progresso quando pausar ou parar
+                if ((event.data === 2 || event.data === 0) && saveProgress) { // 2 = PAUSED, 0 = ENDED
+                  saveProgress();
+                }
+              }
+            },
+          });
+        } catch (e) {
+          console.error('Error creating YouTube player:', e);
+        }
+      }, 100);
+    };
+
+    // Se YT já está disponível, inicializar
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+    } else {
+      // Caso contrário, aguardar o callback
+      window.onYouTubeIframeAPIReady = initPlayer;
+    }
+
+    // Cleanup
+    return () => {
+      if (stopProgressSaving) {
+        stopProgressSaving();
+      }
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {
+          console.log('Cleanup error:', e);
+        }
+        playerRef.current = null;
+      }
+    };
+  }, [showVideo, youtubeVideoId, stopProgressSaving, saveProgress]);
 
   // Check access when resource loads
   useEffect(() => {
@@ -365,26 +492,6 @@ export default function VideoWatchPage() {
     if (user && !hasWatchedRegistered) {
       watchedMutation.mutate();
     }
-  };
-
-
-
-  const getYouTubeVideoId = (url: string) => {
-    const patterns = [
-      /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
-      /(?:youtu\.be\/)([^&\n?#\?]+)/,
-      /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
-      /(?:youtube\.com\/v\/)([^&\n?#]+)/
-    ];
-
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match) {
-        return match[1];
-      }
-    }
-
-    return null;
   };
 
   if (isLoading) {
