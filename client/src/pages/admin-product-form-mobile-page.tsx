@@ -25,21 +25,22 @@ import { useEffect } from 'react';
 
 export default function AdminProductFormMobilePage() {
   const [match, params] = useRoute("/admin/products-mobile/edit/:id");
-  const productId = match && params?.id ? params.id : undefined;
+  const productId = match && params && params.id ? String(params.id) : undefined;
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const isEditing = Boolean(productId);
+  const isEditing = Boolean(match && productId);
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ['/api/admin/products', productId],
     queryFn: async () => {
+      if (!productId) throw new Error('ID não fornecido');
       const res = await fetch(`/api/admin/products/${productId}`);
       if (!res.ok) throw new Error('Erro ao carregar produto');
       return res.json();
     },
-    enabled: isEditing && !!productId,
+    enabled: Boolean(isEditing && productId),
   });
 
   const { data: categories = [] } = useQuery({

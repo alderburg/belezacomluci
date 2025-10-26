@@ -22,8 +22,8 @@ export default function AdminCategoryFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/categories-mobile/edit/:id");
-  const categoryId = match && params?.id ? params.id : undefined;
-  const isEditing = Boolean(categoryId);
+  const categoryId = match && params && params.id ? String(params.id) : undefined;
+  const isEditing = Boolean(match && categoryId);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -32,11 +32,12 @@ export default function AdminCategoryFormMobilePage() {
   const { data: category, isLoading } = useQuery<Category>({
     queryKey: ['/api/categories', categoryId],
     queryFn: async () => {
+      if (!categoryId) throw new Error('ID não fornecido');
       const res = await fetch(`/api/categories/${categoryId}`);
       if (!res.ok) throw new Error('Erro ao carregar categoria');
       return res.json();
     },
-    enabled: isEditing && !!categoryId,
+    enabled: Boolean(isEditing && categoryId),
   });
 
   const form = useForm<z.infer<typeof insertCategorySchema>>({

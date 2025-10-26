@@ -23,8 +23,8 @@ export default function AdminNotificationFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/notifications-mobile/edit/:id");
-  const notificationId = match && params?.id ? params.id : undefined;
-  const isEditing = Boolean(notificationId);
+  const notificationId = match && params && params.id ? String(params.id) : undefined;
+  const isEditing = Boolean(match && notificationId);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -33,11 +33,12 @@ export default function AdminNotificationFormMobilePage() {
   const { data: notification, isLoading } = useQuery<Notification>({
     queryKey: ['/api/admin/notifications', notificationId],
     queryFn: async () => {
+      if (!notificationId) throw new Error('ID não fornecido');
       const res = await fetch(`/api/admin/notifications/${notificationId}`);
       if (!res.ok) throw new Error('Erro ao carregar notificação');
       return res.json();
     },
-    enabled: isEditing && !!notificationId,
+    enabled: Boolean(isEditing && notificationId),
   });
 
   const form = useForm<z.infer<typeof insertNotificationSchema>>({

@@ -25,21 +25,22 @@ import { useEffect } from 'react';
 
 export default function AdminVideoFormMobilePage() {
   const [match, params] = useRoute("/admin/videos-mobile/edit/:id");
-  const videoId = match && params?.id ? params.id : undefined;
+  const videoId = match && params && params.id ? String(params.id) : undefined;
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const isEditing = Boolean(videoId);
+  const isEditing = Boolean(match && videoId);
 
   const { data: video, isLoading } = useQuery<Video>({
     queryKey: ['/api/admin/videos', videoId],
     queryFn: async () => {
+      if (!videoId) throw new Error('ID não fornecido');
       const res = await fetch(`/api/admin/videos/${videoId}`);
       if (!res.ok) throw new Error('Erro ao carregar vídeo');
       return res.json();
     },
-    enabled: isEditing && !!videoId,
+    enabled: Boolean(isEditing && videoId),
   });
 
   const { data: categories = [] } = useQuery({

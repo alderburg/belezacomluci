@@ -23,8 +23,8 @@ export default function AdminPopupFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/popups-mobile/edit/:id");
-  const popupId = match && params?.id ? params.id : undefined;
-  const isEditing = Boolean(popupId);
+  const popupId = match && params && params.id ? String(params.id) : undefined;
+  const isEditing = Boolean(match && popupId);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -33,11 +33,12 @@ export default function AdminPopupFormMobilePage() {
   const { data: popup, isLoading } = useQuery<Popup>({
     queryKey: ['/api/admin/popups', popupId],
     queryFn: async () => {
+      if (!popupId) throw new Error('ID não fornecido');
       const res = await fetch(`/api/admin/popups/${popupId}`);
       if (!res.ok) throw new Error('Erro ao carregar popup');
       return res.json();
     },
-    enabled: isEditing && !!popupId,
+    enabled: Boolean(isEditing && popupId),
   });
 
   const form = useForm<z.infer<typeof insertPopupSchema>>({

@@ -24,21 +24,22 @@ import { useEffect } from 'react';
 
 export default function AdminCouponFormMobilePage() {
   const [match, params] = useRoute("/admin/coupons-mobile/edit/:id");
-  const couponId = match && params?.id ? params.id : undefined;
+  const couponId = match && params && params.id ? String(params.id) : undefined;
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const isEditing = Boolean(couponId);
+  const isEditing = Boolean(match && couponId);
 
   const { data: coupon, isLoading } = useQuery<Coupon>({
     queryKey: ['/api/admin/coupons', couponId],
     queryFn: async () => {
+      if (!couponId) throw new Error('ID não fornecido');
       const res = await fetch(`/api/admin/coupons/${couponId}`);
       if (!res.ok) throw new Error('Erro ao carregar cupom');
       return res.json();
     },
-    enabled: isEditing && !!couponId,
+    enabled: Boolean(isEditing && couponId),
   });
 
   const { data: categories = [] } = useQuery({

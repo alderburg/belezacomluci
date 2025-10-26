@@ -22,8 +22,8 @@ export default function AdminBannerFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/banners-mobile/edit/:id");
-  const bannerId = match && params?.id ? params.id : undefined;
-  const isEditing = Boolean(bannerId);
+  const bannerId = match && params && params.id ? String(params.id) : undefined;
+  const isEditing = Boolean(match && bannerId);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -33,11 +33,12 @@ export default function AdminBannerFormMobilePage() {
   const { data: banner, isLoading } = useQuery<Banner>({
     queryKey: ['/api/admin/banners', bannerId],
     queryFn: async () => {
+      if (!bannerId) throw new Error('ID não fornecido');
       const res = await fetch(`/api/admin/banners/${bannerId}`);
       if (!res.ok) throw new Error('Erro ao carregar banner');
       return res.json();
     },
-    enabled: isEditing && !!bannerId,
+    enabled: Boolean(isEditing && bannerId),
   });
 
   const form = useForm<z.infer<typeof insertBannerSchema>>({
