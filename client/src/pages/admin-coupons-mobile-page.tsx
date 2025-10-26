@@ -94,14 +94,14 @@ export default function AdminCouponsMobilePage() {
                       <Badge className="bg-green-100 text-green-700 text-xs">
                         {coupon.code}
                       </Badge>
-                      <Badge className="bg-blue-100 text-blue-700 text-xs">
-                        {coupon.discount}
-                      </Badge>
-                      {!coupon.isActive && (
-                        <Badge className="bg-red-100 text-red-700 text-xs">
-                          Inativo
+                      {coupon.discount && coupon.discount.trim() !== '' && (
+                        <Badge className="bg-blue-100 text-blue-700 text-xs">
+                          {coupon.discount}
                         </Badge>
                       )}
+                      <Badge className={`text-xs ${coupon.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {coupon.isActive ? 'Ativo' : 'Inativo'}
+                      </Badge>
                     </div>
                   </div>
                 </div>
