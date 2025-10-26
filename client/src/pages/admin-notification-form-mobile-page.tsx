@@ -39,7 +39,13 @@ export default function AdminNotificationFormMobilePage() {
   }
 
   const { data: notification, isLoading } = useQuery<Notification>({
-    queryKey: [`/api/admin/notifications/${notificationId}`],
+    queryKey: ['/api/admin/notifications', notificationId],
+    queryFn: async () => {
+      if (!notificationId) throw new Error('ID não fornecido');
+      const res = await fetch(`/api/admin/notifications/${notificationId}`);
+      if (!res.ok) throw new Error('Erro ao carregar notificação');
+      return res.json();
+    },
     enabled: Boolean(isEditing && notificationId),
   });
 
