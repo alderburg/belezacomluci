@@ -35,6 +35,7 @@ export default function Sidebar() {
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { viewMode, setViewMode } = useAdmin();
   const [lastResourceType, setLastResourceType] = useState<'product' | 'video' | null>(null);
+  const [previousLocation, setPreviousLocation] = useState<string>('');
 
   // Detectar se está em uma página de vídeo ou playlist
   const isVideoPage = location.startsWith('/video/');
@@ -44,6 +45,20 @@ export default function Sidebar() {
     : isPlaylistPage 
     ? location.split('/playlist/')[1] 
     : null;
+
+  // Determinar tipo inicial baseado na navegação anterior
+  useEffect(() => {
+    // Se mudou de /produtos para /video ou /playlist, assume que é produto
+    // Se mudou de /videos para /video ou /playlist, assume que é vídeo
+    if ((isVideoPage || isPlaylistPage) && !lastResourceType) {
+      if (previousLocation === '/produtos') {
+        setLastResourceType('product');
+      } else if (previousLocation === '/videos') {
+        setLastResourceType('video');
+      }
+    }
+    setPreviousLocation(location);
+  }, [location]);
 
   // Buscar informações do recurso para identificar se é produto ou vídeo exclusivo
   const { data: currentResource } = useQuery<any>({
