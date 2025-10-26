@@ -26,22 +26,14 @@ import { useEffect } from 'react';
 export default function AdminProductFormMobilePage() {
   const [match, params] = useRoute("/admin/products-mobile/edit/:id");
   const productId = match && params && params.id ? String(params.id) : undefined;
-  const [, setLocation] = useLocation();
+  const [, setLocation, navigation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = Boolean(match && productId);
-
-  const { data: product, isLoading } = useQuery<Product>({
-    queryKey: ['/api/admin/products', productId],
-    queryFn: async () => {
-      if (!productId) throw new Error('ID não fornecido');
-      const res = await fetch(`/api/admin/products/${productId}`);
-      if (!res.ok) throw new Error('Erro ao carregar produto');
-      return res.json();
-    },
-    enabled: Boolean(isEditing && productId),
-  });
+  
+  const productFromState = navigation?.state?.productData;
+  const product = productFromState;
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
@@ -224,12 +216,7 @@ export default function AdminProductFormMobilePage() {
         </div>
       </div>
 
-      {isEditing && isLoading ? (
-        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
-      ) : (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="product-title">Título <span className="text-destructive">*</span></Label>
           <Input
@@ -361,7 +348,6 @@ export default function AdminProductFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Produto" : "Criar Produto"}
         </Button>
       </form>
-      )}
     </div>
   );
 }

@@ -19,7 +19,7 @@ import { useEffect } from 'react';
 
 export default function AdminNotificationFormMobilePage() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const [, setLocation, navigation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/notifications-mobile/edit/:id");
@@ -30,16 +30,8 @@ export default function AdminNotificationFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  const { data: notification, isLoading } = useQuery<Notification>({
-    queryKey: ['/api/admin/notifications', notificationId],
-    queryFn: async () => {
-      if (!notificationId) throw new Error('ID não fornecido');
-      const res = await fetch(`/api/admin/notifications/${notificationId}`);
-      if (!res.ok) throw new Error('Erro ao carregar notificação');
-      return res.json();
-    },
-    enabled: Boolean(isEditing && notificationId),
-  });
+  const notificationFromState = navigation?.state?.notificationData;
+  const notification = notificationFromState;
 
   const form = useForm<z.infer<typeof insertNotificationSchema>>({
     resolver: zodResolver(insertNotificationSchema),
@@ -133,12 +125,7 @@ export default function AdminNotificationFormMobilePage() {
         </div>
       </div>
 
-      {isEditing && isLoading ? (
-        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
-      ) : (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="notification-title">Título <span className="text-destructive">*</span></Label>
           <Input
@@ -252,7 +239,6 @@ export default function AdminNotificationFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Notificação" : "Criar Notificação"}
         </Button>
       </form>
-      )}
     </div>
   );
 }

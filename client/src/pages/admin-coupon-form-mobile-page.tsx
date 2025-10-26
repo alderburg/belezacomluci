@@ -25,22 +25,14 @@ import { useEffect } from 'react';
 export default function AdminCouponFormMobilePage() {
   const [match, params] = useRoute("/admin/coupons-mobile/edit/:id");
   const couponId = match && params && params.id ? String(params.id) : undefined;
-  const [, setLocation] = useLocation();
+  const [, setLocation, navigation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = Boolean(match && couponId);
-
-  const { data: coupon, isLoading } = useQuery<Coupon>({
-    queryKey: ['/api/admin/coupons', couponId],
-    queryFn: async () => {
-      if (!couponId) throw new Error('ID não fornecido');
-      const res = await fetch(`/api/admin/coupons/${couponId}`);
-      if (!res.ok) throw new Error('Erro ao carregar cupom');
-      return res.json();
-    },
-    enabled: Boolean(isEditing && couponId),
-  });
+  
+  const couponFromState = navigation?.state?.couponData;
+  const coupon = couponFromState;
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
@@ -151,12 +143,7 @@ export default function AdminCouponFormMobilePage() {
         </div>
       </div>
 
-      {isEditing && isLoading ? (
-        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
-      ) : (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="coupon-code">Código <span className="text-destructive">*</span></Label>
@@ -326,7 +313,6 @@ export default function AdminCouponFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Cupom" : "Criar Cupom"}
         </Button>
       </form>
-      )}
     </div>
   );
 }

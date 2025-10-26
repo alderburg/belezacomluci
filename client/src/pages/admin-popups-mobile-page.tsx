@@ -39,7 +39,7 @@ export default function AdminPopupsMobilePage() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/popups"] });
+      queryClient.invalidateQueries({ queryKey: ["/popups"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/popups"] });
       toast({
         title: "Sucesso",
@@ -165,7 +165,6 @@ export default function AdminPopupsMobilePage() {
                       disabled={editingId === popup.id}
                       data-testid={`button-edit-${popup.id}`}
                     >
-                      <Edit className="h-4 w-4 mr-2" />
                       {editingId === popup.id ? "Carregando..." : "Editar"}
                     </Button>
                     <Button

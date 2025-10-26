@@ -18,7 +18,7 @@ import { useEffect } from 'react';
 
 export default function AdminBannerFormMobilePage() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const [, setLocation, navigation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/banners-mobile/edit/:id");
@@ -29,16 +29,8 @@ export default function AdminBannerFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  const { data: banner, isLoading } = useQuery<Banner>({
-    queryKey: ['/api/admin/banners', bannerId],
-    queryFn: async () => {
-      if (!bannerId) throw new Error('ID não fornecido');
-      const res = await fetch(`/api/admin/banners/${bannerId}`);
-      if (!res.ok) throw new Error('Erro ao carregar banner');
-      return res.json();
-    },
-    enabled: Boolean(isEditing && bannerId),
-  });
+  const bannerFromState = navigation?.state?.bannerData;
+  const banner = bannerFromState;
 
   const form = useForm<z.infer<typeof insertBannerSchema>>({
     resolver: zodResolver(insertBannerSchema),
@@ -144,12 +136,7 @@ export default function AdminBannerFormMobilePage() {
         </div>
       </div>
 
-      {isEditing && isLoading ? (
-        <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
-      ) : (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="pt-20 px-4 space-y-4">
         <div>
           <Label htmlFor="banner-title">Título <span className="text-destructive">*</span></Label>
           <Input
@@ -336,7 +323,6 @@ export default function AdminBannerFormMobilePage() {
           {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Banner" : "Criar Banner"}
         </Button>
       </form>
-      )}
     </div>
   );
 }

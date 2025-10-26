@@ -72,13 +72,19 @@ export default function AdminVideosMobilePage() {
     setLocation('/admin/videos-mobile/new');
   };
 
-  const handleEdit = (video: Video) => {
-    setEditingId(video.id);
-    // Pequeno delay para mostrar o loading antes de navegar
-    setTimeout(() => {
-      setLocation(`/admin/videos-mobile/edit/${video.id}`);
-      setEditingId(null);
-    }, 100);
+  const handleEdit = async (id: number) => {
+    try {
+      const response = await fetch(`/api/admin/videos/${id}`);
+      if (!response.ok) throw new Error('Erro ao carregar vídeo');
+      const videoData = await response.json();
+      setLocation(`/admin/videos-mobile/edit/${id}`, { state: { videoData } });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível carregar os dados do vídeo",
+      });
+    }
   };
 
   const handleDeleteClick = (video: Video) => {
@@ -169,7 +175,7 @@ export default function AdminVideosMobilePage() {
                     variant="outline"
                     size="sm"
                     className="flex-1"
-                    onClick={() => handleEdit(video)}
+                    onClick={() => handleEdit(Number(video.id))}
                     disabled={editingId === video.id}
                     data-testid={`button-edit-${video.id}`}
                   >
