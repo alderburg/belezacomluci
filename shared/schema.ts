@@ -671,6 +671,7 @@ export const insertBannerSchema = createInsertSchema(banners).omit({
   updatedAt: true,
 }).extend({
   title: z.string().min(1, "Título é obrigatório"),
+  description: z.string().min(1, "Descrição é obrigatória"),
   showTitle: z.boolean().optional().default(true),
   showDescription: z.boolean().optional().default(true),
   showButton: z.boolean().optional().default(true),

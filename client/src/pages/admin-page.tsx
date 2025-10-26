@@ -2072,13 +2072,16 @@ export default function AdminPage() {
                         </div>
 
                         <div>
-                          <Label htmlFor="banner-description">Descrição</Label>
+                          <Label htmlFor="banner-description">Descrição <span className="text-destructive">*</span></Label>
                           <Textarea
                             id="banner-description"
                             {...bannerForm.register("description")}
                             placeholder="Descrição do banner"
                             data-testid="textarea-banner-description"
                           />
+                          {bannerForm.formState.errors.description && (
+                            <p className="text-sm text-destructive mt-1">{bannerForm.formState.errors.description.message}</p>
+                          )}
                         </div>
 
                         <div>
