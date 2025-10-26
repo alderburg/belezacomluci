@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
+import { useAdmin } from "@/contexts/admin-context";
+import { useEffect } from "react";
 import { 
   Settings,
   ArrowLeft,
@@ -16,7 +18,8 @@ import {
   MessageSquare,
   Bell,
   FolderTree,
-  Users
+  Users,
+  Eye
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -30,7 +33,18 @@ interface AdminMenuItem {
 
 export default function AdminMobilePage() {
   const { user } = useAuth();
+  const { viewMode, setViewMode, setAdminMode } = useAdmin();
   const [, setLocation] = useLocation();
+
+  // Ativar modo admin quando entrar na página
+  useEffect(() => {
+    setAdminMode(true);
+
+    // Limpar modo admin quando sair da página
+    return () => {
+      setAdminMode(false);
+    };
+  }, [setAdminMode]);
 
   // Redirect non-admin users
   if (!user?.isAdmin) {
@@ -153,12 +167,30 @@ export default function AdminMobilePage() {
               <p className="text-sm text-muted-foreground mb-2">
                 Administrador
               </p>
-              <Badge 
-                variant="default"
-                className="text-xs px-2 py-1 bg-amber-500 text-white hover:bg-amber-600"
-              >
-                Modo Admin
-              </Badge>
+              
+              {/* Seletor de Modo de Visualização */}
+              <div className="flex items-center gap-2 bg-white/80 rounded-lg p-2 border border-pink-200">
+                <Eye className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Ver como:</span>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant={viewMode === 'premium' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setViewMode('premium')}
+                    className="h-7 px-2 text-xs font-medium"
+                  >
+                    Premium
+                  </Button>
+                  <Button
+                    variant={viewMode === 'free' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setViewMode('free')}
+                    className="h-7 px-2 text-xs font-medium"
+                  >
+                    Free
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
