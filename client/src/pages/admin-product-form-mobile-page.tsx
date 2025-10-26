@@ -40,16 +40,31 @@ export default function AdminProductFormMobilePage() {
   const queryClient = useQueryClient();
   const isEditing = Boolean(match && productId);
 
-  const { data: product, isLoading } = useQuery<Product>({
+  const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ['/api/admin/products', productId],
     queryFn: async () => {
       if (!productId) throw new Error('ID não fornecido');
+      console.log('Buscando produto para edição:', productId);
       const res = await fetch(`/api/admin/products/${productId}`);
       if (!res.ok) throw new Error('Erro ao carregar produto');
-      return res.json();
+      const data = await res.json();
+      console.log('Produto carregado:', data);
+      return data;
     },
     enabled: Boolean(isEditing && productId),
   });
+
+  // Mostrar erro se houver
+  useEffect(() => {
+    if (error) {
+      console.error('Erro ao carregar produto:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível carregar os dados do produto",
+      });
+    }
+  }, [error, toast]);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
@@ -72,6 +87,7 @@ export default function AdminProductFormMobilePage() {
   // Reset form when product data loads or ID changes
   useEffect(() => {
     if (product && isEditing) {
+      console.log('Populando formulário com dados do produto:', product);
       form.reset({
         title: product.title,
         description: product.description || "",
@@ -83,6 +99,7 @@ export default function AdminProductFormMobilePage() {
         isActive: product.isActive ?? true,
       });
     } else if (!isEditing) {
+      console.log('Resetando formulário para novo produto');
       form.reset({
         title: "",
         description: "",
@@ -94,7 +111,7 @@ export default function AdminProductFormMobilePage() {
         isActive: true,
       });
     }
-  }, [productId, isEditing]);
+  }, [product, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertProductSchema>) => {

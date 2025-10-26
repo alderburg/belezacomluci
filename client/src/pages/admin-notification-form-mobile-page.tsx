@@ -78,7 +78,7 @@ export default function AdminNotificationFormMobilePage() {
           new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
       });
     }
-  }, [notificationId, isEditing]);
+  }, [notification, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {

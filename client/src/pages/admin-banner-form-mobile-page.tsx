@@ -74,14 +74,14 @@ export default function AdminBannerFormMobilePage() {
         showButton: banner.showButton ?? true,
         isActive: banner.isActive,
         opensCouponsModal: banner.opensCouponsModal ?? false,
-        startDateTime: banner.startDateTime ? 
+        startDateTime: banner.startDateTime ?
           new Date(banner.startDateTime).toISOString().slice(0, 16) : "",
-        endDateTime: banner.endDateTime ? 
+        endDateTime: banner.endDateTime ?
           new Date(banner.endDateTime).toISOString().slice(0, 16) : "",
         videoId: banner.videoId || "",
       });
     }
-  }, [banner, isEditing]);
+  }, [banner, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {
