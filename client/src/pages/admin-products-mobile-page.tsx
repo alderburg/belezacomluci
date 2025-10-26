@@ -34,6 +34,8 @@ export default function AdminProductsMobilePage() {
     const labels: Record<string, string> = {
       'ebook': 'E-book',
       'course': 'Curso',
+      'course_video': 'Curso - Vídeo',
+      'course_playlist': 'Curso - Playlist',
       'pdf': 'PDF',
       'checklist': 'Checklist'
     };
@@ -99,7 +101,7 @@ export default function AdminProductsMobilePage() {
                           Premium
                         </Badge>
                       )}
-                      <Badge className="bg-blue-100 text-blue-700 text-xs">
+                      <Badge className={`text-xs ${product.type === 'course_playlist' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
                         {getProductTypeLabel(product.type)}
                       </Badge>
                       {!product.isActive && (
