@@ -62,7 +62,6 @@ const getCategoryLabel = (category: string) => {
 };
 
 export default function VideoMobilePage() {
-  
   const [location, navigate] = useLocation();
   // Extract video ID from URL path manually
   const videoId = location.split('/').pop();
