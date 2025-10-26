@@ -77,7 +77,7 @@ export default function AdminBannerFormMobilePage() {
         videoId: banner.videoId || "",
       });
     }
-  }, [banner, isEditing]);
+  }, [banner, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {

@@ -68,7 +68,7 @@ export default function AdminVideoFormMobilePage() {
         isExclusive: video.isExclusive ?? false,
       });
     }
-  }, [video, isEditing]);
+  }, [video, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertVideoSchema>) => {

@@ -68,7 +68,7 @@ export default function AdminProductFormMobilePage() {
         isActive: product.isActive ?? true,
       });
     }
-  }, [product, isEditing]);
+  }, [product, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertProductSchema>) => {
