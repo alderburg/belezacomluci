@@ -183,29 +183,24 @@ export default function MobileBottomNav() {
     }
     
     // Lógica especial para Vídeos Exclusivos e Produtos Digitais
-    // Quando estiver em uma página de vídeo/playlist, verifica se é produto ou vídeo exclusivo
     if (href === "/videos") {
-      // Ativa se estiver na lista de vídeos OU se estiver vendo um vídeo exclusivo
-      // Usa o último tipo conhecido para evitar piscar durante o carregamento
-      const resourceType = currentResource?._type || lastResourceType;
-      const isVideoActive = location === "/videos" || 
+      // Ativa se estiver em qualquer página de vídeos OU se o tipo for video
+      const isInVideosSection = location.startsWith('/videos');
+      const resourceType = lastResourceType;
+      const isVideoActive = isInVideosSection || 
         ((isVideoPage || isPlaylistPage) && resourceType === 'video');
       
-      if (isVideoPage || isPlaylistPage) {
-        console.log('[MobileNav] Verificando /videos - resourceType:', resourceType, 'isActive:', isVideoActive);
-      }
+      console.log('[MobileNav] Verificando /videos - location:', location, 'isInVideosSection:', isInVideosSection, 'resourceType:', resourceType, 'isActive:', isVideoActive);
       
       return isVideoActive;
     } else if (href === "/produtos") {
-      // Ativa se estiver na lista de produtos OU se estiver vendo um produto digital
-      // Usa o último tipo conhecido para evitar piscar durante o carregamento
-      const resourceType = currentResource?._type || lastResourceType;
-      const isProductActive = location === "/produtos" || 
+      // Ativa se estiver em qualquer página de produtos OU se o tipo for product
+      const isInProductsSection = location.startsWith('/produtos');
+      const resourceType = lastResourceType;
+      const isProductActive = isInProductsSection || 
         ((isVideoPage || isPlaylistPage) && resourceType === 'product');
       
-      if (isVideoPage || isPlaylistPage) {
-        console.log('[MobileNav] Verificando /produtos - resourceType:', resourceType, 'isActive:', isProductActive);
-      }
+      console.log('[MobileNav] Verificando /produtos - location:', location, 'isInProductsSection:', isInProductsSection, 'resourceType:', resourceType, 'isActive:', isProductActive);
       
       return isProductActive;
     }
