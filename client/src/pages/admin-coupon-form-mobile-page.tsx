@@ -23,7 +23,8 @@ import { z } from 'zod';
 import { useEffect } from 'react';
 
 export default function AdminCouponFormMobilePage() {
-  const { id: couponId } = useParams<{ id?: string }>();
+  const params = useParams() as { id?: string };
+  const couponId = params.id;
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();

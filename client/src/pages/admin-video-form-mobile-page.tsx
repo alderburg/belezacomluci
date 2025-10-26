@@ -24,7 +24,8 @@ import { z } from 'zod';
 import { useEffect } from 'react';
 
 export default function AdminVideoFormMobilePage() {
-  const { id: videoId } = useParams<{ id?: string }>();
+  const params = useParams() as { id?: string };
+  const videoId = params.id;
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();

@@ -24,7 +24,8 @@ import { z } from 'zod';
 import { useEffect } from 'react';
 
 export default function AdminProductFormMobilePage() {
-  const { id: productId } = useParams<{ id?: string }>();
+  const params = useParams() as { id?: string };
+  const productId = params.id;
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
