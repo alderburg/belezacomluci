@@ -1039,10 +1039,10 @@ export default function PlaylistPage() {
               <div className="lg:col-span-1">
                 <Card>
                   <div className="p-4 border-b border-border">
-                    <h3 className="font-semibold text-foreground">Conteúdo de {product?.title || 'Carregando...'}</h3>
-                    {product?.description && (
+                    <h3 className="font-semibold text-foreground">Conteúdo de {resource?.title || 'Playlist'}</h3>
+                    {resource?.description && (
                       <p className="text-sm text-muted-foreground mt-2">
-                        {product.description}
+                        {resource.description}
                       </p>
                     )}
                     <p className="text-sm text-muted-foreground mt-1">
@@ -1116,7 +1116,7 @@ export default function PlaylistPage() {
             <div className="h-full flex flex-col">
               <div className="p-4 border-b border-border">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-foreground">Conteúdo de {product?.title || 'nome do curso'}</h3>
+                  <h3 className="font-semibold text-foreground">Conteúdo de {resource?.title || 'Playlist'}</h3>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -1125,9 +1125,9 @@ export default function PlaylistPage() {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                {product?.description && (
+                {resource?.description && (
                   <p className="text-sm text-muted-foreground mt-2">
-                    {product.description}
+                    {resource.description}
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground mt-1">

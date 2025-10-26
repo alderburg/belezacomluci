@@ -670,7 +670,7 @@ export default function PlaylistMobilePage() {
               {resource?.title || 'Playlist'}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {product ? 'Curso' : 'Playlist de vídeos'}
+              {product ? 'Curso' : 'Vídeos exclusivos'}
             </p>
           </div>
           <Button
