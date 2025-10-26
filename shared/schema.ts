@@ -704,6 +704,8 @@ export const insertPopupSchema = createInsertSchema(popups).omit({
   id: true,
   createdAt: true,
 }).extend({
+  title: z.string().min(1, "O título é obrigatório"),
+  description: z.string().min(1, "A descrição é obrigatória"),
   imageUrl: z.string().min(1, "A imagem do popup é obrigatória"),
   startDateTime: z.string().optional().nullable().transform((str) => {
     if (!str || str.trim() === '') return null;
