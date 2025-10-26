@@ -74,7 +74,10 @@ export default function AdminProductsMobilePage() {
 
   const handleEditClick = (productId: string) => {
     setEditingId(productId);
-    setLocation(`/admin/products-mobile/edit/${productId}`);
+    setTimeout(() => {
+      setLocation(`/admin/products-mobile/edit/${productId}`);
+      setEditingId(null);
+    }, 100);
   };
 
   const handleDeleteClick = (product: Product) => {
@@ -178,7 +181,11 @@ export default function AdminProductsMobilePage() {
                     disabled={editingId === product.id}
                     data-testid={`button-edit-${product.id}`}
                   >
-                    <Edit className="h-4 w-4 mr-2" />
+                    {editingId === product.id ? (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    ) : (
+                      <Edit className="h-4 w-4 mr-2" />
+                    )}
                     {editingId === product.id ? "Carregando..." : "Editar"}
                   </Button>
                   <Button

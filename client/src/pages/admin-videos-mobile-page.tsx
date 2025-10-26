@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { ArrowLeft, Plus, Video as VideoIcon, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Video as VideoIcon, Edit, Trash2, Pencil } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useDataSync } from '@/hooks/use-data-sync';
@@ -72,9 +72,13 @@ export default function AdminVideosMobilePage() {
     setLocation('/admin/videos-mobile/new');
   };
 
-  const handleEditClick = (videoId: string) => {
-    setEditingId(videoId);
-    setLocation(`/admin/videos-mobile/edit/${videoId}`);
+  const handleEdit = (video: Video) => {
+    setEditingId(video.id);
+    // Pequeno delay para mostrar o loading antes de navegar
+    setTimeout(() => {
+      setLocation(`/admin/videos-mobile/edit/${video.id}`);
+      setEditingId(null);
+    }, 100);
   };
 
   const handleDeleteClick = (video: Video) => {
@@ -165,11 +169,15 @@ export default function AdminVideosMobilePage() {
                     variant="outline"
                     size="sm"
                     className="flex-1"
-                    onClick={() => handleEditClick(video.id)}
+                    onClick={() => handleEdit(video)}
                     disabled={editingId === video.id}
                     data-testid={`button-edit-${video.id}`}
                   >
-                    <Edit className="h-4 w-4 mr-2" />
+                    {editingId === video.id ? (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    ) : (
+                      <Edit className="h-4 w-4 mr-2" />
+                    )}
                     {editingId === video.id ? "Carregando..." : "Editar"}
                   </Button>
                   <Button

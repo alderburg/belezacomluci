@@ -132,12 +132,8 @@ export default function AdminCouponFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Carregando...</p>
-      </div>
-    );
+  if (isEditing && isLoading) {
+    return null;
   }
 
   return (

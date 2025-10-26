@@ -189,12 +189,8 @@ export default function AdminVideoFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Carregando...</p>
-      </div>
-    );
+  if (isEditing && isLoading) {
+    return null; // Não renderizar nada enquanto carrega na edição
   }
 
   return (
