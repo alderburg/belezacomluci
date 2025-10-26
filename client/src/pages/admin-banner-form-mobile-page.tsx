@@ -96,6 +96,10 @@ export default function AdminBannerFormMobilePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      // Invalidar também a query individual do banner editado
+      if (isEditing && bannerId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${bannerId}`] });
+      }
       toast({
         title: "Sucesso",
         description: isEditing ? "Banner atualizado!" : "Banner criado!",
