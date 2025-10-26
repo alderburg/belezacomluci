@@ -106,7 +106,7 @@ export default function AdminVideoFormMobilePage() {
         isExclusive: false,
       });
     }
-  }, [video, isEditing, form]);
+  }, [video, isEditing, videoId]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertVideoSchema>) => {
@@ -467,6 +467,7 @@ export default function AdminVideoFormMobilePage() {
             <div>
               <Label htmlFor="video-type">Tipo <span className="text-destructive">*</span></Label>
               <Select
+                key={`type-${videoId || 'new'}-${form.watch("type")}`}
                 value={form.watch("type") || "video"}
                 onValueChange={(value) => form.setValue("type", value)}
               >
@@ -487,6 +488,7 @@ export default function AdminVideoFormMobilePage() {
             <div>
               <Label htmlFor="video-category">Categoria <span className="text-destructive">*</span></Label>
               <Select
+                key={`category-${videoId || 'new'}-${form.watch("categoryId")}`}
                 value={form.watch("categoryId") || ""}
                 onValueChange={(value) => form.setValue("categoryId", value)}
               >

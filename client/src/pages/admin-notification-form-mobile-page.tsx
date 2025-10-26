@@ -109,7 +109,7 @@ export default function AdminNotificationFormMobilePage() {
         endDateTime: "",
       });
     }
-  }, [notification, isEditing, form]);
+  }, [notification, isEditing, notificationId]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {
