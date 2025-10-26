@@ -143,6 +143,25 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Admin alias route for getting single video
+  app.get("/api/admin/videos/:id", async (req, res) => {
+    try {
+      const videoId = req.params.id;
+      const video = await storage.getVideo(videoId);
+
+      if (!video) {
+        return res.status(404).json({ message: "Video not found", videoId });
+      }
+
+      res.json(video);
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to fetch video",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Rota para criar vídeo
   app.post('/api/videos', async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
@@ -353,6 +372,19 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Admin alias route for getting single product
+  app.get("/api/admin/products/:id", async (req, res) => {
+    try {
+      const product = await storage.getProduct(req.params.id);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      res.json(product);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch product" });
+    }
+  });
+
   app.post("/api/products", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
       return res.status(403).json({ message: "Admin access required" });
@@ -474,6 +506,32 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Get single coupon by ID
+  app.get("/api/coupons/:id", async (req, res) => {
+    try {
+      const coupon = await storage.getCoupon(req.params.id);
+      if (!coupon) {
+        return res.status(404).json({ message: "Coupon not found" });
+      }
+      res.json(coupon);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch coupon" });
+    }
+  });
+
+  // Admin alias route for getting single coupon
+  app.get("/api/admin/coupons/:id", async (req, res) => {
+    try {
+      const coupon = await storage.getCoupon(req.params.id);
+      if (!coupon) {
+        return res.status(404).json({ message: "Coupon not found" });
+      }
+      res.json(coupon);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch coupon" });
+    }
+  });
+
   app.post("/api/coupons", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
       return res.status(403).json({ message: "Admin access required" });
@@ -559,6 +617,19 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.get("/api/categories/:id", async (req, res) => {
+    try {
+      const category = await storage.getCategory(req.params.id);
+      if (!category) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+      res.json(category);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch category" });
+    }
+  });
+
+  // Admin alias route for getting single category
+  app.get("/api/admin/categories/:id", async (req, res) => {
     try {
       const category = await storage.getCategory(req.params.id);
       if (!category) {
@@ -673,6 +744,32 @@ export function registerRoutes(app: Express): Server {
       res.json(banners);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch banners" });
+    }
+  });
+
+  // Get single banner by ID
+  app.get("/api/banners/:id", async (req, res) => {
+    try {
+      const banner = await storage.getBanner(req.params.id);
+      if (!banner) {
+        return res.status(404).json({ message: "Banner not found" });
+      }
+      res.json(banner);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch banner" });
+    }
+  });
+
+  // Admin alias route for getting single banner
+  app.get("/api/admin/banners/:id", async (req, res) => {
+    try {
+      const banner = await storage.getBanner(req.params.id);
+      if (!banner) {
+        return res.status(404).json({ message: "Banner not found" });
+      }
+      res.json(banner);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch banner" });
     }
   });
 
@@ -1963,6 +2060,32 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Get single popup by ID
+  app.get("/api/popups/:id", async (req, res) => {
+    try {
+      const popup = await storage.getPopup(req.params.id);
+      if (!popup) {
+        return res.status(404).json({ message: "Popup not found" });
+      }
+      res.json(popup);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch popup" });
+    }
+  });
+
+  // Admin alias route for getting single popup
+  app.get("/api/admin/popups/:id", async (req, res) => {
+    try {
+      const popup = await storage.getPopup(req.params.id);
+      if (!popup) {
+        return res.status(404).json({ message: "Popup not found" });
+      }
+      res.json(popup);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch popup" });
+    }
+  });
+
   app.post("/api/popups", async (req, res) => {
     if (!req.user?.isAdmin) {
       return res.status(403).json({ error: "Admin access required" });
@@ -2141,6 +2264,32 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error fetching admin notifications:", error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Get single notification by ID
+  app.get("/api/notifications/:id", async (req, res) => {
+    try {
+      const notification = await storage.getNotification(req.params.id);
+      if (!notification) {
+        return res.status(404).json({ message: "Notification not found" });
+      }
+      res.json(notification);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch notification" });
+    }
+  });
+
+  // Admin alias route for getting single notification
+  app.get("/api/admin/notifications/:id", async (req, res) => {
+    try {
+      const notification = await storage.getNotification(req.params.id);
+      if (!notification) {
+        return res.status(404).json({ message: "Notification not found" });
+      }
+      res.json(notification);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch notification" });
     }
   });
 

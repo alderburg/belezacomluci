@@ -61,7 +61,7 @@ export default function AdminCategoryFormMobilePage() {
         isActive: category.isActive ?? true,
       });
     }
-  }, [category, isEditing, form]);
+  }, [category, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCategorySchema>) => {

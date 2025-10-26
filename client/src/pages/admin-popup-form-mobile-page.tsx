@@ -86,7 +86,7 @@ export default function AdminPopupFormMobilePage() {
           new Date(popup.endDateTime).toISOString().slice(0, 16) : "",
       });
     }
-  }, [popup, isEditing, form]);
+  }, [popup, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertPopupSchema>) => {

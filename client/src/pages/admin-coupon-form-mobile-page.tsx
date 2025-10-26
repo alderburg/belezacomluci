@@ -84,7 +84,7 @@ export default function AdminCouponFormMobilePage() {
         isActive: coupon.isActive ?? true,
       });
     }
-  }, [coupon, isEditing, form]);
+  }, [coupon, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCouponSchema>) => {
