@@ -1264,7 +1264,7 @@ export default function PlaylistMobilePage() {
                         {user && getVideoProgress(video.id) > 0 && (
                           <div className="mt-1.5 space-y-0.5">
                             <Progress 
-                              value={getVideoProgress(video.id)} 
+                              value={isVideoCompleted(video.id) ? 100 : getVideoProgress(video.id)} 
                               className="h-1"
                               data-testid={`progress-video-${video.id}`}
                             />
