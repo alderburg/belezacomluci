@@ -117,26 +117,45 @@ export default function PlaylistPage() {
     }
 
     const initPlayer = () => {
-      // Limpar player anterior se existir
-      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
-        playerRef.current.destroy();
-      }
+      // Aguardar um pouco para garantir que o container está pronto
+      setTimeout(() => {
+        if (!playerContainerRef.current) return;
 
-      // Criar novo player
-      playerRef.current = new window.YT.Player(playerContainerRef.current!, {
-        videoId: currentVideoId,
-        playerVars: {
-          autoplay: 1,
-          rel: 0,
-          modestbranding: 1,
-          enablejsapi: 1,
-        },
-        events: {
-          onReady: (event: any) => {
-            console.log('YouTube player ready');
-          },
-        },
-      });
+        // Limpar player anterior se existir
+        if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+          try {
+            playerRef.current.destroy();
+          } catch (e) {
+            console.log('Error destroying player:', e);
+          }
+          playerRef.current = null;
+        }
+
+        // Limpar o container
+        if (playerContainerRef.current) {
+          playerContainerRef.current.innerHTML = '';
+        }
+
+        // Criar novo player
+        try {
+          playerRef.current = new window.YT.Player(playerContainerRef.current, {
+            videoId: currentVideoId,
+            playerVars: {
+              autoplay: 1,
+              rel: 0,
+              modestbranding: 1,
+              enablejsapi: 1,
+            },
+            events: {
+              onReady: (event: any) => {
+                console.log('YouTube player ready for video:', currentVideoId);
+              },
+            },
+          });
+        } catch (e) {
+          console.error('Error creating YouTube player:', e);
+        }
+      }, 100);
     };
 
     // Se YT já está disponível, inicializar
@@ -150,7 +169,11 @@ export default function PlaylistPage() {
     // Cleanup
     return () => {
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
-        playerRef.current.destroy();
+        try {
+          playerRef.current.destroy();
+        } catch (e) {
+          console.log('Cleanup error:', e);
+        }
         playerRef.current = null;
       }
     };
@@ -388,9 +411,28 @@ export default function PlaylistPage() {
   }, [resource, product]);
 
   const handleVideoSelect = (videoId: string) => {
-    setIsLoadingVideoContent(true); // Ativar skeleton ao selecionar vídeo
-    setCurrentVideoId(videoId);
-    setShowVideo(false); // Reset video state when changing
+    // Se estiver mudando para um vídeo diferente
+    if (videoId !== currentVideoId) {
+      // Destruir player atual antes de mudar
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+        try {
+          playerRef.current.destroy();
+          playerRef.current = null;
+        } catch (e) {
+          console.log('Error destroying player on video change:', e);
+        }
+      }
+      
+      // Reset estados
+      setShowVideo(false);
+      setIsLoadingVideoContent(true);
+      
+      // Pequeno delay para garantir cleanup completo
+      setTimeout(() => {
+        setCurrentVideoId(videoId);
+      }, 50);
+    }
+    
     if (isMobile) {
       setShowPlaylist(false);
     }

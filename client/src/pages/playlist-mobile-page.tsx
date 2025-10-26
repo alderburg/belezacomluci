@@ -418,12 +418,32 @@ export default function PlaylistMobilePage() {
   }, [resource, product]);
 
   const handleVideoSelect = (videoId: string) => {
-    stopProgressSaving(); // Para o salvamento de progresso do vídeo anterior
-    setIsLoadingVideoContent(true);
-    setCurrentVideoId(videoId);
-    setShowVideo(false);
+    // Se estiver mudando para um vídeo diferente
+    if (videoId !== currentVideoId) {
+      // Para o salvamento de progresso do vídeo anterior
+      stopProgressSaving();
+      
+      // Destruir player atual antes de mudar
+      if (youtubePlayer.current && typeof youtubePlayer.current.destroy === 'function') {
+        try {
+          youtubePlayer.current.destroy();
+          youtubePlayer.current = null;
+        } catch (e) {
+          console.log('Error destroying player on video change:', e);
+        }
+      }
+      
+      // Reset estados
+      setShowVideo(false);
+      setIsLoadingVideoContent(true);
+      
+      // Pequeno delay para garantir cleanup completo
+      setTimeout(() => {
+        setCurrentVideoId(videoId);
+      }, 50);
+    }
+    
     setShowPlaylistModal(false);
-    // O useEffect que lida com currentVideoId irá inicializar o novo player
   };
 
   const currentVideo = videos.find(v => v.id === currentVideoId);
