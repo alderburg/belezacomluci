@@ -6,7 +6,6 @@ import MobileBottomNav from "@/components/mobile-bottom-nav";
 import { ArrowLeft, Plus, Bell, Edit, Trash2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'wouter';
 import { useDataSync } from '@/hooks/use-data-sync';
 import { Notification } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,7 +15,6 @@ export default function AdminNotificationsMobilePage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [, navigate] = useNavigate();
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
 
