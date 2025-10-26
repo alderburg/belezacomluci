@@ -678,45 +678,7 @@ export default function PlaylistPage() {
     );
   }
 
-  if (product && product.type !== 'course') {
-    return (
-      <div className="min-h-screen bg-background">
-        <Sidebar />
-        <MainContent>
-          <div className="container mx-auto px-6 py-8 text-center">
-            <h1 className="text-2xl font-bold mb-4">Produto inválido</h1>
-            <p className="text-muted-foreground mb-4">
-              Este produto não é um curso e não pode ser reproduzido aqui.
-            </p>
-            <Button onClick={() => navigate('/produtos')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar para produtos
-            </Button>
-          </div>
-        </MainContent>
-      </div>
-    );
-  }
-
-  if (video && video.type !== 'playlist') {
-    return (
-      <div className="min-h-screen bg-background">
-        <Sidebar />
-        <MainContent>
-          <div className="container mx-auto px-6 py-8 text-center">
-            <h1 className="text-2xl font-bold mb-4">Vídeo inválido</h1>
-            <p className="text-muted-foreground mb-4">
-              Este vídeo não é uma playlist e não pode ser reproduzido aqui.
-            </p>
-            <Button onClick={() => navigate('/videos')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar para vídeos
-            </Button>
-          </div>
-        </MainContent>
-      </div>
-    );
-  }
+  
 
   return (
     <div className="min-h-screen bg-background flex">
