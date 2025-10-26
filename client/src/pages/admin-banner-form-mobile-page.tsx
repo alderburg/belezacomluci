@@ -86,13 +86,13 @@ export default function AdminBannerFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/admin/banners/${bannerId}`, {
+        return await apiRequest(`/api/banners/${bannerId}`, {
           method: 'PUT',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },
         });
       } else {
-        return await apiRequest('/api/admin/banners', {
+        return await apiRequest('/api/banners', {
           method: 'POST',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },

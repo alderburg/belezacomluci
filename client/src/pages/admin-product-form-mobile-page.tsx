@@ -116,13 +116,13 @@ export default function AdminProductFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertProductSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/admin/products/${productId}`, {
+        return await apiRequest(`/api/products/${productId}`, {
           method: 'PUT',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },
         });
       } else {
-        return await apiRequest('/api/admin/products', {
+        return await apiRequest('/api/products', {
           method: 'POST',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },

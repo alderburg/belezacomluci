@@ -112,13 +112,13 @@ export default function AdminCouponFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCouponSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/admin/coupons/${couponId}`, {
+        return await apiRequest(`/api/coupons/${couponId}`, {
           method: 'PUT',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },
         });
       } else {
-        return await apiRequest('/api/admin/coupons', {
+        return await apiRequest('/api/coupons', {
           method: 'POST',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },

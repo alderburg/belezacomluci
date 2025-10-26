@@ -99,13 +99,13 @@ export default function AdminPopupFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertPopupSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/admin/popups/${popupId}`, {
+        return await apiRequest(`/api/popups/${popupId}`, {
           method: 'PUT',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },
         });
       } else {
-        return await apiRequest('/api/admin/popups', {
+        return await apiRequest('/api/popups', {
           method: 'POST',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },

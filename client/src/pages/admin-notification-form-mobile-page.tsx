@@ -83,13 +83,13 @@ export default function AdminNotificationFormMobilePage() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {
       if (isEditing) {
-        return await apiRequest(`/api/admin/notifications/${notificationId}`, {
+        return await apiRequest(`/api/notifications/${notificationId}`, {
           method: 'PUT',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },
         });
       } else {
-        return await apiRequest('/api/admin/notifications', {
+        return await apiRequest('/api/notifications', {
           method: 'POST',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },
