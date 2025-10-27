@@ -115,10 +115,21 @@ export default function AdminPopupFormMobilePage() {
       });
       setLocation('/admin/popups-mobile');
     },
-    onError: () => {
+    onError: (error: any) => {
+      let errorMessage = "Erro ao salvar popup";
+      
+      // Verificar se o erro é relacionado a foreign key de vídeo ou curso
+      if (error?.message?.includes('foreign key') || error?.message?.includes('videos')) {
+        if (form.watch("targetPage") === "video_specific") {
+          errorMessage = "Vídeo não encontrado. Verifique o ID do vídeo.";
+        } else if (form.watch("targetPage") === "course_specific") {
+          errorMessage = "Curso não encontrado. Verifique o ID do curso.";
+        }
+      }
+      
       toast({
         title: "Erro",
-        description: "Erro ao salvar popup",
+        description: errorMessage,
         variant: "destructive",
       });
     },
