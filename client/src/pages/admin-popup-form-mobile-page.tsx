@@ -57,19 +57,19 @@ export default function AdminPopupFormMobilePage() {
       title: "",
       description: "",
       imageUrl: "",
-      linkUrl: "",
+      linkUrl: null,
       trigger: "login",
-      targetPage: "",
-      targetVideoId: "",
-      targetCourseId: "",
+      targetPage: null,
+      targetVideoId: null,
+      targetCourseId: null,
       showFrequency: "always",
       showTitle: true,
       showDescription: true,
       showButton: true,
       isExclusive: false,
       isActive: false,
-      startDateTime: "",
-      endDateTime: "",
+      startDateTime: null,
+      endDateTime: null,
     },
   });
 
@@ -79,11 +79,11 @@ export default function AdminPopupFormMobilePage() {
         title: popup.title,
         description: popup.description,
         imageUrl: popup.imageUrl,
-        linkUrl: popup.linkUrl || "",
+        linkUrl: popup.linkUrl || null,
         trigger: popup.trigger,
-        targetPage: popup.targetPage || "",
-        targetVideoId: popup.targetVideoId || "",
-        targetCourseId: popup.targetCourseId || "",
+        targetPage: popup.targetPage || null,
+        targetVideoId: popup.targetVideoId || null,
+        targetCourseId: popup.targetCourseId || null,
         showFrequency: popup.showFrequency,
         showTitle: popup.showTitle ?? true,
         showDescription: popup.showDescription ?? true,
@@ -91,9 +91,9 @@ export default function AdminPopupFormMobilePage() {
         isExclusive: popup.isExclusive || false,
         isActive: popup.isActive,
         startDateTime: popup.startDateTime ? 
-          new Date(popup.startDateTime).toISOString().slice(0, 16) : "",
+          new Date(popup.startDateTime).toISOString().slice(0, 16) : null,
         endDateTime: popup.endDateTime ? 
-          new Date(popup.endDateTime).toISOString().slice(0, 16) : "",
+          new Date(popup.endDateTime).toISOString().slice(0, 16) : null,
       });
     }
   }, [popup, isEditing, form]);
@@ -129,7 +129,16 @@ export default function AdminPopupFormMobilePage() {
   };
 
   const onSubmit = (data: z.infer<typeof insertPopupSchema>) => {
-    mutation.mutate(data);
+    // Limpar campos opcionais vazios para evitar violação de foreign key
+    const cleanedData = {
+      ...data,
+      targetVideoId: data.targetVideoId?.trim() || null,
+      targetCourseId: data.targetCourseId?.trim() || null,
+      linkUrl: data.linkUrl?.trim() || null,
+      startDateTime: data.startDateTime?.trim() || null,
+      endDateTime: data.endDateTime?.trim() || null,
+    };
+    mutation.mutate(cleanedData);
   };
 
   return (
