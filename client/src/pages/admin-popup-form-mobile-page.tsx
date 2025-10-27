@@ -118,12 +118,17 @@ export default function AdminPopupFormMobilePage() {
     onError: (error: any) => {
       let errorMessage = "Erro ao salvar popup";
       
-      // Verificar se o erro é relacionado a foreign key de vídeo ou curso
-      if (error?.message?.includes('foreign key') || error?.message?.includes('videos')) {
+      // Verificar se o erro é relacionado a foreign key constraint
+      const errorMsg = error?.message || '';
+      if (errorMsg.includes('foreign key') || 
+          errorMsg.includes('constraint') || 
+          errorMsg.includes('not present in table') ||
+          errorMsg.includes('violates foreign key')) {
+        
         if (form.watch("targetPage") === "video_specific") {
-          errorMessage = "Vídeo não encontrado. Verifique o ID do vídeo.";
+          errorMessage = "Vídeo não encontrado. Verifique o ID adicionado.";
         } else if (form.watch("targetPage") === "course_specific") {
-          errorMessage = "Curso não encontrado. Verifique o ID do curso.";
+          errorMessage = "Curso não encontrado. Verifique o ID adicionado.";
         }
       }
       
