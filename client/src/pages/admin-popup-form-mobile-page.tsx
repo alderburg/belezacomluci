@@ -116,14 +116,17 @@ export default function AdminPopupFormMobilePage() {
       setLocation('/admin/popups-mobile');
     },
     onError: (error: any) => {
+      console.log('Erro capturado:', error);
       let errorMessage = "Erro ao salvar popup";
       
       // Verificar se o erro é relacionado a foreign key constraint
-      const errorMsg = error?.message || '';
-      if (errorMsg.includes('foreign key') || 
+      const errorMsg = JSON.stringify(error).toLowerCase();
+      if (errorMsg.includes('foreign') || 
           errorMsg.includes('constraint') || 
-          errorMsg.includes('not present in table') ||
-          errorMsg.includes('violates foreign key')) {
+          errorMsg.includes('not present') ||
+          errorMsg.includes('violates') ||
+          errorMsg.includes('videos') ||
+          errorMsg.includes('video_id')) {
         
         if (form.watch("targetPage") === "video_specific") {
           errorMessage = "Vídeo não encontrado. Verifique o ID adicionado.";
