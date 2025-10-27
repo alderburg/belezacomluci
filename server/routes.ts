@@ -2128,9 +2128,28 @@ export function registerRoutes(app: Express): Server {
       }
 
       res.json(popup);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating popup:", error);
-      res.status(500).json({ error: "Internal server error" });
+      
+      // Verificar se é erro de foreign key
+      const isForeignKeyError = 
+        error?.code === '23503' || 
+        error?.message?.includes('foreign key') ||
+        error?.message?.includes('violates') ||
+        error?.message?.includes('not present');
+      
+      if (isForeignKeyError) {
+        return res.status(400).json({ 
+          error: "Foreign key constraint violation",
+          message: error.message || "ID de vídeo ou curso inválido",
+          details: error.detail
+        });
+      }
+      
+      res.status(500).json({ 
+        error: "Internal server error",
+        message: error.message 
+      });
     }
   });
 

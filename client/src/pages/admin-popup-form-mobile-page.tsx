@@ -116,18 +116,34 @@ export default function AdminPopupFormMobilePage() {
       setLocation('/admin/popups-mobile');
     },
     onError: (error: any) => {
-      console.log('Erro capturado:', error);
+      console.log('Erro completo capturado:', error);
       let errorMessage = "Erro ao salvar popup";
       
-      // Verificar se o erro é relacionado a foreign key constraint
-      const errorMsg = JSON.stringify(error).toLowerCase();
-      if (errorMsg.includes('foreign') || 
-          errorMsg.includes('constraint') || 
-          errorMsg.includes('not present') ||
-          errorMsg.includes('violates') ||
-          errorMsg.includes('videos') ||
-          errorMsg.includes('video_id')) {
-        
+      // Verificar o erro completo (mensagem e response)
+      const errorString = JSON.stringify(error);
+      const errorMsg = (error?.message || '').toLowerCase();
+      const errorResponse = JSON.stringify(error?.response || {}).toLowerCase();
+      
+      console.log('Verificando erro:', {
+        errorMsg,
+        errorResponse,
+        errorString: errorString.toLowerCase()
+      });
+      
+      // Verificar se é erro de foreign key
+      const isForeignKeyError = 
+        errorMsg.includes('foreign') || 
+        errorMsg.includes('constraint') || 
+        errorMsg.includes('not present') ||
+        errorMsg.includes('violates') ||
+        errorResponse.includes('foreign') ||
+        errorResponse.includes('constraint') ||
+        errorResponse.includes('not present') ||
+        errorString.toLowerCase().includes('foreign') ||
+        errorString.toLowerCase().includes('video_id') ||
+        errorString.toLowerCase().includes('course_id');
+      
+      if (isForeignKeyError) {
         if (form.watch("targetPage") === "video_specific") {
           errorMessage = "Vídeo não encontrado. Verifique o ID adicionado.";
         } else if (form.watch("targetPage") === "course_specific") {
