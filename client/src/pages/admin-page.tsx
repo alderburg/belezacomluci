@@ -676,10 +676,21 @@ export default function AdminPage() {
         description: editingItem ? "Popup atualizado!" : "Popup criado!",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      let errorMessage = "Falha ao salvar popup";
+      
+      // Verificar se o erro é relacionado a foreign key de vídeo ou curso
+      if (error?.message?.includes('foreign key') || error?.message?.includes('videos')) {
+        if (popupForm.watch("targetPage") === "video_specific") {
+          errorMessage = "Vídeo não encontrado. Verifique o ID do vídeo.";
+        } else if (popupForm.watch("targetPage") === "course_specific") {
+          errorMessage = "Curso não encontrado. Verifique o ID do curso.";
+        }
+      }
+      
       toast({
         title: "Erro",
-        description: "Falha ao salvar popup",
+        description: errorMessage,
         variant: "destructive",
       });
     },
