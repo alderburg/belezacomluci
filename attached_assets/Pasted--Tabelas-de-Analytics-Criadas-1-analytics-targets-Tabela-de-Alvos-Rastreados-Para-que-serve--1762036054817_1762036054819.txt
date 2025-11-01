@@ -1,0 +1,52 @@
+📊 Tabelas de Analytics Criadas:
+1. analytics_targets (Tabela de Alvos Rastreados)
+Para que serve: Armazena todos os elementos que podem ser clicados (cupons, banners, redes sociais)
+
+Campos:
+
+id - Identificador único
+target_type - Tipo (coupon, banner, social_network)
+coupon_id - Vincula ao cupom específico (se for cupom)
+banner_id - Vincula ao banner específico (se for banner)
+target_name - Nome do elemento (ex: "Instagram", "Cupom Sephora")
+target_url - URL do link clicado
+created_at - ✅ Data/hora de quando foi criado
+2. page_views (Visualizações de Página)
+Para que serve: Rastreia TODAS as visualizações da página /bio com localização do usuário
+
+Campos importantes:
+
+id - Identificador único
+page - Qual página foi acessada (ex: "/bio")
+session_id - Identificador da sessão do usuário
+user_id - ID do usuário (se logado)
+✅ city - Cidade do visitante
+✅ state - Estado do visitante
+✅ country - País do visitante
+referrer - De onde o usuário veio
+user_agent - Navegador/dispositivo usado
+ip_address - Endereço IP
+✅ created_at - Data e HORA EXATA de acesso (timestamp completo)
+3. bio_clicks (Cliques na Bio)
+Para que serve: Rastreia CADA CLIQUE em cupons, banners e redes sociais
+
+Campos:
+
+id - Identificador único
+analytics_target_id - Vincula ao elemento clicado (via analytics_targets)
+user_id - ID do usuário (se logado)
+session_id - Identificador da sessão
+✅ created_at - Data e HORA EXATA do clique (timestamp completo)
+✅ Confirmação dos Requisitos:
+✅ Cidade e Estado: Sim! A tabela page_views tem os campos city, state e country
+✅ Horários de Acesso: Sim! Todas as tabelas têm o campo created_at que armazena a data e hora completa (timestamp) de:
+Quando a página foi visualizada
+Quando um elemento foi clicado
+Quando um target foi criado
+📈 O que o sistema vai rastrear:
+Quantas pessoas visitam a página /bio por dia/hora
+De quais cidades e estados são os visitantes
+Quais cupons são mais clicados
+Quais banners geram mais engajamento
+Quais redes sociais são mais acessadas
+Horários de pico de acesso (manhã, tarde, noite)
