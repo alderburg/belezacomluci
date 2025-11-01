@@ -236,7 +236,10 @@ export default function BioPage() {
               Carregando...
             </h2>
             <p className="text-gray-500 text-sm">
-              Carregando o que há de melhor para minhas cheirosas 💚✨
+              {isLoadingProfile && !adminProfile ? 'Carregando perfil...' : 
+               isLoadingBanners && banners === undefined ? 'Carregando banners...' :
+               !communitySettings ? 'Carregando configurações...' :
+               'Preparando sua página'}
             </p>
           </div>
         </div>
