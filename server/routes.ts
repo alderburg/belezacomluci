@@ -81,8 +81,8 @@ export function registerRoutes(app: Express): Server {
   // Public route to get admin profile info (for bio page)
   app.get('/api/admin/public-profile', async (req, res) => {
     try {
-      // Buscar o usuário admin
-      const adminUser = await storage.getUserByEmail('admin@belezacomluci.com');
+      // Buscar o usuário admin pelo campo is_admin
+      const adminUser = await storage.getAdminUser();
 
       if (!adminUser) {
         return res.status(404).json({ message: "Admin user not found" });
@@ -96,6 +96,7 @@ export function registerRoutes(app: Express): Server {
         socialNetworks: adminUser.socialNetworks || []
       });
     } catch (error) {
+      console.error('Error fetching admin public profile:', error);
       res.status(500).json({ message: "Failed to fetch admin profile" });
     }
   });
@@ -103,8 +104,8 @@ export function registerRoutes(app: Express): Server {
   // Public route to get community settings (for bio page and community page)
   app.get('/api/admin/community-settings', async (req, res) => {
     try {
-      // Buscar o usuário admin
-      const adminUser = await storage.getUserByEmail('admin@belezacomluci.com');
+      // Buscar o usuário admin pelo campo is_admin
+      const adminUser = await storage.getAdminUser();
 
       if (!adminUser) {
         return res.status(404).json({ message: "Admin user not found" });
