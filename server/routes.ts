@@ -147,7 +147,7 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         // Enviar notificação específica para community_settings
         wsService.broadcastDataUpdate('community_settings', 'updated', { title, subtitle, backgroundImage, mobileBackgroundImage });
-        
+
         // Também enviar para users (retrocompatibilidade)
         wsService.broadcastDataUpdate('users', 'updated', {
           id: userId,
@@ -708,7 +708,7 @@ export function registerRoutes(app: Express): Server {
         if (existingCoupon.order >= 0) {
           await storage.reorderCouponsAfterDeletion(existingCoupon.order);
         }
-        
+
         // SEGUNDO: Incrementar cupons na nova posição e sucessores (excluindo o cupom atual)
         await storage.reorderCouponsAfterInsert(couponData.order, req.params.id);
       }
@@ -811,51 +811,46 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/categories", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
-      return res.status(403).json({ message: "Admin access required" });
+      return res.status(401).send("Unauthorized");
     }
 
     try {
       const categoryData = insertCategorySchema.parse(req.body);
-      const category = await storage.createCategory(categoryData);
+      const shouldReorder = req.body.shouldReorder === true;
 
-      // Notificar via WebSocket sobre nova categoria
-      const wsService = (global as any).notificationWS;
-      if (wsService) {
-        wsService.broadcastDataUpdate('categories', 'created', category);
+      if (shouldReorder && categoryData.order !== undefined && categoryData.order >= 0) {
+        await storage.reorderCategoriesAfterInsert(categoryData.order);
       }
 
-      res.status(201).json(category);
-    } catch (error) {
-      res.status(400).json({
-        message: "Invalid category data",
-        details: error.message,
-        validation: error.issues || []
-      });
+      const category = await storage.createCategory(categoryData);
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).send(error.message);
     }
   });
 
   app.put("/api/categories/:id", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
-      return res.status(403).json({ message: "Admin access required" });
+      return res.status(401).send("Unauthorized");
     }
 
     try {
-      const categoryData = insertCategorySchema.partial().parse(req.body);
-      const category = await storage.updateCategory(req.params.id, categoryData);
+      const categoryData = insertCategorySchema.parse(req.body);
+      const shouldReorder = req.body.shouldReorder === true;
+      const existingCategory = await storage.getCategoryById(req.params.id);
 
-      // Notificar via WebSocket sobre categoria atualizada
-      const wsService = (global as any).notificationWS;
-      if (wsService) {
-        wsService.broadcastDataUpdate('categories', 'updated', category);
+      if (shouldReorder && categoryData.order !== undefined && categoryData.order >= 0) {
+        await storage.reorderCategoriesAfterInsert(categoryData.order, req.params.id);
       }
 
+      if (existingCategory && existingCategory.isActive !== categoryData.isActive) {
+        await storage.handleCategoryActivation(req.params.id, categoryData.isActive, categoryData.order);
+      }
+
+      const category = await storage.updateCategory(req.params.id, categoryData);
       res.json(category);
-    } catch (error) {
-      res.status(400).json({
-        message: "Invalid category data",
-        details: error.message,
-        validation: error.issues || []
-      });
+    } catch (error: any) {
+      res.status(400).send(error.message);
     }
   });
 
@@ -943,59 +938,47 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/banners", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
-      return res.status(403).json({ message: "Admin access required" });
+      return res.status(401).send("Unauthorized");
     }
 
     try {
-      const insertData = insertBannerSchema.parse({
-        ...req.body,
-        opensCouponsModal: req.body.opensCouponsModal ?? false,
-        startDateTime: req.body.startDateTime ? new Date(req.body.startDateTime) : null,
-        endDateTime: req.body.endDateTime ? new Date(req.body.endDateTime) : null,
-      });
-      const banner = await storage.createBanner(insertData);
+      const bannerData = insertBannerSchema.parse(req.body);
+      const shouldReorder = req.body.shouldReorder === true;
 
-      // Broadcast data update
-      const wsService = (global as any).notificationWS;
-      if (wsService) {
-        wsService.broadcastDataUpdate('banners', 'created', banner);
+      if (shouldReorder && bannerData.order !== undefined && bannerData.order >= 0) {
+        await storage.reorderBannersAfterInsert(bannerData.order, bannerData.page);
       }
 
-      res.status(201).json(banner);
-    } catch (error) {
-
-      res.status(400).json({
-        message: "Invalid banner data",
-        error: error.message,
-        issues: error.issues || []
-      });
+      const banner = await storage.createBanner(bannerData);
+      res.json(banner);
+    } catch (error: any) {
+      console.error("Error creating banner:", error);
+      res.status(400).send(error.message);
     }
   });
 
   app.put("/api/banners/:id", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
-      return res.status(403).json({ message: "Admin access required" });
+      return res.status(401).send("Unauthorized");
     }
 
     try {
-      const { id } = req.params;
-      const updateData = insertBannerSchema.parse({
-        ...req.body,
-        opensCouponsModal: req.body.opensCouponsModal ?? false,
-        startDateTime: req.body.startDateTime ? new Date(req.body.startDateTime) : null,
-        endDateTime: req.body.endDateTime ? new Date(req.body.endDateTime) : null,
-      });
-      const banner = await storage.updateBanner(id, updateData);
+      const bannerData = insertBannerSchema.parse(req.body);
+      const shouldReorder = req.body.shouldReorder === true;
+      const existingBanner = await storage.getBannerById(req.params.id);
 
-      // Broadcast data update
-      const wsService = (global as any).notificationWS;
-      if (wsService) {
-        wsService.broadcastDataUpdate('banners', 'updated', banner);
+      if (shouldReorder && bannerData.order !== undefined && bannerData.order >= 0) {
+        await storage.reorderBannersAfterInsert(bannerData.order, bannerData.page, req.params.id);
       }
 
+      if (existingBanner && existingBanner.isActive !== bannerData.isActive) {
+        await storage.handleBannerActivation(req.params.id, bannerData.isActive, bannerData.order);
+      }
+
+      const banner = await storage.updateBanner(req.params.id, bannerData);
       res.json(banner);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid banner data" });
+    } catch (error: any) {
+      res.status(400).send(error.message);
     }
   });
 
@@ -3787,7 +3770,7 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         // Enviar notificação específica para community_settings
         wsService.broadcastDataUpdate('community_settings', 'updated', settings);
-        
+
         // Também enviar para users (retrocompatibilidade)
         wsService.broadcastDataUpdate('users', 'updated', {
           id: userId,
