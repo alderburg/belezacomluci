@@ -115,6 +115,11 @@ export default function AdminPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{id: string, type: string, title?: string} | null>(null);
   
+  // Estados para controle de conflito de ordem de cupons
+  const [showCouponConflictDialog, setShowCouponConflictDialog] = useState(false);
+  const [couponConflictData, setCouponConflictData] = useState<{ order: number; conflictCoupon?: Coupon } | null>(null);
+  const [pendingCouponData, setPendingCouponData] = useState<z.infer<typeof createCouponSchema> | null>(null);
+  
   // Atualizar URL quando a aba mudar
   useEffect(() => {
     const newPath = `/admin/${activeTab}`;
@@ -219,6 +224,22 @@ export default function AdminPage() {
   // Estado de loading geral - verifica se TODOS os dados dos 8 cards estão carregando
   const isMainDataLoading = videosLoading || productsLoading || couponsLoading || bannersLoading || 
                            popupsLoading || notificationsLoading || categoriesLoading || usersLoading;
+
+  // Função para verificar conflito de ordem de cupons
+  const checkCouponOrderConflict = async (order: number): Promise<{ hasConflict: boolean; conflict?: Coupon }> => {
+    try {
+      const url = editingItem 
+        ? `/api/coupons/check-order/${order}?excludeId=${editingItem.id}`
+        : `/api/coupons/check-order/${order}`;
+      const response = await fetch(url, {
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Erro ao verificar conflito');
+      return await response.json();
+    } catch (error) {
+      return { hasConflict: false };
+    }
+  };
 
   // Lógica de filtro e paginação para usuários
   const filteredAndPaginatedUsers = useMemo(() => {
@@ -587,16 +608,19 @@ export default function AdminPage() {
   });
 
   const createCouponMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof createCouponSchema>) => {
+    mutationFn: async (data: z.infer<typeof createCouponSchema> & { shouldReorder?: boolean }) => {
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/coupons/${editingItem.id}` : "/api/coupons", data);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/coupons"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/coupons"] });
       couponForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
+      setPendingCouponData(null);
+      setCouponConflictData(null);
       toast({
         title: "Sucesso",
         description: editingItem ? "Cupom atualizado!" : "Cupom criado!",
@@ -926,6 +950,38 @@ export default function AdminPage() {
       setDeleteDialogOpen(false);
       setItemToDelete(null);
     }
+  };
+
+  // Handlers para reorganização de cupons
+  const handleConfirmCouponReorder = () => {
+    if (pendingCouponData) {
+      createCouponMutation.mutate({ ...pendingCouponData, shouldReorder: true });
+    }
+    setShowCouponConflictDialog(false);
+    setPendingCouponData(null);
+    setCouponConflictData(null);
+  };
+
+  const handleCancelCouponReorder = () => {
+    setShowCouponConflictDialog(false);
+    setPendingCouponData(null);
+    setCouponConflictData(null);
+  };
+
+  // Handler para submit de cupons com verificação de conflito
+  const handleCouponSubmit = async (data: z.infer<typeof createCouponSchema>) => {
+    if (data.order !== undefined && data.order >= 0) {
+      const { hasConflict, conflict } = await checkCouponOrderConflict(data.order);
+      
+      if (hasConflict && conflict) {
+        setPendingCouponData(data);
+        setCouponConflictData({ order: data.order, conflictCoupon: conflict });
+        setShowCouponConflictDialog(true);
+        return;
+      }
+    }
+    
+    createCouponMutation.mutate(data);
   };
 
   const handleSubmit = (type: string) => {
@@ -1946,7 +2002,7 @@ export default function AdminPage() {
 
                     {/* Coupon Form */}
                     {activeTab === 'coupons' && (
-                      <form onSubmit={couponForm.handleSubmit((data) => createCouponMutation.mutate(data))} className="space-y-4">
+                      <form onSubmit={couponForm.handleSubmit(handleCouponSubmit)} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label htmlFor="coupon-code">Código <span className="text-destructive">*</span></Label>
@@ -4396,6 +4452,40 @@ export default function AdminPage() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* AlertDialog de conflito de ordem de cupons */}
+      <AlertDialog open={showCouponConflictDialog} onOpenChange={setShowCouponConflictDialog}>
+        <AlertDialogContent data-testid="dialog-order-conflict">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
+            <AlertDialogDescription>
+              Já existe um cupom cadastrado com a posição de exibição número {couponConflictData?.order}.
+              {couponConflictData?.conflictCoupon && (
+                <span className="block mt-2 font-medium">
+                  Cupom atual: {couponConflictData.conflictCoupon.brand}
+                </span>
+              )}
+              <span className="block mt-2">
+                Ao confirmar, todos os cupons a partir da posição {couponConflictData?.order} serão incrementados em 1 posição para frente.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={handleCancelCouponReorder}
+              data-testid="button-cancel-reorder"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmCouponReorder}
+              data-testid="button-confirm-reorder"
+            >
+              Confirmar e Reordenar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
