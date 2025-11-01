@@ -918,11 +918,9 @@ export class DatabaseStorage implements IStorage {
       };
 
       // Se deve reordenar e há uma ordem especificada
-      if (shouldReorder && processedData.order !== undefined) {
-        // Incrementar ordem de todos os banners >= ordem escolhida
-        await this.db.update(banners)
-          .set({ order: sql`${banners.order} + 1` })
-          .where(gte(banners.order, processedData.order));
+      if (shouldReorder && processedData.order !== undefined && processedData.page) {
+        // Incrementar ordem de todos os banners >= ordem escolhida da mesma página
+        await this.reorderBannersAfterInsert(processedData.order, processedData.page);
       }
 
       const [newBanner] = await this.db.insert(banners).values(processedData).returning();
@@ -943,14 +941,9 @@ export class DatabaseStorage implements IStorage {
     };
 
     // Se deve reordenar e há uma ordem especificada
-    if (shouldReorder && processedData.order !== undefined) {
-      // Incrementar ordem de todos os banners >= ordem escolhida (exceto o atual)
-      await this.db.update(banners)
-        .set({ order: sql`${banners.order} + 1` })
-        .where(and(
-          gte(banners.order, processedData.order),
-          ne(banners.id, id)
-        ));
+    if (shouldReorder && processedData.order !== undefined && processedData.page) {
+      // Incrementar ordem de todos os banners >= ordem escolhida da mesma página (exceto o atual)
+      await this.reorderBannersAfterInsert(processedData.order, processedData.page, id);
     }
 
     const [updatedBanner] = await this.db.update(banners).set(processedData).where(eq(banners.id, id)).returning();
@@ -966,14 +959,17 @@ export class DatabaseStorage implements IStorage {
     await this.db.delete(banners).where(eq(banners.id, id));
   }
 
-  async checkBannerOrderConflict(order: number, excludeId?: string): Promise<{ hasConflict: boolean; conflict?: Banner }> {
-    let query = this.db.select().from(banners).where(eq(banners.order, order));
+  async checkBannerOrderConflict(order: number, page: string, excludeId?: string): Promise<{ hasConflict: boolean; conflict?: Banner }> {
+    const conditions = [
+      eq(banners.order, order),
+      eq(banners.page, page)
+    ];
 
     if (excludeId) {
-      query = query.where(ne(banners.id, excludeId)) as any;
+      conditions.push(ne(banners.id, excludeId));
     }
 
-    const conflict = await query;
+    const conflict = await this.db.select().from(banners).where(and(...conditions));
 
     return {
       hasConflict: conflict.length > 0,
@@ -981,8 +977,11 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async reorderBannersAfterInsert(targetOrder: number, excludeId?: string): Promise<void> {
-    const conditions = [gte(banners.order, targetOrder)];
+  async reorderBannersAfterInsert(targetOrder: number, page: string, excludeId?: string): Promise<void> {
+    const conditions = [
+      gte(banners.order, targetOrder),
+      eq(banners.page, page)
+    ];
 
     if (excludeId) {
       conditions.push(sql`${banners.id} != ${excludeId}`);
@@ -994,11 +993,14 @@ export class DatabaseStorage implements IStorage {
       .where(and(...conditions));
   }
 
-  async reorderBannersAfterDeletion(deletedOrder: number): Promise<void> {
+  async reorderBannersAfterDeletion(deletedOrder: number, page: string): Promise<void> {
     await this.db
       .update(banners)
       .set({ order: sql`${banners.order} - 1` })
-      .where(gte(banners.order, deletedOrder + 1));
+      .where(and(
+        gte(banners.order, deletedOrder + 1),
+        eq(banners.page, page)
+      ));
   }
 
   // Post methods

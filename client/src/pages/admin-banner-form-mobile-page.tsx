@@ -161,11 +161,13 @@ export default function AdminBannerFormMobilePage() {
     setLocation('/admin/banners-mobile');
   };
 
-  const checkOrderConflict = async (order: number): Promise<{ hasConflict: boolean; conflict?: Banner }> => {
+  const checkOrderConflict = async (order: number, page: string): Promise<{ hasConflict: boolean; conflict?: Banner }> => {
     try {
-      const url = isEditing 
-        ? `/api/banners/check-order/${order}?excludeId=${bannerId}`
-        : `/api/banners/check-order/${order}`;
+      const params = new URLSearchParams({ page });
+      if (isEditing && bannerId) {
+        params.append('excludeId', bannerId);
+      }
+      const url = `/api/banners/check-order/${order}?${params.toString()}`;
       const response = await fetch(url, {
         credentials: 'include',
       });
@@ -177,8 +179,8 @@ export default function AdminBannerFormMobilePage() {
   };
 
   const onSubmit = async (data: z.infer<typeof insertBannerSchema>) => {
-    if (data.order !== undefined && data.order >= 0) {
-      const { hasConflict, conflict } = await checkOrderConflict(data.order);
+    if (data.order !== undefined && data.order >= 0 && data.page) {
+      const { hasConflict, conflict } = await checkOrderConflict(data.order, data.page);
       
       if (hasConflict && conflict) {
         setPendingFormData(data);

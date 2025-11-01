@@ -664,10 +664,15 @@ export function registerRoutes(app: Express): Server {
   // Check banner order conflict
   app.get("/api/banners/check-order/:order", async (req, res) => {
     const order = parseInt(req.params.order);
+    const page = req.query.page as string;
     const excludeId = req.query.excludeId as string | undefined;
 
+    if (!page) {
+      return res.status(400).json({ error: "Page parameter is required" });
+    }
+
     try {
-      const conflict = await storage.checkBannerOrderConflict(order, excludeId);
+      const conflict = await storage.checkBannerOrderConflict(order, page, excludeId);
       res.json(conflict);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
