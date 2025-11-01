@@ -88,8 +88,13 @@ export default function BioPage() {
     },
   });
 
-  // Verificar se está carregando
-  const isLoading = isLoadingProfile || isLoadingBanners;
+  // Verificar se está carregando - aguardar TODOS os dados necessários
+  const isLoading = 
+    isLoadingProfile || 
+    isLoadingBanners || 
+    !adminProfile || 
+    !communitySettings || 
+    banners === undefined;
 
   // Mudar a cor da barra do navegador para verde apenas quando o conteúdo carregar
   useEffect(() => {
@@ -230,7 +235,12 @@ export default function BioPage() {
             <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-teal-500 to-green-500 bg-clip-text text-transparent">
               Carregando...
             </h2>
-            <p className="text-gray-500 text-sm">Preparando sua página</p>
+            <p className="text-gray-500 text-sm">
+              {isLoadingProfile && !adminProfile ? 'Carregando perfil...' : 
+               isLoadingBanners && banners === undefined ? 'Carregando banners...' :
+               !communitySettings ? 'Carregando configurações...' :
+               'Preparando sua página'}
+            </p>
           </div>
         </div>
       </div>
@@ -368,11 +378,11 @@ export default function BioPage() {
             </div>
 
             <h1 className="text-3xl md:text-4xl font-bold text-white">
-              {communitySettings?.title || adminProfile?.name || 'Beleza com Luci'}
+              {communitySettings?.title || adminProfile?.name || ''}
             </h1>
 
             <p className="text-base md:text-lg text-white max-w-lg mx-auto">
-              {adminProfile?.bio || 'Sua dose diária de beleza, perfumaria e autocuidado com muito humor e bom astral! 💚✨'}
+              {adminProfile?.bio || ''}
             </p>
           </div>
 
