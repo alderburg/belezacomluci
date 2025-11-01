@@ -124,6 +124,11 @@ export default function AdminPage() {
   const [bannerConflictData, setBannerConflictData] = useState<{ order: number; conflictBanner?: Banner } | null>(null);
   const [pendingBannerData, setPendingBannerData] = useState<z.infer<typeof createBannerSchema> | null>(null);
 
+  // Estados para controle de conflito de ordem de categorias
+  const [showCategoryConflictDialog, setShowCategoryConflictDialog] = useState(false);
+  const [categoryConflictData, setCategoryConflictData] = useState<{ order: number; conflictCategory?: Category } | null>(null);
+  const [pendingCategoryData, setPendingCategoryData] = useState<z.infer<typeof createCategorySchema> | null>(null);
+
   // Atualizar URL quando a aba mudar
   useEffect(() => {
     const newPath = `/admin/${activeTab}`;
@@ -255,6 +260,24 @@ export default function AdminPage() {
         params.append('excludeId', editingItem.id);
       }
       const url = `/api/banners/check-order/${order}?${params.toString()}`;
+      const response = await fetch(url, {
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Erro ao verificar conflito');
+      return await response.json();
+    } catch (error) {
+      return { hasConflict: false };
+    }
+  };
+
+  // Função para verificar conflito de ordem de categorias
+  const checkCategoryOrderConflict = async (order: number): Promise<{ hasConflict: boolean; conflict?: Category }> => {
+    try {
+      const params = new URLSearchParams();
+      if (editingItem && editingItem.type === 'categories') { // Only apply excludeId if editing a category
+        params.append('excludeId', editingItem.id);
+      }
+      const url = `/api/categories/check-order/${order}?${params.toString()}`;
       const response = await fetch(url, {
         credentials: 'include',
       });
@@ -816,7 +839,7 @@ export default function AdminPage() {
   });
 
   const createCategoryMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof createCategorySchema>) => {
+    mutationFn: async (data: z.infer<typeof createCategorySchema> & { shouldReorder?: boolean }) => {
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/categories/${editingItem.id}` : "/api/categories", data);
       return response.json();
@@ -826,15 +849,17 @@ export default function AdminPage() {
       categoryForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
+      setPendingCategoryData(null); // Clear pending data
+      setCategoryConflictData(null); // Clear conflict data
       toast({
         title: "Sucesso",
         description: editingItem ? "Categoria atualizada!" : "Categoria criada!",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Erro",
-        description: "Falha ao salvar categoria",
+        description: `Falha ao salvar categoria: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -993,6 +1018,38 @@ export default function AdminPage() {
     setCouponConflictData(null);
   };
 
+  // Handlers para reorganização de banners
+  const handleConfirmBannerReorder = () => {
+    if (pendingBannerData) {
+      createBannerMutation.mutate({ ...pendingBannerData, shouldReorder: true });
+    }
+    setShowBannerConflictDialog(false);
+    setPendingBannerData(null);
+    setBannerConflictData(null);
+  };
+
+  const handleCancelBannerReorder = () => {
+    setShowBannerConflictDialog(false);
+    setPendingBannerData(null);
+    setBannerConflictData(null);
+  };
+
+  // Handlers para reorganização de categorias
+  const handleConfirmCategoryReorder = () => {
+    if (pendingCategoryData) {
+      createCategoryMutation.mutate({ ...pendingCategoryData, shouldReorder: true });
+    }
+    setShowCategoryConflictDialog(false);
+    setPendingCategoryData(null);
+    setCategoryConflictData(null);
+  };
+
+  const handleCancelCategoryReorder = () => {
+    setShowCategoryConflictDialog(false);
+    setPendingCategoryData(null);
+    setCategoryConflictData(null);
+  };
+
   // Handler para submit de cupons com verificação de conflito
   const handleCouponSubmit = async (data: z.infer<typeof createCouponSchema>) => {
     if (data.order !== undefined && data.order >= 0) {
@@ -1025,6 +1082,22 @@ export default function AdminPage() {
     createBannerMutation.mutate(data);
   };
 
+  // Handler para submit de categorias com verificação de conflito
+  const handleCategorySubmit = async (data: z.infer<typeof createCategorySchema>) => {
+    if (data.order !== undefined && data.order >= 0) {
+      const { hasConflict, conflict } = await checkCategoryOrderConflict(data.order);
+
+      if (hasConflict && conflict) {
+        setPendingCategoryData(data);
+        setCategoryConflictData({ order: data.order, conflictCategory: conflict });
+        setShowCategoryConflictDialog(true);
+        return;
+      }
+    }
+
+    createCategoryMutation.mutate(data);
+  };
+
 
   const handleSubmit = (type: string) => {
     switch (type) {
@@ -1047,7 +1120,7 @@ export default function AdminPage() {
         notificationForm.handleSubmit((data) => createNotificationMutation.mutate(data))();
         break;
       case 'categories':
-        categoryForm.handleSubmit((data) => createCategoryMutation.mutate(data))();
+        categoryForm.handleSubmit(handleCategorySubmit)();
         break;
     }
   };
@@ -1104,7 +1177,7 @@ export default function AdminPage() {
       case 'banners':
         // Calcular a próxima posição disponível para banners da mesma página
         const currentPage = bannerForm.watch("page") || "home";
-        const bannersOfSamePage = allBanners?.filter(b => b.page === currentPage) || [];
+        const bannersOfSamePage = banners?.filter(b => b.page === currentPage) || [];
         const maxBannerOrder = bannersOfSamePage.length > 0 
           ? Math.max(...bannersOfSamePage.map(b => b.order ?? 0))
           : -1;
@@ -1159,12 +1232,18 @@ export default function AdminPage() {
         });
         break;
       case 'categories':
+        // Calcular a próxima posição disponível
+        const maxCategoryOrder = categories && categories.length > 0 
+          ? Math.max(...categories.map(c => c.order ?? 0))
+          : -1;
+        const nextCategoryOrder = maxCategoryOrder + 1;
+        
         categoryForm.reset({
           title: "",
           description: "",
           coverImageUrl: "",
           isActive: true,
-          order: 0
+          order: nextCategoryOrder
         });
         break;
     }
@@ -2304,7 +2383,7 @@ export default function AdminPage() {
                                 bannerForm.setValue("page", e.target.value);
                                 // Recalcular a ordem quando a página mudar
                                 const currentPage = e.target.value || "home";
-                                const bannersOfSamePage = allBanners?.filter(b => b.page === currentPage) || [];
+                                const bannersOfSamePage = banners?.filter(b => b.page === currentPage) || [];
                                 const maxOrder = bannersOfSamePage.length > 0 
                                   ? Math.max(...bannersOfSamePage.map(b => b.order ?? 0))
                                   : -1;
@@ -2829,7 +2908,7 @@ export default function AdminPage() {
 
                     {/* Category Form */}
                     {activeTab === 'categories' && (
-                      <form onSubmit={categoryForm.handleSubmit((data) => createCategoryMutation.mutate(data))} className="space-y-4">
+                      <form onSubmit={categoryForm.handleSubmit(handleCategorySubmit)} className="space-y-4">
                         <div>
                           <Label htmlFor="category-title">Título <span className="text-destructive">*</span></Label>
                           <Input
@@ -4526,14 +4605,14 @@ export default function AdminPage() {
 
       {/* AlertDialog de conflito de ordem de cupons */}
       <AlertDialog open={showCouponConflictDialog} onOpenChange={setShowCouponConflictDialog}>
-        <AlertDialogContent data-testid="dialog-coupon-order-conflict">
+        <AlertDialogContent data-testid="dialog-order-conflict">
           <AlertDialogHeader>
             <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
             <AlertDialogDescription>
               Já existe um cupom cadastrado com a posição de exibição número {couponConflictData?.order}.
               {couponConflictData?.conflictCoupon && (
                 <span className="block mt-2 font-medium">
-                  Cupom atual: {couponConflictData.conflictCoupon.brand}
+                  Cupom atual: {couponConflictData.conflictCoupon.code}
                 </span>
               )}
               <span className="block mt-2">
@@ -4544,13 +4623,13 @@ export default function AdminPage() {
           <AlertDialogFooter>
             <AlertDialogCancel 
               onClick={handleCancelCouponReorder}
-              data-testid="button-cancel-coupon-reorder"
+              data-testid="button-cancel-reorder"
             >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmCouponReorder}
-              data-testid="button-confirm-coupon-reorder"
+              data-testid="button-confirm-reorder"
             >
               Confirmar e Reordenar
             </AlertDialogAction>
@@ -4577,25 +4656,48 @@ export default function AdminPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel 
-              onClick={() => {
-                setShowBannerConflictDialog(false);
-                setPendingBannerData(null);
-                setBannerConflictData(null);
-              }}
+              onClick={handleCancelBannerReorder}
               data-testid="button-cancel-banner-reorder"
             >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                if (pendingBannerData) {
-                  createBannerMutation.mutate({ ...pendingBannerData, shouldReorder: true });
-                }
-                setShowBannerConflictDialog(false);
-                setPendingBannerData(null);
-                setBannerConflictData(null);
-              }}
+              onClick={handleConfirmBannerReorder}
               data-testid="button-confirm-banner-reorder"
+            >
+              Confirmar e Reordenar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* AlertDialog de conflito de ordem de categorias */}
+      <AlertDialog open={showCategoryConflictDialog} onOpenChange={setShowCategoryConflictDialog}>
+        <AlertDialogContent data-testid="dialog-category-order-conflict">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
+            <AlertDialogDescription>
+              Já existe uma categoria cadastrada com a posição de exibição número {categoryConflictData?.order}.
+              {categoryConflictData?.conflictCategory && (
+                <span className="block mt-2 font-medium">
+                  Categoria atual: {categoryConflictData.conflictCategory.title}
+                </span>
+              )}
+              <span className="block mt-2">
+                Ao confirmar, todas as categorias a partir da posição {categoryConflictData?.order} serão incrementadas em 1 posição para frente.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={handleCancelCategoryReorder}
+              data-testid="button-cancel-category-reorder"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmCategoryReorder}
+              data-testid="button-confirm-category-reorder"
             >
               Confirmar e Reordenar
             </AlertDialogAction>
