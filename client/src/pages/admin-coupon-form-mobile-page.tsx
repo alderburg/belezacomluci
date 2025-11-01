@@ -182,7 +182,10 @@ export default function AdminCouponFormMobilePage() {
   };
 
   const onSubmit = async (data: z.infer<typeof insertCouponSchema>) => {
-    if (data.order !== undefined && data.order >= 0) {
+    // Se estiver editando, verificar se a ordem foi realmente alterada
+    const isOrderChanged = coupon ? coupon.order !== data.order : true;
+    
+    if (data.order !== undefined && data.order >= 0 && isOrderChanged) {
       const { hasConflict, conflict } = await checkOrderConflict(data.order);
       
       if (hasConflict && conflict) {
