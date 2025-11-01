@@ -35,6 +35,7 @@ export default function AdminAnalyticsPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { isOpen } = useSidebar();
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   // Aguardar autenticação antes de verificar admin
   if (authLoading) {
@@ -52,7 +53,7 @@ export default function AdminAnalyticsPage() {
     return <Redirect to="/" />;
   }
 
-  const { data: stats, isLoading } = useQuery<AnalyticsStats>({
+  const { data: stats, isLoading, refetch } = useQuery<AnalyticsStats>({
     queryKey: ["/api/analytics/stats", dateRange],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -78,6 +79,14 @@ export default function AdminAnalyticsPage() {
     },
     enabled: !!user?.isAdmin,
   });
+
+  // Recarregar dados quando o calendário fechar
+  const handleCalendarOpenChange = (open: boolean) => {
+    if (!open && isCalendarOpen) {
+      refetch();
+    }
+    setIsCalendarOpen(open);
+  };
 
   if (isLoading) {
     return (
@@ -119,7 +128,7 @@ export default function AdminAnalyticsPage() {
               </h1>
               <p className="text-sm text-muted-foreground">Análise completa de desempenho e engajamento</p>
             </div>
-            <Popover>
+            <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpenChange}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="gap-2 text-xs sm:text-sm">
                   <Calendar className="w-4 h-4" />
@@ -137,11 +146,17 @@ export default function AdminAnalyticsPage() {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
+              <PopoverContent className="w-auto p-0" align="end" onInteractOutside={(e) => {
+                // Permitir fechar apenas clicando fora
+                handleCalendarOpenChange(false);
+              }}>
                 <CalendarComponent
                   mode="range"
                   selected={dateRange}
-                  onSelect={setDateRange}
+                  onSelect={(range) => {
+                    setDateRange(range || {});
+                    // Não fechar o modal ao selecionar
+                  }}
                   numberOfMonths={2}
                   locale={ptBR}
                 />
