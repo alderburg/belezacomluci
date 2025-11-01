@@ -1,4 +1,3 @@
-replit_final_file>
 import {
   users,
   videos,
@@ -750,7 +749,94 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCategory(id: string): Promise<void> {
+    const category = await this.getCategory(id);
+    if (!category) return;
+
+    // PRIMEIRO: Reordenar as categorias antes de deletar
+    if (category.order >= 0) {
+      await this.reorderCategoriesAfterDeletion(category.order);
+    }
+
+    // DEPOIS: Deletar a categoria
     await this.db.delete(categories).where(eq(categories.id, id));
+  }
+
+  async checkCategoryOrderConflict(order: number, excludeId?: string): Promise<Category | undefined> {
+    const conditions = [eq(categories.order, order)];
+    if (excludeId) {
+      conditions.push(sql`${categories.id} != ${excludeId}`);
+    }
+    const [conflict] = await this.db.select().from(categories).where(and(...conditions));
+    return conflict || undefined;
+  }
+
+  async reorderCategoriesAfterInsert(targetOrder: number, excludeId?: string): Promise<void> {
+    const conditions = [
+      gte(categories.order, targetOrder),
+      sql`${categories.order} >= 0`
+    ];
+    
+    if (excludeId) {
+      conditions.push(ne(categories.id, excludeId));
+    }
+    
+    await this.db
+      .update(categories)
+      .set({ order: sql`${categories.order} + 1` })
+      .where(and(...conditions));
+  }
+
+  async reorderCategoriesAfterDeletion(deletedOrder: number): Promise<void> {
+    await this.db
+      .update(categories)
+      .set({ order: sql`${categories.order} - 1` })
+      .where(
+        and(
+          gt(categories.order, deletedOrder),
+          sql`${categories.order} >= 0`
+        )
+      );
+  }
+
+  async reorderCategoriesAfterStatusChange(categoryId: string, newIsActive: boolean, targetOrder?: number): Promise<void> {
+    const category = await this.getCategory(categoryId);
+    if (!category) return;
+
+    if (!newIsActive) {
+      if (category.order >= 0) {
+        await this.reorderCategoriesAfterDeletion(category.order);
+      }
+      await this.db
+        .update(categories)
+        .set({ order: -1 })
+        .where(eq(categories.id, categoryId));
+    } else {
+      let newOrder = targetOrder;
+      
+      if (newOrder === undefined || newOrder < 0) {
+        const maxOrder = await this.db
+          .select({ max: sql<number>`COALESCE(MAX(${categories.order}), 0)` })
+          .from(categories)
+          .where(sql`${categories.order} >= 0`);
+        
+        newOrder = (maxOrder[0]?.max ?? 0) + 1;
+      } else {
+        await this.reorderCategoriesAfterInsert(newOrder, categoryId);
+      }
+      
+      await this.db
+        .update(categories)
+        .set({ order: newOrder })
+        .where(eq(categories.id, categoryId));
+    }
+  }
+
+  async getCategoryById(id: string): Promise<Category | undefined> {
+    return await this.getCategory(id);
+  }
+
+  async handleCategoryActivation(categoryId: string, newIsActive: boolean, targetOrder?: number): Promise<void> {
+    await this.reorderCategoriesAfterStatusChange(categoryId, newIsActive, targetOrder);
   }
 
   // Banner methods
@@ -844,7 +930,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBanner(id: string): Promise<void> {
+    const banner = await this.getBanner(id);
+    if (!banner) return;
+
+    // PRIMEIRO: Reordenar os banners antes de deletar
+    if (banner.order >= 0) {
+      await this.reorderBannersAfterDeletion(banner.order, banner.page);
+    }
+
+    // DEPOIS: Deletar o banner
     await this.db.delete(banners).where(eq(banners.id, id));
+  }
+
+  async getBannerById(id: string): Promise<Banner | undefined> {
+    return await this.getBanner(id);
   }
 
   // Banner reordering methods

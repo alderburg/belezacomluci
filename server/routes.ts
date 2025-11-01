@@ -854,6 +854,24 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.get("/api/categories/check-order/:order", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      const order = parseInt(req.params.order);
+      if (isNaN(order)) {
+        return res.status(400).json({ message: "Invalid order parameter" });
+      }
+      const excludeId = req.query.excludeId as string | undefined;
+      const conflict = await storage.checkCategoryOrderConflict(order, excludeId);
+      res.json({ hasConflict: !!conflict, conflict });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check order conflict" });
+    }
+  });
+
   app.delete("/api/categories/:id", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
       return res.status(403).json({ message: "Admin access required" });
@@ -933,6 +951,30 @@ export function registerRoutes(app: Express): Server {
       res.json(banner);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch banner" });
+    }
+  });
+
+  app.get("/api/banners/check-order/:order", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      const order = parseInt(req.params.order);
+      if (isNaN(order)) {
+        return res.status(400).json({ message: "Invalid order parameter" });
+      }
+      const page = req.query.page as string;
+      const excludeId = req.query.excludeId as string | undefined;
+      
+      if (!page) {
+        return res.status(400).json({ message: "Page parameter is required" });
+      }
+      
+      const result = await storage.checkBannerOrderConflict(order, page, excludeId);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check order conflict" });
     }
   });
 
