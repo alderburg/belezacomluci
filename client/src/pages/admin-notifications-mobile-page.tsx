@@ -130,7 +130,7 @@ export default function AdminNotificationsMobilePage() {
         </div>
       </div>
 
-      <div className="pt-24 px-4 pb-4">
+      <div className="pt-24 px-4 pb-32">
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
