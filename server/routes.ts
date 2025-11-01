@@ -601,6 +601,39 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Admin delete coupon route
+  app.delete("/api/admin/coupons/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      const coupon = await storage.getCoupon(req.params.id);
+      if (!coupon) {
+        return res.status(404).json({ message: "Coupon not found" });
+      }
+
+      // PRIMEIRO: Reordenar os cupons antes de deletar
+      if (coupon.order >= 0) {
+        await storage.reorderCouponsAfterDeletion(coupon.order);
+      }
+
+      // DEPOIS: Deletar o cupom
+      await storage.deleteCoupon(req.params.id);
+
+      // Notificar via WebSocket sobre cupom deletado
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('coupons', 'deleted', { id: req.params.id });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error('Erro ao deletar cupom:', error);
+      res.status(500).json({ message: "Failed to delete coupon", error: error.message });
+    }
+  });
+
   app.get("/api/coupons/check-order/:order", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
       return res.status(403).json({ message: "Admin access required" });
@@ -713,11 +746,13 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "Coupon not found" });
       }
 
-      await storage.deleteCoupon(req.params.id);
-
+      // PRIMEIRO: Reordenar os cupons antes de deletar
       if (coupon.order >= 0) {
         await storage.reorderCouponsAfterDeletion(coupon.order);
       }
+
+      // DEPOIS: Deletar o cupom
+      await storage.deleteCoupon(req.params.id);
 
       // Notificar via WebSocket sobre cupom deletado
       const wsService = (global as any).notificationWS;
@@ -727,7 +762,8 @@ export function registerRoutes(app: Express): Server {
 
       res.status(204).send();
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete coupon" });
+      console.error('Erro ao deletar cupom:', error);
+      res.status(500).json({ message: "Failed to delete coupon", error: error.message });
     }
   });
 

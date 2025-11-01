@@ -634,7 +634,7 @@ export class DatabaseStorage implements IStorage {
     await this.db
       .update(coupons)
       .set({ order: sql`${coupons.order} - 1` })
-      .where(sql`${coupons.order} > ${deletedOrder}`);
+      .where(gte(coupons.order, deletedOrder + 1));
   }
 
   async reorderCouponsAfterStatusChange(couponId: string, newIsActive: boolean): Promise<void> {
