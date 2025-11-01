@@ -209,6 +209,24 @@ export function useDataSync() {
         console.log('Admin public profile and community settings cache invalidated and refetched - Pages will refresh');
         console.log('Users cache invalidated - UI will refresh with new data');
         break;
+      
+      case 'community_settings':
+        // Quando settings da comunidade mudam, invalidar também o perfil público
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/community-settings'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/public-profile'] });
+        
+        // Forçar refetch imediato
+        queryClient.refetchQueries({
+          queryKey: ['/api/admin/community-settings'],
+          type: 'active'
+        });
+        queryClient.refetchQueries({
+          queryKey: ['/api/admin/public-profile'],
+          type: 'active'
+        });
+        
+        console.log('Community settings and admin public profile cache invalidated and refetched - Bio page will refresh');
+        break;
 
       case 'user_stats':
         queryClient.invalidateQueries({ queryKey: ['/api/user/stats'] });

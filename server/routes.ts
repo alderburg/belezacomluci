@@ -3657,6 +3657,10 @@ export function registerRoutes(app: Express): Server {
       // Broadcast atualização das configurações da comunidade
       const wsService = (global as any).notificationWS;
       if (wsService) {
+        // Enviar notificação específica para community_settings
+        wsService.broadcastDataUpdate('community_settings', 'updated', settings);
+        
+        // Também enviar para users (retrocompatibilidade)
         wsService.broadcastDataUpdate('users', 'updated', {
           id: userId,
           isAdmin: true,
