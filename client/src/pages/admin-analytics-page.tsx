@@ -5,8 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Eye, MousePointerClick, MapPin, Clock, TrendingUp, Users, Target, Calendar } from "lucide-react";
+import { Eye, MousePointerClick, MapPin, Clock, TrendingUp, Users, Target, Calendar, Activity } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import { useSidebar } from "@/contexts/sidebar-context";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -45,31 +44,20 @@ export default function AdminAnalyticsPage() {
     queryKey: ["/api/analytics/stats", dateRange],
   });
 
-  const chartConfig = {
-    clicks: {
-      label: "Cliques",
-      color: "#ff6b9d",
-    },
-    views: {
-      label: "Visualizações",
-      color: "#c084fc",
-    },
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex">
         <Sidebar />
         <main className={`flex-1 transition-all duration-300 ${isOpen ? 'ml-64' : 'ml-16'} pt-16`}>
-          <div className="container mx-auto px-6 py-8">
+          <div className="container mx-auto px-4 py-6 max-w-[1600px]">
             <div className="mb-6">
-              <Skeleton className="h-9 w-80 mb-2" />
+              <Skeleton className="h-10 w-80 mb-3" />
               <Skeleton className="h-5 w-96" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {[1, 2, 3, 4].map((i) => (
                 <Card key={i}>
-                  <CardContent className="p-6">
+                  <CardContent className="p-5">
                     <Skeleton className="h-8 w-24 mb-2" />
                     <Skeleton className="h-4 w-32" />
                   </CardContent>
@@ -86,22 +74,25 @@ export default function AdminAnalyticsPage() {
     <div className="min-h-screen bg-background flex">
       <Sidebar />
       <main className={`flex-1 transition-all duration-300 ${isOpen ? 'ml-64' : 'ml-16'} pt-16`}>
-        <div className="container mx-auto px-6 py-8">
+        <div className="container mx-auto px-4 py-6 max-w-[1600px]">
           {/* Header */}
-          <div className="mb-6 flex items-start justify-between">
+          <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">📊 Analytics & Métricas</h1>
-              <p className="text-muted-foreground">Análise completa de desempenho e engajamento</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1 flex items-center gap-2">
+                <Activity className="w-7 h-7 text-primary" />
+                Analytics & Métricas
+              </h1>
+              <p className="text-sm text-muted-foreground">Análise completa de desempenho e engajamento</p>
             </div>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 text-xs sm:text-sm">
                   <Calendar className="w-4 h-4" />
                   {dateRange.from ? (
                     dateRange.to ? (
                       <>
-                        {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
-                        {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
+                        {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} -{" "}
+                        {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
                       </>
                     ) : (
                       format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
@@ -124,77 +115,77 @@ export default function AdminAnalyticsPage() {
           </div>
 
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-gradient-to-br from-pink-500 to-rose-500 text-white border-0">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <Eye className="w-8 h-8 opacity-80" />
-                  <Badge className="bg-white/20 text-white border-0">Total</Badge>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card className="bg-gradient-to-br from-pink-500 to-rose-500 text-white border-0 overflow-hidden">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <Eye className="w-7 h-7 opacity-80" />
+                  <Badge className="bg-white/20 text-white border-0 text-xs">Total</Badge>
                 </div>
-                <h3 className="text-3xl font-bold mb-1">{stats?.totalPageViews.toLocaleString()}</h3>
-                <p className="text-white/80 text-sm">Visualizações de Página</p>
+                <h3 className="text-2xl font-bold mb-1">{stats?.totalPageViews.toLocaleString()}</h3>
+                <p className="text-white/80 text-xs">Visualizações de Página</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white border-0">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <Users className="w-8 h-8 opacity-80" />
-                  <Badge className="bg-white/20 text-white border-0">Únicos</Badge>
+            <Card className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white border-0 overflow-hidden">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <Users className="w-7 h-7 opacity-80" />
+                  <Badge className="bg-white/20 text-white border-0 text-xs">Únicos</Badge>
                 </div>
-                <h3 className="text-3xl font-bold mb-1">{stats?.uniqueVisitors.toLocaleString()}</h3>
-                <p className="text-white/80 text-sm">Visitantes Únicos</p>
+                <h3 className="text-2xl font-bold mb-1">{stats?.uniqueVisitors.toLocaleString()}</h3>
+                <p className="text-white/80 text-xs">Visitantes Únicos</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white border-0">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <MousePointerClick className="w-8 h-8 opacity-80" />
-                  <Badge className="bg-white/20 text-white border-0">Ações</Badge>
+            <Card className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white border-0 overflow-hidden">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <MousePointerClick className="w-7 h-7 opacity-80" />
+                  <Badge className="bg-white/20 text-white border-0 text-xs">Ações</Badge>
                 </div>
-                <h3 className="text-3xl font-bold mb-1">{stats?.totalClicks.toLocaleString()}</h3>
-                <p className="text-white/80 text-sm">Total de Cliques</p>
+                <h3 className="text-2xl font-bold mb-1">{stats?.totalClicks.toLocaleString()}</h3>
+                <p className="text-white/80 text-xs">Total de Cliques</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white border-0">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <TrendingUp className="w-8 h-8 opacity-80" />
-                  <Badge className="bg-white/20 text-white border-0">Taxa</Badge>
+            <Card className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white border-0 overflow-hidden">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <TrendingUp className="w-7 h-7 opacity-80" />
+                  <Badge className="bg-white/20 text-white border-0 text-xs">Taxa</Badge>
                 </div>
-                <h3 className="text-3xl font-bold mb-1">
+                <h3 className="text-2xl font-bold mb-1">
                   {stats?.totalPageViews ? ((stats.totalClicks / stats.totalPageViews) * 100).toFixed(1) : 0}%
                 </h3>
-                <p className="text-white/80 text-sm">Taxa de Conversão</p>
+                <p className="text-white/80 text-xs">Taxa de Conversão</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Main Content */}
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
-              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-              <TabsTrigger value="engagement">Engajamento</TabsTrigger>
-              <TabsTrigger value="geographic">Geografia</TabsTrigger>
-              <TabsTrigger value="timeline">Linha do Tempo</TabsTrigger>
+          <Tabs defaultValue="overview" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-4 max-w-[600px]">
+              <TabsTrigger value="overview" className="text-xs sm:text-sm">Visão Geral</TabsTrigger>
+              <TabsTrigger value="engagement" className="text-xs sm:text-sm">Engajamento</TabsTrigger>
+              <TabsTrigger value="geographic" className="text-xs sm:text-sm">Geografia</TabsTrigger>
+              <TabsTrigger value="timeline" className="text-xs sm:text-sm">Timeline</TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <TabsContent value="overview" className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Clicks by Type */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
                       <Target className="w-5 h-5 text-pink-500" />
                       Cliques por Tipo
                     </CardTitle>
-                    <CardDescription>Distribuição de cliques por categoria</CardDescription>
+                    <CardDescription className="text-xs">Distribuição de cliques por categoria</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={chartConfig} className="h-[300px]">
+                  <CardContent className="pt-0">
+                    <div className="h-[250px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
@@ -203,8 +194,9 @@ export default function AdminAnalyticsPage() {
                             nameKey="type"
                             cx="50%"
                             cy="50%"
-                            outerRadius={100}
+                            outerRadius={80}
                             label={(entry) => `${entry.type}: ${entry.count}`}
+                            labelLine={false}
                           >
                             {stats?.clicksByType.map((_, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -213,129 +205,131 @@ export default function AdminAnalyticsPage() {
                           <Tooltip />
                         </PieChart>
                       </ResponsiveContainer>
-                    </ChartContainer>
+                    </div>
                   </CardContent>
                 </Card>
 
                 {/* Top Clicked Items */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
                       <MousePointerClick className="w-5 h-5 text-purple-500" />
                       Itens Mais Clicados
                     </CardTitle>
-                    <CardDescription>Top 10 elementos com mais engajamento</CardDescription>
+                    <CardDescription className="text-xs">Top 10 elementos com mais engajamento</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={chartConfig} className="h-[300px]">
+                  <CardContent className="pt-0">
+                    <div className="h-[250px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={stats?.topClickedItems.slice(0, 10) || []} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis type="number" />
-                          <YAxis dataKey="targetName" type="category" width={100} />
-                          <Tooltip />
-                          <Bar dataKey="count" fill="#ff6b9d" radius={[0, 8, 8, 0]} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis type="number" tick={{ fontSize: 11 }} />
+                          <YAxis dataKey="targetName" type="category" width={90} tick={{ fontSize: 10 }} />
+                          <Tooltip contentStyle={{ fontSize: 12 }} />
+                          <Bar dataKey="count" fill="#ff6b9d" radius={[0, 4, 4, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
-                    </ChartContainer>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Detailed Table */}
               <Card>
-                <CardHeader>
-                  <CardTitle>Detalhamento de Cliques</CardTitle>
-                  <CardDescription>Lista completa de itens rastreados</CardDescription>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Detalhamento de Cliques</CardTitle>
+                  <CardDescription className="text-xs">Lista completa de itens rastreados</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Item</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead className="text-right">Cliques</TableHead>
-                        <TableHead className="text-right">% do Total</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {stats?.topClickedItems.map((item, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">{item.targetName}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{item.targetType}</Badge>
-                          </TableCell>
-                          <TableCell className="text-right">{item.count.toLocaleString()}</TableCell>
-                          <TableCell className="text-right">
-                            {stats.totalClicks > 0 ? ((item.count / stats.totalClicks) * 100).toFixed(1) : 0}%
-                          </TableCell>
+                <CardContent className="pt-0">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs">Item</TableHead>
+                          <TableHead className="text-xs">Tipo</TableHead>
+                          <TableHead className="text-right text-xs">Cliques</TableHead>
+                          <TableHead className="text-right text-xs">% do Total</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {stats?.topClickedItems.slice(0, 15).map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">{item.targetType}</Badge>
+                            </TableCell>
+                            <TableCell className="text-right text-xs">{item.count.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-xs font-medium">
+                              {stats.totalClicks > 0 ? ((item.count / stats.totalClicks) * 100).toFixed(1) : 0}%
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
             {/* Engagement Tab */}
-            <TabsContent value="engagement" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <TabsContent value="engagement" className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <Card className="lg:col-span-2">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
                       <TrendingUp className="w-5 h-5 text-blue-500" />
                       Cliques ao Longo do Tempo
                     </CardTitle>
-                    <CardDescription>Evolução temporal do engajamento</CardDescription>
+                    <CardDescription className="text-xs">Evolução temporal do engajamento</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={chartConfig} className="h-[400px]">
+                  <CardContent className="pt-0">
+                    <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={stats?.clicksOverTime || []}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="date" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Line type="monotone" dataKey="count" stroke="#ff6b9d" strokeWidth={3} name="Cliques" />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                          <YAxis tick={{ fontSize: 11 }} />
+                          <Tooltip contentStyle={{ fontSize: 12 }} />
+                          <Legend wrapperStyle={{ fontSize: 12 }} />
+                          <Line type="monotone" dataKey="count" stroke="#ff6b9d" strokeWidth={2} name="Cliques" dot={{ r: 3 }} />
                         </LineChart>
                       </ResponsiveContainer>
-                    </ChartContainer>
+                    </div>
                   </CardContent>
                 </Card>
 
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Métricas de Engajamento</CardTitle>
-                    <CardDescription>Indicadores principais</CardDescription>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Métricas de Engajamento</CardTitle>
+                    <CardDescription className="text-xs">Indicadores principais</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="p-4 bg-pink-50 rounded-lg border border-pink-200">
+                  <CardContent className="space-y-3 pt-0">
+                    <div className="p-3 bg-pink-50 rounded-lg border border-pink-200">
                       <div className="flex items-center gap-2 mb-2">
-                        <MousePointerClick className="w-5 h-5 text-pink-600" />
-                        <span className="font-semibold text-sm">Taxa de Clique</span>
+                        <MousePointerClick className="w-4 h-4 text-pink-600" />
+                        <span className="font-semibold text-xs">Taxa de Clique</span>
                       </div>
-                      <p className="text-2xl font-bold text-pink-600">
+                      <p className="text-xl font-bold text-pink-600">
                         {stats?.totalPageViews ? ((stats.totalClicks / stats.totalPageViews) * 100).toFixed(1) : 0}%
                       </p>
                     </div>
 
-                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
                       <div className="flex items-center gap-2 mb-2">
-                        <Eye className="w-5 h-5 text-purple-600" />
-                        <span className="font-semibold text-sm">Cliques/Visitante</span>
+                        <Eye className="w-4 h-4 text-purple-600" />
+                        <span className="font-semibold text-xs">Cliques/Visitante</span>
                       </div>
-                      <p className="text-2xl font-bold text-purple-600">
+                      <p className="text-xl font-bold text-purple-600">
                         {stats?.uniqueVisitors ? (stats.totalClicks / stats.uniqueVisitors).toFixed(2) : 0}
                       </p>
                     </div>
 
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="flex items-center gap-2 mb-2">
-                        <Target className="w-5 h-5 text-blue-600" />
-                        <span className="font-semibold text-sm">Itens Rastreados</span>
+                        <Target className="w-4 h-4 text-blue-600" />
+                        <span className="font-semibold text-xs">Itens Rastreados</span>
                       </div>
-                      <p className="text-2xl font-bold text-blue-600">
+                      <p className="text-xl font-bold text-blue-600">
                         {stats?.topClickedItems.length || 0}
                       </p>
                     </div>
@@ -345,43 +339,43 @@ export default function AdminAnalyticsPage() {
             </TabsContent>
 
             {/* Geographic Tab */}
-            <TabsContent value="geographic" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <TabsContent value="geographic" className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Top Cities */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
                       <MapPin className="w-5 h-5 text-emerald-500" />
                       Top 10 Cidades
                     </CardTitle>
-                    <CardDescription>Cidades com maior número de visitantes</CardDescription>
+                    <CardDescription className="text-xs">Cidades com maior número de visitantes</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={chartConfig} className="h-[400px]">
+                  <CardContent className="pt-0">
+                    <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={stats?.topCities.slice(0, 10) || []}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="city" angle={-45} textAnchor="end" height={100} />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="count" fill="#34d399" radius={[8, 8, 0, 0]} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis dataKey="city" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10 }} />
+                          <YAxis tick={{ fontSize: 11 }} />
+                          <Tooltip contentStyle={{ fontSize: 12 }} />
+                          <Bar dataKey="count" fill="#34d399" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
-                    </ChartContainer>
+                    </div>
                   </CardContent>
                 </Card>
 
                 {/* Top States */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
                       <MapPin className="w-5 h-5 text-cyan-500" />
                       Top 10 Estados
                     </CardTitle>
-                    <CardDescription>Estados com maior alcance</CardDescription>
+                    <CardDescription className="text-xs">Estados com maior alcance</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={chartConfig} className="h-[400px]">
+                  <CardContent className="pt-0">
+                    <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
@@ -390,8 +384,9 @@ export default function AdminAnalyticsPage() {
                             nameKey="state"
                             cx="50%"
                             cy="50%"
-                            outerRadius={120}
+                            outerRadius={90}
                             label={(entry) => `${entry.state}: ${entry.count}`}
+                            labelLine={false}
                           >
                             {stats?.topStates.slice(0, 10).map((_, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -400,79 +395,81 @@ export default function AdminAnalyticsPage() {
                           <Tooltip />
                         </PieChart>
                       </ResponsiveContainer>
-                    </ChartContainer>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Geographic Table */}
               <Card>
-                <CardHeader>
-                  <CardTitle>Distribuição Geográfica Completa</CardTitle>
-                  <CardDescription>Detalhamento por localização</CardDescription>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Distribuição Geográfica Completa</CardTitle>
+                  <CardDescription className="text-xs">Detalhamento por localização</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Posição</TableHead>
-                        <TableHead>Cidade</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead className="text-right">Visitantes</TableHead>
-                        <TableHead className="text-right">% do Total</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {stats?.topCities.map((city, index) => (
-                        <TableRow key={index}>
-                          <TableCell>
-                            <Badge variant={index < 3 ? "default" : "outline"}>#{index + 1}</Badge>
-                          </TableCell>
-                          <TableCell className="font-medium">{city.city}</TableCell>
-                          <TableCell>{city.state}</TableCell>
-                          <TableCell className="text-right">{city.count.toLocaleString()}</TableCell>
-                          <TableCell className="text-right">
-                            {stats.totalPageViews > 0 ? ((city.count / stats.totalPageViews) * 100).toFixed(1) : 0}%
-                          </TableCell>
+                <CardContent className="pt-0">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs">Pos.</TableHead>
+                          <TableHead className="text-xs">Cidade</TableHead>
+                          <TableHead className="text-xs">Estado</TableHead>
+                          <TableHead className="text-right text-xs">Visitantes</TableHead>
+                          <TableHead className="text-right text-xs">% do Total</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {stats?.topCities.slice(0, 15).map((city, index) => (
+                          <TableRow key={index}>
+                            <TableCell>
+                              <Badge variant={index < 3 ? "default" : "outline"} className="text-xs">#{index + 1}</Badge>
+                            </TableCell>
+                            <TableCell className="font-medium text-xs">{city.city}</TableCell>
+                            <TableCell className="text-xs">{city.state}</TableCell>
+                            <TableCell className="text-right text-xs">{city.count.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-xs font-medium">
+                              {stats.totalPageViews > 0 ? ((city.count / stats.totalPageViews) * 100).toFixed(1) : 0}%
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
             {/* Timeline Tab */}
-            <TabsContent value="timeline" className="space-y-6">
+            <TabsContent value="timeline" className="space-y-4">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
                     <Clock className="w-5 h-5 text-orange-500" />
                     Linha do Tempo de Atividade
                   </CardTitle>
-                  <CardDescription>Histórico detalhado de ações ao longo do tempo</CardDescription>
+                  <CardDescription className="text-xs">Histórico detalhado de ações ao longo do tempo</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig} className="h-[500px]">
+                <CardContent className="pt-0">
+                  <div className="h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={stats?.clicksOverTime || []}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                        <YAxis tick={{ fontSize: 11 }} />
+                        <Tooltip contentStyle={{ fontSize: 12 }} />
+                        <Legend wrapperStyle={{ fontSize: 12 }} />
                         <Line 
                           type="monotone" 
                           dataKey="count" 
                           stroke="#ff6b9d" 
-                          strokeWidth={3} 
+                          strokeWidth={2} 
                           name="Cliques"
-                          dot={{ fill: '#ff6b9d', r: 5 }}
-                          activeDot={{ r: 8 }}
+                          dot={{ fill: '#ff6b9d', r: 4 }}
+                          activeDot={{ r: 6 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
-                  </ChartContainer>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
