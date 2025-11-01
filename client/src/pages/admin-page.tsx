@@ -3190,6 +3190,9 @@ export default function AdminPage() {
                                 </div>
                                 <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{coupon.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                    Posição: {coupon.order}
+                                  </Badge>
                                   <code className="text-xs bg-muted px-2 py-1 rounded">{coupon.code}</code>
                                   {coupon.category && (
                                     <Badge variant="outline">{getCategoryLabel(coupon.category)}</Badge>
