@@ -4,6 +4,14 @@ This is "Beleza com Luci", a beauty platform built for followers to access exclu
 
 # Recent Changes
 
+## 2025-11-01: Sistema de Auto-Preenchimento de Posição em Cupons
+- Implementado cálculo automático da próxima posição disponível ao criar novos cupons
+- Sistema busca o cupom com maior ordem e preenche automaticamente o campo "ordem" com maxOrder + 1
+- Funcionalidade implementada tanto no formulário mobile (admin-coupon-form-mobile-page.tsx) quanto no desktop (admin-page.tsx)
+- Usuário pode alterar a posição sugerida se desejar, mantendo total flexibilidade
+- Sistema detecta conflitos de ordem e exibe AlertDialog para confirmar reorganização
+- Experiência consistente entre mobile e desktop: campo já preenchido, editável, com validação de conflitos
+
 ## 2025-10-26: Sistema de Diferenciação de Cursos (Vídeo Único vs Playlist)
 - Implementado dois novos tipos de produto: `course_video` (Curso - Vídeo Único) e `course_playlist` (Curso - Playlist)
 - Sistema agora detecta automaticamente o tipo ao inserir URL do YouTube no admin:
