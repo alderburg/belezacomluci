@@ -267,7 +267,9 @@ export default function ComunidadeMobilePage() {
 
   const handleSocialClick = (social: any, index: number) => {
     if (!user?.isAdmin) {
-      window.open(social.url, '_blank');
+      // Para usuários não-admin, tenta abrir o link diretamente, formatando para mailto: se for email
+      const url = social.type?.toLowerCase() === 'email' ? `mailto:${social.url}` : social.url;
+      window.open(url, '_blank');
       return;
     }
 
@@ -286,7 +288,8 @@ export default function ComunidadeMobilePage() {
       setEditingValue(social.url);
       setEditingSecondaryValue(social.name);
     } else if (action === 'visit' && social) {
-      window.open(social.url, '_blank');
+      const url = social.type?.toLowerCase() === 'email' ? `mailto:${social.url}` : social.url;
+      window.open(url, '_blank');
     }
 
     setSocialActionModal({ isOpen: false });
@@ -714,11 +717,42 @@ export default function ComunidadeMobilePage() {
                 <div className="flex justify-center gap-3 flex-wrap">
                   {userSocialNetworks.map((network: any, index: number) => {
                     const socialData = getSocialIcon(network.type);
+
+                    // Formatar URL do email como mailto:
+                    const linkUrl = network.type?.toLowerCase() === 'email' 
+                      ? `mailto:${network.url}` 
+                      : network.url;
+
+                    // Se for admin, usa onClick, senão usa link direto
+                    if (user?.isAdmin) {
+                      return (
+                        <div 
+                          key={`${network.type}-${index}`}
+                          className="relative group cursor-pointer"
+                          onClick={() => handleSocialClick({ name: socialData.name, url: network.url, ...socialData }, index)}
+                        >
+                          <div
+                            className="w-10 h-10 rounded-full border-2 flex items-center justify-center hover:scale-110 transition-all duration-300 bg-white/90 backdrop-blur-sm hover:bg-white/95"
+                            style={{ 
+                              borderColor: socialData.color,
+                              color: socialData.color
+                            }}
+                          >
+                            {socialData.icon}
+                          </div>
+                          <Edit3 className="absolute -top-1 -right-1 w-3 h-3 text-white bg-primary rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      );
+                    }
+
+                    // Para usuários normais, link direto
                     return (
-                      <div 
+                      <a
                         key={`${network.type}-${index}`}
-                        className={`relative group ${user?.isAdmin ? 'cursor-pointer' : ''}`}
-                        onClick={() => handleSocialClick({ name: socialData.name, url: network.url, ...socialData }, index)}
+                        href={linkUrl || '#'}
+                        target={network.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "_blank" : undefined}
+                        rel={network.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
+                        className="relative group"
                       >
                         <div
                           className="w-10 h-10 rounded-full border-2 flex items-center justify-center hover:scale-110 transition-all duration-300 bg-white/90 backdrop-blur-sm hover:bg-white/95"
@@ -729,10 +763,7 @@ export default function ComunidadeMobilePage() {
                         >
                           {socialData.icon}
                         </div>
-                        {user?.isAdmin && (
-                          <Edit3 className="absolute -top-1 -right-1 w-3 h-3 text-white bg-primary rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        )}
-                      </div>
+                      </a>
                     );
                   })}
                 </div>
