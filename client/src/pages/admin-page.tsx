@@ -1038,6 +1038,12 @@ export default function AdminPage() {
         });
         break;
       case 'coupons':
+        // Calcular a próxima posição disponível
+        const maxOrder = coupons && coupons.length > 0 
+          ? Math.max(...coupons.map(c => c.order ?? 0))
+          : -1;
+        const nextOrder = maxOrder + 1;
+
         couponForm.reset({
           code: "",
           brand: "",
@@ -1048,7 +1054,7 @@ export default function AdminPage() {
           isActive: true,
           storeUrl: "",
           coverImageUrl: "",
-          order: 0,
+          order: nextOrder,
           startDateTime: "",
           endDateTime: ""
         });

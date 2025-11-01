@@ -69,6 +69,12 @@ export default function AdminCouponFormMobilePage() {
     queryKey: ["/api/categories"],
   });
 
+  // Buscar todos os cupons para calcular a próxima posição disponível
+  const { data: allCoupons = [] } = useQuery<Coupon[]>({
+    queryKey: ["/api/coupons"],
+    enabled: !isEditing, // Só buscar quando estiver criando novo cupom
+  });
+
   const form = useForm<z.infer<typeof insertCouponSchema>>({
     resolver: zodResolver(insertCouponSchema),
     defaultValues: {
@@ -106,7 +112,13 @@ export default function AdminCouponFormMobilePage() {
         isExclusive: coupon.isExclusive ?? false,
         isActive: coupon.isActive ?? true,
       });
-    } else if (!isEditing) {
+    } else if (!isEditing && allCoupons) {
+      // Calcular a próxima posição disponível
+      const maxOrder = allCoupons.length > 0 
+        ? Math.max(...allCoupons.map(c => c.order ?? 0))
+        : -1;
+      const nextOrder = maxOrder + 1;
+
       form.reset({
         code: "",
         brand: "",
@@ -115,14 +127,14 @@ export default function AdminCouponFormMobilePage() {
         categoryId: "",
         storeUrl: "",
         coverImageUrl: "",
-        order: 0,
+        order: nextOrder,
         startDateTime: "",
         endDateTime: "",
         isExclusive: false,
         isActive: true,
       });
     }
-  }, [coupon, isEditing, form]);
+  }, [coupon, isEditing, allCoupons, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCouponSchema> & { shouldReorder?: boolean }) => {
