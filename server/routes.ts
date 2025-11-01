@@ -3916,6 +3916,36 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Alias endpoint for bio clicks (compatibility)
+  app.post("/api/analytics/bio-click", async (req, res) => {
+    try {
+      const { targetType, targetId, targetName, targetUrl, sessionId } = req.body;
+
+      if (!targetType || !targetName || !sessionId) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const analyticsTarget = await storage.createOrGetAnalyticsTarget({
+        targetType,
+        couponId: targetType === 'coupon' ? targetId : null,
+        bannerId: targetType === 'banner' ? targetId : null,
+        targetName,
+        targetUrl: targetUrl || null,
+      });
+
+      const click = await storage.createBioClick({
+        analyticsTargetId: analyticsTarget.id,
+        sessionId,
+        userId: req.isAuthenticated() ? req.user!.id : null,
+      });
+
+      res.json(click);
+    } catch (error) {
+      console.error('Error creating bio click:', error);
+      res.status(500).json({ message: "Failed to create bio click" });
+    }
+  });
+
   // Get bio clicks (admin only)
   app.get("/api/analytics/clicks", async (req, res) => {
     try {

@@ -58,6 +58,32 @@ export default function BioPage() {
     fetchGeoData();
   }, []);
 
+  // Rastrear pageview quando a página carregar
+  useEffect(() => {
+    if (!pageViewTracked.current && geoData !== null && sessionId.current) {
+      pageViewTracked.current = true;
+      
+      async function trackPageView() {
+        try {
+          await apiRequest('POST', '/api/analytics/pageview', {
+            page: 'bio',
+            sessionId: sessionId.current,
+            referrer: document.referrer || null,
+            userAgent: navigator.userAgent || null,
+            city: geoData?.city || null,
+            state: geoData?.state || null,
+            country: geoData?.country || null,
+          });
+          console.log('✅ Pageview rastreada com sucesso');
+        } catch (error) {
+          console.error('Erro ao rastrear pageview:', error);
+        }
+      }
+      
+      trackPageView();
+    }
+  }, [geoData]);
+
   // Função helper para rastrear cliques
   const trackClick = useCallback(async (
     targetType: string,
@@ -66,15 +92,12 @@ export default function BioPage() {
     targetUrl: string | null = null
   ) => {
     try {
-      await apiRequest('/api/analytics/bio-click', {
-        method: 'POST',
-        body: JSON.stringify({
-          targetType,
-          targetId,
-          targetName,
-          targetUrl,
-          sessionId: sessionId.current,
-        }),
+      await apiRequest('POST', '/api/analytics/bio-click', {
+        targetType,
+        targetId,
+        targetName,
+        targetUrl,
+        sessionId: sessionId.current,
       });
     } catch (error) {
       console.error('Erro ao rastrear clique:', error);
@@ -453,8 +476,12 @@ export default function BioPage() {
                   return (
                     <div
                       key={banner.id}
-                      onClick={() => setIsCouponsModalOpen(true)}
+                      onClick={() => {
+                        trackClick('banner', banner.id, banner.title, null);
+                        setIsCouponsModalOpen(true);
+                      }}
                       className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
+                      data-testid={`banner-${banner.id}`}
                     >
                       <img 
                         src={banner.imageUrl} 
@@ -472,7 +499,9 @@ export default function BioPage() {
                     href={banner.linkUrl || "#"}
                     target={banner.linkUrl?.startsWith('http') ? "_blank" : undefined}
                     rel={banner.linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
+                    onClick={() => trackClick('banner', banner.id, banner.title, banner.linkUrl || null)}
                     className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
+                    data-testid={`banner-${banner.id}`}
                   >
                     <img 
                       src={banner.imageUrl} 
@@ -509,8 +538,10 @@ export default function BioPage() {
                       href={linkUrl || '#'}
                       target={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "_blank" : undefined}
                       rel={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
+                      onClick={() => trackClick('social_network', null, socialData.name, linkUrl || null)}
                       className={`w-12 h-12 rounded-full flex items-center justify-center ${socialData.bgColor} text-white hover:scale-110 transition-transform duration-300 shadow-lg`}
                       title={socialData.name}
+                      data-testid={`social-${social.type}`}
                     >
                       {socialData.icon}
                     </a>
@@ -579,8 +610,12 @@ export default function BioPage() {
                       href={linkUrl || '#'}
                       target={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "_blank" : undefined}
                       rel={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
-                      onClick={() => setIsSocialMenuOpen(false)}
+                      onClick={() => {
+                        trackClick('social_network', null, `${socialData.name} (Menu)`, linkUrl || null);
+                        setIsSocialMenuOpen(false);
+                      }}
                       className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer"
+                      data-testid={`social-menu-${social.type}`}
                     >
                       <div className={`flex items-center justify-center w-12 h-12 ${socialData.bgColor} rounded-lg text-white`}>
                         {socialData.icon}
@@ -662,6 +697,9 @@ export default function BioPage() {
                             onClick={async (e) => {
                               e.preventDefault();
 
+                              // Rastrear clique no cupom
+                              await trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, coupon.storeUrl || null);
+
                               try {
                                 const codigo = coupon.code || '';
 
@@ -702,6 +740,7 @@ export default function BioPage() {
                               }
                             }}
                             className="relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                            data-testid={`coupon-${coupon.id}`}
                           >
                             {coupon.coverImageUrl ? (
                               <img
