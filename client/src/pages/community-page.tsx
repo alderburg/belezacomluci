@@ -257,13 +257,19 @@ export default function CommunityPage() {
   };
 
   const handleSocialClick = (social: any, index: number) => {
-    if (!user?.isAdmin) {
-      // Para usuários não-admin, tenta abrir o link diretamente, formatando para mailto: se for email
-      const url = social.type?.toLowerCase() === 'email' ? `mailto:${social.url}` : social.url;
-      window.open(url, '_blank');
+    // Se for email, sempre abre diretamente (mesmo para admin)
+    if (social.type?.toLowerCase() === 'email') {
+      window.location.href = `mailto:${social.url}`;
       return;
     }
 
+    // Para não-admin, abre o link diretamente
+    if (!user?.isAdmin) {
+      window.open(social.url, '_blank');
+      return;
+    }
+
+    // Para admin em outras redes sociais, abre modal de ação
     setSocialActionModal({
       isOpen: true,
       social,
