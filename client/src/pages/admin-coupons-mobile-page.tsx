@@ -145,21 +145,27 @@ export default function AdminCouponsMobilePage() {
                         </Badge>
                       </div>
                     )}
-                    <div className="flex gap-2 mt-2">
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
-                        Posição: {coupon.order}
-                      </Badge>
-                      <Badge className="bg-green-100 text-green-700 text-xs">
-                        {coupon.code}
-                      </Badge>
-                      {coupon.discount && coupon.discount.trim() !== '' && (
-                        <Badge className="bg-blue-100 text-blue-700 text-xs">
-                          {coupon.discount}
+                    <div className="flex flex-col gap-2 mt-2">
+                      {/* Linha 1: Badge de Posição */}
+                      <div className="flex">
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+                          Posição: {coupon.order}
                         </Badge>
-                      )}
-                      <Badge className={`text-xs ${coupon.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {coupon.isActive ? 'Ativo' : 'Inativo'}
-                      </Badge>
+                      </div>
+                      {/* Linha 2: Outros Badges */}
+                      <div className="flex gap-2 flex-wrap">
+                        <Badge className="bg-green-100 text-green-700 text-xs">
+                          {coupon.code}
+                        </Badge>
+                        {coupon.discount && coupon.discount.trim() !== '' && (
+                          <Badge className="bg-blue-100 text-blue-700 text-xs">
+                            {coupon.discount}
+                          </Badge>
+                        )}
+                        <Badge className={`text-xs ${coupon.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          {coupon.isActive ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 </div>
