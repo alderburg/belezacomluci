@@ -439,12 +439,18 @@ export default function BioPage() {
               <div className="flex justify-center gap-4 mt-3 mb-0 flex-wrap">
                 {adminProfile.socialNetworks.filter(social => social && social.type).map((social, index) => {
                   const socialData = getSocialData(social.type);
+                  
+                  // Formatar URL do email como mailto:
+                  const linkUrl = social.type?.toLowerCase() === 'email' 
+                    ? `mailto:${social.url}` 
+                    : social.url;
+                  
                   return (
                     <a
                       key={index}
-                      href={social.url || '#'}
-                      target={social.url?.startsWith('http') ? "_blank" : undefined}
-                      rel={social.url?.startsWith('http') ? "noopener noreferrer" : undefined}
+                      href={linkUrl || '#'}
+                      target={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "_blank" : undefined}
+                      rel={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
                       className={`w-12 h-12 rounded-full flex items-center justify-center ${socialData.bgColor} text-white hover:scale-110 transition-transform duration-300 shadow-lg`}
                       title={socialData.name}
                     >
