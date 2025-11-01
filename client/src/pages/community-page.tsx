@@ -279,9 +279,13 @@ export default function CommunityPage() {
       setEditingValue(social.url);
       setEditingSecondaryValue(social.name);
     } else if (action === 'visit' && social) {
-      const url = social.type?.toLowerCase() === 'email' ? `mailto:${social.url}` : social.url;
-      window.open(url, '_blank');
+      if (social.type?.toLowerCase() === 'email') {
+        window.location.href = `mailto:${social.url}`;
+      } else {
+        window.open(social.url, '_blank');
+      }
     }
+
 
     setSocialActionModal({ isOpen: false });
   };
