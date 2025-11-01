@@ -17,6 +17,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Redirect, useLocation, useRoute } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -28,7 +38,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { useAuth } from '@/hooks/use-auth';
 import { z } from 'zod';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function AdminCouponFormMobilePage() {
   const [match, params] = useRoute("/admin/coupons-mobile/edit/:id");
@@ -38,6 +48,9 @@ export default function AdminCouponFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = Boolean(match && couponId);
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [conflictData, setConflictData] = useState<{ order: number; conflictCoupon?: Coupon } | null>(null);
+  const [pendingFormData, setPendingFormData] = useState<z.infer<typeof insertCouponSchema> | null>(null);
 
   const { data: coupon, isLoading } = useQuery<Coupon>({
     queryKey: ['/api/admin/coupons', couponId],
@@ -112,7 +125,7 @@ export default function AdminCouponFormMobilePage() {
   }, [coupon, isEditing, form]);
 
   const mutation = useMutation({
-    mutationFn: async (data: z.infer<typeof insertCouponSchema>) => {
+    mutationFn: async (data: z.infer<typeof insertCouponSchema> & { shouldReorder?: boolean }) => {
       if (isEditing) {
         return await apiRequest('PUT', `/api/coupons/${couponId}`, data);
       } else {
@@ -141,8 +154,49 @@ export default function AdminCouponFormMobilePage() {
     setLocation('/admin/coupons-mobile');
   };
 
-  const onSubmit = (data: z.infer<typeof insertCouponSchema>) => {
+  const checkOrderConflict = async (order: number): Promise<{ hasConflict: boolean; conflict?: Coupon }> => {
+    try {
+      const url = isEditing 
+        ? `/api/coupons/check-order/${order}?excludeId=${couponId}`
+        : `/api/coupons/check-order/${order}`;
+      const response = await fetch(url, {
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Erro ao verificar conflito');
+      return await response.json();
+    } catch (error) {
+      return { hasConflict: false };
+    }
+  };
+
+  const onSubmit = async (data: z.infer<typeof insertCouponSchema>) => {
+    if (data.order !== undefined && data.order >= 0) {
+      const { hasConflict, conflict } = await checkOrderConflict(data.order);
+      
+      if (hasConflict && conflict) {
+        setPendingFormData(data);
+        setConflictData({ order: data.order, conflictCoupon: conflict });
+        setShowConflictDialog(true);
+        return;
+      }
+    }
+    
     mutation.mutate(data);
+  };
+
+  const handleConfirmReorder = () => {
+    if (pendingFormData) {
+      mutation.mutate({ ...pendingFormData, shouldReorder: true });
+    }
+    setShowConflictDialog(false);
+    setPendingFormData(null);
+    setConflictData(null);
+  };
+
+  const handleCancelReorder = () => {
+    setShowConflictDialog(false);
+    setPendingFormData(null);
+    setConflictData(null);
   };
 
   if (!user?.isAdmin) {
@@ -349,6 +403,39 @@ export default function AdminCouponFormMobilePage() {
         </form>
         </Form>
       )}
+
+      <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
+        <AlertDialogContent data-testid="dialog-order-conflict">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
+            <AlertDialogDescription>
+              Já existe um cupom cadastrado com a posição de exibição número {conflictData?.order}.
+              {conflictData?.conflictCoupon && (
+                <span className="block mt-2 font-medium">
+                  Cupom atual: {conflictData.conflictCoupon.brand}
+                </span>
+              )}
+              <span className="block mt-2">
+                Ao confirmar, todos os cupons a partir da posição {conflictData?.order} serão incrementados em 1 posição para frente.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={handleCancelReorder}
+              data-testid="button-cancel-reorder"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmReorder}
+              data-testid="button-confirm-reorder"
+            >
+              Confirmar e Reordenar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

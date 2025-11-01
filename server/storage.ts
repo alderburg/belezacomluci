@@ -91,6 +91,10 @@ export interface IStorage {
   createCoupon(coupon: InsertCoupon): Promise<Coupon>;
   updateCoupon(id: string, coupon: Partial<InsertCoupon>): Promise<Coupon>;
   deleteCoupon(id: string): Promise<void>;
+  checkCouponOrderConflict(order: number, excludeId?: string): Promise<Coupon | undefined>;
+  reorderCouponsAfterInsert(targetOrder: number): Promise<void>;
+  reorderCouponsAfterDeletion(deletedOrder: number): Promise<void>;
+  reorderCouponsAfterStatusChange(couponId: string, newIsActive: boolean): Promise<void>;
 
   // Category methods
   getCategories(isActive?: boolean): Promise<Category[]>;
@@ -601,6 +605,55 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCoupon(id: string): Promise<void> {
     await this.db.delete(coupons).where(eq(coupons.id, id));
+  }
+
+  async checkCouponOrderConflict(order: number, excludeId?: string): Promise<Coupon | undefined> {
+    const conditions = [eq(coupons.order, order)];
+    if (excludeId) {
+      conditions.push(sql`${coupons.id} != ${excludeId}`);
+    }
+    const [conflict] = await this.db.select().from(coupons).where(and(...conditions));
+    return conflict || undefined;
+  }
+
+  async reorderCouponsAfterInsert(targetOrder: number): Promise<void> {
+    await this.db
+      .update(coupons)
+      .set({ order: sql`${coupons.order} + 1` })
+      .where(gte(coupons.order, targetOrder));
+  }
+
+  async reorderCouponsAfterDeletion(deletedOrder: number): Promise<void> {
+    await this.db
+      .update(coupons)
+      .set({ order: sql`${coupons.order} - 1` })
+      .where(sql`${coupons.order} > ${deletedOrder}`);
+  }
+
+  async reorderCouponsAfterStatusChange(couponId: string, newIsActive: boolean): Promise<void> {
+    const coupon = await this.getCoupon(couponId);
+    if (!coupon) return;
+
+    if (!newIsActive) {
+      if (coupon.order >= 0) {
+        await this.reorderCouponsAfterDeletion(coupon.order);
+      }
+      await this.db
+        .update(coupons)
+        .set({ order: -1 })
+        .where(eq(coupons.id, couponId));
+    } else {
+      const maxOrder = await this.db
+        .select({ max: sql<number>`COALESCE(MAX(${coupons.order}), 0)` })
+        .from(coupons)
+        .where(sql`${coupons.order} >= 0`);
+      
+      const nextOrder = (maxOrder[0]?.max ?? 0) + 1;
+      await this.db
+        .update(coupons)
+        .set({ order: nextOrder })
+        .where(eq(coupons.id, couponId));
+    }
   }
 
   // Category methods

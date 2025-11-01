@@ -601,6 +601,24 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.get("/api/coupons/check-order/:order", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      const order = parseInt(req.params.order);
+      if (isNaN(order)) {
+        return res.status(400).json({ message: "Invalid order parameter" });
+      }
+      const excludeId = req.query.excludeId as string | undefined;
+      const conflict = await storage.checkCouponOrderConflict(order, excludeId);
+      res.json({ hasConflict: !!conflict, conflict });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check order conflict" });
+    }
+  });
+
   app.post("/api/coupons", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
       return res.status(403).json({ message: "Admin access required" });
@@ -608,6 +626,12 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const couponData = insertCouponSchema.parse(req.body);
+      const shouldReorder = req.body.shouldReorder === true;
+
+      if (shouldReorder && couponData.order !== undefined && couponData.order >= 0) {
+        await storage.reorderCouponsAfterInsert(couponData.order);
+      }
+
       const coupon = await storage.createCoupon(couponData);
 
       // Notificar via WebSocket sobre novo cupom
@@ -633,6 +657,27 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const couponData = insertCouponSchema.partial().parse(req.body);
+      const shouldReorder = req.body.shouldReorder === true;
+      const existingCoupon = await storage.getCoupon(req.params.id);
+
+      if (!existingCoupon) {
+        return res.status(404).json({ message: "Coupon not found" });
+      }
+
+      const isOrderChanging = couponData.order !== undefined && couponData.order >= 0 && couponData.order !== existingCoupon.order;
+      const isStatusChanging = couponData.isActive !== undefined && couponData.isActive !== existingCoupon.isActive;
+
+      if (isOrderChanging && shouldReorder) {
+        if (existingCoupon.order >= 0) {
+          await storage.reorderCouponsAfterDeletion(existingCoupon.order);
+        }
+        await storage.reorderCouponsAfterInsert(couponData.order);
+      }
+
+      if (isStatusChanging && !isOrderChanging) {
+        await storage.reorderCouponsAfterStatusChange(req.params.id, couponData.isActive);
+      }
+
       const coupon = await storage.updateCoupon(req.params.id, couponData);
 
       // Notificar via WebSocket sobre cupom atualizado
@@ -657,7 +702,16 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
+      const coupon = await storage.getCoupon(req.params.id);
+      if (!coupon) {
+        return res.status(404).json({ message: "Coupon not found" });
+      }
+
       await storage.deleteCoupon(req.params.id);
+
+      if (coupon.order >= 0) {
+        await storage.reorderCouponsAfterDeletion(coupon.order);
+      }
 
       // Notificar via WebSocket sobre cupom deletado
       const wsService = (global as any).notificationWS;
