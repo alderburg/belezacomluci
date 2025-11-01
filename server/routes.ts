@@ -3737,46 +3737,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Get community settings (admin only)
-  app.get("/api/admin/community-settings", async (req, res) => {
-    try {
-      if (!req.isAuthenticated() || !req.user?.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      // Buscar o usuário admin diretamente do banco (sem cache)
-      const adminUser = await storage.getAdminUser();
-
-      if (!adminUser) {
-        // Retornar valores padrão se não houver admin
-        return res.json({
-          title: "Nossa Comunidade",
-          subtitle: "Compartilhe suas experiências e dicas de beleza",
-          backgroundImage: "",
-          mobileBackgroundImage: ""
-        });
-      }
-
-      // Retornar as configurações da comunidade sempre atualizadas do banco
-      const settings = {
-        title: adminUser.communityTitle || "Nossa Comunidade",
-        subtitle: adminUser.communitySubtitle || "Compartilhe suas experiências e dicas de beleza",
-        backgroundImage: adminUser.communityBackgroundImage || "",
-        mobileBackgroundImage: adminUser.communityBackgroundImageMobile || adminUser.communityBackgroundImage || ""
-      };
-
-      // Configurar headers para evitar cache no navegador
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-
-      res.json(settings);
-    } catch (error) {
-      console.error('Error fetching community settings:', error);
-      res.status(500).json({ message: "Failed to fetch community settings" });
-    }
-  });
-
   // Update community settings (admin only)
   app.put("/api/admin/community-settings", async (req, res) => {
     try {
