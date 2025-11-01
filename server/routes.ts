@@ -3837,7 +3837,7 @@ export function registerRoutes(app: Express): Server {
   // Track page view
   app.post("/api/analytics/pageview", async (req, res) => {
     try {
-      const { page, sessionId, referrer, userAgent } = req.body;
+      const { page, sessionId, referrer, userAgent, city, state, country } = req.body;
 
       if (!page || !sessionId) {
         return res.status(400).json({ message: "Missing required fields" });
@@ -3848,6 +3848,9 @@ export function registerRoutes(app: Express): Server {
         sessionId,
         referrer,
         userAgent,
+        city: city || null,
+        state: state || null,
+        country: country || null,
         userId: req.isAuthenticated() ? req.user!.id : null,
         ipAddress: null,
       });

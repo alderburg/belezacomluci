@@ -232,6 +232,8 @@ export interface IStorage {
     clicksByType: { type: string; count: number }[];
     topClickedItems: { targetName: string; targetType: string; count: number }[];
     clicksOverTime: { date: string; count: number }[];
+    topCities: { city: string; state: string; count: number }[];
+    topStates: { state: string; count: number }[];
   }>;
 }
 
@@ -2981,6 +2983,8 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
     clicksByType: { type: string; count: number }[];
     topClickedItems: { targetName: string; targetType: string; count: number }[];
     clicksOverTime: { date: string; count: number }[];
+    topCities: { city: string; state: string; count: number }[];
+    topStates: { state: string; count: number }[];
   }> {
     const pageConditions = [eq(pageViews.page, 'bio')];
     const clickConditions = [];
@@ -3043,6 +3047,29 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
       .groupBy(sql`DATE(${bioClicks.createdAt})`)
       .orderBy(sql`DATE(${bioClicks.createdAt})`);
 
+    const topCitiesResult = await this.db
+      .select({
+        city: pageViews.city,
+        state: pageViews.state,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(pageViews)
+      .where(and(...pageConditions, sql`${pageViews.city} IS NOT NULL`))
+      .groupBy(pageViews.city, pageViews.state)
+      .orderBy(desc(sql`count(*)`))
+      .limit(10);
+
+    const topStatesResult = await this.db
+      .select({
+        state: pageViews.state,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(pageViews)
+      .where(and(...pageConditions, sql`${pageViews.state} IS NOT NULL`))
+      .groupBy(pageViews.state)
+      .orderBy(desc(sql`count(*)`))
+      .limit(10);
+
     return {
       totalPageViews: totalPageViewsResult[0]?.count || 0,
       uniqueVisitors: uniqueVisitorsResult[0]?.count || 0,
@@ -3054,6 +3081,15 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
         count: r.count 
       })),
       clicksOverTime: clicksOverTimeResult,
+      topCities: topCitiesResult.map(r => ({ 
+        city: r.city || 'unknown', 
+        state: r.state || 'unknown', 
+        count: r.count 
+      })),
+      topStates: topStatesResult.map(r => ({ 
+        state: r.state || 'unknown', 
+        count: r.count 
+      })),
     };
   }
 }

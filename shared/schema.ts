@@ -477,6 +477,9 @@ export const pageViews = pgTable("page_views", {
   referrer: text("referrer"), // Where the user came from
   userAgent: text("user_agent"), // Browser info
   ipAddress: text("ip_address"), // User IP (anonymized)
+  city: text("city"), // City from geolocation
+  state: text("state"), // State from geolocation
+  country: text("country"), // Country from geolocation
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
