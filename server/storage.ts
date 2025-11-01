@@ -32,6 +32,8 @@ import {
   referrals,
   categories,
   videoProgress,
+  pageViews,
+  bioClicks,
   type User, type InsertUser, type Video, type InsertVideo, type VideoProgress, type InsertVideoProgress,
   type Product, type InsertProduct, type Coupon, type InsertCoupon,
   type Banner, type InsertBanner, type Post, type InsertPost,
@@ -44,7 +46,8 @@ import {
   type UserMission, type InsertUserMission, type Reward, type InsertReward,
   type UserReward, type InsertUserReward, type Raffle, type InsertRaffle,
   type RaffleEntry, type InsertRaffleEntry, type Achievement, type InsertAchievement,
-  type UserAchievement, type InsertUserAchievement, type Category, type InsertCategory
+  type UserAchievement, type InsertUserAchievement, type Category, type InsertCategory,
+  type PageView, type InsertPageView, type BioClick, type InsertBioClick
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql, gte, lte, isNull } from "drizzle-orm";
@@ -214,6 +217,19 @@ export interface IStorage {
   getVideoProgress(userId: string, videoId: string, resourceId: string): Promise<VideoProgress | undefined>;
   updateVideoProgress(userId: string, videoId: string, resourceId: string, currentTime: number, duration: number): Promise<VideoProgress>;
   getUserVideoProgressByResource(userId: string, resourceId: string): Promise<VideoProgress[]>;
+
+  // Analytics methods
+  createPageView(pageView: InsertPageView): Promise<PageView>;
+  createBioClick(bioClick: InsertBioClick): Promise<BioClick>;
+  getPageViews(page: string, startDate?: Date, endDate?: Date): Promise<PageView[]>;
+  getBioClicks(clickType?: string, startDate?: Date, endDate?: Date): Promise<BioClick[]>;
+  getAnalyticsStats(startDate?: Date, endDate?: Date): Promise<{
+    totalPageViews: number;
+    uniqueVisitors: number;
+    totalClicks: number;
+    clicksByType: { clickType: string; count: number }[];
+    topClickedItems: { targetName: string; clickType: string; count: number }[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2864,6 +2880,129 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
         eq(videoProgress.resourceId, resourceId)
       ))
       .orderBy(desc(videoProgress.lastWatchedAt));
+  }
+
+  // ========== ANALYTICS METHODS ==========
+
+  async createPageView(pageView: InsertPageView): Promise<PageView> {
+    const [created] = await this.db
+      .insert(pageViews)
+      .values(pageView)
+      .returning();
+    return created;
+  }
+
+  async createBioClick(bioClick: InsertBioClick): Promise<BioClick> {
+    const [created] = await this.db
+      .insert(bioClicks)
+      .values(bioClick)
+      .returning();
+    return created;
+  }
+
+  async getPageViews(page: string, startDate?: Date, endDate?: Date): Promise<PageView[]> {
+    const conditions = [eq(pageViews.page, page)];
+    
+    if (startDate) {
+      conditions.push(gte(pageViews.createdAt, startDate));
+    }
+    
+    if (endDate) {
+      conditions.push(lte(pageViews.createdAt, endDate));
+    }
+
+    return await this.db
+      .select()
+      .from(pageViews)
+      .where(and(...conditions))
+      .orderBy(desc(pageViews.createdAt));
+  }
+
+  async getBioClicks(clickType?: string, startDate?: Date, endDate?: Date): Promise<BioClick[]> {
+    const conditions = [];
+    
+    if (clickType) {
+      conditions.push(eq(bioClicks.clickType, clickType));
+    }
+    
+    if (startDate) {
+      conditions.push(gte(bioClicks.createdAt, startDate));
+    }
+    
+    if (endDate) {
+      conditions.push(lte(bioClicks.createdAt, endDate));
+    }
+
+    return await this.db
+      .select()
+      .from(bioClicks)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(bioClicks.createdAt));
+  }
+
+  async getAnalyticsStats(startDate?: Date, endDate?: Date): Promise<{
+    totalPageViews: number;
+    uniqueVisitors: number;
+    totalClicks: number;
+    clicksByType: { clickType: string; count: number }[];
+    topClickedItems: { targetName: string; clickType: string; count: number }[];
+  }> {
+    const pageConditions = [eq(pageViews.page, 'bio')];
+    const clickConditions = [];
+    
+    if (startDate) {
+      pageConditions.push(gte(pageViews.createdAt, startDate));
+      clickConditions.push(gte(bioClicks.createdAt, startDate));
+    }
+    
+    if (endDate) {
+      pageConditions.push(lte(pageViews.createdAt, endDate));
+      clickConditions.push(lte(bioClicks.createdAt, endDate));
+    }
+
+    const totalPageViewsResult = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(pageViews)
+      .where(and(...pageConditions));
+
+    const uniqueVisitorsResult = await this.db
+      .select({ count: sql<number>`count(distinct ${pageViews.sessionId})::int` })
+      .from(pageViews)
+      .where(and(...pageConditions));
+
+    const totalClicksResult = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(bioClicks)
+      .where(clickConditions.length > 0 ? and(...clickConditions) : undefined);
+
+    const clicksByTypeResult = await this.db
+      .select({
+        clickType: bioClicks.clickType,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(bioClicks)
+      .where(clickConditions.length > 0 ? and(...clickConditions) : undefined)
+      .groupBy(bioClicks.clickType);
+
+    const topClickedItemsResult = await this.db
+      .select({
+        targetName: bioClicks.targetName,
+        clickType: bioClicks.clickType,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(bioClicks)
+      .where(clickConditions.length > 0 ? and(...clickConditions) : undefined)
+      .groupBy(bioClicks.targetName, bioClicks.clickType)
+      .orderBy(desc(sql`count(*)`))
+      .limit(10);
+
+    return {
+      totalPageViews: totalPageViewsResult[0]?.count || 0,
+      uniqueVisitors: uniqueVisitorsResult[0]?.count || 0,
+      totalClicks: totalClicksResult[0]?.count || 0,
+      clicksByType: clicksByTypeResult,
+      topClickedItems: topClickedItemsResult,
+    };
   }
 }
 

@@ -452,6 +452,30 @@ export const userAchievements = pgTable("user_achievements", {
   unlockedAt: timestamp("unlocked_at").default(sql`now()`),
 });
 
+// ========== ANALYTICS SYSTEM ==========
+
+export const pageViews = pgTable("page_views", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  page: text("page").notNull(), // 'bio', 'home', 'videos', etc.
+  userId: varchar("user_id").references(() => users.id), // null for non-logged users
+  sessionId: text("session_id"), // To track unique sessions
+  referrer: text("referrer"), // Where the user came from
+  userAgent: text("user_agent"), // Browser info
+  ipAddress: text("ip_address"), // User IP (anonymized)
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const bioClicks = pgTable("bio_clicks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  clickType: text("click_type").notNull(), // 'coupon', 'banner', 'social_network'
+  targetId: varchar("target_id"), // ID of the coupon, banner, or null for social
+  targetName: text("target_name").notNull(), // Name/title of what was clicked
+  targetUrl: text("target_url"), // URL that was clicked
+  userId: varchar("user_id").references(() => users.id), // null for non-logged users
+  sessionId: text("session_id"), // To track unique sessions
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 // Relations
 export const userRelations = relations(users, ({ many, one }) => ({
   subscription: one(subscriptions),
@@ -616,6 +640,15 @@ export const referralRelations = relations(referrals, ({ one }) => ({
 export const videoProgressRelations = relations(videoProgress, ({ one }) => ({
   user: one(users, { fields: [videoProgress.userId], references: [users.id] }),
   video: one(videos, { fields: [videoProgress.videoId], references: [videos.id] }),
+}));
+
+// Analytics relations
+export const pageViewRelations = relations(pageViews, ({ one }) => ({
+  user: one(users, { fields: [pageViews.userId], references: [users.id] }),
+}));
+
+export const bioClickRelations = relations(bioClicks, ({ one }) => ({
+  user: one(users, { fields: [bioClicks.userId], references: [users.id] }),
 }));
 
 
@@ -968,3 +1001,12 @@ export type UserAchievement = typeof userAchievements.$inferSelect;
 // ========== VIDEO PROGRESS TYPES ==========
 export type VideoProgress = typeof videoProgress.$inferSelect;
 export type InsertVideoProgress = z.infer<typeof insertVideoProgressSchema>;
+
+// ========== ANALYTICS SYSTEM SCHEMAS AND TYPES ==========
+export const insertPageViewSchema = createInsertSchema(pageViews).omit({ id: true, createdAt: true });
+export const insertBioClickSchema = createInsertSchema(bioClicks).omit({ id: true, createdAt: true });
+
+export type InsertPageView = z.infer<typeof insertPageViewSchema>;
+export type PageView = typeof pageViews.$inferSelect;
+export type InsertBioClick = z.infer<typeof insertBioClickSchema>;
+export type BioClick = typeof bioClicks.$inferSelect;
