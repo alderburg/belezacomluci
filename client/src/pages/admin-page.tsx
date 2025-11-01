@@ -635,12 +635,8 @@ export default function AdminPage() {
     },
   });
 
-  const [showBannerConflictDialog, setShowBannerConflictDialog] = useState(false);
-  const [bannerConflictData, setBannerConflictData] = useState<{ order: number; conflictBanner?: Banner } | null>(null);
-  const [pendingBannerData, setPendingBannerData] = useState<z.infer<typeof createBannerSchema> | null>(null);
-
   const createBannerMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof createBannerSchema> & { shouldReorder?: boolean }) => {
+    mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
       try {
         console.log("Original data:", data);
 
@@ -661,8 +657,6 @@ export default function AdminPage() {
       bannerForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
-      setPendingBannerData(null);
-      setBannerConflictData(null);
       toast({
         title: "Sucesso",
         description: editingItem ? "Banner atualizado!" : "Banner criado!",
@@ -795,12 +789,8 @@ export default function AdminPage() {
     },
   });
 
-  const [showCategoryConflictDialog, setShowCategoryConflictDialog] = useState(false);
-  const [categoryConflictData, setCategoryConflictData] = useState<{ order: number; conflictCategory?: Category } | null>(null);
-  const [pendingCategoryData, setPendingCategoryData] = useState<z.infer<typeof createCategorySchema> | null>(null);
-
   const createCategoryMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof createCategorySchema> & { shouldReorder?: boolean }) => {
+    mutationFn: async (data: z.infer<typeof createCategorySchema>) => {
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/categories/${editingItem.id}` : "/api/categories", data);
       return response.json();
@@ -810,8 +800,6 @@ export default function AdminPage() {
       categoryForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
-      setPendingCategoryData(null);
-      setCategoryConflictData(null);
       toast({
         title: "Sucesso",
         description: editingItem ? "Categoria atualizada!" : "Categoria criada!",
@@ -980,102 +968,6 @@ export default function AdminPage() {
     setCouponConflictData(null);
   };
 
-  // Handlers para reorganização de categorias
-  const checkCategoryOrderConflict = async (order: number): Promise<{ hasConflict: boolean; conflict?: Category }> => {
-    try {
-      const url = editingItem 
-        ? `/api/categories/check-order/${order}?excludeId=${editingItem.id}`
-        : `/api/categories/check-order/${order}`;
-      const response = await fetch(url, {
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('Erro ao verificar conflito');
-      return await response.json();
-    } catch (error) {
-      return { hasConflict: false };
-    }
-  };
-
-  const handleCategorySubmit = async (data: z.infer<typeof createCategorySchema>) => {
-    const isOrderChanged = editingItem ? editingItem.order !== data.order : true;
-    
-    if (data.order !== undefined && data.order >= 0 && isOrderChanged) {
-      const { hasConflict, conflict } = await checkCategoryOrderConflict(data.order);
-      
-      if (hasConflict && conflict) {
-        setPendingCategoryData(data);
-        setCategoryConflictData({ order: data.order, conflictCategory: conflict });
-        setShowCategoryConflictDialog(true);
-        return;
-      }
-    }
-    
-    createCategoryMutation.mutate(data);
-  };
-
-  const handleConfirmCategoryReorder = () => {
-    if (pendingCategoryData) {
-      createCategoryMutation.mutate({ ...pendingCategoryData, shouldReorder: true });
-    }
-    setShowCategoryConflictDialog(false);
-    setPendingCategoryData(null);
-    setCategoryConflictData(null);
-  };
-
-  const handleCancelCategoryReorder = () => {
-    setShowCategoryConflictDialog(false);
-    setPendingCategoryData(null);
-    setCategoryConflictData(null);
-  };
-
-  // Handlers para reorganização de banners
-  const checkBannerOrderConflict = async (order: number, page: string): Promise<{ hasConflict: boolean; conflict?: Banner }> => {
-    try {
-      const url = editingItem 
-        ? `/api/banners/check-order/${order}?page=${page}&excludeId=${editingItem.id}`
-        : `/api/banners/check-order/${order}?page=${page}`;
-      const response = await fetch(url, {
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('Erro ao verificar conflito');
-      return await response.json();
-    } catch (error) {
-      return { hasConflict: false };
-    }
-  };
-
-  const handleBannerSubmit = async (data: z.infer<typeof createBannerSchema>) => {
-    const isOrderChanged = editingItem ? editingItem.order !== data.order : true;
-    
-    if (data.order !== undefined && data.order >= 0 && isOrderChanged) {
-      const { hasConflict, conflict } = await checkBannerOrderConflict(data.order, data.page);
-      
-      if (hasConflict && conflict) {
-        setPendingBannerData(data);
-        setBannerConflictData({ order: data.order, conflictBanner: conflict });
-        setShowBannerConflictDialog(true);
-        return;
-      }
-    }
-    
-    createBannerMutation.mutate(data);
-  };
-
-  const handleConfirmBannerReorder = () => {
-    if (pendingBannerData) {
-      createBannerMutation.mutate({ ...pendingBannerData, shouldReorder: true });
-    }
-    setShowBannerConflictDialog(false);
-    setPendingBannerData(null);
-    setBannerConflictData(null);
-  };
-
-  const handleCancelBannerReorder = () => {
-    setShowBannerConflictDialog(false);
-    setPendingBannerData(null);
-    setBannerConflictData(null);
-  };
-
   // Handler para submit de cupons com verificação de conflito
   const handleCouponSubmit = async (data: z.infer<typeof createCouponSchema>) => {
     // Se estiver editando, verificar se a ordem foi realmente alterada
@@ -1104,10 +996,10 @@ export default function AdminPage() {
         productForm.handleSubmit((data) => createProductMutation.mutate(data))();
         break;
       case 'coupons':
-        couponForm.handleSubmit(handleCouponSubmit)();
+        couponForm.handleSubmit((data) => createCouponMutation.mutate(data))();
         break;
       case 'banners':
-        bannerForm.handleSubmit(handleBannerSubmit)();
+        bannerForm.handleSubmit((data) => createBannerMutation.mutate(data))();
         break;
       case 'popups':
         popupForm.handleSubmit((data) => createPopupMutation.mutate(data))();
@@ -1116,7 +1008,7 @@ export default function AdminPage() {
         notificationForm.handleSubmit((data) => createNotificationMutation.mutate(data))();
         break;
       case 'categories':
-        categoryForm.handleSubmit(handleCategorySubmit)();
+        categoryForm.handleSubmit((data) => createCategoryMutation.mutate(data))();
         break;
     }
   };
@@ -1171,20 +1063,14 @@ export default function AdminPage() {
         });
         break;
       case 'banners':
-        const defaultPage = "home";
-        const maxBannerOrder = banners && banners.length > 0
-          ? Math.max(...banners.filter(b => b.page === defaultPage).map(b => b.order ?? 0))
-          : -1;
-        const nextBannerOrder = maxBannerOrder + 1;
-
         bannerForm.reset({
           title: "",
           description: "",
           imageUrl: "",
           linkUrl: "",
-          page: defaultPage,
+          page: "home",
           isActive: true,
-          order: nextBannerOrder,
+          order: 0,
           showTitle: false,
           showDescription: false,
           showButton: false,
@@ -1226,17 +1112,12 @@ export default function AdminPage() {
         });
         break;
       case 'categories':
-        const maxCategoryOrder = categories && categories.length > 0 
-          ? Math.max(...categories.map(c => c.order ?? 0))
-          : -1;
-        const nextCategoryOrder = maxCategoryOrder + 1;
-
         categoryForm.reset({
           title: "",
           description: "",
           coverImageUrl: "",
           isActive: true,
-          order: nextCategoryOrder
+          order: 0
         });
         break;
     }
@@ -4580,62 +4461,6 @@ export default function AdminPage() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Dialog de Conflito de Categoria */}
-      <AlertDialog open={showCategoryConflictDialog} onOpenChange={setShowCategoryConflictDialog}>
-        <AlertDialogContent data-testid="dialog-category-order-conflict">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
-            <AlertDialogDescription>
-              Já existe uma categoria cadastrada com a posição de exibição número {categoryConflictData?.order}.
-              {categoryConflictData?.conflictCategory && (
-                <span className="block mt-2 font-medium">
-                  Categoria atual: {categoryConflictData.conflictCategory.title}
-                </span>
-              )}
-              <span className="block mt-2">
-                Ao confirmar, todas as categorias a partir da posição {categoryConflictData?.order} serão incrementadas em 1 posição para frente.
-              </span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelCategoryReorder}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmCategoryReorder}>
-              Confirmar e Reordenar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Dialog de Conflito de Banner */}
-      <AlertDialog open={showBannerConflictDialog} onOpenChange={setShowBannerConflictDialog}>
-        <AlertDialogContent data-testid="dialog-banner-order-conflict">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
-            <AlertDialogDescription>
-              Já existe um banner cadastrado com a posição de exibição número {bannerConflictData?.order} nesta página.
-              {bannerConflictData?.conflictBanner && (
-                <span className="block mt-2 font-medium">
-                  Banner atual: {bannerConflictData.conflictBanner.title}
-                </span>
-              )}
-              <span className="block mt-2">
-                Ao confirmar, todos os banners desta página a partir da posição {bannerConflictData?.order} serão incrementados em 1 posição para frente.
-              </span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelBannerReorder}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmBannerReorder}>
-              Confirmar e Reordenar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

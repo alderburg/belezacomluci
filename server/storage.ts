@@ -47,7 +47,7 @@ import {
   type UserAchievement, type InsertUserAchievement, type Category, type InsertCategory
 } from "../shared/schema";
 import { db } from "./db";
-import { eq, desc, and, or, sql, gte, lte, isNull, gt, ne } from "drizzle-orm";
+import { eq, desc, and, or, sql, gte, lte, isNull } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -112,16 +112,10 @@ export interface IStorage {
   updateBanner(id: string, banner: Partial<InsertBanner>): Promise<Banner>;
   deleteBanner(id: string): Promise<void>;
 
-  // Banner reordering methods
-  checkBannerOrderConflict(order: number, page: string, excludeId?: string): Promise<{ hasConflict: boolean; conflict?: Banner }>;
-  reorderBannersAfterInsert(newOrder: number, page: string, excludeId?: string): Promise<void>;
-  reorderBannersAfterDeletion(deletedOrder: number, page: string): Promise<void>;
-  handleBannerActivation(bannerId: string, newIsActive: boolean, targetOrder?: number): Promise<void>;
-
   // Post methods
   getPosts(): Promise<(Post & { user: Pick<User, 'id' | 'name' | 'avatar' | 'isAdmin'> })[]>;
   getPost(id: string): Promise<Post | undefined>;
-  createPost(post: InsertPost, taggedUserIds?: string[]): Promise<Post>;
+  createPost(post: InsertPost): Promise<Post>;
   updatePost(id: string, post: Partial<InsertPost>): Promise<Post>;
   deletePost(id: string): Promise<void>;
 
@@ -154,7 +148,6 @@ export interface IStorage {
 
   // Notification methods
   getNotifications(isActive?: boolean, targetAudience?: string): Promise<Notification[]>;
-  getAllNotificationsForAdmin(): Promise<Notification[]>; // Added for admin view
   getNotificationById(id: string): Promise<Notification | undefined>;
   getActiveNotificationsForUser(userId: string, userPlanType: string): Promise<Notification[]>;
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -169,33 +162,12 @@ export interface IStorage {
   removeUserNotification(userId: string, notificationId: string): Promise<void>;
   getUserNotificationByIds(userId: string, notificationId: string);
 
-  // Notification Settings methods
-  getNotificationSettings(userId: string);
-  saveNotificationSettings(userId: string, settings: {
-    emailEnabled: boolean;
-    whatsappEnabled: boolean;
-    smsEnabled: boolean;
-    soundEnabled: boolean;
-  });
-
-  // Seed methods for initial setup
-  seedDefaultUsers(): Promise<void>;
-  seedSampleContent(adminId: string): Promise<void>;
-
-  // ========== REFERRAL SYSTEM METHODS ==========
-  getShareSettings();
-  updateShareSettings(freePoints: number, premiumPoints: number, updatedBy: string);
-  getReferralsByUser(userId: string);
-  getUserReferralStats(userId: string);
-  getAllUsersWithReferralData();
-  createReferral(referrerId: string, referredId: string, referredPlanType: string);
-  updateUserPoints(userId: string, pointsToAdd: number, referralType?: 'free' | 'premium');
-
   // ========== GAMIFICATION METHODS ==========
 
   // User Points methods
   getUserPoints(userId: string): Promise<UserPoints | undefined>;
-  createUserPoints(userPointsData: InsertUserPoints): Promise<UserPoints>;
+  createUserPoints(userPoints: InsertUserPoints): Promise<UserPoints>;
+  updateUserPoints(userId: string, points: number): Promise<UserPoints>;
   getUserRanking(limit?: number): Promise<(UserPoints & { user: Pick<User, 'id' | 'name' | 'avatar'> })[]>;
 
   // Mission methods
@@ -242,12 +214,6 @@ export interface IStorage {
   getVideoProgress(userId: string, videoId: string, resourceId: string): Promise<VideoProgress | undefined>;
   updateVideoProgress(userId: string, videoId: string, resourceId: string, currentTime: number, duration: number): Promise<VideoProgress>;
   getUserVideoProgressByResource(userId: string, resourceId: string): Promise<VideoProgress[]>;
-
-  // Gamification methods (for DatabaseStorageWithGamification)
-  // These are re-declared here to satisfy the IStorage interface if DatabaseStorageWithGamification is used directly
-  updateUserPoints(userId: string, points: number): Promise<UserPoints>;
-  createSystemNotification(title: string, description: string, targetAudience?: string, linkUrl?: string): Promise<string>;
-  sendNotificationToUsers(notificationId: string, targetAudience: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -398,7 +364,7 @@ export class DatabaseStorage implements IStorage {
         categoryId: video.categoryId,
         isExclusive: video.isExclusive
       } : 'não encontrado');
-
+      
       if (video) {
         // Sincroniza o contador de likes antes de retornar o vídeo
         await this.syncVideoLikesCount(id);
@@ -656,28 +622,25 @@ export class DatabaseStorage implements IStorage {
     return conflict || undefined;
   }
 
-  async reorderCouponsAfterInsert(targetOrder: number): Promise<void> {
+  async reorderCouponsAfterInsert(targetOrder: number, excludeId?: string): Promise<void> {
+    const conditions = [gte(coupons.order, targetOrder)];
+    
+    // Excluir o cupom que está sendo movido para evitar incrementá-lo
+    if (excludeId) {
+      conditions.push(sql`${coupons.id} != ${excludeId}`);
+    }
+    
     await this.db
       .update(coupons)
       .set({ order: sql`${coupons.order} + 1` })
-      .where(
-        and(
-          gte(coupons.order, targetOrder),
-          sql`${coupons.order} >= 0`
-        )
-      );
+      .where(and(...conditions));
   }
 
   async reorderCouponsAfterDeletion(deletedOrder: number): Promise<void> {
     await this.db
       .update(coupons)
       .set({ order: sql`${coupons.order} - 1` })
-      .where(
-        and(
-          gt(coupons.order, deletedOrder),
-          sql`${coupons.order} >= 0`
-        )
-      );
+      .where(gte(coupons.order, deletedOrder + 1));
   }
 
   async reorderCouponsAfterStatusChange(couponId: string, newIsActive: boolean, targetOrder?: number): Promise<void> {
@@ -696,20 +659,20 @@ export class DatabaseStorage implements IStorage {
     } else {
       // Reativando: verificar se targetOrder foi fornecida, senão usar próxima disponível
       let newOrder = targetOrder;
-
+      
       if (newOrder === undefined || newOrder < 0) {
         // Se não forneceu ordem específica, colocar no final
         const maxOrder = await this.db
           .select({ max: sql<number>`COALESCE(MAX(${coupons.order}), 0)` })
           .from(coupons)
           .where(sql`${coupons.order} >= 0`);
-
+        
         newOrder = (maxOrder[0]?.max ?? 0) + 1;
       } else {
         // Se forneceu ordem específica, incrementar cupons naquela posição
-        await this.reorderCouponsAfterInsert(newOrder);
+        await this.reorderCouponsAfterInsert(newOrder, couponId);
       }
-
+      
       await this.db
         .update(coupons)
         .set({ order: newOrder })
@@ -749,94 +712,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCategory(id: string): Promise<void> {
-    const category = await this.getCategory(id);
-    if (!category) return;
-
-    // PRIMEIRO: Reordenar as categorias antes de deletar
-    if (category.order >= 0) {
-      await this.reorderCategoriesAfterDeletion(category.order);
-    }
-
-    // DEPOIS: Deletar a categoria
     await this.db.delete(categories).where(eq(categories.id, id));
-  }
-
-  async checkCategoryOrderConflict(order: number, excludeId?: string): Promise<Category | undefined> {
-    const conditions = [eq(categories.order, order)];
-    if (excludeId) {
-      conditions.push(sql`${categories.id} != ${excludeId}`);
-    }
-    const [conflict] = await this.db.select().from(categories).where(and(...conditions));
-    return conflict || undefined;
-  }
-
-  async reorderCategoriesAfterInsert(targetOrder: number, excludeId?: string): Promise<void> {
-    const conditions = [
-      gte(categories.order, targetOrder),
-      sql`${categories.order} >= 0`
-    ];
-    
-    if (excludeId) {
-      conditions.push(ne(categories.id, excludeId));
-    }
-    
-    await this.db
-      .update(categories)
-      .set({ order: sql`${categories.order} + 1` })
-      .where(and(...conditions));
-  }
-
-  async reorderCategoriesAfterDeletion(deletedOrder: number): Promise<void> {
-    await this.db
-      .update(categories)
-      .set({ order: sql`${categories.order} - 1` })
-      .where(
-        and(
-          gt(categories.order, deletedOrder),
-          sql`${categories.order} >= 0`
-        )
-      );
-  }
-
-  async reorderCategoriesAfterStatusChange(categoryId: string, newIsActive: boolean, targetOrder?: number): Promise<void> {
-    const category = await this.getCategory(categoryId);
-    if (!category) return;
-
-    if (!newIsActive) {
-      if (category.order >= 0) {
-        await this.reorderCategoriesAfterDeletion(category.order);
-      }
-      await this.db
-        .update(categories)
-        .set({ order: -1 })
-        .where(eq(categories.id, categoryId));
-    } else {
-      let newOrder = targetOrder;
-      
-      if (newOrder === undefined || newOrder < 0) {
-        const maxOrder = await this.db
-          .select({ max: sql<number>`COALESCE(MAX(${categories.order}), 0)` })
-          .from(categories)
-          .where(sql`${categories.order} >= 0`);
-        
-        newOrder = (maxOrder[0]?.max ?? 0) + 1;
-      } else {
-        await this.reorderCategoriesAfterInsert(newOrder, categoryId);
-      }
-      
-      await this.db
-        .update(categories)
-        .set({ order: newOrder })
-        .where(eq(categories.id, categoryId));
-    }
-  }
-
-  async getCategoryById(id: string): Promise<Category | undefined> {
-    return await this.getCategory(id);
-  }
-
-  async handleCategoryActivation(categoryId: string, newIsActive: boolean, targetOrder?: number): Promise<void> {
-    await this.reorderCategoriesAfterStatusChange(categoryId, newIsActive, targetOrder);
   }
 
   // Banner methods
@@ -930,116 +806,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBanner(id: string): Promise<void> {
-    const banner = await this.getBanner(id);
-    if (!banner) return;
-
-    // PRIMEIRO: Reordenar os banners antes de deletar
-    if (banner.order >= 0) {
-      await this.reorderBannersAfterDeletion(banner.order, banner.page);
-    }
-
-    // DEPOIS: Deletar o banner
     await this.db.delete(banners).where(eq(banners.id, id));
-  }
-
-  async getBannerById(id: string): Promise<Banner | undefined> {
-    return await this.getBanner(id);
-  }
-
-  // Banner reordering methods
-  async checkBannerOrderConflict(order: number, page: string, excludeId?: string): Promise<{ hasConflict: boolean; conflict?: Banner }> {
-    const conditions = [
-      eq(banners.order, order),
-      eq(banners.page, page),
-      sql`${banners.order} >= 0`
-    ];
-
-    if (excludeId) {
-      conditions.push(ne(banners.id, excludeId));
-    }
-
-    const existing = await this.db
-      .select()
-      .from(banners)
-      .where(and(...conditions))
-      .limit(1);
-
-    return {
-      hasConflict: existing.length > 0,
-      conflict: existing[0]
-    };
-  }
-
-  async reorderBannersAfterInsert(newOrder: number, page: string, excludeId?: string): Promise<void> {
-    const conditions = [
-      gte(banners.order, newOrder),
-      eq(banners.page, page),
-      sql`${banners.order} >= 0`
-    ];
-
-    if (excludeId) {
-      conditions.push(ne(banners.id, excludeId));
-    }
-
-    await this.db
-      .update(banners)
-      .set({ order: sql`${banners.order} + 1` })
-      .where(and(...conditions));
-  }
-
-  async reorderBannersAfterDeletion(deletedOrder: number, page: string): Promise<void> {
-    await this.db
-      .update(banners)
-      .set({ order: sql`${banners.order} - 1` })
-      .where(
-        and(
-          gt(banners.order, deletedOrder),
-          eq(banners.page, page),
-          sql`${banners.order} >= 0`
-        )
-      );
-  }
-
-  async handleBannerActivation(bannerId: string, newIsActive: boolean, targetOrder?: number): Promise<void> {
-    const banner = await this.getBanner(bannerId); // Usando getBanner para buscar o banner
-    if (!banner) return;
-
-    if (!newIsActive) {
-      // Desativando: decrementar sucessores e marcar como -1
-      if (banner.order >= 0) {
-        await this.reorderBannersAfterDeletion(banner.order, banner.page);
-      }
-      await this.db
-        .update(banners)
-        .set({ order: -1 })
-        .where(eq(banners.id, bannerId));
-    } else {
-      // Reativando: verificar se targetOrder foi fornecida, senão usar próxima disponível
-      let newOrder = targetOrder;
-
-      if (newOrder === undefined || newOrder < 0) {
-        // Se não forneceu ordem específica, colocar no final
-        const maxOrder = await this.db
-          .select({ max: sql<number>`COALESCE(MAX(${banners.order}), 0)` })
-          .from(banners)
-          .where(
-            and(
-              eq(banners.page, banner.page),
-              sql`${banners.order} >= 0`
-            )
-          );
-
-        newOrder = (maxOrder[0]?.max ?? 0) + 1;
-      } else {
-        // Se forneceu ordem específica, incrementar banners naquela posição
-        await this.reorderBannersAfterInsert(newOrder, banner.page, bannerId);
-      }
-
-      await this.db
-        .update(banners)
-        .set({ order: newOrder })
-        .where(eq(banners.id, bannerId));
-    }
   }
 
   // Post methods
@@ -1930,8 +1697,7 @@ export class DatabaseStorage implements IStorage {
           discount: "20%",
           category: "makeup",
           storeUrl: "https://sephora.com.br",
-          isActive: true, // Adicionado para que apareça por padrão
-          order: 1 // Adicionado order
+          isActive: true // Adicionado para que apareça por padrão
         },
         {
           code: "SKINCARE15",
@@ -1940,8 +1706,7 @@ export class DatabaseStorage implements IStorage {
           discount: "15%",
           category: "skincare",
           storeUrl: "https://theordinary.com",
-          isActive: false, // Adicionado para que não apareça por padrão
-          order: 2 // Adicionado order
+          isActive: false // Adicionado para que não apareça por padrão
         }
       ]);
 
@@ -1953,8 +1718,7 @@ export class DatabaseStorage implements IStorage {
           imageUrl: "https://via.placeholder.com/1200x400/ff69b4/ffffff?text=Novidades+em+Maquiagem",
           linkUrl: "/products",
           order: 1,
-          isActive: true,
-          page: 'home'
+          isActive: true
         },
         {
           title: "Cupons Exclusivos",
@@ -1962,8 +1726,7 @@ export class DatabaseStorage implements IStorage {
           imageUrl: "https://via.placeholder.com/1200x400/ffd700/ffffff?text=Cupons+Exclusivos",
           linkUrl: "/coupons",
           order: 2,
-          isActive: true,
-          page: 'home'
+          isActive: true
         }
       ]);
 
@@ -2489,7 +2252,7 @@ export class DatabaseStorage implements IStorage {
       // Update raffle total entries
       await this.db.update(rafflesTable)
         .set({ totalEntries: raffle.totalEntries + entries })
-        .where(eq(raffle.id, raffleId));
+        .where(eq(rafflesTable.id, raffleId));
 
       return { success: true, message: `Participação registrada! ${entries} entrada(s) no sorteio` };
     } catch (error) {
@@ -3038,6 +2801,7 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
   ): Promise<VideoProgress> {
     const existing = await this.getVideoProgress(userId, videoId, resourceId);
 
+    // Só atualiza se o tempo atual for maior que o máximo já assistido
     if (existing && currentTime <= existing.maxTimeWatched) {
       return existing;
     }
@@ -3046,11 +2810,13 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
     let progressPercentage = duration > 0 ? Math.floor((maxTimeWatched / duration) * 100) : 0;
     const isCompleted = progressPercentage >= 95;
 
+    // Se o vídeo está completo (>=95%), atualiza o progresso para 100% no banco
     if (isCompleted) {
       progressPercentage = 100;
     }
 
     if (existing) {
+      // Atualiza existente
       const [updated] = await this.db
         .update(videoProgress)
         .set({
@@ -3070,6 +2836,7 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
 
       return updated;
     } else {
+      // Cria novo
       const [created] = await this.db
         .insert(videoProgress)
         .values({
@@ -3101,4 +2868,3 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
 }
 
 export const storage = new DatabaseStorageWithGamification();
-</replit_final_file>
