@@ -2130,25 +2130,25 @@ export function registerRoutes(app: Express): Server {
       res.json(popup);
     } catch (error: any) {
       console.error("Error updating popup:", error);
-      
+
       // Verificar se é erro de foreign key
-      const isForeignKeyError = 
-        error?.code === '23503' || 
+      const isForeignKeyError =
+        error?.code === '23503' ||
         error?.message?.includes('foreign key') ||
         error?.message?.includes('violates') ||
         error?.message?.includes('not present');
-      
+
       if (isForeignKeyError) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: "Foreign key constraint violation",
           message: error.message || "ID de vídeo ou curso inválido",
           details: error.detail
         });
       }
-      
-      res.status(500).json({ 
+
+      res.status(500).json({
         error: "Internal server error",
-        message: error.message 
+        message: error.message
       });
     }
   });
@@ -3536,7 +3536,7 @@ export function registerRoutes(app: Express): Server {
       // Verify current password
       const { comparePasswords } = await import('./auth');
       const isPasswordValid = await comparePasswords(currentPassword, user.password);
-      
+
       if (!isPasswordValid) {
         return res.status(401).json({ message: "Senha atual incorreta" });
       }
@@ -3577,18 +3577,32 @@ export function registerRoutes(app: Express): Server {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      const adminUser = await storage.getUser(req.user.id);
+      // Buscar o usuário admin diretamente do banco (sem cache)
+      const adminUser = await storage.getAdminUser();
 
       if (!adminUser) {
-        return res.status(404).json({ message: "User not found" });
+        // Retornar valores padrão se não houver admin
+        return res.json({
+          title: "Nossa Comunidade",
+          subtitle: "Compartilhe suas experiências e dicas de beleza",
+          backgroundImage: "",
+          mobileBackgroundImage: ""
+        });
       }
 
+      // Retornar as configurações da comunidade sempre atualizadas do banco
       const settings = {
         title: adminUser.communityTitle || "Nossa Comunidade",
         subtitle: adminUser.communitySubtitle || "Compartilhe suas experiências e dicas de beleza",
-        backgroundImage: adminUser.communityBackgroundImage || null,
-        mobileBackgroundImage: adminUser.communityBackgroundImageMobile || adminUser.communityBackgroundImage,
+        backgroundImage: adminUser.communityBackgroundImage || "",
+        mobileBackgroundImage: adminUser.communityBackgroundImageMobile || adminUser.communityBackgroundImage || ""
       };
+
+      // Configurar headers para evitar cache no navegador
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+
       res.json(settings);
     } catch (error) {
       console.error('Error fetching community settings:', error);

@@ -18,7 +18,7 @@ export default function BioPage() {
   const { toast } = useToast();
   
   // Ativar sincronização global de dados para atualização automática
-  useDataSync();
+  useDataSync(['/api/admin/community-settings', '/api/admin/public-profile']);
 
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
   const [isCouponsModalOpen, setIsCouponsModalOpen] = useState(false);
@@ -37,7 +37,6 @@ export default function BioPage() {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: 0,
-    refetchInterval: false, // Não fazer polling, usar WebSocket
   });
 
   // Buscar configurações da comunidade (título e subtitle)
@@ -49,7 +48,6 @@ export default function BioPage() {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: 0,
-    refetchInterval: false, // Não fazer polling, usar WebSocket
   });
 
 

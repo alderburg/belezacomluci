@@ -197,11 +197,11 @@ export function useDataSync() {
         queryClient.invalidateQueries({ queryKey: ['/api/admin/community-settings'] });
 
         // Forçar refetch imediato
-        queryClient.refetchQueries({ 
+        queryClient.refetchQueries({
           queryKey: ['/api/admin/community-settings'],
           type: 'active'
         });
-        queryClient.refetchQueries({ 
+        queryClient.refetchQueries({
           queryKey: ['/api/admin/public-profile'],
           type: 'active'
         });
@@ -233,7 +233,7 @@ export function useDataSync() {
           if (data?.postId) {
             queryClient.invalidateQueries({ queryKey: [`/api/posts/${data.postId}/comments`] });
           }
-          
+
           // Disparar evento customizado para atualização imediata na UI
           window.dispatchEvent(new CustomEvent('data_update', {
             detail: { dataType, action, data }
