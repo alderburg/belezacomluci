@@ -58,17 +58,35 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      secure: 'auto',
-      sameSite: isProduction ? 'none' : 'lax',
+      secure: false,
+      sameSite: 'none',
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000
+      maxAge: 24 * 60 * 60 * 1000,
+      domain: undefined
     }
   };
 
-  app.set("trust proxy", 1);
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
+  
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    
+    if (origin) {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+    }
+    
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+    
+    next();
+  });
 
   passport.use(
     new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
