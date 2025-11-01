@@ -16,7 +16,7 @@ import { useDataSync } from "@/hooks/use-data-sync";
 
 export default function BioPage() {
   const { toast } = useToast();
-  
+
   // Ativar sincronização global de dados para atualização automática
   useDataSync(['/api/admin/community-settings', '/api/admin/public-profile']);
 
@@ -101,7 +101,7 @@ export default function BioPage() {
     if (!isLoading) {
       // Criar ou atualizar meta tag
       let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-      
+
       if (metaThemeColor) {
         metaThemeColor.setAttribute('content', '#034738');
       } else {
@@ -236,10 +236,10 @@ export default function BioPage() {
               Carregando...
             </h2>
             <p className="text-gray-500 text-sm">
-              {isLoadingProfile && !adminProfile ? 'Carregando perfil...' : 
-               isLoadingBanners && banners === undefined ? 'Carregando banners...' :
-               !communitySettings ? 'Carregando configurações...' :
-               'Preparando sua página'}
+              {isLoadingProfile && !adminProfile ? 'Carregando os melhores cupons...' : 
+               isLoadingBanners && banners === undefined ? 'Carregando as melhores promoções...' :
+               !communitySettings ? 'Carregando minhas redes ...' :
+               'Está tudo pronto!'}
             </p>
           </div>
         </div>
@@ -406,7 +406,7 @@ export default function BioPage() {
                     </div>
                   );
                 }
-                
+
                 // Outros banners mantêm comportamento de link normal
                 return (
                   <a 
@@ -549,7 +549,7 @@ export default function BioPage() {
                   <div key={categoryIndex} className="mb-8">
                     {/* Skeleton do título da categoria */}
                     <div className="h-6 bg-gray-200 rounded w-32 mb-4 animate-pulse"></div>
-                    
+
                     {/* Grid de skeletons para cupons */}
                     <div className="grid grid-cols-2 gap-4">
                       {[1, 2, 3, 4].map((couponIndex) => (
@@ -597,13 +597,13 @@ export default function BioPage() {
                             key={coupon.id}
                             onClick={async (e) => {
                               e.preventDefault();
-                              
+
                               try {
                                 const codigo = coupon.code || '';
-                                
+
                                 if (codigo && codigo.trim() !== '') {
                                   await navigator.clipboard.writeText(codigo);
-                                  
+
                                   toast({
                                     title: `Cupom ${codigo} copiado! 🎉`,
                                     description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
@@ -619,11 +619,11 @@ export default function BioPage() {
 
                                 if (coupon.storeUrl) {
                                   let url = coupon.storeUrl.trim();
-                                  
+
                                   if (!url.startsWith('http://') && !url.startsWith('https://')) {
                                     url = 'https://' + url;
                                   }
-                                  
+
                                   setTimeout(() => {
                                     window.open(url, '_blank', 'noopener,noreferrer');
                                   }, 2000);
