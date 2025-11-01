@@ -279,7 +279,8 @@ export default function CommunityPage() {
       setEditingValue(social.url);
       setEditingSecondaryValue(social.name);
     } else if (action === 'visit' && social) {
-      window.open(social.url, '_blank');
+      const url = social.type?.toLowerCase() === 'email' ? `mailto:${social.url}` : social.url;
+      window.open(url, '_blank');
     }
 
     setSocialActionModal({ isOpen: false });
