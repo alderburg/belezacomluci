@@ -108,8 +108,8 @@ export default function AdminAnalyticsPage() {
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar />
-      <main className={`flex-1 transition-all duration-300 ${isOpen ? 'ml-64' : 'ml-16'} pt-16`}>
-        <div className="px-6 py-6">
+      <main className={`flex-1 transition-all duration-300 ${isOpen ? 'ml-64' : 'ml-16'} pt-16 px-6 py-6`}>
+        <div>
           {/* Header */}
           <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
@@ -597,7 +597,6 @@ export default function AdminAnalyticsPage() {
               </Card>
             </TabsContent>
           </Tabs>
-        </div>
       </main>
     </div>
   );
