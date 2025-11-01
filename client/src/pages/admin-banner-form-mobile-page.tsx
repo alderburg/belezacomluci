@@ -12,16 +12,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useLocation, useRoute, Redirect } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -32,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import type { z } from 'zod';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export default function AdminBannerFormMobilePage() {
   const { user } = useAuth();
@@ -42,9 +32,6 @@ export default function AdminBannerFormMobilePage() {
   const [match, params] = useRoute("/admin/banners-mobile/edit/:id");
   const bannerId = match && params && params.id ? String(params.id) : undefined;
   const isEditing = Boolean(match && bannerId);
-  const [showConflictDialog, setShowConflictDialog] = useState(false);
-  const [conflictData, setConflictData] = useState<{ order: number; conflictBanner?: Banner } | null>(null);
-  const [pendingFormData, setPendingFormData] = useState<z.infer<typeof insertBannerSchema> | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -53,12 +40,6 @@ export default function AdminBannerFormMobilePage() {
   const { data: banner, isLoading } = useQuery<Banner>({
     queryKey: [`/api/admin/banners/${bannerId}`],
     enabled: Boolean(isEditing && bannerId),
-  });
-
-  // Buscar todos os banners para calcular a próxima posição disponível
-  const { data: allBanners = [] } = useQuery<Banner[]>({
-    queryKey: ["/api/admin/banners"],
-    enabled: !isEditing, // Só buscar quando estiver criando novo banner
   });
 
   const form = useForm<z.infer<typeof insertBannerSchema>>({
@@ -101,34 +82,11 @@ export default function AdminBannerFormMobilePage() {
           new Date(banner.endDateTime).toISOString().slice(0, 16) : "",
         videoId: banner.videoId || "",
       });
-    } else if (!isEditing && allBanners) {
-      // Calcular a próxima posição disponível
-      const maxOrder = allBanners.length > 0 
-        ? Math.max(...allBanners.map(b => b.order ?? 0))
-        : -1;
-      const nextOrder = maxOrder + 1;
-
-      form.reset({
-        title: "",
-        description: "",
-        imageUrl: "",
-        linkUrl: "",
-        page: "home",
-        order: nextOrder,
-        showTitle: true,
-        showDescription: true,
-        showButton: true,
-        isActive: false,
-        opensCouponsModal: false,
-        startDateTime: "",
-        endDateTime: "",
-        videoId: "",
-      });
     }
-  }, [banner, isEditing, allBanners, form]);
+  }, [banner, isEditing, form]);
 
   const mutation = useMutation({
-    mutationFn: async (data: z.infer<typeof insertBannerSchema> & { shouldReorder?: boolean }) => {
+    mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {
       if (isEditing) {
         return await apiRequest('PUT', `/api/banners/${bannerId}`, data);
       } else {
@@ -148,10 +106,10 @@ export default function AdminBannerFormMobilePage() {
       });
       setLocation('/admin/banners-mobile');
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast({
         title: "Erro",
-        description: error.message || (isEditing ? "Erro ao atualizar banner" : "Erro ao criar banner"),
+        description: "Erro ao salvar banner",
         variant: "destructive",
       });
     },
@@ -161,51 +119,8 @@ export default function AdminBannerFormMobilePage() {
     setLocation('/admin/banners-mobile');
   };
 
-  const checkOrderConflict = async (order: number, page: string): Promise<{ hasConflict: boolean; conflict?: Banner }> => {
-    try {
-      const params = new URLSearchParams({ page });
-      if (isEditing && bannerId) {
-        params.append('excludeId', bannerId);
-      }
-      const url = `/api/banners/check-order/${order}?${params.toString()}`;
-      const response = await fetch(url, {
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('Erro ao verificar conflito');
-      return await response.json();
-    } catch (error) {
-      return { hasConflict: false };
-    }
-  };
-
-  const onSubmit = async (data: z.infer<typeof insertBannerSchema>) => {
-    if (data.order !== undefined && data.order >= 0 && data.page) {
-      const { hasConflict, conflict } = await checkOrderConflict(data.order, data.page);
-      
-      if (hasConflict && conflict) {
-        setPendingFormData(data);
-        setConflictData({ order: data.order, conflictBanner: conflict });
-        setShowConflictDialog(true);
-        return;
-      }
-    }
-    
+  const onSubmit = (data: z.infer<typeof insertBannerSchema>) => {
     mutation.mutate(data);
-  };
-
-  const handleConfirmReorder = () => {
-    if (pendingFormData) {
-      mutation.mutate({ ...pendingFormData, shouldReorder: true });
-    }
-    setShowConflictDialog(false);
-    setPendingFormData(null);
-    setConflictData(null);
-  };
-
-  const handleCancelReorder = () => {
-    setShowConflictDialog(false);
-    setPendingFormData(null);
-    setConflictData(null);
   };
 
   return (
@@ -422,39 +337,6 @@ export default function AdminBannerFormMobilePage() {
         </form>
         </Form>
       )}
-
-      <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
-        <AlertDialogContent data-testid="dialog-order-conflict">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
-            <AlertDialogDescription>
-              Já existe um banner cadastrado com a posição de exibição número {conflictData?.order}.
-              {conflictData?.conflictBanner && (
-                <span className="block mt-2 font-medium">
-                  Banner atual: {conflictData.conflictBanner.title}
-                </span>
-              )}
-              <span className="block mt-2">
-                Ao confirmar, todos os banners a partir da posição {conflictData?.order} serão incrementados em 1 posição para frente.
-              </span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel 
-              onClick={handleCancelReorder}
-              data-testid="button-cancel-reorder"
-            >
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmReorder}
-              data-testid="button-confirm-reorder"
-            >
-              Confirmar e Reordenar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

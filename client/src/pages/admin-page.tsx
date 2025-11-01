@@ -28,6 +28,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAdmin } from "@/contexts/admin-context";
+import { useEffect } from "react";
 import { ImageUpload } from "@/components/ui/image-upload";
 
 const createVideoSchema = insertVideoSchema;
@@ -100,35 +101,25 @@ export default function AdminPage() {
   const { toast } = useToast();
   const { isAdminMode, viewMode, setAdminMode, setViewMode } = useAdmin();
   const [location, setLocation] = useLocation();
-
+  
   // Extrair a aba da URL
   const getTabFromUrl = () => {
     const path = location.replace('/admin/', '').replace('/admin', '');
     const validTabs = ['videos', 'products', 'coupons', 'banners', 'popups', 'notifications', 'categories', 'users'];
     return validTabs.includes(path) ? path : 'videos';
   };
-
+  
   const [activeTab, setActiveTab] = useState(getTabFromUrl());
   const [editingItem, setEditingItem] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{id: string, type: string, title?: string} | null>(null);
-
+  
   // Estados para controle de conflito de ordem de cupons
   const [showCouponConflictDialog, setShowCouponConflictDialog] = useState(false);
   const [couponConflictData, setCouponConflictData] = useState<{ order: number; conflictCoupon?: Coupon } | null>(null);
   const [pendingCouponData, setPendingCouponData] = useState<z.infer<typeof createCouponSchema> | null>(null);
-
-  // Estados para controle de conflito de ordem de banners
-  const [showBannerConflictDialog, setShowBannerConflictDialog] = useState(false);
-  const [bannerConflictData, setBannerConflictData] = useState<{ order: number; conflictBanner?: Banner } | null>(null);
-  const [pendingBannerData, setPendingBannerData] = useState<z.infer<typeof createBannerSchema> | null>(null);
-
-  // Estados para controle de conflito de ordem de categorias
-  const [showCategoryConflictDialog, setShowCategoryConflictDialog] = useState(false);
-  const [categoryConflictData, setCategoryConflictData] = useState<{ order: number; conflictCategory?: Category } | null>(null);
-  const [pendingCategoryData, setPendingCategoryData] = useState<z.infer<typeof createCategorySchema> | null>(null);
-
+  
   // Atualizar URL quando a aba mudar
   useEffect(() => {
     const newPath = `/admin/${activeTab}`;
@@ -136,7 +127,7 @@ export default function AdminPage() {
       setLocation(newPath);
     }
   }, [activeTab]);
-
+  
   // Atualizar aba quando a URL mudar
   useEffect(() => {
     const tabFromUrl = getTabFromUrl();
@@ -237,47 +228,9 @@ export default function AdminPage() {
   // Função para verificar conflito de ordem de cupons
   const checkCouponOrderConflict = async (order: number): Promise<{ hasConflict: boolean; conflict?: Coupon }> => {
     try {
-      const params = new URLSearchParams();
-      if (editingItem && editingItem.type === 'coupons') { // Only apply excludeId if editing a coupon
-        params.append('excludeId', editingItem.id);
-      }
-      const url = `/api/coupons/check-order/${order}?${params.toString()}`;
-      const response = await fetch(url, {
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('Erro ao verificar conflito');
-      return await response.json();
-    } catch (error) {
-      return { hasConflict: false };
-    }
-  };
-
-  // Função para verificar conflito de ordem de banners
-  const checkBannerOrderConflict = async (order: number, page: string): Promise<{ hasConflict: boolean; conflict?: Banner }> => {
-    try {
-      const params = new URLSearchParams({ page });
-      if (editingItem && editingItem.type === 'banners') { // Only apply excludeId if editing a banner
-        params.append('excludeId', editingItem.id);
-      }
-      const url = `/api/banners/check-order/${order}?${params.toString()}`;
-      const response = await fetch(url, {
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('Erro ao verificar conflito');
-      return await response.json();
-    } catch (error) {
-      return { hasConflict: false };
-    }
-  };
-
-  // Função para verificar conflito de ordem de categorias
-  const checkCategoryOrderConflict = async (order: number): Promise<{ hasConflict: boolean; conflict?: Category }> => {
-    try {
-      const params = new URLSearchParams();
-      if (editingItem && editingItem.type === 'categories') { // Only apply excludeId if editing a category
-        params.append('excludeId', editingItem.id);
-      }
-      const url = `/api/categories/check-order/${order}?${params.toString()}`;
+      const url = editingItem 
+        ? `/api/coupons/check-order/${order}?excludeId=${editingItem.id}`
+        : `/api/coupons/check-order/${order}`;
       const response = await fetch(url, {
         credentials: 'include',
       });
@@ -683,7 +636,7 @@ export default function AdminPage() {
   });
 
   const createBannerMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof createBannerSchema> & { shouldReorder?: boolean }) => {
+    mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
       try {
         console.log("Original data:", data);
 
@@ -704,8 +657,6 @@ export default function AdminPage() {
       bannerForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
-      setPendingBannerData(null); // Clear pending data after successful save
-      setBannerConflictData(null); // Clear conflict data after successful save
       toast({
         title: "Sucesso",
         description: editingItem ? "Banner atualizado!" : "Banner criado!",
@@ -752,18 +703,18 @@ export default function AdminPage() {
     onError: (error: any) => {
       console.log('Erro completo capturado:', error);
       let errorMessage = "Falha ao salvar popup";
-
+      
       // Verificar o erro completo (mensagem e response)
       const errorString = JSON.stringify(error);
       const errorMsg = (error?.message || '').toLowerCase();
       const errorResponse = JSON.stringify(error?.response || {}).toLowerCase();
-
+      
       console.log('Verificando erro:', {
         errorMsg,
         errorResponse,
         errorString: errorString.toLowerCase()
       });
-
+      
       // Verificar se é erro de foreign key
       const isForeignKeyError = 
         errorMsg.includes('foreign') || 
@@ -776,7 +727,7 @@ export default function AdminPage() {
         errorString.toLowerCase().includes('foreign') ||
         errorString.toLowerCase().includes('video_id') ||
         errorString.toLowerCase().includes('course_id');
-
+      
       if (isForeignKeyError) {
         if (popupForm.watch("targetPage") === "video_specific") {
           errorMessage = "Vídeo não encontrado. Verifique o ID adicionado.";
@@ -784,7 +735,7 @@ export default function AdminPage() {
           errorMessage = "Curso não encontrado. Verifique o ID adicionado.";
         }
       }
-
+      
       toast({
         title: "Erro",
         description: errorMessage,
@@ -839,7 +790,7 @@ export default function AdminPage() {
   });
 
   const createCategoryMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof createCategorySchema> & { shouldReorder?: boolean }) => {
+    mutationFn: async (data: z.infer<typeof createCategorySchema>) => {
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/categories/${editingItem.id}` : "/api/categories", data);
       return response.json();
@@ -849,17 +800,15 @@ export default function AdminPage() {
       categoryForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
-      setPendingCategoryData(null); // Clear pending data
-      setCategoryConflictData(null); // Clear conflict data
       toast({
         title: "Sucesso",
         description: editingItem ? "Categoria atualizada!" : "Categoria criada!",
       });
     },
-    onError: (error: any) => {
+    onError: () => {
       toast({
         title: "Erro",
-        description: `Falha ao salvar categoria: ${error.message}`,
+        description: "Falha ao salvar categoria",
         variant: "destructive",
       });
     },
@@ -871,7 +820,7 @@ export default function AdminPage() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [`/api/${variables.type}`] });
-
+      
       // Se for vídeo, também invalidar banners, popups e comentários vinculados
       if (variables.type === 'videos') {
         queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
@@ -879,7 +828,7 @@ export default function AdminPage() {
         queryClient.invalidateQueries({ queryKey: ["/api/popups"] });
         queryClient.invalidateQueries({ queryKey: ["/api/admin/popups"] });
         queryClient.invalidateQueries({ queryKey: ["/api/comments"] });
-
+        
         // Limpar cache de popups do sessionStorage
         const keys = Object.keys(sessionStorage);
         keys.forEach(key => {
@@ -888,7 +837,7 @@ export default function AdminPage() {
           }
         });
       }
-
+      
       // Se for banner, também invalidar a rota admin
       if (variables.type === 'banners') {
         queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
@@ -929,6 +878,7 @@ export default function AdminPage() {
       });
     },
   });
+
 
 
   const handleEdit = (item: any, type: string) => {
@@ -1018,43 +968,11 @@ export default function AdminPage() {
     setCouponConflictData(null);
   };
 
-  // Handlers para reorganização de banners
-  const handleConfirmBannerReorder = () => {
-    if (pendingBannerData) {
-      createBannerMutation.mutate({ ...pendingBannerData, shouldReorder: true });
-    }
-    setShowBannerConflictDialog(false);
-    setPendingBannerData(null);
-    setBannerConflictData(null);
-  };
-
-  const handleCancelBannerReorder = () => {
-    setShowBannerConflictDialog(false);
-    setPendingBannerData(null);
-    setBannerConflictData(null);
-  };
-
-  // Handlers para reorganização de categorias
-  const handleConfirmCategoryReorder = () => {
-    if (pendingCategoryData) {
-      createCategoryMutation.mutate({ ...pendingCategoryData, shouldReorder: true });
-    }
-    setShowCategoryConflictDialog(false);
-    setPendingCategoryData(null);
-    setCategoryConflictData(null);
-  };
-
-  const handleCancelCategoryReorder = () => {
-    setShowCategoryConflictDialog(false);
-    setPendingCategoryData(null);
-    setCategoryConflictData(null);
-  };
-
   // Handler para submit de cupons com verificação de conflito
   const handleCouponSubmit = async (data: z.infer<typeof createCouponSchema>) => {
     if (data.order !== undefined && data.order >= 0) {
       const { hasConflict, conflict } = await checkCouponOrderConflict(data.order);
-
+      
       if (hasConflict && conflict) {
         setPendingCouponData(data);
         setCouponConflictData({ order: data.order, conflictCoupon: conflict });
@@ -1062,42 +980,9 @@ export default function AdminPage() {
         return;
       }
     }
-
+    
     createCouponMutation.mutate(data);
   };
-
-  // Handler para submit de banners com verificação de conflito
-  const handleBannerSubmit = async (data: z.infer<typeof createBannerSchema>) => {
-    if (data.order !== undefined && data.order >= 0 && data.page) {
-      const { hasConflict, conflict } = await checkBannerOrderConflict(data.order, data.page);
-
-      if (hasConflict && conflict) {
-        setPendingBannerData(data);
-        setBannerConflictData({ order: data.order, conflictBanner: conflict });
-        setShowBannerConflictDialog(true);
-        return;
-      }
-    }
-
-    createBannerMutation.mutate(data);
-  };
-
-  // Handler para submit de categorias com verificação de conflito
-  const handleCategorySubmit = async (data: z.infer<typeof createCategorySchema>) => {
-    if (data.order !== undefined && data.order >= 0) {
-      const { hasConflict, conflict } = await checkCategoryOrderConflict(data.order);
-
-      if (hasConflict && conflict) {
-        setPendingCategoryData(data);
-        setCategoryConflictData({ order: data.order, conflictCategory: conflict });
-        setShowCategoryConflictDialog(true);
-        return;
-      }
-    }
-
-    createCategoryMutation.mutate(data);
-  };
-
 
   const handleSubmit = (type: string) => {
     switch (type) {
@@ -1108,10 +993,10 @@ export default function AdminPage() {
         productForm.handleSubmit((data) => createProductMutation.mutate(data))();
         break;
       case 'coupons':
-        couponForm.handleSubmit(handleCouponSubmit)();
+        couponForm.handleSubmit((data) => createCouponMutation.mutate(data))();
         break;
       case 'banners':
-        bannerForm.handleSubmit(handleBannerSubmit)();
+        bannerForm.handleSubmit((data) => createBannerMutation.mutate(data))();
         break;
       case 'popups':
         popupForm.handleSubmit((data) => createPopupMutation.mutate(data))();
@@ -1120,7 +1005,7 @@ export default function AdminPage() {
         notificationForm.handleSubmit((data) => createNotificationMutation.mutate(data))();
         break;
       case 'categories':
-        categoryForm.handleSubmit(handleCategorySubmit)();
+        categoryForm.handleSubmit((data) => createCategoryMutation.mutate(data))();
         break;
     }
   };
@@ -1154,10 +1039,10 @@ export default function AdminPage() {
         break;
       case 'coupons':
         // Calcular a próxima posição disponível
-        const maxCouponOrder = coupons && coupons.length > 0 
+        const maxOrder = coupons && coupons.length > 0 
           ? Math.max(...coupons.map(c => c.order ?? 0))
           : -1;
-        const nextCouponOrder = maxCouponOrder + 1;
+        const nextOrder = maxOrder + 1;
 
         couponForm.reset({
           code: "",
@@ -1169,35 +1054,27 @@ export default function AdminPage() {
           isActive: true,
           storeUrl: "",
           coverImageUrl: "",
-          order: nextCouponOrder,
+          order: nextOrder,
           startDateTime: "",
           endDateTime: ""
         });
         break;
       case 'banners':
-        // Calcular a próxima posição disponível para banners da mesma página
-        const currentPage = bannerForm.watch("page") || "home";
-        const bannersOfSamePage = banners?.filter(b => b.page === currentPage) || [];
-        const maxBannerOrder = bannersOfSamePage.length > 0 
-          ? Math.max(...bannersOfSamePage.map(b => b.order ?? 0))
-          : -1;
-        const nextBannerOrder = maxBannerOrder + 1;
-
         bannerForm.reset({
           title: "",
           description: "",
           imageUrl: "",
           linkUrl: "",
-          page: currentPage,
-          order: nextBannerOrder,
-          showTitle: true,
-          showDescription: true,
-          showButton: true,
-          isActive: false,
+          page: "home",
+          isActive: true,
+          order: 0,
+          showTitle: false,
+          showDescription: false,
+          showButton: false,
+          videoId: "",
           opensCouponsModal: false,
           startDateTime: "",
-          endDateTime: "",
-          videoId: "",
+          endDateTime: ""
         });
         break;
       case 'popups':
@@ -1232,18 +1109,12 @@ export default function AdminPage() {
         });
         break;
       case 'categories':
-        // Calcular a próxima posição disponível
-        const maxCategoryOrder = categories && categories.length > 0 
-          ? Math.max(...categories.map(c => c.order ?? 0))
-          : -1;
-        const nextCategoryOrder = maxCategoryOrder + 1;
-        
         categoryForm.reset({
           title: "",
           description: "",
           coverImageUrl: "",
           isActive: true,
-          order: nextCategoryOrder
+          order: 0
         });
         break;
     }
@@ -1301,20 +1172,20 @@ export default function AdminPage() {
 
     try {
       console.log('Buscando dados do YouTube para vídeo:', videoId);
-
+      
       // Primeiro, detectar o tipo baseado na URL
       const isPlaylist = isPlaylistUrl(url);
-
+      
       // Se for playlist, calcular duração total
       if (isPlaylist) {
         const playlistIdMatch = url.match(/[?&]list=([^&\n?#]+)/);
         if (playlistIdMatch && playlistIdMatch[1]) {
           const playlistId = playlistIdMatch[1];
           console.log('Detectada playlist, buscando vídeos para calcular duração total:', playlistId);
-
+          
           try {
             const playlistResponse = await fetch(`/api/youtube/playlist/${playlistId}`);
-
+            
             if (!playlistResponse.ok) {
               console.error('Erro ao buscar playlist:', playlistResponse.status);
               toast({
@@ -1325,7 +1196,7 @@ export default function AdminPage() {
               // Continua para buscar dados do vídeo individual
             } else {
               const playlistData = await playlistResponse.json();
-
+              
               if (playlistData && playlistData.videos && playlistData.videos.length > 0) {
                 // Calcular duração total
                 let totalSeconds = 0;
@@ -1340,22 +1211,22 @@ export default function AdminPage() {
                     }
                   }
                 }
-
+                
                 // Converter total de segundos para HH:MM:SS
                 const hours = Math.floor(totalSeconds / 3600);
                 const minutes = Math.floor((totalSeconds % 3600) / 60);
                 const seconds = totalSeconds % 60;
                 const totalDuration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
+                
                 videoForm.setValue('duration', totalDuration);
                 console.log(`Duração total da playlist calculada: ${totalDuration} (${playlistData.videos.length} vídeos)`);
-
+                
                 // Usar título da playlist
                 if (playlistData.playlistTitle) {
                   videoForm.setValue('title', playlistData.playlistTitle);
                   console.log('Título da playlist preenchido:', playlistData.playlistTitle);
                 }
-
+                
                 // Usar descrição da playlist (somente se existir e não estiver vazia)
                 if (playlistData.playlistDescription && playlistData.playlistDescription.trim() !== '') {
                   videoForm.setValue('description', playlistData.playlistDescription);
@@ -1363,21 +1234,21 @@ export default function AdminPage() {
                 } else {
                   console.log('Playlist não possui descrição, deixando campo vazio');
                 }
-
+                
                 // Usar thumbnail da playlist
                 if (playlistData.playlistThumbnail) {
                   videoForm.setValue('thumbnailUrl', playlistData.playlistThumbnail);
                   console.log('Thumbnail da playlist preenchida');
                 }
-
+                
                 videoForm.setValue('type', 'playlist');
                 console.log('Tipo alterado para: playlist');
-
+                
                 toast({
                   title: "Playlist detectada!",
                   description: `${playlistData.videos.length} vídeos encontrados. Duração total: ${totalDuration}`,
                 });
-
+                
                 return; // Não precisa buscar dados do vídeo individual
               }
             }
@@ -1386,10 +1257,10 @@ export default function AdminPage() {
           }
         }
       }
-
+      
       // Se não for playlist ou falhou, buscar dados do vídeo individual
       const response = await fetch(`/api/youtube/video/${videoId}`);
-
+      
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Erro ao buscar dados do YouTube:', response.status, errorText);
@@ -1403,17 +1274,17 @@ export default function AdminPage() {
 
       const videoData = await response.json();
       console.log('Dados recebidos do YouTube:', videoData);
-
+      
       // Auto-fill title
       if (videoData.title) {
         videoForm.setValue('title', videoData.title);
         console.log('Título preenchido:', videoData.title);
       }
-
+      
       // Auto-fill type based on detection
       let detectedType = 'video'; // default
       let typeMessage = 'vídeo único';
-
+      
       if (videoData.isLive) {
         detectedType = 'live';
         typeMessage = 'live';
@@ -1421,29 +1292,29 @@ export default function AdminPage() {
       } else {
         console.log('Tipo detectado: vídeo único');
       }
-
+      
       videoForm.setValue('type', detectedType);
       console.log('Tipo alterado para:', detectedType);
-
+      
       // Auto-fill duration field - only for non-live videos
       if (videoData.duration && !videoData.isLive) {
         const formattedDuration = ensureHHMMSSFormat(videoData.duration);
         videoForm.setValue('duration', formattedDuration);
         console.log('Duração preenchida:', formattedDuration);
       }
-
+      
       // Auto-fill description if not already set
       if (videoData.description) {
         videoForm.setValue('description', videoData.description);
         console.log('Descrição preenchida automaticamente');
       }
-
+      
       // Auto-fill thumbnail if not already set
       if (videoData.thumbnail) {
         videoForm.setValue('thumbnailUrl', videoData.thumbnail);
         console.log('Thumbnail preenchida automaticamente');
       }
-
+      
       // Show appropriate toast message
       toast({
         title: `${typeMessage.charAt(0).toUpperCase() + typeMessage.slice(1)} detectada!`,
@@ -1961,16 +1832,16 @@ export default function AdminPage() {
                               onChange={async (e) => {
                                 const url = e.target.value.trim();
                                 productForm.setValue("fileUrl", e.target.value);
-
+                                
                                 if (!url) return;
 
                                 // Verificar se é URL do YouTube
                                 const isYouTubeUrl = /(?:youtube\.com|youtu\.be)/.test(url);
-
+                                
                                 if (isYouTubeUrl) {
                                   // Verificar se é playlist ou vídeo único
                                   const isPlaylist = /[?&]list=([^&\n?#]+)/.test(url);
-
+                                  
                                   if (isPlaylist) {
                                     productForm.setValue("type", "course_playlist");
                                     console.log('URL de Playlist do YouTube detectada, tipo alterado para: course_playlist');
@@ -1986,27 +1857,27 @@ export default function AdminPage() {
                                       if (playlistIdMatch && playlistIdMatch[1]) {
                                         const playlistId = playlistIdMatch[1];
                                         console.log('Detectada playlist de produto, buscando dados:', playlistId);
-
+                                        
                                         const playlistResponse = await fetch(`/api/youtube/playlist/${playlistId}`);
                                         if (playlistResponse.ok) {
                                           const playlistData = await playlistResponse.json();
-
+                                          
                                           if (playlistData && playlistData.videos && playlistData.videos.length > 0) {
                                             // Preencher título da playlist
                                             if (playlistData.playlistTitle) {
                                               productForm.setValue('title', playlistData.playlistTitle);
                                             }
-
+                                            
                                             // Preencher descrição se existir
                                             if (playlistData.playlistDescription && playlistData.playlistDescription.trim() !== '') {
                                               productForm.setValue('description', playlistData.playlistDescription);
                                             }
-
+                                            
                                             // Preencher thumbnail
                                             if (playlistData.playlistThumbnail) {
                                               productForm.setValue('coverImageUrl', playlistData.playlistThumbnail);
                                             }
-
+                                            
                                             toast({
                                               title: "Playlist detectada!",
                                               description: `${playlistData.videos.length} vídeos encontrados. Tipo alterado para "Curso - Playlist".`,
@@ -2022,28 +1893,28 @@ export default function AdminPage() {
                                         if (videoId.includes('?')) {
                                           videoId = videoId.split('?')[0];
                                         }
-
+                                        
                                         console.log('Detectado vídeo único de produto, buscando dados:', videoId);
-
+                                        
                                         const videoResponse = await fetch(`/api/youtube/video/${videoId}`);
                                         if (videoResponse.ok) {
                                           const videoData = await videoResponse.json();
-
+                                          
                                           // Preencher título
                                           if (videoData.title) {
                                             productForm.setValue('title', videoData.title);
                                           }
-
+                                          
                                           // Preencher descrição
                                           if (videoData.description) {
                                             productForm.setValue('description', videoData.description);
                                           }
-
+                                          
                                           // Preencher thumbnail
                                           if (videoData.thumbnail) {
                                             productForm.setValue('coverImageUrl', videoData.thumbnail);
                                           }
-
+                                          
                                           toast({
                                             title: "Vídeo do YouTube detectado!",
                                             description: "Tipo alterado para 'Curso - Vídeo Único'. Dados preenchidos automaticamente.",
@@ -2309,7 +2180,7 @@ export default function AdminPage() {
 
                     {/* Banner Form */}
                     {activeTab === 'banners' && (
-                      <form onSubmit={bannerForm.handleSubmit(handleBannerSubmit)} className="space-y-4">
+                      <form onSubmit={bannerForm.handleSubmit((data) => createBannerMutation.mutate(data))} className="space-y-4">
                         <div>
                           <Label htmlFor="banner-title">Título <span className="text-destructive">*</span></Label>
                           <Input
@@ -2379,17 +2250,6 @@ export default function AdminPage() {
                               {...bannerForm.register("page")}
                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                               data-testid="select-banner-page"
-                              onChange={(e) => {
-                                bannerForm.setValue("page", e.target.value);
-                                // Recalcular a ordem quando a página mudar
-                                const currentPage = e.target.value || "home";
-                                const bannersOfSamePage = banners?.filter(b => b.page === currentPage) || [];
-                                const maxOrder = bannersOfSamePage.length > 0 
-                                  ? Math.max(...bannersOfSamePage.map(b => b.order ?? 0))
-                                  : -1;
-                                const nextOrder = maxOrder + 1;
-                                bannerForm.setValue("order", nextOrder);
-                              }}
                             >
                               <option value="home">Página Inicial</option>
                               <option value="videos">Vídeos Exclusivos</option>
@@ -2908,7 +2768,7 @@ export default function AdminPage() {
 
                     {/* Category Form */}
                     {activeTab === 'categories' && (
-                      <form onSubmit={categoryForm.handleSubmit(handleCategorySubmit)} className="space-y-4">
+                      <form onSubmit={categoryForm.handleSubmit((data) => createCategoryMutation.mutate(data))} className="space-y-4">
                         <div>
                           <Label htmlFor="category-title">Título <span className="text-destructive">*</span></Label>
                           <Input
@@ -3360,7 +3220,7 @@ export default function AdminPage() {
                         <div className="space-y-4">
                           {filteredAndPaginatedCoupons.items.map((coupon) => (
                             <div key={coupon.id} className="flex items-center space-x-4 p-4 border border-border rounded-lg">
-                              <div className="w-16 h-16 bg-muted rounded overflow-hidden relative">
+                              <div className="w-16 h-16 bg-muted rounded overflow-hidden relative flex items-center justify-center">
                                 {coupon.coverImageUrl ? (
                                   <img
                                     src={coupon.coverImageUrl}
@@ -4612,7 +4472,7 @@ export default function AdminPage() {
               Já existe um cupom cadastrado com a posição de exibição número {couponConflictData?.order}.
               {couponConflictData?.conflictCoupon && (
                 <span className="block mt-2 font-medium">
-                  Cupom atual: {couponConflictData.conflictCoupon.code}
+                  Cupom atual: {couponConflictData.conflictCoupon.brand}
                 </span>
               )}
               <span className="block mt-2">
@@ -4630,74 +4490,6 @@ export default function AdminPage() {
             <AlertDialogAction
               onClick={handleConfirmCouponReorder}
               data-testid="button-confirm-reorder"
-            >
-              Confirmar e Reordenar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* AlertDialog de conflito de ordem de banners */}
-      <AlertDialog open={showBannerConflictDialog} onOpenChange={setShowBannerConflictDialog}>
-        <AlertDialogContent data-testid="dialog-banner-order-conflict">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
-            <AlertDialogDescription>
-              Já existe um banner cadastrado com a posição de exibição número {bannerConflictData?.order}.
-              {bannerConflictData?.conflictBanner && (
-                <span className="block mt-2 font-medium">
-                  Banner atual: {bannerConflictData.conflictBanner.title}
-                </span>
-              )}
-              <span className="block mt-2">
-                Ao confirmar, todos os banners a partir da posição {bannerConflictData?.order} serão incrementados em 1 posição para frente.
-              </span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel 
-              onClick={handleCancelBannerReorder}
-              data-testid="button-cancel-banner-reorder"
-            >
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmBannerReorder}
-              data-testid="button-confirm-banner-reorder"
-            >
-              Confirmar e Reordenar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* AlertDialog de conflito de ordem de categorias */}
-      <AlertDialog open={showCategoryConflictDialog} onOpenChange={setShowCategoryConflictDialog}>
-        <AlertDialogContent data-testid="dialog-category-order-conflict">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
-            <AlertDialogDescription>
-              Já existe uma categoria cadastrada com a posição de exibição número {categoryConflictData?.order}.
-              {categoryConflictData?.conflictCategory && (
-                <span className="block mt-2 font-medium">
-                  Categoria atual: {categoryConflictData.conflictCategory.title}
-                </span>
-              )}
-              <span className="block mt-2">
-                Ao confirmar, todas as categorias a partir da posição {categoryConflictData?.order} serão incrementadas em 1 posição para frente.
-              </span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel 
-              onClick={handleCancelCategoryReorder}
-              data-testid="button-cancel-category-reorder"
-            >
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmCategoryReorder}
-              data-testid="button-confirm-category-reorder"
             >
               Confirmar e Reordenar
             </AlertDialogAction>

@@ -147,7 +147,7 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         // Enviar notificação específica para community_settings
         wsService.broadcastDataUpdate('community_settings', 'updated', { title, subtitle, backgroundImage, mobileBackgroundImage });
-
+        
         // Também enviar para users (retrocompatibilidade)
         wsService.broadcastDataUpdate('users', 'updated', {
           id: userId,
@@ -635,47 +635,21 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Check coupon order conflict
   app.get("/api/coupons/check-order/:order", async (req, res) => {
-    const order = parseInt(req.params.order);
-    const excludeId = req.query.excludeId as string | undefined;
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
 
     try {
+      const order = parseInt(req.params.order);
+      if (isNaN(order)) {
+        return res.status(400).json({ message: "Invalid order parameter" });
+      }
+      const excludeId = req.query.excludeId as string | undefined;
       const conflict = await storage.checkCouponOrderConflict(order, excludeId);
-      res.json(conflict);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Check category order conflict
-  app.get("/api/categories/check-order/:order", async (req, res) => {
-    const order = parseInt(req.params.order);
-    const excludeId = req.query.excludeId as string | undefined;
-
-    try {
-      const conflict = await storage.checkCategoryOrderConflict(order, excludeId);
-      res.json(conflict);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Check banner order conflict
-  app.get("/api/banners/check-order/:order", async (req, res) => {
-    const order = parseInt(req.params.order);
-    const page = req.query.page as string;
-    const excludeId = req.query.excludeId as string | undefined;
-
-    if (!page) {
-      return res.status(400).json({ error: "Page parameter is required" });
-    }
-
-    try {
-      const conflict = await storage.checkBannerOrderConflict(order, page, excludeId);
-      res.json(conflict);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      res.json({ hasConflict: !!conflict, conflict });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check order conflict" });
     }
   });
 
@@ -734,7 +708,7 @@ export function registerRoutes(app: Express): Server {
         if (existingCoupon.order >= 0) {
           await storage.reorderCouponsAfterDeletion(existingCoupon.order);
         }
-
+        
         // SEGUNDO: Incrementar cupons na nova posição e sucessores (excluindo o cupom atual)
         await storage.reorderCouponsAfterInsert(couponData.order, req.params.id);
       }
@@ -3813,7 +3787,7 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         // Enviar notificação específica para community_settings
         wsService.broadcastDataUpdate('community_settings', 'updated', settings);
-
+        
         // Também enviar para users (retrocompatibilidade)
         wsService.broadcastDataUpdate('users', 'updated', {
           id: userId,
