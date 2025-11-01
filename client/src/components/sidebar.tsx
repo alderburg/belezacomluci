@@ -34,8 +34,8 @@ export default function Sidebar() {
   const [showExitPopup, setShowExitPopup] = useState(false);
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { viewMode, setViewMode } = useAdmin();
-  
-  
+
+
 
   // Close mobile sidebar when route changes
   useEffect(() => {
@@ -63,6 +63,7 @@ export default function Sidebar() {
   if (user?.isAdmin) {
     navItems.push({ href: "/admin", label: "Admin", icon: Crown });
     navItems.push({ href: "/admin/cheirosas", label: "Gerenciar Cheirosas", icon: BarChart3 });
+    navItems.push({ href: "/admin/analytics", label: "Analytics", icon: BarChart3 });
   }
 
   const getUserInitials = (name: string) => {
@@ -241,9 +242,9 @@ export default function Sidebar() {
                   <Link href="/perfil" className="p-2 rounded-lg hover:bg-muted transition-colors" title={user?.name || 'Usuário'}>
                     <Avatar className="w-10 h-10">
                       {user?.avatar ? (
-                        <img 
-                          src={user.avatar} 
-                          alt={user.name} 
+                        <img
+                          src={user.avatar}
+                          alt={user.name}
                           className="w-full h-full object-cover rounded-full"
                         />
                       ) : (
@@ -270,9 +271,9 @@ export default function Sidebar() {
                   <Link href="/perfil" className="flex items-center space-x-3 mb-4 p-2 rounded-lg hover:bg-muted transition-colors">
                     <Avatar className="w-10 h-10">
                       {user?.avatar ? (
-                        <img 
-                          src={user.avatar} 
-                          alt={user.name} 
+                        <img
+                          src={user.avatar}
+                          alt={user.name}
                           className="w-full h-full object-cover rounded-full"
                         />
                       ) : (
@@ -348,8 +349,8 @@ export default function Sidebar() {
 
       {/* Logout Popup */}
       {showExitPopup && (
-        <PopupSystem 
-          trigger="logout" 
+        <PopupSystem
+          trigger="logout"
           onClose={handleExitPopupClose}
         />
       )}
