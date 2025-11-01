@@ -637,11 +637,12 @@ export class DatabaseStorage implements IStorage {
       .where(gte(coupons.order, deletedOrder + 1));
   }
 
-  async reorderCouponsAfterStatusChange(couponId: string, newIsActive: boolean): Promise<void> {
+  async reorderCouponsAfterStatusChange(couponId: string, newIsActive: boolean, targetOrder?: number): Promise<void> {
     const coupon = await this.getCoupon(couponId);
     if (!coupon) return;
 
     if (!newIsActive) {
+      // Desativando: decrementar sucessores e marcar como -1
       if (coupon.order >= 0) {
         await this.reorderCouponsAfterDeletion(coupon.order);
       }
@@ -650,15 +651,25 @@ export class DatabaseStorage implements IStorage {
         .set({ order: -1 })
         .where(eq(coupons.id, couponId));
     } else {
-      const maxOrder = await this.db
-        .select({ max: sql<number>`COALESCE(MAX(${coupons.order}), 0)` })
-        .from(coupons)
-        .where(sql`${coupons.order} >= 0`);
+      // Reativando: verificar se targetOrder foi fornecida, senão usar próxima disponível
+      let newOrder = targetOrder;
       
-      const nextOrder = (maxOrder[0]?.max ?? 0) + 1;
+      if (newOrder === undefined || newOrder < 0) {
+        // Se não forneceu ordem específica, colocar no final
+        const maxOrder = await this.db
+          .select({ max: sql<number>`COALESCE(MAX(${coupons.order}), 0)` })
+          .from(coupons)
+          .where(sql`${coupons.order} >= 0`);
+        
+        newOrder = (maxOrder[0]?.max ?? 0) + 1;
+      } else {
+        // Se forneceu ordem específica, incrementar cupons naquela posição
+        await this.reorderCouponsAfterInsert(newOrder, couponId);
+      }
+      
       await this.db
         .update(coupons)
-        .set({ order: nextOrder })
+        .set({ order: newOrder })
         .where(eq(coupons.id, couponId));
     }
   }

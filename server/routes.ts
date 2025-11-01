@@ -713,7 +713,9 @@ export function registerRoutes(app: Express): Server {
       }
 
       if (isStatusChanging && !isOrderChanging) {
-        await storage.reorderCouponsAfterStatusChange(req.params.id, couponData.isActive);
+        // Ao mudar o status, passar a ordem desejada se estiver reativando
+        const targetOrder = couponData.isActive ? couponData.order : undefined;
+        await storage.reorderCouponsAfterStatusChange(req.params.id, couponData.isActive, targetOrder);
       }
 
       // TERCEIRO: Atualizar o cupom na nova posição
