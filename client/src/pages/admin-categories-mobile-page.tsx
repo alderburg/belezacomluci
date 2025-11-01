@@ -141,12 +141,21 @@ export default function AdminCategoriesMobilePage() {
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {category.description}
                     </p>
-                    <div className="flex gap-2 mt-2">
-                      {category.isActive ? (
-                        <Badge className="bg-green-100 text-green-700 text-xs">Ativa</Badge>
-                      ) : (
-                        <Badge variant="secondary" className="text-xs">Inativa</Badge>
-                      )}
+                    <div className="flex flex-col gap-2 mt-2">
+                      {/* Linha 1: Badge de Posição */}
+                      <div className="flex">
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+                          Posição: {category.order}
+                        </Badge>
+                      </div>
+                      {/* Linha 2: Outros Badges */}
+                      <div className="flex gap-2 flex-wrap">
+                        {category.isActive ? (
+                          <Badge className="bg-green-100 text-green-700 text-xs">Ativa</Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">Inativa</Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

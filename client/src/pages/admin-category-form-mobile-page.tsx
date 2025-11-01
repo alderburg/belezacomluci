@@ -12,6 +12,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useLocation, useRoute, Redirect } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -22,7 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import type { z } from 'zod';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function AdminCategoryFormMobilePage() {
   const { user } = useAuth();
@@ -32,6 +42,9 @@ export default function AdminCategoryFormMobilePage() {
   const [match, params] = useRoute("/admin/categories-mobile/edit/:id");
   const categoryId = match && params && params.id ? String(params.id) : undefined;
   const isEditing = Boolean(match && categoryId);
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [conflictData, setConflictData] = useState<{ order: number; conflictCategory?: Category } | null>(null);
+  const [pendingFormData, setPendingFormData] = useState<z.infer<typeof insertCategorySchema> | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -40,6 +53,12 @@ export default function AdminCategoryFormMobilePage() {
   const { data: category, isLoading } = useQuery<Category>({
     queryKey: [`/api/categories/${categoryId}`],
     enabled: Boolean(isEditing && categoryId),
+  });
+
+  // Buscar todas as categorias para calcular a próxima posição disponível
+  const { data: allCategories = [] } = useQuery<Category[]>({
+    queryKey: ["/api/categories"],
+    enabled: !isEditing, // Só buscar quando estiver criando nova categoria
   });
 
   const form = useForm<z.infer<typeof insertCategorySchema>>({
@@ -62,11 +81,25 @@ export default function AdminCategoryFormMobilePage() {
         order: category.order || 0,
         isActive: category.isActive ?? true,
       });
+    } else if (!isEditing && allCategories) {
+      // Calcular a próxima posição disponível
+      const maxOrder = allCategories.length > 0 
+        ? Math.max(...allCategories.map(c => c.order ?? 0))
+        : -1;
+      const nextOrder = maxOrder + 1;
+
+      form.reset({
+        title: "",
+        description: "",
+        coverImageUrl: "",
+        order: nextOrder,
+        isActive: true,
+      });
     }
-  }, [category, isEditing, form]);
+  }, [category, isEditing, allCategories, form]);
 
   const mutation = useMutation({
-    mutationFn: async (data: z.infer<typeof insertCategorySchema>) => {
+    mutationFn: async (data: z.infer<typeof insertCategorySchema> & { shouldReorder?: boolean }) => {
       if (isEditing) {
         return await apiRequest('PUT', `/api/categories/${categoryId}`, data);
       } else {
@@ -81,10 +114,10 @@ export default function AdminCategoryFormMobilePage() {
       });
       setLocation('/admin/categories-mobile');
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Erro",
-        description: "Erro ao salvar categoria",
+        description: error.message || (isEditing ? "Erro ao atualizar categoria" : "Erro ao criar categoria"),
         variant: "destructive",
       });
     },
@@ -94,8 +127,49 @@ export default function AdminCategoryFormMobilePage() {
     setLocation('/admin/categories-mobile');
   };
 
-  const onSubmit = (data: z.infer<typeof insertCategorySchema>) => {
+  const checkOrderConflict = async (order: number): Promise<{ hasConflict: boolean; conflict?: Category }> => {
+    try {
+      const url = isEditing 
+        ? `/api/categories/check-order/${order}?excludeId=${categoryId}`
+        : `/api/categories/check-order/${order}`;
+      const response = await fetch(url, {
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Erro ao verificar conflito');
+      return await response.json();
+    } catch (error) {
+      return { hasConflict: false };
+    }
+  };
+
+  const onSubmit = async (data: z.infer<typeof insertCategorySchema>) => {
+    if (data.order !== undefined && data.order >= 0) {
+      const { hasConflict, conflict } = await checkOrderConflict(data.order);
+      
+      if (hasConflict && conflict) {
+        setPendingFormData(data);
+        setConflictData({ order: data.order, conflictCategory: conflict });
+        setShowConflictDialog(true);
+        return;
+      }
+    }
+    
     mutation.mutate(data);
+  };
+
+  const handleConfirmReorder = () => {
+    if (pendingFormData) {
+      mutation.mutate({ ...pendingFormData, shouldReorder: true });
+    }
+    setShowConflictDialog(false);
+    setPendingFormData(null);
+    setConflictData(null);
+  };
+
+  const handleCancelReorder = () => {
+    setShowConflictDialog(false);
+    setPendingFormData(null);
+    setConflictData(null);
   };
 
   return (
@@ -186,6 +260,39 @@ export default function AdminCategoryFormMobilePage() {
         </form>
         </Form>
       )}
+
+      <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
+        <AlertDialogContent data-testid="dialog-order-conflict">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
+            <AlertDialogDescription>
+              Já existe uma categoria cadastrada com a posição de exibição número {conflictData?.order}.
+              {conflictData?.conflictCategory && (
+                <span className="block mt-2 font-medium">
+                  Categoria atual: {conflictData.conflictCategory.title}
+                </span>
+              )}
+              <span className="block mt-2">
+                Ao confirmar, todas as categorias a partir da posição {conflictData?.order} serão incrementadas em 1 posição para frente.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={handleCancelReorder}
+              data-testid="button-cancel-reorder"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmReorder}
+              data-testid="button-confirm-reorder"
+            >
+              Confirmar e Reordenar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

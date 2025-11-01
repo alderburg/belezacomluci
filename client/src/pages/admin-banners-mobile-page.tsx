@@ -7,12 +7,12 @@ import { ArrowLeft, Plus, Image as ImageIcon, Edit, Trash2 } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useDataSync } from '@/hooks/use-data-sync';
-import { Banner } from "@shared/schema";
+import { Banner, Category } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { apiRequest } from '@/lib/queryClient';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AdminBannersMobilePage() {
   const { user } = useAuth();
@@ -24,12 +24,82 @@ export default function AdminBannersMobilePage() {
   const [bannerToDelete, setBannerToDelete] = useState<{ id: string; title: string } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isLoadingBanners, setIsLoadingBanners] = useState(true);
+
+
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
   }
 
-  const { data: banners, isLoading } = useQuery<Banner[]>({
-    queryKey: ["/api/admin/banners"],
+  const fetchCategories = async () => {
+    setIsLoadingCategories(true);
+    try {
+      const data = await apiRequest('GET', '/api/admin/categories');
+      const sortedData = [...data].sort((a, b) => a.order - b.order);
+      setCategories(sortedData);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as categorias.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
+
+  const fetchBanners = async () => {
+    setIsLoadingBanners(true);
+    try {
+      const data = await apiRequest('GET', '/api/admin/banners');
+      const sortedData = [...data].sort((a, b) => a.order - b.order);
+      setBanners(sortedData);
+    } catch (error) {
+      console.error("Error fetching banners:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os banners.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingBanners(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+    fetchBanners();
+  }, [isConnected]);
+
+  const reorderMutation = useMutation({
+    mutationFn: async ({ type, ids }: { type: 'categories' | 'banners'; ids: { id: string; order: number }[] }) => {
+      return await apiRequest('POST', `/api/admin/${type}/reorder`, { ids });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/admin/${variables.type}`] });
+      toast({
+        title: "Sucesso",
+        description: `${variables.type.charAt(0).toUpperCase() + variables.type.slice(1)} reordenados com sucesso!`,
+      });
+      // Refresh data after reordering
+      if (variables.type === 'categories') {
+        fetchCategories();
+      } else {
+        fetchBanners();
+      }
+    },
+    onError: (error: any, variables) => {
+      console.error(`Error reordering ${variables.type}:`, error);
+      toast({
+        title: "Erro",
+        description: `Erro ao reordenar ${variables.type}. Por favor, tente novamente.`,
+        variant: "destructive",
+      });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -45,6 +115,7 @@ export default function AdminBannersMobilePage() {
       });
       setDeleteDialogOpen(false);
       setBannerToDelete(null);
+      fetchBanners(); // Refresh banners
     },
     onError: () => {
       toast({
@@ -79,6 +150,10 @@ export default function AdminBannersMobilePage() {
     }
   };
 
+  const handleReorder = (type: 'categories' | 'banners', itemIds: { id: string; order: number }[]) => {
+    reorderMutation.mutate({ type, ids: itemIds });
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
@@ -95,7 +170,7 @@ export default function AdminBannersMobilePage() {
           <div className="text-left flex-1 ml-4">
             <h1 className="text-lg font-semibold text-foreground">Banners</h1>
             <p className="text-sm text-muted-foreground">
-              {banners?.length || 0} banners cadastrados
+              {banners.length} banners cadastrados
             </p>
           </div>
           <ImageIcon className="h-5 w-5 text-primary" />
@@ -103,13 +178,13 @@ export default function AdminBannersMobilePage() {
       </div>
 
       <div className="pt-24 px-4 pb-24">
-        {isLoading ? (
+        {isLoadingBanners ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} className="h-32 w-full rounded-xl" />
             ))}
           </div>
-        ) : banners && banners.length > 0 ? (
+        ) : banners.length > 0 ? (
           <div className="space-y-3">
             {banners.map((banner) => (
               <div
@@ -133,7 +208,7 @@ export default function AdminBannersMobilePage() {
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2">
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
-                      {banner.page === 'home' ? 'Página Inicial' : 
+                      {banner.page === 'home' ? 'Página Inicial' :
                        banner.page === 'videos' ? 'Vídeos Exclusivos' :
                        banner.page === 'products' ? 'Produtos Digitais' :
                        banner.page === 'coupons' ? 'Cupons' :
@@ -177,8 +252,8 @@ export default function AdminBannersMobilePage() {
                           return <Badge className="bg-gray-100 text-gray-700 text-xs">Expirado</Badge>;
                         } else if (startDate && now < startDate) {
                           return <Badge className="bg-orange-100 text-orange-700 text-xs">Programado</Badge>;
-                        } else if (banner.isActive && 
-                                  (!startDate || now >= startDate) && 
+                        } else if (banner.isActive &&
+                                  (!startDate || now >= startDate) &&
                                   (!endDate || now <= endDate)) {
                           return <Badge className="bg-blue-100 text-blue-700 text-xs">Em Vinculação</Badge>;
                         }
