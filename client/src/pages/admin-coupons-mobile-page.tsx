@@ -203,7 +203,7 @@ export default function AdminCouponsMobilePage() {
       </div>
 
       <Button
-        className="fixed bottom-32 right-4 h-14 w-14 rounded-full shadow-lg"
+        className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
         onClick={handleCreateClick}
         data-testid="button-add-coupon"
       >

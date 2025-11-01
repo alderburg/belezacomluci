@@ -189,7 +189,7 @@ export default function AdminPopupsMobilePage() {
       </div>
 
       <Button
-        className="fixed bottom-32 right-4 h-14 w-14 rounded-full shadow-lg"
+        className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
         onClick={handleAddClick}
         data-testid="button-add-popup"
       >
