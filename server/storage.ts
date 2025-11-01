@@ -3038,7 +3038,6 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
   ): Promise<VideoProgress> {
     const existing = await this.getVideoProgress(userId, videoId, resourceId);
 
-    // Só atualiza se o tempo atual for maior que o máximo já assistido
     if (existing && currentTime <= existing.maxTimeWatched) {
       return existing;
     }
@@ -3047,13 +3046,11 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
     let progressPercentage = duration > 0 ? Math.floor((maxTimeWatched / duration) * 100) : 0;
     const isCompleted = progressPercentage >= 95;
 
-    // Se o vídeo está completo (>=95%), atualiza o progresso para 100% no banco
     if (isCompleted) {
       progressPercentage = 100;
     }
 
     if (existing) {
-      // Atualiza existente
       const [updated] = await this.db
         .update(videoProgress)
         .set({
@@ -3073,7 +3070,6 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
 
       return updated;
     } else {
-      // Cria novo
       const [created] = await this.db
         .insert(videoProgress)
         .values({
