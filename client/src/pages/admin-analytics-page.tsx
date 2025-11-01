@@ -32,9 +32,21 @@ interface AnalyticsStats {
 }
 
 export default function AdminAnalyticsPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { isOpen } = useSidebar();
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+
+  // Aguardar autenticação antes de verificar admin
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -42,6 +54,29 @@ export default function AdminAnalyticsPage() {
 
   const { data: stats, isLoading } = useQuery<AnalyticsStats>({
     queryKey: ["/api/analytics/stats", dateRange],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (dateRange.from) {
+        params.append('startDate', dateRange.from.toISOString());
+      }
+      if (dateRange.to) {
+        params.append('endDate', dateRange.to.toISOString());
+      }
+      
+      const response = await fetch(`/api/analytics/stats?${params.toString()}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch analytics stats');
+      }
+      
+      return response.json();
+    },
+    enabled: !!user?.isAdmin,
   });
 
   if (isLoading) {

@@ -3895,7 +3895,10 @@ export function registerRoutes(app: Express): Server {
   // Get analytics stats (admin only)
   app.get("/api/analytics/stats", async (req, res) => {
     try {
+      console.log('📊 Analytics stats request - Auth:', req.isAuthenticated(), 'Admin:', req.user?.isAdmin);
+      
       if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        console.log('❌ Analytics stats - Access denied');
         return res.status(403).json({ message: "Admin access required" });
       }
 
