@@ -9,10 +9,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Banner } from "@shared/schema";
 import { useDataSync } from "@/hooks/use-data-sync";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function BioPage() {
   const { toast } = useToast();
@@ -22,6 +23,63 @@ export default function BioPage() {
 
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
   const [isCouponsModalOpen, setIsCouponsModalOpen] = useState(false);
+  
+  // Estado para geolocalização e session tracking
+  const [geoData, setGeoData] = useState<{city?: string, state?: string, country?: string} | null>(null);
+  const sessionId = useRef<string>('');
+  const pageViewTracked = useRef(false);
+
+  // Gerar ou obter session ID
+  useEffect(() => {
+    let sid = sessionStorage.getItem('analytics_session_id');
+    if (!sid) {
+      sid = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      sessionStorage.setItem('analytics_session_id', sid);
+    }
+    sessionId.current = sid;
+  }, []);
+
+  // Obter geolocalização do usuário
+  useEffect(() => {
+    async function fetchGeoData() {
+      try {
+        const response = await fetch('https://get.geojs.io/v1/ip/geo.json');
+        const data = await response.json();
+        setGeoData({
+          city: data.city || undefined,
+          state: data.region || undefined,
+          country: data.country || undefined,
+        });
+      } catch (error) {
+        console.error('Erro ao obter geolocalização:', error);
+        setGeoData({});
+      }
+    }
+    fetchGeoData();
+  }, []);
+
+  // Função helper para rastrear cliques
+  const trackClick = useCallback(async (
+    targetType: string,
+    targetId: string | null,
+    targetName: string,
+    targetUrl: string | null = null
+  ) => {
+    try {
+      await apiRequest('/api/analytics/bio-click', {
+        method: 'POST',
+        body: JSON.stringify({
+          targetType,
+          targetId,
+          targetName,
+          targetUrl,
+          sessionId: sessionId.current,
+        }),
+      });
+    } catch (error) {
+      console.error('Erro ao rastrear clique:', error);
+    }
+  }, []);
 
   // Buscar dados do admin (bio e redes sociais)
   const { data: adminProfile, isLoading: isLoadingProfile } = useQuery<{
