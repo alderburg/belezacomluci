@@ -628,10 +628,12 @@ export function registerRoutes(app: Express): Server {
       const couponData = insertCouponSchema.parse(req.body);
       const shouldReorder = req.body.shouldReorder === true;
 
+      // PRIMEIRO: Incrementar os cupons na posição alvo e sucessores
       if (shouldReorder && couponData.order !== undefined && couponData.order >= 0) {
         await storage.reorderCouponsAfterInsert(couponData.order);
       }
 
+      // DEPOIS: Criar o cupom na posição desejada
       const coupon = await storage.createCoupon(couponData);
 
       // Notificar via WebSocket sobre novo cupom
@@ -668,16 +670,20 @@ export function registerRoutes(app: Express): Server {
       const isStatusChanging = couponData.isActive !== undefined && couponData.isActive !== existingCoupon.isActive;
 
       if (isOrderChanging && shouldReorder) {
+        // PRIMEIRO: Remover o cupom da posição antiga (decrementar sucessores)
         if (existingCoupon.order >= 0) {
           await storage.reorderCouponsAfterDeletion(existingCoupon.order);
         }
-        await storage.reorderCouponsAfterInsert(couponData.order);
+        
+        // SEGUNDO: Incrementar cupons na nova posição e sucessores (excluindo o cupom atual)
+        await storage.reorderCouponsAfterInsert(couponData.order, req.params.id);
       }
 
       if (isStatusChanging && !isOrderChanging) {
         await storage.reorderCouponsAfterStatusChange(req.params.id, couponData.isActive);
       }
 
+      // TERCEIRO: Atualizar o cupom na nova posição
       const coupon = await storage.updateCoupon(req.params.id, couponData);
 
       // Notificar via WebSocket sobre cupom atualizado

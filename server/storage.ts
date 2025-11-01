@@ -616,11 +616,18 @@ export class DatabaseStorage implements IStorage {
     return conflict || undefined;
   }
 
-  async reorderCouponsAfterInsert(targetOrder: number): Promise<void> {
+  async reorderCouponsAfterInsert(targetOrder: number, excludeId?: string): Promise<void> {
+    const conditions = [gte(coupons.order, targetOrder)];
+    
+    // Excluir o cupom que está sendo movido para evitar incrementá-lo
+    if (excludeId) {
+      conditions.push(sql`${coupons.id} != ${excludeId}`);
+    }
+    
     await this.db
       .update(coupons)
       .set({ order: sql`${coupons.order} + 1` })
-      .where(gte(coupons.order, targetOrder));
+      .where(and(...conditions));
   }
 
   async reorderCouponsAfterDeletion(deletedOrder: number): Promise<void> {
