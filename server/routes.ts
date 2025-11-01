@@ -3832,6 +3832,105 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // ========== ANALYTICS ROUTES ==========
+
+  // Track page view
+  app.post("/api/analytics/pageview", async (req, res) => {
+    try {
+      const { page, sessionId, referrer, userAgent } = req.body;
+
+      if (!page || !sessionId) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const pageView = await storage.createPageView({
+        page,
+        sessionId,
+        referrer,
+        userAgent,
+        userId: req.isAuthenticated() ? req.user!.id : null,
+        ipAddress: null,
+      });
+
+      res.json(pageView);
+    } catch (error) {
+      console.error('Error creating page view:', error);
+      res.status(500).json({ message: "Failed to create page view" });
+    }
+  });
+
+  // Track click
+  app.post("/api/analytics/click", async (req, res) => {
+    try {
+      const { targetType, couponId, bannerId, targetName, targetUrl, sessionId } = req.body;
+
+      if (!targetType || !targetName || !sessionId) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const analyticsTarget = await storage.createOrGetAnalyticsTarget({
+        targetType,
+        couponId: couponId || null,
+        bannerId: bannerId || null,
+        targetName,
+        targetUrl: targetUrl || null,
+      });
+
+      const click = await storage.createBioClick({
+        analyticsTargetId: analyticsTarget.id,
+        sessionId,
+        userId: req.isAuthenticated() ? req.user!.id : null,
+      });
+
+      res.json(click);
+    } catch (error) {
+      console.error('Error creating click:', error);
+      res.status(500).json({ message: "Failed to create click" });
+    }
+  });
+
+  // Get analytics stats (admin only)
+  app.get("/api/analytics/stats", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { startDate, endDate } = req.query;
+
+      const stats = await storage.getAnalyticsStats(
+        startDate ? new Date(startDate as string) : undefined,
+        endDate ? new Date(endDate as string) : undefined
+      );
+
+      res.json(stats);
+    } catch (error) {
+      console.error('Error getting analytics stats:', error);
+      res.status(500).json({ message: "Failed to get analytics stats" });
+    }
+  });
+
+  // Get bio clicks (admin only)
+  app.get("/api/analytics/clicks", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { startDate, endDate } = req.query;
+
+      const clicks = await storage.getBioClicks(
+        startDate ? new Date(startDate as string) : undefined,
+        endDate ? new Date(endDate as string) : undefined
+      );
+
+      res.json(clicks);
+    } catch (error) {
+      console.error('Error getting clicks:', error);
+      res.status(500).json({ message: "Failed to get clicks" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

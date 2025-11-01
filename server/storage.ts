@@ -32,6 +32,7 @@ import {
   referrals,
   categories,
   videoProgress,
+  analyticsTargets,
   pageViews,
   bioClicks,
   type User, type InsertUser, type Video, type InsertVideo, type VideoProgress, type InsertVideoProgress,
@@ -47,7 +48,7 @@ import {
   type UserReward, type InsertUserReward, type Raffle, type InsertRaffle,
   type RaffleEntry, type InsertRaffleEntry, type Achievement, type InsertAchievement,
   type UserAchievement, type InsertUserAchievement, type Category, type InsertCategory,
-  type PageView, type InsertPageView, type BioClick, type InsertBioClick
+  type AnalyticsTarget, type InsertAnalyticsTarget, type PageView, type InsertPageView, type BioClick, type InsertBioClick
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql, gte, lte, isNull } from "drizzle-orm";
@@ -219,16 +220,18 @@ export interface IStorage {
   getUserVideoProgressByResource(userId: string, resourceId: string): Promise<VideoProgress[]>;
 
   // Analytics methods
+  createOrGetAnalyticsTarget(target: InsertAnalyticsTarget): Promise<AnalyticsTarget>;
   createPageView(pageView: InsertPageView): Promise<PageView>;
   createBioClick(bioClick: InsertBioClick): Promise<BioClick>;
   getPageViews(page: string, startDate?: Date, endDate?: Date): Promise<PageView[]>;
-  getBioClicks(clickType?: string, startDate?: Date, endDate?: Date): Promise<BioClick[]>;
+  getBioClicks(startDate?: Date, endDate?: Date): Promise<(BioClick & { analyticsTarget: AnalyticsTarget })[]>;
   getAnalyticsStats(startDate?: Date, endDate?: Date): Promise<{
     totalPageViews: number;
     uniqueVisitors: number;
     totalClicks: number;
-    clicksByType: { clickType: string; count: number }[];
-    topClickedItems: { targetName: string; clickType: string; count: number }[];
+    clicksByType: { type: string; count: number }[];
+    topClickedItems: { targetName: string; targetType: string; count: number }[];
+    clicksOverTime: { date: string; count: number }[];
   }>;
 }
 
@@ -2884,6 +2887,29 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
 
   // ========== ANALYTICS METHODS ==========
 
+  async createOrGetAnalyticsTarget(target: InsertAnalyticsTarget): Promise<AnalyticsTarget> {
+    const existing = await this.db
+      .select()
+      .from(analyticsTargets)
+      .where(and(
+        eq(analyticsTargets.targetType, target.targetType),
+        target.couponId ? eq(analyticsTargets.couponId, target.couponId) : isNull(analyticsTargets.couponId),
+        target.bannerId ? eq(analyticsTargets.bannerId, target.bannerId) : isNull(analyticsTargets.bannerId),
+        eq(analyticsTargets.targetName, target.targetName)
+      ))
+      .limit(1);
+
+    if (existing.length > 0) {
+      return existing[0];
+    }
+
+    const [created] = await this.db
+      .insert(analyticsTargets)
+      .values(target)
+      .returning();
+    return created;
+  }
+
   async createPageView(pageView: InsertPageView): Promise<PageView> {
     const [created] = await this.db
       .insert(pageViews)
@@ -2918,12 +2944,8 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
       .orderBy(desc(pageViews.createdAt));
   }
 
-  async getBioClicks(clickType?: string, startDate?: Date, endDate?: Date): Promise<BioClick[]> {
+  async getBioClicks(startDate?: Date, endDate?: Date): Promise<(BioClick & { analyticsTarget: AnalyticsTarget })[]> {
     const conditions = [];
-    
-    if (clickType) {
-      conditions.push(eq(bioClicks.clickType, clickType));
-    }
     
     if (startDate) {
       conditions.push(gte(bioClicks.createdAt, startDate));
@@ -2933,19 +2955,32 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
       conditions.push(lte(bioClicks.createdAt, endDate));
     }
 
-    return await this.db
+    const clicks = await this.db
       .select()
       .from(bioClicks)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(bioClicks.createdAt));
+
+    const result = [];
+    for (const click of clicks) {
+      const [target] = await this.db
+        .select()
+        .from(analyticsTargets)
+        .where(eq(analyticsTargets.id, click.analyticsTargetId));
+      
+      result.push({ ...click, analyticsTarget: target });
+    }
+
+    return result;
   }
 
   async getAnalyticsStats(startDate?: Date, endDate?: Date): Promise<{
     totalPageViews: number;
     uniqueVisitors: number;
     totalClicks: number;
-    clicksByType: { clickType: string; count: number }[];
-    topClickedItems: { targetName: string; clickType: string; count: number }[];
+    clicksByType: { type: string; count: number }[];
+    topClickedItems: { targetName: string; targetType: string; count: number }[];
+    clicksOverTime: { date: string; count: number }[];
   }> {
     const pageConditions = [eq(pageViews.page, 'bio')];
     const clickConditions = [];
@@ -2977,31 +3012,48 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
 
     const clicksByTypeResult = await this.db
       .select({
-        clickType: bioClicks.clickType,
+        type: analyticsTargets.targetType,
         count: sql<number>`count(*)::int`,
       })
       .from(bioClicks)
+      .leftJoin(analyticsTargets, eq(bioClicks.analyticsTargetId, analyticsTargets.id))
       .where(clickConditions.length > 0 ? and(...clickConditions) : undefined)
-      .groupBy(bioClicks.clickType);
+      .groupBy(analyticsTargets.targetType);
 
     const topClickedItemsResult = await this.db
       .select({
-        targetName: bioClicks.targetName,
-        clickType: bioClicks.clickType,
+        targetName: analyticsTargets.targetName,
+        targetType: analyticsTargets.targetType,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(bioClicks)
+      .leftJoin(analyticsTargets, eq(bioClicks.analyticsTargetId, analyticsTargets.id))
+      .where(clickConditions.length > 0 ? and(...clickConditions) : undefined)
+      .groupBy(analyticsTargets.targetName, analyticsTargets.targetType)
+      .orderBy(desc(sql`count(*)`))
+      .limit(10);
+
+    const clicksOverTimeResult = await this.db
+      .select({
+        date: sql<string>`DATE(${bioClicks.createdAt})::text`,
         count: sql<number>`count(*)::int`,
       })
       .from(bioClicks)
       .where(clickConditions.length > 0 ? and(...clickConditions) : undefined)
-      .groupBy(bioClicks.targetName, bioClicks.clickType)
-      .orderBy(desc(sql`count(*)`))
-      .limit(10);
+      .groupBy(sql`DATE(${bioClicks.createdAt})`)
+      .orderBy(sql`DATE(${bioClicks.createdAt})`);
 
     return {
       totalPageViews: totalPageViewsResult[0]?.count || 0,
       uniqueVisitors: uniqueVisitorsResult[0]?.count || 0,
       totalClicks: totalClicksResult[0]?.count || 0,
-      clicksByType: clicksByTypeResult,
-      topClickedItems: topClickedItemsResult,
+      clicksByType: clicksByTypeResult.map(r => ({ type: r.type || 'unknown', count: r.count })),
+      topClickedItems: topClickedItemsResult.map(r => ({ 
+        targetName: r.targetName || 'unknown', 
+        targetType: r.targetType || 'unknown', 
+        count: r.count 
+      })),
+      clicksOverTime: clicksOverTimeResult,
     };
   }
 }
