@@ -220,27 +220,37 @@ export default function AdminAnalyticsPage() {
                     <CardDescription className="text-xs">Distribuição de cliques por categoria</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="h-[250px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={stats?.clicksByType || []}
-                            dataKey="count"
-                            nameKey="type"
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={80}
-                            label={(entry) => `${entry.type}: ${entry.count}`}
-                            labelLine={false}
-                          >
-                            {stats?.clicksByType.map((_, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
+                    {stats?.clicksByType && stats.clicksByType.length > 0 ? (
+                      <div className="h-[250px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={stats.clicksByType}
+                              dataKey="count"
+                              nameKey="type"
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={80}
+                              label={(entry) => `${entry.type}: ${entry.count}`}
+                              labelLine={false}
+                            >
+                              {stats.clicksByType.map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+                        <div className="text-center p-6">
+                          <Target className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Nenhum clique registrado</p>
+                          <p className="text-xs text-muted-foreground/70">Os dados aparecerão aqui quando houver interações</p>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -254,17 +264,27 @@ export default function AdminAnalyticsPage() {
                     <CardDescription className="text-xs">Top 10 elementos com mais engajamento</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="h-[250px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={stats?.topClickedItems.slice(0, 10) || []} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis type="number" tick={{ fontSize: 11 }} />
-                          <YAxis dataKey="targetName" type="category" width={90} tick={{ fontSize: 10 }} />
-                          <Tooltip contentStyle={{ fontSize: 12 }} />
-                          <Bar dataKey="count" fill="#ff6b9d" radius={[0, 4, 4, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    {stats?.topClickedItems && stats.topClickedItems.length > 0 ? (
+                      <div className="h-[250px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={stats.topClickedItems.slice(0, 10)} layout="vertical">
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis type="number" tick={{ fontSize: 11 }} />
+                            <YAxis dataKey="targetName" type="category" width={90} tick={{ fontSize: 10 }} />
+                            <Tooltip contentStyle={{ fontSize: 12 }} />
+                            <Bar dataKey="count" fill="#ff6b9d" radius={[0, 4, 4, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+                        <div className="text-center p-6">
+                          <MousePointerClick className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Nenhum item clicado</p>
+                          <p className="text-xs text-muted-foreground/70">Os itens mais populares aparecerão aqui</p>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -287,18 +307,32 @@ export default function AdminAnalyticsPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {stats?.topClickedItems.slice(0, 15).map((item, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="text-xs">{item.targetType}</Badge>
-                            </TableCell>
-                            <TableCell className="text-right text-xs">{item.count.toLocaleString()}</TableCell>
-                            <TableCell className="text-right text-xs font-medium">
-                              {stats.totalClicks > 0 ? ((item.count / stats.totalClicks) * 100).toFixed(1) : 0}%
+                        {stats?.topClickedItems && stats.topClickedItems.length > 0 ? (
+                          stats.topClickedItems.slice(0, 15).map((item, index) => (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-xs">{item.targetType}</Badge>
+                              </TableCell>
+                              <TableCell className="text-right text-xs">{item.count.toLocaleString()}</TableCell>
+                              <TableCell className="text-right text-xs font-medium">
+                                {stats.totalClicks > 0 ? ((item.count / stats.totalClicks) * 100).toFixed(1) : 0}%
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={4} className="h-32 text-center">
+                              <div className="flex flex-col items-center justify-center py-8">
+                                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
+                                  <MousePointerClick className="w-6 h-6 text-muted-foreground opacity-50" />
+                                </div>
+                                <p className="text-sm font-medium text-muted-foreground">Nenhum dado disponível</p>
+                                <p className="text-xs text-muted-foreground/70 mt-1">Aguardando primeiras interações</p>
+                              </div>
                             </TableCell>
                           </TableRow>
-                        ))}
+                        )}
                       </TableBody>
                     </Table>
                   </div>
@@ -318,18 +352,28 @@ export default function AdminAnalyticsPage() {
                     <CardDescription className="text-xs">Evolução temporal do engajamento</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={stats?.clicksOverTime || []}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                          <YAxis tick={{ fontSize: 11 }} />
-                          <Tooltip contentStyle={{ fontSize: 12 }} />
-                          <Legend wrapperStyle={{ fontSize: 12 }} />
-                          <Line type="monotone" dataKey="count" stroke="#ff6b9d" strokeWidth={2} name="Cliques" dot={{ r: 3 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
+                    {stats?.clicksOverTime && stats.clicksOverTime.length > 0 ? (
+                      <div className="h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={stats.clicksOverTime}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                            <YAxis tick={{ fontSize: 11 }} />
+                            <Tooltip contentStyle={{ fontSize: 12 }} />
+                            <Legend wrapperStyle={{ fontSize: 12 }} />
+                            <Line type="monotone" dataKey="count" stroke="#ff6b9d" strokeWidth={2} name="Cliques" dot={{ r: 3 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+                        <div className="text-center p-6">
+                          <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Sem dados temporais</p>
+                          <p className="text-xs text-muted-foreground/70">O gráfico será preenchido com o tempo</p>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -386,17 +430,27 @@ export default function AdminAnalyticsPage() {
                     <CardDescription className="text-xs">Cidades com maior número de visitantes</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={stats?.topCities.slice(0, 10) || []}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis dataKey="city" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10 }} />
-                          <YAxis tick={{ fontSize: 11 }} />
-                          <Tooltip contentStyle={{ fontSize: 12 }} />
-                          <Bar dataKey="count" fill="#34d399" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    {stats?.topCities && stats.topCities.length > 0 ? (
+                      <div className="h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={stats.topCities.slice(0, 10)}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis dataKey="city" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10 }} />
+                            <YAxis tick={{ fontSize: 11 }} />
+                            <Tooltip contentStyle={{ fontSize: 12 }} />
+                            <Bar dataKey="count" fill="#34d399" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+                        <div className="text-center p-6">
+                          <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Nenhuma cidade registrada</p>
+                          <p className="text-xs text-muted-foreground/70">Dados geográficos aparecerão aqui</p>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -410,27 +464,37 @@ export default function AdminAnalyticsPage() {
                     <CardDescription className="text-xs">Estados com maior alcance</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={stats?.topStates.slice(0, 10) || []}
-                            dataKey="count"
-                            nameKey="state"
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={90}
-                            label={(entry) => `${entry.state}: ${entry.count}`}
-                            labelLine={false}
-                          >
-                            {stats?.topStates.slice(0, 10).map((_, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
+                    {stats?.topStates && stats.topStates.length > 0 ? (
+                      <div className="h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={stats.topStates.slice(0, 10)}
+                              dataKey="count"
+                              nameKey="state"
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={90}
+                              label={(entry) => `${entry.state}: ${entry.count}`}
+                              labelLine={false}
+                            >
+                              {stats.topStates.slice(0, 10).map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+                        <div className="text-center p-6">
+                          <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Nenhum estado registrado</p>
+                          <p className="text-xs text-muted-foreground/70">Distribuição por estado aparecerá aqui</p>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -454,19 +518,33 @@ export default function AdminAnalyticsPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {stats?.topCities.slice(0, 15).map((city, index) => (
-                          <TableRow key={index}>
-                            <TableCell>
-                              <Badge variant={index < 3 ? "default" : "outline"} className="text-xs">#{index + 1}</Badge>
-                            </TableCell>
-                            <TableCell className="font-medium text-xs">{city.city}</TableCell>
-                            <TableCell className="text-xs">{city.state}</TableCell>
-                            <TableCell className="text-right text-xs">{city.count.toLocaleString()}</TableCell>
-                            <TableCell className="text-right text-xs font-medium">
-                              {stats.totalPageViews > 0 ? ((city.count / stats.totalPageViews) * 100).toFixed(1) : 0}%
+                        {stats?.topCities && stats.topCities.length > 0 ? (
+                          stats.topCities.slice(0, 15).map((city, index) => (
+                            <TableRow key={index}>
+                              <TableCell>
+                                <Badge variant={index < 3 ? "default" : "outline"} className="text-xs">#{index + 1}</Badge>
+                              </TableCell>
+                              <TableCell className="font-medium text-xs">{city.city}</TableCell>
+                              <TableCell className="text-xs">{city.state}</TableCell>
+                              <TableCell className="text-right text-xs">{city.count.toLocaleString()}</TableCell>
+                              <TableCell className="text-right text-xs font-medium">
+                                {stats.totalPageViews > 0 ? ((city.count / stats.totalPageViews) * 100).toFixed(1) : 0}%
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="h-32 text-center">
+                              <div className="flex flex-col items-center justify-center py-8">
+                                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
+                                  <MapPin className="w-6 h-6 text-muted-foreground opacity-50" />
+                                </div>
+                                <p className="text-sm font-medium text-muted-foreground">Nenhum dado geográfico</p>
+                                <p className="text-xs text-muted-foreground/70 mt-1">Dados de localização aparecerão aqui</p>
+                              </div>
                             </TableCell>
                           </TableRow>
-                        ))}
+                        )}
                       </TableBody>
                     </Table>
                   </div>
@@ -485,26 +563,36 @@ export default function AdminAnalyticsPage() {
                   <CardDescription className="text-xs">Histórico detalhado de ações ao longo do tempo</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={stats?.clicksOverTime || []}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                        <YAxis tick={{ fontSize: 11 }} />
-                        <Tooltip contentStyle={{ fontSize: 12 }} />
-                        <Legend wrapperStyle={{ fontSize: 12 }} />
-                        <Line 
-                          type="monotone" 
-                          dataKey="count" 
-                          stroke="#ff6b9d" 
-                          strokeWidth={2} 
-                          name="Cliques"
-                          dot={{ fill: '#ff6b9d', r: 4 }}
-                          activeDot={{ r: 6 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
+                  {stats?.clicksOverTime && stats.clicksOverTime.length > 0 ? (
+                    <div className="h-[400px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={stats.clicksOverTime}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                          <YAxis tick={{ fontSize: 11 }} />
+                          <Tooltip contentStyle={{ fontSize: 12 }} />
+                          <Legend wrapperStyle={{ fontSize: 12 }} />
+                          <Line 
+                            type="monotone" 
+                            dataKey="count" 
+                            stroke="#ff6b9d" 
+                            strokeWidth={2} 
+                            name="Cliques"
+                            dot={{ fill: '#ff6b9d', r: 4 }}
+                            activeDot={{ r: 6 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : (
+                    <div className="h-[400px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+                      <div className="text-center p-6">
+                        <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                        <p className="text-sm font-medium text-muted-foreground mb-1">Sem histórico de atividade</p>
+                        <p className="text-xs text-muted-foreground/70">A linha do tempo será construída com as interações</p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
