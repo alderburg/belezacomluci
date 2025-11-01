@@ -100,6 +100,75 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Public route to get community settings (for bio page and community page)
+  app.get('/api/admin/community-settings', async (req, res) => {
+    try {
+      // Buscar o usuário admin
+      const adminUser = await storage.getUserByEmail('admin@belezacomluci.com');
+
+      if (!adminUser) {
+        return res.status(404).json({ message: "Admin user not found" });
+      }
+
+      // Retornar configurações da comunidade
+      res.json({
+        title: adminUser.communityTitle || 'Nossa Comunidade',
+        subtitle: adminUser.communitySubtitle || 'Compartilhe suas experiências e dicas de beleza',
+        backgroundImage: adminUser.communityBackgroundImage || '',
+        mobileBackgroundImage: adminUser.communityMobileBackgroundImage || adminUser.communityBackgroundImage || ''
+      });
+    } catch (error) {
+      console.error('Error fetching community settings:', error);
+      res.status(500).json({ message: "Failed to fetch community settings" });
+    }
+  });
+
+  // Update community settings (admin only)
+  app.put('/api/admin/community-settings', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      const { title, subtitle, backgroundImage, mobileBackgroundImage } = req.body;
+      const userId = req.user.id;
+
+      // Atualizar configurações da comunidade no perfil do admin
+      await storage.updateUser(userId, {
+        communityTitle: title,
+        communitySubtitle: subtitle,
+        communityBackgroundImage: backgroundImage,
+        communityMobileBackgroundImage: mobileBackgroundImage || backgroundImage
+      });
+
+      // Broadcast atualização das configurações da comunidade
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        // Enviar notificação específica para community_settings
+        wsService.broadcastDataUpdate('community_settings', 'updated', { title, subtitle, backgroundImage, mobileBackgroundImage });
+        
+        // Também enviar para users (retrocompatibilidade)
+        wsService.broadcastDataUpdate('users', 'updated', {
+          id: userId,
+          isAdmin: true,
+
+  communityTitle: title,
+          communitySubtitle: subtitle
+        });
+      }
+
+      res.json({
+        title,
+        subtitle,
+        backgroundImage,
+        mobileBackgroundImage: mobileBackgroundImage || backgroundImage
+      });
+    } catch (error) {
+      console.error('Error updating community settings:', error);
+      res.status(500).json({ message: "Failed to update community settings" });
+    }
+  });
+
   // Users routes (Admin only)
   app.get("/api/admin/users", async (req, res) => {
     try {
