@@ -700,20 +700,11 @@ export default function BioPage() {
                             onClick={(e) => {
                               e.preventDefault();
 
-                              // SOLUÇÃO PARA iOS: Abrir janela em branco IMEDIATAMENTE (síncrono)
-                              // Depois redirecionar após mostrar a notificação
-                              let novaJanela: Window | null = null;
-                              if (coupon.storeUrl) {
-                                // Abrir about:blank imediatamente para não ser bloqueado pelo iOS
-                                novaJanela = window.open('about:blank', '_blank', 'noopener,noreferrer');
-                              }
-
-                              // Depois fazer as operações assíncronas
                               (async () => {
-                                // Rastrear clique no cupom
-                                await trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, coupon.storeUrl || null);
-
                                 try {
+                                  // Rastrear clique no cupom
+                                  await trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, coupon.storeUrl || null);
+
                                   const codigo = coupon.code || '';
 
                                   // Tentar copiar o código - com fallback para iOS
@@ -742,30 +733,27 @@ export default function BioPage() {
 
                                     toast({
                                       title: `Cupom ${codigo} copiado! 🎉`,
-                                      description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
-                                      duration: 2000,
+                                      description: `Abrindo ${coupon.brand || 'loja'}...`,
+                                      duration: 1500,
                                     });
                                   } else {
                                     toast({
                                       title: "Cupom selecionado! 🎉",
-                                      description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
-                                      duration: 2000,
+                                      description: `Abrindo ${coupon.brand || 'loja'}...`,
+                                      duration: 1500,
                                     });
                                   }
 
-                                  // AGORA redirecionar a janela que foi aberta para a URL correta
-                                  if (novaJanela && coupon.storeUrl) {
+                                  // Abrir a URL após um pequeno delay para a notificação aparecer
+                                  if (coupon.storeUrl) {
                                     let url = coupon.storeUrl.trim();
                                     if (!url.startsWith('http://') && !url.startsWith('https://')) {
                                       url = 'https://' + url;
                                     }
                                     
-                                    // Aguardar 2 segundos (mesmo tempo da notificação)
                                     setTimeout(() => {
-                                      if (novaJanela) {
-                                        novaJanela.location.href = url;
-                                      }
-                                    }, 2000);
+                                      window.open(url, '_blank', 'noopener,noreferrer');
+                                    }, 500);
                                   }
                                 } catch (error) {
                                   console.error('Erro ao processar cupom:', error);
@@ -774,10 +762,6 @@ export default function BioPage() {
                                     description: "Tente novamente",
                                     variant: "destructive",
                                   });
-                                  // Fechar a janela se houve erro
-                                  if (novaJanela) {
-                                    novaJanela.close();
-                                  }
                                 }
                               })();
                             }}
