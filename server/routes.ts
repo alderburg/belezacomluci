@@ -10,7 +10,7 @@ import {
   insertRaffleSchema, insertRewardSchema, shareSettings, referrals,
   insertNotificationSchema, insertUserNotificationSchema, notifications, userNotifications,
   insertPopupSchema, insertPopupViewSchema, insertCategorySchema,
-  insertUserSchema, coupons, categories, commentLikes, commentReplies, analyticsClicks, analyticsTargets
+  insertUserSchema, coupons, categories, commentLikes, commentReplies, bioClicks, analyticsTargets
 } from "../shared/schema";
 import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
@@ -3986,14 +3986,14 @@ export function registerRoutes(app: Express): Server {
           targetName: analyticsTargets.targetName,
           targetType: analyticsTargets.targetType,
           targetOrder: analyticsTargets.targetOrder,
-          count: sql<number>`cast(count(${analyticsClicks.id}) as int)`,
+          count: sql<number>`cast(count(${bioClicks.id}) as int)`,
         })
-        .from(analyticsClicks)
-        .innerJoin(analyticsTargets, eq(analyticsClicks.targetId, analyticsTargets.id))
-        .where(dateCondition)
+        .from(bioClicks)
+        .innerJoin(analyticsTargets, eq(bioClicks.analyticsTargetId, analyticsTargets.id))
+        .where(clickConditions.length > 0 ? and(...clickConditions) : undefined)
         .groupBy(analyticsTargets.targetName, analyticsTargets.targetType, analyticsTargets.targetOrder)
         .orderBy(
-          desc(sql`count(${analyticsClicks.id})`),
+          desc(sql`count(${bioClicks.id})`),
           asc(analyticsTargets.targetOrder)
         );
 
