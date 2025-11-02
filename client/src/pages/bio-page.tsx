@@ -635,12 +635,12 @@ export default function BioPage() {
 
       {/* Modal de Cupons */}
       <Sheet open={isCouponsModalOpen} onOpenChange={setIsCouponsModalOpen}>
-        <SheetContent side="left" className="w-full [&>button]:!ring-1 [&>button]:!ring-[#439b1e] [&>button]:!ring-offset-1 flex flex-col">
+        <SheetContent side="left" className="w-full [&>button]:!ring-1 [&>button]:!ring-[#439b1e] [&>button]:!ring-offset-1 flex flex-col max-h-screen">
           <SheetHeader className="flex-shrink-0">
             <SheetTitle className="text-xl font-bold text-black">Meus Cupons</SheetTitle>
           </SheetHeader>
 
-          <div className="flex-1 mt-6 overflow-y-auto pb-6" style={{ 
+          <div className="flex-1 mt-6 overflow-y-auto pb-24 min-h-0" style={{ 
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain'
           }}>
@@ -697,100 +697,98 @@ export default function BioPage() {
                         {coupons.map((coupon) => (
                           <div
                             key={coupon.id}
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.preventDefault();
 
-                              (async () => {
-                                try {
-                                  const codigo = coupon.code || '';
+                              try {
+                                const codigo = coupon.code || '';
 
-                                  // Função melhorada para copiar texto no iOS/Safari
-                                  const copyToClipboard = async (text: string): Promise<boolean> => {
-                                    try {
-                                      // Método 1: Clipboard API moderna (funciona em HTTPS)
-                                      if (navigator.clipboard && window.isSecureContext) {
-                                        await navigator.clipboard.writeText(text);
-                                        return true;
-                                      }
-
-                                      // Método 2: Fallback usando textarea (compatível com iOS Safari)
-                                      const textArea = document.createElement('textarea');
-                                      textArea.value = text;
-
-                                      // Configurar textarea para ser invisível mas acessível
-                                      textArea.style.position = 'fixed';
-                                      textArea.style.top = '0';
-                                      textArea.style.left = '-9999px';
-                                      textArea.style.opacity = '0';
-                                      textArea.setAttribute('readonly', '');
-
-                                      document.body.appendChild(textArea);
-
-                                      // iOS/Safari precisa de foco e seleção explícitos
-                                      textArea.focus();
-                                      textArea.select();
-                                      textArea.setSelectionRange(0, text.length);
-
-                                      // Executar comando de cópia
-                                      const successful = document.execCommand('copy');
-                                      document.body.removeChild(textArea);
-
-                                      return successful;
-                                    } catch (error) {
-                                      console.error('Erro ao copiar:', error);
-                                      return false;
+                                // Função melhorada para copiar texto no iOS/Safari
+                                const copyToClipboard = async (text: string): Promise<boolean> => {
+                                  try {
+                                    // Método 1: Clipboard API moderna (funciona em HTTPS)
+                                    if (navigator.clipboard && window.isSecureContext) {
+                                      await navigator.clipboard.writeText(text);
+                                      return true;
                                     }
-                                  };
 
-                                  // Preparar URL do cupom ANTES de copiar (importante para Safari)
-                                  let redirectUrl = '';
-                                  if (coupon.storeUrl) {
-                                    redirectUrl = coupon.storeUrl.trim();
-                                    if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
-                                      redirectUrl = 'https://' + redirectUrl;
-                                    }
-                                  }
+                                    // Método 2: Fallback usando textarea (compatível com iOS Safari)
+                                    const textArea = document.createElement('textarea');
+                                    textArea.value = text;
 
-                                  // Copiar código do cupom (se existir)
-                                  let copiado = false;
-                                  if (codigo && codigo.trim() !== '') {
-                                    copiado = await copyToClipboard(codigo);
-                                  }
+                                    // Configurar textarea para ser invisível mas acessível
+                                    textArea.style.position = 'fixed';
+                                    textArea.style.top = '0';
+                                    textArea.style.left = '-9999px';
+                                    textArea.style.opacity = '0';
+                                    textArea.setAttribute('readonly', '');
 
-                                  // Mostrar notificação ANTES de qualquer outra ação (garantir que apareça no iPhone)
-                                  const brandName = coupon.brand || 'loja';
-                                  if (codigo && codigo.trim() !== '') {
-                                    toast({
-                                      title: copiado ? `Cupom ${codigo} copiado! 🎉` : `Cupom: ${codigo}`,
-                                      description: `Redirecionando para ${brandName}...`,
-                                      duration: 3000,
-                                    });
-                                  } else {
-                                    toast({
-                                      title: "Cupom selecionado! 🎉",
-                                      description: `Redirecionando para ${brandName}...`,
-                                      duration: 3000,
-                                    });
-                                  }
-                                  
-                                  // Rastrear clique no cupom (sem await para não atrasar)
-                                  trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, redirectUrl || null);
+                                    document.body.appendChild(textArea);
 
-                                  // Aguardar 3 segundos antes de redirecionar
-                                  if (redirectUrl) {
-                                    setTimeout(() => {
-                                      window.location.href = redirectUrl;
-                                    }, 3000);
+                                    // iOS/Safari precisa de foco e seleção explícitos
+                                    textArea.focus();
+                                    textArea.select();
+                                    textArea.setSelectionRange(0, text.length);
+
+                                    // Executar comando de cópia
+                                    const successful = document.execCommand('copy');
+                                    document.body.removeChild(textArea);
+
+                                    return successful;
+                                  } catch (error) {
+                                    console.error('Erro ao copiar:', error);
+                                    return false;
                                   }
-                                } catch (error) {
-                                  console.error('Erro ao processar cupom:', error);
+                                };
+
+                                // Preparar URL do cupom ANTES de copiar (importante para Safari)
+                                let redirectUrl = '';
+                                if (coupon.storeUrl) {
+                                  redirectUrl = coupon.storeUrl.trim();
+                                  if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
+                                    redirectUrl = 'https://' + redirectUrl;
+                                  }
+                                }
+
+                                // Copiar código do cupom (se existir)
+                                let copiado = false;
+                                if (codigo && codigo.trim() !== '') {
+                                  copiado = await copyToClipboard(codigo);
+                                }
+
+                                // Rastrear clique no cupom (sem await para não atrasar)
+                                trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, redirectUrl || null);
+
+                                // Mostrar notificação IMEDIATAMENTE (garantir que apareça no iPhone)
+                                const brandName = coupon.brand || 'loja';
+                                if (codigo && codigo.trim() !== '') {
                                   toast({
-                                    title: "Erro ao processar cupom",
-                                    description: "Tente novamente",
-                                    variant: "destructive",
+                                    title: copiado ? `Cupom ${codigo} copiado! 🎉` : `Cupom: ${codigo}`,
+                                    description: `Redirecionando para ${brandName}...`,
+                                    duration: 3500,
+                                  });
+                                } else {
+                                  toast({
+                                    title: "Cupom selecionado! 🎉",
+                                    description: `Redirecionando para ${brandName}...`,
+                                    duration: 3500,
                                   });
                                 }
-                              })();
+                                
+                                // Aguardar 3 segundos antes de redirecionar
+                                if (redirectUrl) {
+                                  setTimeout(() => {
+                                    window.location.href = redirectUrl;
+                                  }, 3000);
+                                }
+                              } catch (error) {
+                                console.error('Erro ao processar cupom:', error);
+                                toast({
+                                  title: "Erro ao processar cupom",
+                                  description: "Tente novamente",
+                                  variant: "destructive",
+                                });
+                              }
                             }}
                             className="relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
                             data-testid={`coupon-${coupon.id}`}
