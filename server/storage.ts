@@ -385,7 +385,7 @@ export class DatabaseStorage implements IStorage {
         categoryId: video.categoryId,
         isExclusive: video.isExclusive
       } : 'não encontrado');
-      
+
       if (video) {
         // Sincroniza o contador de likes antes de retornar o vídeo
         await this.syncVideoLikesCount(id);
@@ -631,6 +631,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCoupon(id: string): Promise<void> {
+    const coupon = await this.getCoupon(id);
+    if (!coupon) return;
+
+    // PRIMEIRO: Deletar registros de analytics relacionados
+    await this.db.delete(analyticsTargets).where(eq(analyticsTargets.couponId, id));
+
+    // SEGUNDO: Reordenar os cupons antes de deletar
+    if (coupon.order >= 0) {
+      await this.reorderCouponsAfterDeletion(coupon.order);
+    }
+
+    // TERCEIRO: Deletar o cupom
     await this.db.delete(coupons).where(eq(coupons.id, id));
   }
 
@@ -643,14 +655,13 @@ export class DatabaseStorage implements IStorage {
     return conflict || undefined;
   }
 
-  async reorderCouponsAfterInsert(targetOrder: number, excludeId?: string): Promise<void> {
+  async reorderCouponsAfterInsert(targetOrder: number): Promise<void> {
     const conditions = [gte(coupons.order, targetOrder)];
-    
+
     // Excluir o cupom que está sendo movido para evitar incrementá-lo
-    if (excludeId) {
-      conditions.push(sql`${coupons.id} != ${excludeId}`);
-    }
-    
+    // A lógica de exclusão de ID não é necessária aqui pois este método é chamado antes da inserção
+    // e não há um ID de cupom específico sendo movido para ser excluído da condição.
+
     await this.db
       .update(coupons)
       .set({ order: sql`${coupons.order} + 1` })
@@ -680,20 +691,20 @@ export class DatabaseStorage implements IStorage {
     } else {
       // Reativando: verificar se targetOrder foi fornecida, senão usar próxima disponível
       let newOrder = targetOrder;
-      
+
       if (newOrder === undefined || newOrder < 0) {
         // Se não forneceu ordem específica, colocar no final
         const maxOrder = await this.db
           .select({ max: sql<number>`COALESCE(MAX(${coupons.order}), 0)` })
           .from(coupons)
           .where(sql`${coupons.order} >= 0`);
-        
+
         newOrder = (maxOrder[0]?.max ?? 0) + 1;
       } else {
         // Se forneceu ordem específica, incrementar cupons naquela posição
-        await this.reorderCouponsAfterInsert(newOrder, couponId);
+        await this.reorderCouponsAfterInsert(newOrder);
       }
-      
+
       await this.db
         .update(coupons)
         .set({ order: newOrder })
@@ -2930,11 +2941,11 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
 
   async getPageViews(page: string, startDate?: Date, endDate?: Date): Promise<PageView[]> {
     const conditions = [eq(pageViews.page, page)];
-    
+
     if (startDate) {
       conditions.push(gte(pageViews.createdAt, startDate));
     }
-    
+
     if (endDate) {
       conditions.push(lte(pageViews.createdAt, endDate));
     }
@@ -2948,11 +2959,11 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
 
   async getBioClicks(startDate?: Date, endDate?: Date): Promise<(BioClick & { analyticsTarget: AnalyticsTarget })[]> {
     const conditions = [];
-    
+
     if (startDate) {
       conditions.push(gte(bioClicks.createdAt, startDate));
     }
-    
+
     if (endDate) {
       conditions.push(lte(bioClicks.createdAt, endDate));
     }
@@ -2969,7 +2980,7 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
         .select()
         .from(analyticsTargets)
         .where(eq(analyticsTargets.id, click.analyticsTargetId));
-      
+
       result.push({ ...click, analyticsTarget: target });
     }
 
@@ -2988,12 +2999,12 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
   }> {
     const pageConditions = [eq(pageViews.page, 'bio')];
     const clickConditions = [];
-    
+
     if (startDate) {
       pageConditions.push(gte(pageViews.createdAt, startDate));
       clickConditions.push(gte(bioClicks.createdAt, startDate));
     }
-    
+
     if (endDate) {
       pageConditions.push(lte(pageViews.createdAt, endDate));
       clickConditions.push(lte(bioClicks.createdAt, endDate));
@@ -3074,20 +3085,20 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
       uniqueVisitors: uniqueVisitorsResult[0]?.count || 0,
       totalClicks: totalClicksResult[0]?.count || 0,
       clicksByType: clicksByTypeResult.map(r => ({ type: r.type || 'unknown', count: r.count })),
-      topClickedItems: topClickedItemsResult.map(r => ({ 
-        targetName: r.targetName || 'unknown', 
-        targetType: r.targetType || 'unknown', 
-        count: r.count 
+      topClickedItems: topClickedItemsResult.map(r => ({
+        targetName: r.targetName || 'unknown',
+        targetType: r.targetType || 'unknown',
+        count: r.count
       })),
       clicksOverTime: clicksOverTimeResult,
-      topCities: topCitiesResult.map(r => ({ 
-        city: r.city || 'unknown', 
-        state: r.state || 'unknown', 
-        count: r.count 
+      topCities: topCitiesResult.map(r => ({
+        city: r.city || 'unknown',
+        state: r.state || 'unknown',
+        count: r.count
       })),
-      topStates: topStatesResult.map(r => ({ 
-        state: r.state || 'unknown', 
-        count: r.count 
+      topStates: topStatesResult.map(r => ({
+        state: r.state || 'unknown',
+        count: r.count
       })),
     };
   }
