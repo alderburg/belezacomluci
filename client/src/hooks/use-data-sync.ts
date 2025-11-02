@@ -163,12 +163,19 @@ export function useDataSync() {
         queryClient.invalidateQueries({ queryKey: ['/api/coupons'] });
         queryClient.invalidateQueries({ queryKey: ['/api/cupons'] });
         queryClient.invalidateQueries({ queryKey: ['/api/coupons/active-with-categories'] });
-        console.log('Coupons cache invalidated - Bio page modal will refresh with new data');
+        // Invalidar analytics quando cupons mudarem
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/clicks'] });
+        console.log('Coupons cache invalidated - Bio page modal and Analytics will refresh with new data');
         break;
 
       case 'banners':
         queryClient.invalidateQueries({ queryKey: ['/api/banners'] });
         queryClient.invalidateQueries({ queryKey: ['/api/admin/banners'] });
+        // Invalidar analytics quando banners mudarem
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/clicks'] });
+        console.log('Banners cache invalidated - Analytics will refresh with new data');
         break;
 
       case 'categories':
@@ -215,6 +222,10 @@ export function useDataSync() {
         queryClient.invalidateQueries({ queryKey: ['/api/admin/community-settings'] });
         queryClient.invalidateQueries({ queryKey: ['/api/admin/public-profile'] });
         
+        // Invalidar analytics quando redes sociais mudarem
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/clicks'] });
+        
         // Forçar refetch imediato
         queryClient.refetchQueries({
           queryKey: ['/api/admin/community-settings'],
@@ -225,7 +236,7 @@ export function useDataSync() {
           type: 'active'
         });
         
-        console.log('Community settings and admin public profile cache invalidated and refetched - Bio page will refresh');
+        console.log('Community settings, admin public profile and analytics cache invalidated - Bio page and Analytics will refresh');
         break;
 
       case 'user_stats':

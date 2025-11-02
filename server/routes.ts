@@ -152,9 +152,14 @@ export function registerRoutes(app: Express): Server {
         wsService.broadcastDataUpdate('users', 'updated', {
           id: userId,
           isAdmin: true,
-
-  communityTitle: title,
+          communityTitle: title,
           communitySubtitle: subtitle
+        });
+        
+        // Notificar analytics quando redes sociais mudarem (community settings incluem redes sociais)
+        wsService.broadcastDataUpdate('analytics', 'updated', { 
+          type: 'social_network', 
+          source: 'community_settings' 
         });
       }
 
@@ -744,6 +749,12 @@ export function registerRoutes(app: Express): Server {
       const wsService = (global as any).notificationWS;
       if (wsService) {
         wsService.broadcastDataUpdate('coupons', 'updated', coupon);
+        // Notificar também analytics para atualização em tempo real
+        wsService.broadcastDataUpdate('analytics', 'updated', { 
+          type: 'coupon', 
+          id: req.params.id,
+          name: coupon.brand 
+        });
       }
 
       res.json(coupon);
@@ -1016,6 +1027,12 @@ export function registerRoutes(app: Express): Server {
       const wsService = (global as any).notificationWS;
       if (wsService) {
         wsService.broadcastDataUpdate('banners', 'updated', banner);
+        // Notificar também analytics para atualização em tempo real
+        wsService.broadcastDataUpdate('analytics', 'updated', { 
+          type: 'banner', 
+          id: id,
+          name: banner.title 
+        });
       }
 
       res.json(banner);
