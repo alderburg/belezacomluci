@@ -707,54 +707,74 @@ export default function BioPage() {
 
                                   const codigo = coupon.code || '';
 
-                                  // Tentar copiar o código - com fallback para iOS
-                                  if (codigo && codigo.trim() !== '') {
+                                  // Função para copiar texto no iOS/Safari
+                                  const copyToClipboard = (text: string): boolean => {
                                     try {
-                                      // Método moderno - funciona na maioria dos navegadores
-                                      await navigator.clipboard.writeText(codigo);
-                                    } catch (clipboardError) {
-                                      // Fallback para iOS e navegadores que bloqueiam clipboard
-                                      try {
-                                        const textArea = document.createElement('textarea');
-                                        textArea.value = codigo;
-                                        textArea.style.position = 'fixed';
-                                        textArea.style.top = '0';
-                                        textArea.style.left = '0';
-                                        textArea.style.opacity = '0';
-                                        document.body.appendChild(textArea);
-                                        textArea.focus();
-                                        textArea.select();
-                                        document.execCommand('copy');
-                                        document.body.removeChild(textArea);
-                                      } catch (fallbackError) {
-                                        console.warn('Não foi possível copiar automaticamente:', fallbackError);
+                                      // Método 1: Clipboard API (navegadores modernos)
+                                      if (navigator.clipboard && window.isSecureContext) {
+                                        navigator.clipboard.writeText(text);
+                                        return true;
                                       }
+                                      
+                                      // Método 2: Fallback com textarea (funciona no iOS)
+                                      const textArea = document.createElement('textarea');
+                                      textArea.value = text;
+                                      textArea.style.position = 'fixed';
+                                      textArea.style.top = '0';
+                                      textArea.style.left = '-9999px';
+                                      textArea.style.opacity = '0';
+                                      textArea.setAttribute('readonly', '');
+                                      document.body.appendChild(textArea);
+                                      
+                                      // iOS precisa de foco e seleção
+                                      textArea.focus();
+                                      textArea.select();
+                                      textArea.setSelectionRange(0, text.length);
+                                      
+                                      const successful = document.execCommand('copy');
+                                      document.body.removeChild(textArea);
+                                      
+                                      return successful;
+                                    } catch (error) {
+                                      console.error('Erro ao copiar:', error);
+                                      return false;
                                     }
+                                  };
 
-                                    toast({
-                                      title: `Cupom ${codigo} copiado! 🎉`,
-                                      description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
-                                      duration: 3000,
-                                    });
+                                  // Copiar o código do cupom
+                                  if (codigo && codigo.trim() !== '') {
+                                    const copiado = copyToClipboard(codigo);
+                                    
+                                    if (copiado) {
+                                      toast({
+                                        title: `Cupom ${codigo} copiado! 🎉`,
+                                        description: `Redirecionando para ${coupon.brand || 'loja'}...`,
+                                        duration: 2500,
+                                      });
+                                    } else {
+                                      toast({
+                                        title: `Cupom: ${codigo}`,
+                                        description: `Redirecionando para ${coupon.brand || 'loja'}...`,
+                                        duration: 2500,
+                                      });
+                                    }
                                   } else {
                                     toast({
                                       title: "Cupom selecionado! 🎉",
-                                      description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
-                                      duration: 3000,
+                                      description: `Redirecionando para ${coupon.brand || 'loja'}...`,
+                                      duration: 2500,
                                     });
                                   }
 
-                                  // Abrir a URL após delay maior para garantir que a notificação seja vista
+                                  // Redirecionar imediatamente (window.open dentro do evento de clique evita bloqueio)
                                   if (coupon.storeUrl) {
                                     let url = coupon.storeUrl.trim();
                                     if (!url.startsWith('http://') && !url.startsWith('https://')) {
                                       url = 'https://' + url;
                                     }
                                     
-                                    // Aguardar 2 segundos antes de abrir para o usuário ler a notificação
-                                    setTimeout(() => {
-                                      window.open(url, '_blank', 'noopener,noreferrer');
-                                    }, 2000);
+                                    // Abrir imediatamente para evitar bloqueio de pop-up no Safari/iPhone
+                                    window.location.href = url;
                                   }
                                 } catch (error) {
                                   console.error('Erro ao processar cupom:', error);
