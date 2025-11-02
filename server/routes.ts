@@ -16,7 +16,7 @@ import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
 import { youtubeOAuth } from './youtube-oauth';
 import { db } from './db';
-import { eq, desc, and, or, isNull, lte, gte, sql } from 'drizzle-orm';
+import { eq, desc, and, or, isNull, lte, gte, sql, asc } from 'drizzle-orm';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -3980,7 +3980,24 @@ export function registerRoutes(app: Express): Server {
         endDate ? new Date(endDate as string) : undefined
       );
 
-      res.json(stats);
+      // Top clicked items com informações adicionais
+      const topClickedItems = await db
+        .select({
+          targetName: analyticsTargets.targetName,
+          targetType: analyticsTargets.targetType,
+          targetOrder: analyticsTargets.targetOrder,
+          count: sql<number>`cast(count(${analyticsClicks.id}) as int)`,
+        })
+        .from(analyticsClicks)
+        .innerJoin(analyticsTargets, eq(analyticsClicks.targetId, analyticsTargets.id))
+        .where(dateCondition)
+        .groupBy(analyticsTargets.targetName, analyticsTargets.targetType, analyticsTargets.targetOrder)
+        .orderBy(
+          desc(sql`count(${analyticsClicks.id})`),
+          asc(analyticsTargets.targetOrder)
+        );
+
+      res.json({...stats, topClickedItems});
     } catch (error) {
       console.error('Error getting analytics stats:', error);
       res.status(500).json({ message: "Failed to get analytics stats" });
