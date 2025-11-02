@@ -221,6 +221,9 @@ export interface IStorage {
 
   // Analytics methods
   createOrGetAnalyticsTarget(target: InsertAnalyticsTarget): Promise<AnalyticsTarget>;
+  updateAnalyticsTargetsByCoupon(couponId: string, targetName: string, targetUrl?: string): Promise<void>;
+  updateAnalyticsTargetsByBanner(bannerId: string, targetName: string, targetUrl?: string): Promise<void>;
+  syncAnalyticsTargetsForSocialNetworks(socialNetworks: any[]): Promise<void>;
   createPageView(pageView: InsertPageView): Promise<PageView>;
   createBioClick(bioClick: InsertBioClick): Promise<BioClick>;
   getPageViews(page: string, startDate?: Date, endDate?: Date): Promise<PageView[]>;
@@ -2932,6 +2935,46 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
       .values(target)
       .returning();
     return created;
+  }
+
+  async updateAnalyticsTargetsByCoupon(couponId: string, targetName: string, targetUrl?: string): Promise<void> {
+    await this.db
+      .update(analyticsTargets)
+      .set({
+        targetName,
+        targetUrl: targetUrl || null
+      })
+      .where(eq(analyticsTargets.couponId, couponId));
+  }
+
+  async updateAnalyticsTargetsByBanner(bannerId: string, targetName: string, targetUrl?: string): Promise<void> {
+    await this.db
+      .update(analyticsTargets)
+      .set({
+        targetName,
+        targetUrl: targetUrl || null
+      })
+      .where(eq(analyticsTargets.bannerId, bannerId));
+  }
+
+  async syncAnalyticsTargetsForSocialNetworks(socialNetworks: any[]): Promise<void> {
+    for (const network of socialNetworks) {
+      if (!network.type || !network.url) continue;
+      
+      const targetName = network.type;
+      const targetUrl = network.url;
+      
+      await this.db
+        .update(analyticsTargets)
+        .set({
+          targetName,
+          targetUrl
+        })
+        .where(and(
+          eq(analyticsTargets.targetType, 'social_network'),
+          eq(analyticsTargets.targetName, targetName)
+        ));
+    }
   }
 
   async createPageView(pageView: InsertPageView): Promise<PageView> {

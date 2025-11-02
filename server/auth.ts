@@ -296,6 +296,16 @@ export function setupAuth(app: Express) {
 
       await storage.updateUser(userId, updateData);
 
+      // Sincronizar analytics_targets para redes sociais se foram atualizadas
+      if (socialNetworks && socialNetworks.length > 0) {
+        try {
+          await storage.syncAnalyticsTargetsForSocialNetworks(socialNetworks);
+          console.log("Analytics targets synced for social networks");
+        } catch (syncError) {
+          console.error("Failed to sync analytics targets for social networks:", syncError);
+        }
+      }
+
       // Log activity for profile update
       try {
         await storage.createActivity({

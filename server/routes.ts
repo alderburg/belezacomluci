@@ -722,6 +722,13 @@ export function registerRoutes(app: Express): Server {
       // TERCEIRO: Atualizar o cupom na nova posição
       const coupon = await storage.updateCoupon(req.params.id, couponData);
 
+      // QUARTO: Atualizar analytics_targets se nome ou URL mudaram
+      if (couponData.code || couponData.brand || couponData.storeUrl !== undefined) {
+        const targetName = couponData.code || couponData.brand || coupon.code;
+        const targetUrl = couponData.storeUrl !== undefined ? couponData.storeUrl : coupon.storeUrl;
+        await storage.updateAnalyticsTargetsByCoupon(req.params.id, targetName, targetUrl || undefined);
+      }
+
       // Notificar via WebSocket sobre cupom atualizado
       const wsService = (global as any).notificationWS;
       if (wsService) {
@@ -986,6 +993,13 @@ export function registerRoutes(app: Express): Server {
         endDateTime: req.body.endDateTime ? new Date(req.body.endDateTime) : null,
       });
       const banner = await storage.updateBanner(id, updateData);
+
+      // Atualizar analytics_targets se título ou URL mudaram
+      if (updateData.title || updateData.linkUrl !== undefined) {
+        const targetName = updateData.title || banner.title;
+        const targetUrl = updateData.linkUrl !== undefined ? updateData.linkUrl : banner.linkUrl;
+        await storage.updateAnalyticsTargetsByBanner(id, targetName, targetUrl || undefined);
+      }
 
       // Broadcast data update
       const wsService = (global as any).notificationWS;
