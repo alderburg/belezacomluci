@@ -758,14 +758,17 @@ export default function BioPage() {
                                   }
 
                                   // Mostrar notificação ANTES de qualquer outra ação (garantir que apareça no iPhone)
+                                  const brandName = coupon.brand || 'loja';
                                   if (codigo && codigo.trim() !== '') {
                                     toast({
                                       title: copiado ? `Cupom ${codigo} copiado! 🎉` : `Cupom: ${codigo}`,
+                                      description: `Redirecionando para ${brandName}...`,
                                       duration: 3000,
                                     });
                                   } else {
                                     toast({
                                       title: "Cupom selecionado! 🎉",
+                                      description: `Redirecionando para ${brandName}...`,
                                       duration: 3000,
                                     });
                                   }
