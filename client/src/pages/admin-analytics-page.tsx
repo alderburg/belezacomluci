@@ -25,7 +25,7 @@ interface AnalyticsStats {
   uniqueVisitors: number;
   totalClicks: number;
   clicksByType: { type: string; count: number }[];
-  topClickedItems: { targetName: string; targetType: string; count: number }[];
+  topClickedItems: { targetName: string; targetType: string; targetOrder: number; count: number }[];
   clicksOverTime: { date: string; count: number }[];
   topCities: { city: string; state: string; count: number }[];
   topStates: { state: string; count: number }[];

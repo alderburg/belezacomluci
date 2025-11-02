@@ -10,7 +10,7 @@ import {
   insertRaffleSchema, insertRewardSchema, shareSettings, referrals,
   insertNotificationSchema, insertUserNotificationSchema, notifications, userNotifications,
   insertPopupSchema, insertPopupViewSchema, insertCategorySchema,
-  insertUserSchema, coupons, categories, commentLikes, commentReplies
+  insertUserSchema, coupons, categories, commentLikes, commentReplies, analyticsClicks, analyticsTargets
 } from "../shared/schema";
 import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
@@ -157,9 +157,9 @@ export function registerRoutes(app: Express): Server {
         });
 
         // Notificar analytics quando redes sociais mudarem (community settings incluem redes sociais)
-        wsService.broadcastDataUpdate('analytics', 'updated', { 
-          type: 'social_network', 
-          source: 'community_settings' 
+        wsService.broadcastDataUpdate('analytics', 'updated', {
+          type: 'social_network',
+          source: 'community_settings'
         });
       }
 
@@ -750,10 +750,10 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         wsService.broadcastDataUpdate('coupons', 'updated', coupon);
         // Notificar também analytics para atualização em tempo real
-        wsService.broadcastDataUpdate('analytics', 'updated', { 
-          type: 'coupon', 
+        wsService.broadcastDataUpdate('analytics', 'updated', {
+          type: 'coupon',
           id: req.params.id,
-          name: coupon.brand 
+          name: coupon.brand
         });
       }
 
@@ -1028,10 +1028,10 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         wsService.broadcastDataUpdate('banners', 'updated', banner);
         // Notificar também analytics para atualização em tempo real
-        wsService.broadcastDataUpdate('analytics', 'updated', { 
-          type: 'banner', 
+        wsService.broadcastDataUpdate('analytics', 'updated', {
+          type: 'banner',
           id: id,
-          name: banner.title 
+          name: banner.title
         });
       }
 
@@ -3948,7 +3948,7 @@ export function registerRoutes(app: Express): Server {
       // Broadcast analytics update via WebSocket para todos os admins conectados
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('analytics', 'click', { 
+        wsService.broadcastDataUpdate('analytics', 'click', {
           targetType,
           targetName,
           timestamp: new Date().toISOString()
