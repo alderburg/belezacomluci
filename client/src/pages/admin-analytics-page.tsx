@@ -314,12 +314,12 @@ export default function AdminAnalyticsPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Detalhamento de Cliques</CardTitle>
-                  <CardDescription className="text-xs">Lista completa de itens rastreados</CardDescription>
+                  <CardDescription className="text-xs">Lista completa de itens rastreados ({stats?.topClickedItems?.length || 0} itens)</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
                     <Table>
-                      <TableHeader>
+                      <TableHeader className="sticky top-0 bg-background z-10">
                         <TableRow>
                           <TableHead className="text-xs">Item</TableHead>
                           <TableHead className="text-xs">Tipo</TableHead>

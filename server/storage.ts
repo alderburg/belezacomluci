@@ -3034,8 +3034,7 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
       .leftJoin(analyticsTargets, eq(bioClicks.analyticsTargetId, analyticsTargets.id))
       .where(clickConditions.length > 0 ? and(...clickConditions) : undefined)
       .groupBy(analyticsTargets.targetName, analyticsTargets.targetType)
-      .orderBy(desc(sql`count(*)`))
-      .limit(10);
+      .orderBy(desc(sql`count(*)`));
 
     const clicksOverTimeResult = await this.db
       .select({
