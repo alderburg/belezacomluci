@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Eye, MousePointerClick, MapPin, Clock, TrendingUp, Users, Target, Calendar, Activity } from "lucide-react";
+import { Eye, MousePointerClick, MapPin, Clock, TrendingUp, Users, Target, Calendar, Activity, Tag, Image } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import { useSidebar } from "@/contexts/sidebar-context";
 import { Skeleton } from "@/components/ui/skeleton";
