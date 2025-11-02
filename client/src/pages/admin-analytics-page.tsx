@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useDataSync } from "@/hooks/use-data-sync";
 
 const COLORS = ['#ff6b9d', '#c084fc', '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#fb923c'];
 
@@ -35,6 +36,9 @@ export default function AdminAnalyticsPage() {
   const { isOpen } = useSidebar();
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  
+  // Conectar ao WebSocket para atualização em tempo real
+  useDataSync();
 
   // Aguardar autenticação antes de verificar admin
   if (authLoading) {
@@ -338,7 +342,7 @@ export default function AdminAnalyticsPage() {
                               .filter(item => item.targetType === 'coupon')
                               .map((item, index) => (
                                 <TableRow key={index}>
-                                  <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName.split(' - ')[0]}</TableCell>
+                                  <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
                                   <TableCell className="text-right text-xs">{item.count.toLocaleString()}</TableCell>
                                   <TableCell className="text-right text-xs font-medium">
                                     {stats.totalClicks > 0 ? ((item.count / stats.totalClicks) * 100).toFixed(1) : 0}%

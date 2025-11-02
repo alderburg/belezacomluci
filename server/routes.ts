@@ -3875,6 +3875,12 @@ export function registerRoutes(app: Express): Server {
         ipAddress: null,
       });
 
+      // Broadcast analytics update via WebSocket
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('analytics', 'pageview', pageView);
+      }
+
       res.json(pageView);
     } catch (error) {
       console.error('Error creating page view:', error);
@@ -3910,6 +3916,12 @@ export function registerRoutes(app: Express): Server {
         sessionId,
         userId: req.isAuthenticated() ? req.user!.id : null,
       });
+
+      // Broadcast analytics update via WebSocket
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('analytics', 'click', { click, target: analyticsTarget });
+      }
 
       res.json(click);
     } catch (error) {
@@ -3964,6 +3976,12 @@ export function registerRoutes(app: Express): Server {
         sessionId,
         userId: req.isAuthenticated() ? req.user!.id : null,
       });
+
+      // Broadcast analytics update via WebSocket
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('analytics', 'click', { click, target: analyticsTarget });
+      }
 
       res.json(click);
     } catch (error) {

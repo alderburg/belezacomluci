@@ -770,7 +770,7 @@ export default function BioPage() {
                                 }
 
                                 // Rastrear clique no cupom (sem await para não atrasar)
-                                trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, redirectUrl || null);
+                                trackClick('coupon', coupon.id, coupon.brand, redirectUrl || null);
 
                                 // Mostrar notificação IMEDIATAMENTE (garantir que apareça no iPhone)
                                 const brandName = coupon.brand || 'loja';

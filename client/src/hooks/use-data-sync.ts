@@ -3,8 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 
 interface DataUpdateMessage {
   type: 'data_update';
-  dataType: 'videos' | 'products' | 'coupons' | 'banners' | 'categories' | 'popups' | 'notifications' | 'users' | 'user_stats' | 'user_activity' | 'user_referrals' | 'posts' | 'gamification';
-  action: 'created' | 'updated' | 'deleted';
+  dataType: 'videos' | 'products' | 'coupons' | 'banners' | 'categories' | 'popups' | 'notifications' | 'users' | 'user_stats' | 'user_activity' | 'user_referrals' | 'posts' | 'gamification' | 'analytics';
+  action: 'created' | 'updated' | 'deleted' | 'pageview' | 'click';
   data?: any;
   timestamp: string;
 }
@@ -277,6 +277,14 @@ export function useDataSync() {
         queryClient.invalidateQueries({ queryKey: ['/api/admin/rewards'] });
         console.log('Gamification cache invalidated - Cheirosas page will refresh with new data');
         break;
+
+      case 'analytics':
+        // Invalidar todas as queries relacionadas à analytics
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/clicks'] });
+        console.log(`📊 Analytics ${action} - Cache invalidated - Analytics page will refresh with real-time data`);
+        break;
+
       default:
         console.log(`Unknown data type for invalidation: ${dataType}`);
     }
