@@ -3843,6 +3843,12 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
+      // Não rastrear pageviews do admin
+      if (req.isAuthenticated() && req.user?.isAdmin) {
+        console.log('🚫 Analytics: Pageview do admin ignorado');
+        return res.json({ message: "Admin pageviews are not tracked" });
+      }
+
       const pageView = await storage.createPageView({
         page,
         sessionId,
@@ -3869,6 +3875,12 @@ export function registerRoutes(app: Express): Server {
 
       if (!targetType || !targetName || !sessionId) {
         return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Não rastrear cliques do admin
+      if (req.isAuthenticated() && req.user?.isAdmin) {
+        console.log('🚫 Analytics: Clique do admin ignorado');
+        return res.json({ message: "Admin clicks are not tracked" });
       }
 
       const analyticsTarget = await storage.createOrGetAnalyticsTarget({
