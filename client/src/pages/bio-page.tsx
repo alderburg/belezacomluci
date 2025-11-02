@@ -733,27 +733,28 @@ export default function BioPage() {
 
                                     toast({
                                       title: `Cupom ${codigo} copiado! 🎉`,
-                                      description: `Abrindo ${coupon.brand || 'loja'}...`,
-                                      duration: 1500,
+                                      description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
+                                      duration: 3000,
                                     });
                                   } else {
                                     toast({
                                       title: "Cupom selecionado! 🎉",
-                                      description: `Abrindo ${coupon.brand || 'loja'}...`,
-                                      duration: 1500,
+                                      description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
+                                      duration: 3000,
                                     });
                                   }
 
-                                  // Abrir a URL após um pequeno delay para a notificação aparecer
+                                  // Abrir a URL após delay maior para garantir que a notificação seja vista
                                   if (coupon.storeUrl) {
                                     let url = coupon.storeUrl.trim();
                                     if (!url.startsWith('http://') && !url.startsWith('https://')) {
                                       url = 'https://' + url;
                                     }
                                     
+                                    // Aguardar 2 segundos antes de abrir para o usuário ler a notificação
                                     setTimeout(() => {
                                       window.open(url, '_blank', 'noopener,noreferrer');
-                                    }, 500);
+                                    }, 2000);
                                   }
                                 } catch (error) {
                                   console.error('Erro ao processar cupom:', error);
