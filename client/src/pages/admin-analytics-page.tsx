@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Eye, MousePointerClick, MapPin, Clock, TrendingUp, Users, Target, Calendar, Activity, Tag, Image } from "lucide-react";
+import { Eye, MousePointerClick, MapPin, Clock, TrendingUp, Users, Target, Calendar, Activity, Tag, Image, ChevronLeft, ChevronRight } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import { useSidebar } from "@/contexts/sidebar-context";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -46,6 +46,18 @@ export default function AdminAnalyticsPage() {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [timelineType, setTimelineType] = useState<string>("all");
   const [timelineItem, setTimelineItem] = useState<string>("all");
+  
+  // Estados de paginação
+  const [couponsPage, setCouponsPage] = useState(1);
+  const [couponsPerPage, setCouponsPerPage] = useState(10);
+  const [bannersPage, setBannersPage] = useState(1);
+  const [bannersPerPage, setBannersPerPage] = useState(10);
+  const [socialPage, setSocialPage] = useState(1);
+  const [socialPerPage, setSocialPerPage] = useState(10);
+  const [geoPage, setGeoPage] = useState(1);
+  const [geoPerPage, setGeoPerPage] = useState(10);
+  const [timelinePage, setTimelinePage] = useState(1);
+  const [timelinePerPage, setTimelinePerPage] = useState(10);
   
   // Conectar ao WebSocket para atualização em tempo real
   useDataSync();
@@ -371,9 +383,9 @@ export default function AdminAnalyticsPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                    <div className="overflow-x-auto">
                       <Table>
-                        <TableHeader className="sticky top-0 bg-background z-10">
+                        <TableHeader>
                           <TableRow>
                             <TableHead className="text-xs">Cupom</TableHead>
                             <TableHead className="text-right text-xs">Cliques</TableHead>
@@ -384,6 +396,7 @@ export default function AdminAnalyticsPage() {
                           {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'coupon').length > 0 ? (
                             stats.topClickedItems
                               .filter(item => item.targetType === 'coupon')
+                              .slice((couponsPage - 1) * couponsPerPage, couponsPage * couponsPerPage)
                               .map((item, index) => (
                                 <TableRow key={index}>
                                   <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
@@ -406,6 +419,55 @@ export default function AdminAnalyticsPage() {
                         </TableBody>
                       </Table>
                     </div>
+                    
+                    {/* Paginação Cupons */}
+                    {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'coupon').length > 0 && (
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Mostrar:</span>
+                          <Select value={couponsPerPage.toString()} onValueChange={(value) => {
+                            setCouponsPerPage(Number(value));
+                            setCouponsPage(1);
+                          }}>
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="10">10</SelectItem>
+                              <SelectItem value="25">25</SelectItem>
+                              <SelectItem value="50">50</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <span className="text-sm text-muted-foreground">por página</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCouponsPage(prev => Math.max(1, prev - 1))}
+                            disabled={couponsPage <= 1}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            Anterior
+                          </Button>
+
+                          <div className="text-sm text-muted-foreground px-3">
+                            {couponsPage}/{Math.ceil(stats.topClickedItems.filter(item => item.targetType === 'coupon').length / couponsPerPage)}
+                          </div>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCouponsPage(prev => Math.min(Math.ceil(stats.topClickedItems.filter(item => item.targetType === 'coupon').length / couponsPerPage), prev + 1))}
+                            disabled={couponsPage >= Math.ceil(stats.topClickedItems.filter(item => item.targetType === 'coupon').length / couponsPerPage)}
+                          >
+                            Próximo
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -421,9 +483,9 @@ export default function AdminAnalyticsPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                    <div className="overflow-x-auto">
                       <Table>
-                        <TableHeader className="sticky top-0 bg-background z-10">
+                        <TableHeader>
                           <TableRow>
                             <TableHead className="text-xs">Banner</TableHead>
                             <TableHead className="text-right text-xs">Cliques</TableHead>
@@ -434,6 +496,7 @@ export default function AdminAnalyticsPage() {
                           {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'banner').length > 0 ? (
                             stats.topClickedItems
                               .filter(item => item.targetType === 'banner')
+                              .slice((bannersPage - 1) * bannersPerPage, bannersPage * bannersPerPage)
                               .map((item, index) => (
                                 <TableRow key={index}>
                                   <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
@@ -456,6 +519,55 @@ export default function AdminAnalyticsPage() {
                         </TableBody>
                       </Table>
                     </div>
+                    
+                    {/* Paginação Banners */}
+                    {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'banner').length > 0 && (
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Mostrar:</span>
+                          <Select value={bannersPerPage.toString()} onValueChange={(value) => {
+                            setBannersPerPage(Number(value));
+                            setBannersPage(1);
+                          }}>
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="10">10</SelectItem>
+                              <SelectItem value="25">25</SelectItem>
+                              <SelectItem value="50">50</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <span className="text-sm text-muted-foreground">por página</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setBannersPage(prev => Math.max(1, prev - 1))}
+                            disabled={bannersPage <= 1}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            Anterior
+                          </Button>
+
+                          <div className="text-sm text-muted-foreground px-3">
+                            {bannersPage}/{Math.ceil(stats.topClickedItems.filter(item => item.targetType === 'banner').length / bannersPerPage)}
+                          </div>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setBannersPage(prev => Math.min(Math.ceil(stats.topClickedItems.filter(item => item.targetType === 'banner').length / bannersPerPage), prev + 1))}
+                            disabled={bannersPage >= Math.ceil(stats.topClickedItems.filter(item => item.targetType === 'banner').length / bannersPerPage)}
+                          >
+                            Próximo
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -471,9 +583,9 @@ export default function AdminAnalyticsPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                    <div className="overflow-x-auto">
                       <Table>
-                        <TableHeader className="sticky top-0 bg-background z-10">
+                        <TableHeader>
                           <TableRow>
                             <TableHead className="text-xs">Rede Social</TableHead>
                             <TableHead className="text-right text-xs">Cliques</TableHead>
@@ -484,6 +596,7 @@ export default function AdminAnalyticsPage() {
                           {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'social_network').length > 0 ? (
                             stats.topClickedItems
                               .filter(item => item.targetType === 'social_network')
+                              .slice((socialPage - 1) * socialPerPage, socialPage * socialPerPage)
                               .map((item, index) => (
                                 <TableRow key={index}>
                                   <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
@@ -506,6 +619,55 @@ export default function AdminAnalyticsPage() {
                         </TableBody>
                       </Table>
                     </div>
+                    
+                    {/* Paginação Redes Sociais */}
+                    {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'social_network').length > 0 && (
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Mostrar:</span>
+                          <Select value={socialPerPage.toString()} onValueChange={(value) => {
+                            setSocialPerPage(Number(value));
+                            setSocialPage(1);
+                          }}>
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="10">10</SelectItem>
+                              <SelectItem value="25">25</SelectItem>
+                              <SelectItem value="50">50</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <span className="text-sm text-muted-foreground">por página</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSocialPage(prev => Math.max(1, prev - 1))}
+                            disabled={socialPage <= 1}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            Anterior
+                          </Button>
+
+                          <div className="text-sm text-muted-foreground px-3">
+                            {socialPage}/{Math.ceil(stats.topClickedItems.filter(item => item.targetType === 'social_network').length / socialPerPage)}
+                          </div>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSocialPage(prev => Math.min(Math.ceil(stats.topClickedItems.filter(item => item.targetType === 'social_network').length / socialPerPage), prev + 1))}
+                            disabled={socialPage >= Math.ceil(stats.topClickedItems.filter(item => item.targetType === 'social_network').length / socialPerPage)}
+                          >
+                            Próximo
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -693,19 +855,22 @@ export default function AdminAnalyticsPage() {
                       </TableHeader>
                       <TableBody>
                         {stats?.topCities && stats.topCities.length > 0 ? (
-                          stats.topCities.slice(0, 15).map((city, index) => (
-                            <TableRow key={index}>
-                              <TableCell>
-                                <Badge variant={index < 3 ? "default" : "outline"} className="text-xs">#{index + 1}</Badge>
-                              </TableCell>
-                              <TableCell className="font-medium text-xs">{city.city}</TableCell>
-                              <TableCell className="text-xs">{city.state}</TableCell>
-                              <TableCell className="text-right text-xs">{city.count.toLocaleString()}</TableCell>
-                              <TableCell className="text-right text-xs font-medium">
-                                {stats.totalPageViews > 0 ? ((city.count / stats.totalPageViews) * 100).toFixed(1) : 0}%
-                              </TableCell>
-                            </TableRow>
-                          ))
+                          stats.topCities.slice((geoPage - 1) * geoPerPage, geoPage * geoPerPage).map((city, index) => {
+                            const globalIndex = (geoPage - 1) * geoPerPage + index;
+                            return (
+                              <TableRow key={index}>
+                                <TableCell>
+                                  <Badge variant={globalIndex < 3 ? "default" : "outline"} className="text-xs">#{globalIndex + 1}</Badge>
+                                </TableCell>
+                                <TableCell className="font-medium text-xs">{city.city}</TableCell>
+                                <TableCell className="text-xs">{city.state}</TableCell>
+                                <TableCell className="text-right text-xs">{city.count.toLocaleString()}</TableCell>
+                                <TableCell className="text-right text-xs font-medium">
+                                  {stats.totalPageViews > 0 ? ((city.count / stats.totalPageViews) * 100).toFixed(1) : 0}%
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
                         ) : (
                           <TableRow>
                             <TableCell colSpan={5} className="h-32 text-center">
@@ -722,6 +887,55 @@ export default function AdminAnalyticsPage() {
                       </TableBody>
                     </Table>
                   </div>
+                  
+                  {/* Paginação Geografia */}
+                  {stats?.topCities && stats.topCities.length > 0 && (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 pt-4 border-t">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Mostrar:</span>
+                        <Select value={geoPerPage.toString()} onValueChange={(value) => {
+                          setGeoPerPage(Number(value));
+                          setGeoPage(1);
+                        }}>
+                          <SelectTrigger className="w-20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <span className="text-sm text-muted-foreground">por página</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setGeoPage(prev => Math.max(1, prev - 1))}
+                          disabled={geoPage <= 1}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          Anterior
+                        </Button>
+
+                        <div className="text-sm text-muted-foreground px-3">
+                          {geoPage}/{Math.ceil(stats.topCities.length / geoPerPage)}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setGeoPage(prev => Math.min(Math.ceil(stats.topCities.length / geoPerPage), prev + 1))}
+                          disabled={geoPage >= Math.ceil(stats.topCities.length / geoPerPage)}
+                        >
+                          Próximo
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -878,9 +1092,9 @@ export default function AdminAnalyticsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                  <div className="overflow-x-auto">
                     <Table>
-                      <TableHeader className="sticky top-0 bg-background z-10">
+                      <TableHeader>
                         <TableRow>
                           <TableHead className="text-xs">Item</TableHead>
                           <TableHead className="text-xs">Tipo</TableHead>
@@ -892,7 +1106,7 @@ export default function AdminAnalyticsPage() {
                       </TableHeader>
                       <TableBody>
                         {timelineData?.clicks && timelineData.clicks.length > 0 ? (
-                          timelineData.clicks.map((click) => (
+                          timelineData.clicks.slice((timelinePage - 1) * timelinePerPage, timelinePage * timelinePerPage).map((click) => (
                             <TableRow key={click.id} data-testid={`row-click-${click.id}`}>
                               <TableCell className="font-medium text-xs max-w-[150px] truncate" data-testid={`text-item-${click.id}`}>
                                 {click.targetName}
@@ -932,6 +1146,55 @@ export default function AdminAnalyticsPage() {
                       </TableBody>
                     </Table>
                   </div>
+                  
+                  {/* Paginação Timeline */}
+                  {timelineData?.clicks && timelineData.clicks.length > 0 && (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 pt-4 border-t">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Mostrar:</span>
+                        <Select value={timelinePerPage.toString()} onValueChange={(value) => {
+                          setTimelinePerPage(Number(value));
+                          setTimelinePage(1);
+                        }}>
+                          <SelectTrigger className="w-20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <span className="text-sm text-muted-foreground">por página</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setTimelinePage(prev => Math.max(1, prev - 1))}
+                          disabled={timelinePage <= 1}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          Anterior
+                        </Button>
+
+                        <div className="text-sm text-muted-foreground px-3">
+                          {timelinePage}/{Math.ceil(timelineData.clicks.length / timelinePerPage)}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setTimelinePage(prev => Math.min(Math.ceil(timelineData.clicks.length / timelinePerPage), prev + 1))}
+                          disabled={timelinePage >= Math.ceil(timelineData.clicks.length / timelinePerPage)}
+                        >
+                          Próximo
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
