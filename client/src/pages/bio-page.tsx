@@ -752,19 +752,28 @@ export default function BioPage() {
                                   }
 
                                   // Copiar código do cupom (se existir)
+                                  let copiado = false;
                                   if (codigo && codigo.trim() !== '') {
-                                    await copyToClipboard(codigo);
+                                    copiado = await copyToClipboard(codigo);
                                   }
 
+                                  // Mostrar notificação ANTES de qualquer outra ação (garantir que apareça no iPhone)
+                                  if (codigo && codigo.trim() !== '') {
+                                    toast({
+                                      title: copiado ? `Cupom ${codigo} copiado! 🎉` : `Cupom: ${codigo}`,
+                                      description: `Redirecionando para ${coupon.brand || 'loja'} em 3 segundos...`,
+                                      duration: 4000,
+                                    });
+                                  } else {
+                                    toast({
+                                      title: "Cupom selecionado! 🎉",
+                                      description: `Redirecionando para ${coupon.brand || 'loja'} em 3 segundos...`,
+                                      duration: 4000,
+                                    });
+                                  }
+                                  
                                   // Rastrear clique no cupom (sem await para não atrasar)
                                   trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, redirectUrl || null);
-
-                                  // Mostrar notificação ANTES do redirecionamento
-                                  toast({
-                                    title: "Cupom ativado! 🎉",
-                                    description: `Abrindo ${coupon.brand || 'loja'} em 3 segundos...`,
-                                    duration: 4000,
-                                  });
 
                                   // Aguardar 3 segundos antes de redirecionar
                                   if (redirectUrl) {
