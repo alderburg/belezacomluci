@@ -762,13 +762,13 @@ export default function BioPage() {
                                     toast({
                                       title: copiado ? `Cupom ${codigo} copiado! 🎉` : `Cupom: ${codigo}`,
                                       description: `Redirecionando para ${coupon.brand || 'loja'} em 3 segundos...`,
-                                      duration: 4000,
+                                      duration: 3000,
                                     });
                                   } else {
                                     toast({
                                       title: "Cupom selecionado! 🎉",
                                       description: `Redirecionando para ${coupon.brand || 'loja'} em 3 segundos...`,
-                                      duration: 4000,
+                                      duration: 3000,
                                     });
                                   }
                                   
