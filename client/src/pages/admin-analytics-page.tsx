@@ -14,7 +14,7 @@ import { useState } from "react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useDataSync } from "@/hooks/use-data-sync";
 
@@ -500,9 +500,12 @@ export default function AdminAnalyticsPage() {
                     {stats?.clicksOverTime && stats.clicksOverTime.length > 0 ? (
                       <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={stats.clicksOverTime}>
+                          <LineChart data={stats.clicksOverTime.map(item => ({
+                            ...item,
+                            date: format(parseISO(item.date), "dd/MM/yyyy", { locale: ptBR })
+                          }))}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} angle={-45} textAnchor="end" height={70} />
                             <YAxis tick={{ fontSize: 11 }} />
                             <Tooltip contentStyle={{ fontSize: 12 }} />
                             <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -711,9 +714,12 @@ export default function AdminAnalyticsPage() {
                   {stats?.clicksOverTime && stats.clicksOverTime.length > 0 ? (
                     <div className="h-[400px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={stats.clicksOverTime}>
+                        <LineChart data={stats.clicksOverTime.map(item => ({
+                          ...item,
+                          date: format(parseISO(item.date), "dd/MM/yyyy", { locale: ptBR })
+                        }))}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                          <XAxis dataKey="date" tick={{ fontSize: 11 }} angle={-45} textAnchor="end" height={70} />
                           <YAxis tick={{ fontSize: 11 }} />
                           <Tooltip contentStyle={{ fontSize: 12 }} />
                           <Legend wrapperStyle={{ fontSize: 12 }} />
