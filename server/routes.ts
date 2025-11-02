@@ -147,7 +147,7 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         // Enviar notificação específica para community_settings
         wsService.broadcastDataUpdate('community_settings', 'updated', { title, subtitle, backgroundImage, mobileBackgroundImage });
-        
+
         // Também enviar para users (retrocompatibilidade)
         wsService.broadcastDataUpdate('users', 'updated', {
           id: userId,
@@ -668,15 +668,23 @@ export function registerRoutes(app: Express): Server {
       }
 
       // DEPOIS: Criar o cupom na posição desejada
-      const coupon = await storage.createCoupon(couponData);
+      const newCoupon = await storage.createCoupon(couponData);
+
+      // Criar analytics target para o cupom
+      await storage.createOrGetAnalyticsTarget({
+        targetType: 'coupon',
+        couponId: newCoupon.id,
+        targetName: newCoupon.brand, // usar marca ao invés de código
+        targetUrl: newCoupon.storeUrl || null
+      });
 
       // Notificar via WebSocket sobre novo cupom
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('coupons', 'created', coupon);
+        wsService.broadcastDataUpdate('coupons', 'created', newCoupon);
       }
 
-      res.status(201).json(coupon);
+      res.status(201).json(newCoupon);
     } catch (error) {
       res.status(400).json({
         message: "Invalid coupon data",
@@ -708,7 +716,7 @@ export function registerRoutes(app: Express): Server {
         if (existingCoupon.order >= 0) {
           await storage.reorderCouponsAfterDeletion(existingCoupon.order);
         }
-        
+
         // SEGUNDO: Incrementar cupons na nova posição e sucessores (excluindo o cupom atual)
         await storage.reorderCouponsAfterInsert(couponData.order, req.params.id);
       }
@@ -724,9 +732,12 @@ export function registerRoutes(app: Express): Server {
 
       // QUARTO: Atualizar analytics_targets se nome ou URL mudaram
       if (couponData.code || couponData.brand || couponData.storeUrl !== undefined) {
-        const targetName = couponData.code || couponData.brand || coupon.code;
-        const targetUrl = couponData.storeUrl !== undefined ? couponData.storeUrl : coupon.storeUrl;
-        await storage.updateAnalyticsTargetsByCoupon(req.params.id, targetName, targetUrl || undefined);
+        // Atualizar os analytics targets relacionados a este cupom
+        await storage.updateAnalyticsTargetsByCoupon(
+          req.params.id,
+          couponData.brand, // usar marca ao invés de código
+          couponData.storeUrl !== undefined ? couponData.storeUrl : coupon.storeUrl
+        );
       }
 
       // Notificar via WebSocket sobre cupom atualizado
@@ -3801,7 +3812,7 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         // Enviar notificação específica para community_settings
         wsService.broadcastDataUpdate('community_settings', 'updated', settings);
-        
+
         // Também enviar para users (retrocompatibilidade)
         wsService.broadcastDataUpdate('users', 'updated', {
           id: userId,
@@ -3934,7 +3945,7 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/analytics/stats", async (req, res) => {
     try {
       console.log('📊 Analytics stats request - Auth:', req.isAuthenticated(), 'Admin:', req.user?.isAdmin);
-      
+
       if (!req.isAuthenticated() || !req.user?.isAdmin) {
         console.log('❌ Analytics stats - Access denied');
         return res.status(403).json({ message: "Admin access required" });

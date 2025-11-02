@@ -2937,11 +2937,11 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
     return created;
   }
 
-  async updateAnalyticsTargetsByCoupon(couponId: string, targetName: string, targetUrl?: string): Promise<void> {
+  async updateAnalyticsTargetsByCoupon(couponId: string, brand: string, targetUrl?: string): Promise<void> {
     await this.db
       .update(analyticsTargets)
       .set({
-        targetName,
+        targetName: brand, // usar marca ao invés de código
         targetUrl: targetUrl || null
       })
       .where(eq(analyticsTargets.couponId, couponId));
