@@ -24,6 +24,13 @@ export default function BioPage() {
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
   const [isCouponsModalOpen, setIsCouponsModalOpen] = useState(false);
 
+  // Detectar se está no navegador in-app do Instagram/Facebook
+  const isInAppBrowser = useRef(false);
+  useEffect(() => {
+    const ua = navigator.userAgent || '';
+    isInAppBrowser.current = /Instagram|FBAN|FBAV/i.test(ua);
+  }, []);
+
   // Estado para geolocalização e session tracking
   const [geoData, setGeoData] = useState<{city?: string, state?: string, country?: string} | null>(null);
   const sessionId = useRef<string>('');
@@ -640,10 +647,16 @@ export default function BioPage() {
             <SheetTitle className="text-xl font-bold text-black">Meus Cupons</SheetTitle>
           </SheetHeader>
 
-          <div className="flex-1 mt-6 overflow-y-auto pb-24 min-h-0" style={{ 
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehavior: 'contain'
-          }}>
+          <div 
+            className="flex-1 mt-6 overflow-y-auto min-h-0" 
+            style={{ 
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain',
+              paddingBottom: isInAppBrowser.current 
+                ? 'max(10rem, env(safe-area-inset-bottom, 0px) + 10rem)' 
+                : '6rem'
+            }}
+          >
             {isLoadingCoupons ? (
               <div className="space-y-8">
                 {/* Skeleton para categorias */}
