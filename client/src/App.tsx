@@ -135,9 +135,6 @@ function Router() {
 
 // Componente interno que tem acesso ao QueryClient
 function AppContent() {
-  // Ativar sincronização de dados em tempo real globalmente
-  useDataSync();
-
   return (
     <MobileDetectionProvider>
       <AuthProvider>

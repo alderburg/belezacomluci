@@ -10,7 +10,7 @@ import { useSidebar } from "@/contexts/sidebar-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -39,24 +39,6 @@ export default function AdminAnalyticsPage() {
   
   // Conectar ao WebSocket para atualização em tempo real
   useDataSync();
-
-  // Atualizar automaticamente quando houver mudanças via WebSocket
-  useEffect(() => {
-    const handleDataUpdate = (event: CustomEvent) => {
-      const { dataType, action } = event.detail;
-      
-      // Recarregar dados quando houver atualizações de analytics, cupons, banners ou redes sociais
-      if (dataType === 'analytics' || dataType === 'coupons' || dataType === 'banners' || dataType === 'community_settings') {
-        console.log(`📊 Analytics: Recebida atualização de ${dataType} - ${action}, recarregando dados...`);
-        refetch();
-      }
-    };
-
-    window.addEventListener('data_update' as any, handleDataUpdate);
-    return () => {
-      window.removeEventListener('data_update' as any, handleDataUpdate);
-    };
-  }, [refetch]);
 
   // Aguardar autenticação antes de verificar admin
   if (authLoading) {
@@ -99,6 +81,7 @@ export default function AdminAnalyticsPage() {
       return response.json();
     },
     enabled: !!user?.isAdmin,
+    refetchInterval: 30000, // Refetch automático a cada 30 segundos
   });
 
   // Recarregar dados quando o calendário fechar
