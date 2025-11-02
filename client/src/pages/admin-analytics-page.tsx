@@ -797,7 +797,7 @@ export default function AdminAnalyticsPage() {
                     </CardTitle>
                     <CardDescription className="text-xs">Cliques por hora do dia</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
+                  <CardContent className="pt-0 pb-2">
                     {timelineData?.hourlyDistribution && timelineData.hourlyDistribution.some(h => h.count > 0) ? (
                       <div className="h-[250px]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -830,7 +830,7 @@ export default function AdminAnalyticsPage() {
                     </CardTitle>
                     <CardDescription className="text-xs">Cliques ao longo dos dias</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
+                  <CardContent className="pt-0 pb-2">
                     {timelineData?.dailyDistribution && timelineData.dailyDistribution.length > 0 ? (
                       <div className="h-[280px]">
                         <ResponsiveContainer width="100%" height="100%">
