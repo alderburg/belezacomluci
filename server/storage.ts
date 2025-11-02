@@ -2970,10 +2970,10 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
   async syncAnalyticsTargetsForSocialNetworks(socialNetworks: any[]): Promise<void> {
     for (const network of socialNetworks) {
       if (!network.type || !network.url) continue;
-      
+
       const targetName = network.type;
       const targetUrl = network.url;
-      
+
       await this.db
         .update(analyticsTargets)
         .set({
