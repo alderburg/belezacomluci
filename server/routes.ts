@@ -155,7 +155,7 @@ export function registerRoutes(app: Express): Server {
           communityTitle: title,
           communitySubtitle: subtitle
         });
-        
+
         // Notificar analytics quando redes sociais mudarem (community settings incluem redes sociais)
         wsService.broadcastDataUpdate('analytics', 'updated', { 
           type: 'social_network', 
@@ -3945,10 +3945,15 @@ export function registerRoutes(app: Express): Server {
         userId: req.isAuthenticated() ? req.user!.id : null,
       });
 
-      // Broadcast analytics update via WebSocket
+      // Broadcast analytics update via WebSocket para todos os admins conectados
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('analytics', 'click', { click, target: analyticsTarget });
+        wsService.broadcastDataUpdate('analytics', 'click', { 
+          targetType,
+          targetName,
+          timestamp: new Date().toISOString()
+        });
+        console.log(`📊 Analytics click broadcast enviado via WebSocket: ${targetName} (${targetType})`);
       }
 
       res.json(click);

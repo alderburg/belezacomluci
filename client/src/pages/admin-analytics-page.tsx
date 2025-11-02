@@ -40,6 +40,24 @@ export default function AdminAnalyticsPage() {
   // Conectar ao WebSocket para atualização em tempo real
   useDataSync();
 
+  // Atualizar automaticamente quando houver mudanças via WebSocket
+  useEffect(() => {
+    const handleDataUpdate = (event: CustomEvent) => {
+      const { dataType, action } = event.detail;
+      
+      // Recarregar dados quando houver atualizações de analytics, cupons, banners ou redes sociais
+      if (dataType === 'analytics' || dataType === 'coupons' || dataType === 'banners' || dataType === 'community_settings') {
+        console.log(`📊 Analytics: Recebida atualização de ${dataType} - ${action}, recarregando dados...`);
+        refetch();
+      }
+    };
+
+    window.addEventListener('data_update' as any, handleDataUpdate);
+    return () => {
+      window.removeEventListener('data_update' as any, handleDataUpdate);
+    };
+  }, [refetch]);
+
   // Aguardar autenticação antes de verificar admin
   if (authLoading) {
     return (

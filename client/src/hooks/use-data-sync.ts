@@ -293,7 +293,18 @@ export function useDataSync() {
         // Invalidar todas as queries relacionadas à analytics
         queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats'] });
         queryClient.invalidateQueries({ queryKey: ['/api/analytics/clicks'] });
-        console.log(`📊 Analytics ${action} - Cache invalidated - Analytics page will refresh with real-time data`);
+        
+        // Forçar refetch imediato para atualização em tempo real
+        queryClient.refetchQueries({
+          queryKey: ['/api/analytics/stats'],
+          type: 'active'
+        });
+        queryClient.refetchQueries({
+          queryKey: ['/api/analytics/clicks'],
+          type: 'active'
+        });
+        
+        console.log(`📊 Analytics ${action} - Cache invalidated and refetched - Analytics page will refresh with real-time data`);
         break;
 
       default:
