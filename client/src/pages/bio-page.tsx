@@ -635,12 +635,15 @@ export default function BioPage() {
 
       {/* Modal de Cupons */}
       <Sheet open={isCouponsModalOpen} onOpenChange={setIsCouponsModalOpen}>
-        <SheetContent side="left" className="w-full [&>button]:!ring-1 [&>button]:!ring-[#439b1e] [&>button]:!ring-offset-1">
-          <SheetHeader>
+        <SheetContent side="left" className="w-full [&>button]:!ring-1 [&>button]:!ring-[#439b1e] [&>button]:!ring-offset-1 flex flex-col">
+          <SheetHeader className="flex-shrink-0">
             <SheetTitle className="text-xl font-bold text-black">Meus Cupons</SheetTitle>
           </SheetHeader>
 
-          <div className="mt-6 overflow-y-auto max-h-[calc(100vh-120px)]">
+          <div className="flex-1 mt-6 overflow-y-auto pb-6" style={{ 
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain'
+          }}>
             {isLoadingCoupons ? (
               <div className="space-y-8">
                 {/* Skeleton para categorias */}
@@ -700,43 +703,72 @@ export default function BioPage() {
                               // Rastrear clique no cupom
                               await trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, coupon.storeUrl || null);
 
-                              try {
-                                const codigo = coupon.code || '';
+                              const codigo = coupon.code || '';
+                              let copiado = false;
 
-                                if (codigo && codigo.trim() !== '') {
+                              // Tentar copiar o código - com fallback para iOS
+                              if (codigo && codigo.trim() !== '') {
+                                try {
+                                  // Método moderno - funciona na maioria dos navegadores
                                   await navigator.clipboard.writeText(codigo);
-
-                                  toast({
-                                    title: `Cupom ${codigo} copiado! 🎉`,
-                                    description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
-                                    duration: 2000,
-                                  });
-                                } else {
-                                  toast({
-                                    title: "Cupom selecionado! 🎉",
-                                    description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
-                                    duration: 2000,
-                                  });
-                                }
-
-                                if (coupon.storeUrl) {
-                                  let url = coupon.storeUrl.trim();
-
-                                  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                                    url = 'https://' + url;
+                                  copiado = true;
+                                } catch (clipboardError) {
+                                  // Fallback para iOS e navegadores que bloqueiam clipboard
+                                  try {
+                                    const textArea = document.createElement('textarea');
+                                    textArea.value = codigo;
+                                    textArea.style.position = 'fixed';
+                                    textArea.style.top = '0';
+                                    textArea.style.left = '0';
+                                    textArea.style.opacity = '0';
+                                    document.body.appendChild(textArea);
+                                    textArea.focus();
+                                    textArea.select();
+                                    
+                                    const successful = document.execCommand('copy');
+                                    document.body.removeChild(textArea);
+                                    
+                                    if (successful) {
+                                      copiado = true;
+                                    }
+                                  } catch (fallbackError) {
+                                    console.warn('Não foi possível copiar automaticamente:', fallbackError);
                                   }
-
-                                  setTimeout(() => {
-                                    window.open(url, '_blank', 'noopener,noreferrer');
-                                  }, 2000);
                                 }
-                              } catch (error) {
-                                console.error('Erro ao processar cupom:', error);
+                              }
+
+                              // Mostrar toast de feedback
+                              if (copiado) {
                                 toast({
-                                  title: "Erro ao processar cupom",
-                                  description: "Tente novamente",
-                                  variant: "destructive",
+                                  title: `Cupom ${codigo} copiado! 🎉`,
+                                  description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
+                                  duration: 2000,
                                 });
+                              } else if (codigo && codigo.trim() !== '') {
+                                toast({
+                                  title: `Cupom: ${codigo} 🎉`,
+                                  description: `Abrindo ${coupon.brand || 'loja'}. Copie o cupom manualmente.`,
+                                  duration: 3000,
+                                });
+                              } else {
+                                toast({
+                                  title: "Cupom selecionado! 🎉",
+                                  description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
+                                  duration: 2000,
+                                });
+                              }
+
+                              // Abrir loja - SEMPRE executar, mesmo se copiar falhar
+                              if (coupon.storeUrl) {
+                                let url = coupon.storeUrl.trim();
+
+                                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                                  url = 'https://' + url;
+                                }
+
+                                setTimeout(() => {
+                                  window.open(url, '_blank', 'noopener,noreferrer');
+                                }, 2000);
                               }
                             }}
                             className="relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
