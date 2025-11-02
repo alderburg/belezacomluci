@@ -799,7 +799,7 @@ export default function AdminAnalyticsPage() {
                   </CardHeader>
                   <CardContent className="pt-0">
                     {timelineData?.hourlyDistribution && timelineData.hourlyDistribution.some(h => h.count > 0) ? (
-                      <div className="h-[300px]">
+                      <div className="h-[250px]">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={timelineData.hourlyDistribution}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -811,7 +811,7 @@ export default function AdminAnalyticsPage() {
                         </ResponsiveContainer>
                       </div>
                     ) : (
-                      <div className="h-[300px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+                      <div className="h-[250px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
                         <div className="text-center p-6">
                           <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
                           <p className="text-sm font-medium text-muted-foreground mb-1">Sem dados</p>
@@ -832,7 +832,7 @@ export default function AdminAnalyticsPage() {
                   </CardHeader>
                   <CardContent className="pt-0">
                     {timelineData?.dailyDistribution && timelineData.dailyDistribution.length > 0 ? (
-                      <div className="h-[300px]">
+                      <div className="h-[250px]">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={timelineData.dailyDistribution.map(item => ({
                             ...item,
@@ -854,7 +854,7 @@ export default function AdminAnalyticsPage() {
                         </ResponsiveContainer>
                       </div>
                     ) : (
-                      <div className="h-[300px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+                      <div className="h-[250px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
                         <div className="text-center p-6">
                           <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
                           <p className="text-sm font-medium text-muted-foreground mb-1">Sem dados</p>
