@@ -228,6 +228,12 @@ export interface IStorage {
   createBioClick(bioClick: InsertBioClick): Promise<BioClick>;
   getPageViews(page: string, startDate?: Date, endDate?: Date): Promise<PageView[]>;
   getBioClicks(startDate?: Date, endDate?: Date): Promise<(BioClick & { analyticsTarget: AnalyticsTarget })[]>;
+  getTimelineData(startDate?: Date, endDate?: Date, targetType?: string, targetId?: string): Promise<{
+    items: { targetType: string; targetId: string | null; targetName: string }[];
+    clicks: { id: string; targetName: string; targetType: string; date: string; time: string; hour: number; city: string | null; state: string | null; createdAt: string }[];
+    hourlyDistribution: { hour: number; count: number }[];
+    dailyDistribution: { date: string; count: number }[];
+  }>;
   getAnalyticsStats(startDate?: Date, endDate?: Date): Promise<{
     totalPageViews: number;
     uniqueVisitors: number;
@@ -3043,6 +3049,116 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
     }
 
     return result;
+  }
+
+  async getTimelineData(startDate?: Date, endDate?: Date, targetType?: string, targetId?: string): Promise<{
+    items: { targetType: string; targetId: string | null; targetName: string }[];
+    clicks: { id: string; targetName: string; targetType: string; date: string; time: string; hour: number; city: string | null; state: string | null; createdAt: string }[];
+    hourlyDistribution: { hour: number; count: number }[];
+    dailyDistribution: { date: string; count: number }[];
+  }> {
+    const conditions = [];
+
+    if (startDate) {
+      conditions.push(gte(bioClicks.createdAt, startDate));
+    }
+
+    if (endDate) {
+      conditions.push(lte(bioClicks.createdAt, endDate));
+    }
+
+    if (targetType) {
+      conditions.push(eq(analyticsTargets.targetType, targetType));
+    }
+
+    if (targetId) {
+      if (targetType === 'coupon') {
+        conditions.push(eq(analyticsTargets.couponId, targetId));
+      } else if (targetType === 'banner') {
+        conditions.push(eq(analyticsTargets.bannerId, targetId));
+      }
+    }
+
+    // Buscar itens disponíveis para seleção
+    const itemsResult = await this.db
+      .select({
+        targetType: analyticsTargets.targetType,
+        targetId: sql<string | null>`COALESCE(${analyticsTargets.couponId}, ${analyticsTargets.bannerId})`,
+        targetName: analyticsTargets.targetName,
+      })
+      .from(analyticsTargets)
+      .where(targetType ? eq(analyticsTargets.targetType, targetType) : undefined)
+      .groupBy(analyticsTargets.targetType, sql`COALESCE(${analyticsTargets.couponId}, ${analyticsTargets.bannerId})`, analyticsTargets.targetName)
+      .orderBy(analyticsTargets.targetName);
+
+    // Buscar cliques detalhados com localização da sessão
+    const clicksResult = await this.db
+      .select({
+        id: bioClicks.id,
+        targetName: analyticsTargets.targetName,
+        targetType: analyticsTargets.targetType,
+        createdAt: bioClicks.createdAt,
+        sessionId: bioClicks.sessionId,
+      })
+      .from(bioClicks)
+      .leftJoin(analyticsTargets, eq(bioClicks.analyticsTargetId, analyticsTargets.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(bioClicks.createdAt));
+
+    // Para cada clique, buscar localização da última pageview da sessão
+    const clicksWithLocation = await Promise.all(
+      clicksResult.map(async (click) => {
+        const [location] = await this.db
+          .select({
+            city: pageViews.city,
+            state: pageViews.state,
+          })
+          .from(pageViews)
+          .where(and(
+            eq(pageViews.sessionId, click.sessionId),
+            sql`${pageViews.city} IS NOT NULL`
+          ))
+          .orderBy(desc(pageViews.createdAt))
+          .limit(1);
+
+        const createdDate = new Date(click.createdAt);
+        return {
+          id: click.id,
+          targetName: click.targetName,
+          targetType: click.targetType,
+          date: createdDate.toISOString().split('T')[0],
+          time: createdDate.toTimeString().split(' ')[0].substring(0, 5),
+          hour: createdDate.getHours(),
+          city: location?.city || null,
+          state: location?.state || null,
+          createdAt: click.createdAt.toISOString(),
+        };
+      })
+    );
+
+    // Distribuição por hora
+    const hourlyDistribution = Array.from({ length: 24 }, (_, hour) => ({
+      hour,
+      count: clicksWithLocation.filter(c => c.hour === hour).length,
+    }));
+
+    // Distribuição por dia
+    const dailyMap = new Map<string, number>();
+    clicksWithLocation.forEach(click => {
+      const count = dailyMap.get(click.date) || 0;
+      dailyMap.set(click.date, count + 1);
+    });
+
+    const dailyDistribution = Array.from(dailyMap.entries())
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return {
+      items: itemsResult,
+      clicks: clicksWithLocation,
+      hourlyDistribution,
+      dailyDistribution,
+    };
   }
 
   async getAnalyticsStats(startDate?: Date, endDate?: Date): Promise<{

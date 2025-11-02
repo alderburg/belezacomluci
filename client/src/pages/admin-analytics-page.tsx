@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useDataSync } from "@/hooks/use-data-sync";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const COLORS = ['#ff6b9d', '#c084fc', '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#fb923c'];
 
@@ -31,11 +32,20 @@ interface AnalyticsStats {
   topStates: { state: string; count: number }[];
 }
 
+interface TimelineData {
+  items: { targetType: string; targetId: string | null; targetName: string }[];
+  clicks: { id: string; targetName: string; targetType: string; date: string; time: string; hour: number; city: string | null; state: string | null; createdAt: string }[];
+  hourlyDistribution: { hour: number; count: number }[];
+  dailyDistribution: { date: string; count: number }[];
+}
+
 export default function AdminAnalyticsPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { isOpen } = useSidebar();
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [timelineType, setTimelineType] = useState<string>("all");
+  const [timelineItem, setTimelineItem] = useState<string>("all");
   
   // Conectar ao WebSocket para atualização em tempo real
   useDataSync();
@@ -82,6 +92,39 @@ export default function AdminAnalyticsPage() {
     },
     enabled: !!user?.isAdmin,
     refetchInterval: 30000, // Refetch automático a cada 30 segundos
+  });
+
+  const { data: timelineData, isLoading: timelineLoading } = useQuery<TimelineData>({
+    queryKey: ["/api/analytics/timeline", dateRange, timelineType, timelineItem],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (dateRange.from) {
+        params.append('startDate', dateRange.from.toISOString());
+      }
+      if (dateRange.to) {
+        params.append('endDate', dateRange.to.toISOString());
+      }
+      if (timelineType && timelineType !== "all") {
+        params.append('targetType', timelineType);
+      }
+      if (timelineItem && timelineItem !== "all") {
+        params.append('targetId', timelineItem);
+      }
+
+      const response = await fetch(`/api/analytics/timeline?${params.toString()}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch timeline data');
+      }
+
+      return response.json();
+    },
+    enabled: !!user?.isAdmin,
   });
 
   // Recarregar dados quando o calendário fechar
@@ -685,48 +728,210 @@ export default function AdminAnalyticsPage() {
 
             {/* Timeline Tab */}
             <TabsContent value="timeline" className="space-y-4">
+              {/* Filtros */}
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Clock className="w-5 h-5 text-orange-500" />
-                    Linha do Tempo de Atividade
+                    <Target className="w-5 h-5 text-orange-500" />
+                    Filtros
                   </CardTitle>
-                  <CardDescription className="text-xs">Histórico detalhado de ações ao longo do tempo</CardDescription>
+                  <CardDescription className="text-xs">Selecione o tipo e item para análise detalhada</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  {stats?.clicksOverTime && stats.clicksOverTime.length > 0 ? (
-                    <div className="h-[400px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={stats.clicksOverTime.map(item => ({
-                          ...item,
-                          date: format(parseISO(item.date), "dd/MM/yyyy", { locale: ptBR })
-                        }))}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis dataKey="date" tick={{ fontSize: 11 }} angle={-45} textAnchor="end" height={70} />
-                          <YAxis tick={{ fontSize: 11 }} />
-                          <Tooltip contentStyle={{ fontSize: 12 }} />
-                          <Legend wrapperStyle={{ fontSize: 12 }} />
-                          <Line 
-                            type="monotone" 
-                            dataKey="count" 
-                            stroke="#ff6b9d" 
-                            strokeWidth={2} 
-                            name="Cliques"
-                            dot={{ fill: '#ff6b9d', r: 4 }}
-                            activeDot={{ r: 6 }}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium">Tipo de Interação</label>
+                      <Select
+                        value={timelineType}
+                        onValueChange={(value) => {
+                          setTimelineType(value);
+                          setTimelineItem("all");
+                        }}
+                        data-testid="select-timeline-type"
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os tipos</SelectItem>
+                          <SelectItem value="coupon">Cupons</SelectItem>
+                          <SelectItem value="banner">Banners</SelectItem>
+                          <SelectItem value="social_network">Redes Sociais</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  ) : (
-                    <div className="h-[400px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
-                      <div className="text-center p-6">
-                        <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                        <p className="text-sm font-medium text-muted-foreground mb-1">Sem histórico de atividade</p>
-                        <p className="text-xs text-muted-foreground/70">A linha do tempo será construída com as interações</p>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium">Item Específico</label>
+                      <Select
+                        value={timelineItem}
+                        onValueChange={setTimelineItem}
+                        disabled={timelineType === "all"}
+                        data-testid="select-timeline-item"
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione o item" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos</SelectItem>
+                          {timelineData?.items
+                            .filter(item => timelineType === "all" || item.targetType === timelineType)
+                            .map(item => (
+                              <SelectItem key={item.targetId || item.targetName} value={item.targetId || item.targetName}>
+                                {item.targetName}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Gráfico de Distribuição por Horário */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Clock className="w-5 h-5 text-pink-500" />
+                      Distribuição por Horário
+                    </CardTitle>
+                    <CardDescription className="text-xs">Cliques por hora do dia</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    {timelineData?.hourlyDistribution && timelineData.hourlyDistribution.some(h => h.count > 0) ? (
+                      <div className="h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={timelineData.hourlyDistribution}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis dataKey="hour" tick={{ fontSize: 10 }} label={{ value: 'Hora', position: 'insideBottom', offset: -5, fontSize: 11 }} />
+                            <YAxis tick={{ fontSize: 10 }} />
+                            <Tooltip contentStyle={{ fontSize: 12 }} />
+                            <Bar dataKey="count" fill="#ff6b9d" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+                        <div className="text-center p-6">
+                          <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Sem dados</p>
+                          <p className="text-xs text-muted-foreground/70">Selecione filtros para visualizar</p>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Calendar className="w-5 h-5 text-purple-500" />
+                      Distribuição por Dia
+                    </CardTitle>
+                    <CardDescription className="text-xs">Cliques ao longo dos dias</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    {timelineData?.dailyDistribution && timelineData.dailyDistribution.length > 0 ? (
+                      <div className="h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={timelineData.dailyDistribution.map(item => ({
+                            ...item,
+                            displayDate: format(parseISO(item.date), "dd/MM", { locale: ptBR })
+                          }))}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis dataKey="displayDate" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
+                            <YAxis tick={{ fontSize: 10 }} />
+                            <Tooltip contentStyle={{ fontSize: 12 }} />
+                            <Line 
+                              type="monotone" 
+                              dataKey="count" 
+                              stroke="#c084fc" 
+                              strokeWidth={2} 
+                              dot={{ fill: '#c084fc', r: 3 }}
+                              activeDot={{ r: 5 }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+                        <div className="text-center p-6">
+                          <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Sem dados</p>
+                          <p className="text-xs text-muted-foreground/70">Selecione filtros para visualizar</p>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Tabela Detalhada de Cliques */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Activity className="w-5 h-5 text-blue-500" />
+                    Cliques Detalhados
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Histórico completo com data, hora e localização ({timelineData?.clicks.length || 0} registros)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                    <Table>
+                      <TableHeader className="sticky top-0 bg-background z-10">
+                        <TableRow>
+                          <TableHead className="text-xs">Item</TableHead>
+                          <TableHead className="text-xs">Tipo</TableHead>
+                          <TableHead className="text-xs">Data</TableHead>
+                          <TableHead className="text-xs">Hora</TableHead>
+                          <TableHead className="text-xs">Cidade</TableHead>
+                          <TableHead className="text-xs">Estado</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {timelineData?.clicks && timelineData.clicks.length > 0 ? (
+                          timelineData.clicks.map((click) => (
+                            <TableRow key={click.id} data-testid={`row-click-${click.id}`}>
+                              <TableCell className="font-medium text-xs max-w-[150px] truncate" data-testid={`text-item-${click.id}`}>
+                                {click.targetName}
+                              </TableCell>
+                              <TableCell className="text-xs" data-testid={`text-type-${click.id}`}>
+                                <Badge variant="outline" className="text-xs">
+                                  {click.targetType === 'coupon' ? 'Cupom' : 
+                                   click.targetType === 'banner' ? 'Banner' : 
+                                   click.targetType === 'social_network' ? 'Rede Social' : click.targetType}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-xs" data-testid={`text-date-${click.id}`}>
+                                {format(parseISO(click.date), "dd/MM/yyyy", { locale: ptBR })}
+                              </TableCell>
+                              <TableCell className="text-xs font-mono" data-testid={`text-time-${click.id}`}>
+                                {click.time}
+                              </TableCell>
+                              <TableCell className="text-xs" data-testid={`text-city-${click.id}`}>
+                                {click.city || <span className="text-muted-foreground">-</span>}
+                              </TableCell>
+                              <TableCell className="text-xs" data-testid={`text-state-${click.id}`}>
+                                {click.state || <span className="text-muted-foreground">-</span>}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={6} className="h-32 text-center">
+                              <div className="flex flex-col items-center justify-center py-8">
+                                <Activity className="w-12 h-12 text-muted-foreground opacity-50 mb-3" />
+                                <p className="text-sm font-medium text-muted-foreground mb-1">Nenhum clique registrado</p>
+                                <p className="text-xs text-muted-foreground/70">Selecione filtros ou aguarde interações</p>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

@@ -4023,6 +4023,29 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Get timeline detailed data (admin only)
+  app.get("/api/analytics/timeline", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { startDate, endDate, targetType, targetId } = req.query;
+
+      const timeline = await storage.getTimelineData(
+        startDate ? new Date(startDate as string) : undefined,
+        endDate ? new Date(endDate as string) : undefined,
+        targetType as string | undefined,
+        targetId as string | undefined
+      );
+
+      res.json(timeline);
+    } catch (error) {
+      console.error('Error getting timeline data:', error);
+      res.status(500).json({ message: "Failed to get timeline data" });
+    }
+  });
+
   // Get bio clicks (admin only)
   app.get("/api/analytics/clicks", async (req, res) => {
     try {
