@@ -634,15 +634,26 @@ export class DatabaseStorage implements IStorage {
     const coupon = await this.getCoupon(id);
     if (!coupon) return;
 
-    // PRIMEIRO: Deletar registros de analytics relacionados
+    // PRIMEIRO: Buscar todos os analytics_targets relacionados ao cupom
+    const relatedTargets = await this.db
+      .select()
+      .from(analyticsTargets)
+      .where(eq(analyticsTargets.couponId, id));
+
+    // SEGUNDO: Para cada target, deletar os bio_clicks relacionados
+    for (const target of relatedTargets) {
+      await this.db.delete(bioClicks).where(eq(bioClicks.analyticsTargetId, target.id));
+    }
+
+    // TERCEIRO: Deletar os analytics_targets relacionados ao cupom
     await this.db.delete(analyticsTargets).where(eq(analyticsTargets.couponId, id));
 
-    // SEGUNDO: Reordenar os cupons antes de deletar
+    // QUARTO: Reordenar os cupons antes de deletar
     if (coupon.order >= 0) {
       await this.reorderCouponsAfterDeletion(coupon.order);
     }
 
-    // TERCEIRO: Deletar o cupom
+    // QUINTO: Deletar o cupom
     await this.db.delete(coupons).where(eq(coupons.id, id));
   }
 
