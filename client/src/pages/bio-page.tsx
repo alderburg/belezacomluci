@@ -697,71 +697,73 @@ export default function BioPage() {
                         {coupons.map((coupon) => (
                           <div
                             key={coupon.id}
-                            onClick={async (e) => {
+                            onClick={(e) => {
                               e.preventDefault();
 
-                              // Rastrear clique no cupom
-                              await trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, coupon.storeUrl || null);
-
-                              try {
-                                const codigo = coupon.code || '';
-
-                                // Tentar copiar o código - com fallback para iOS
-                                if (codigo && codigo.trim() !== '') {
-                                  try {
-                                    // Método moderno - funciona na maioria dos navegadores
-                                    await navigator.clipboard.writeText(codigo);
-                                  } catch (clipboardError) {
-                                    // Fallback para iOS e navegadores que bloqueiam clipboard
-                                    try {
-                                      const textArea = document.createElement('textarea');
-                                      textArea.value = codigo;
-                                      textArea.style.position = 'fixed';
-                                      textArea.style.top = '0';
-                                      textArea.style.left = '0';
-                                      textArea.style.opacity = '0';
-                                      document.body.appendChild(textArea);
-                                      textArea.focus();
-                                      textArea.select();
-                                      document.execCommand('copy');
-                                      document.body.removeChild(textArea);
-                                    } catch (fallbackError) {
-                                      console.warn('Não foi possível copiar automaticamente:', fallbackError);
-                                    }
-                                  }
-
-                                  toast({
-                                    title: `Cupom ${codigo} copiado! 🎉`,
-                                    description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
-                                    duration: 2000,
-                                  });
-                                } else {
-                                  toast({
-                                    title: "Cupom selecionado! 🎉",
-                                    description: `Abrindo ${coupon.brand || 'loja'} em instantes...`,
-                                    duration: 2000,
-                                  });
+                              // IMPORTANTE: Abrir a janela PRIMEIRO para funcionar no iOS
+                              // window.open() precisa ser chamado DIRETAMENTE no evento de clique
+                              let novaJanela: Window | null = null;
+                              if (coupon.storeUrl) {
+                                let url = coupon.storeUrl.trim();
+                                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                                  url = 'https://' + url;
                                 }
-
-                                if (coupon.storeUrl) {
-                                  let url = coupon.storeUrl.trim();
-
-                                  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                                    url = 'https://' + url;
-                                  }
-
-                                  setTimeout(() => {
-                                    window.open(url, '_blank', 'noopener,noreferrer');
-                                  }, 2000);
-                                }
-                              } catch (error) {
-                                console.error('Erro ao processar cupom:', error);
-                                toast({
-                                  title: "Erro ao processar cupom",
-                                  description: "Tente novamente",
-                                  variant: "destructive",
-                                });
+                                novaJanela = window.open(url, '_blank', 'noopener,noreferrer');
                               }
+
+                              // Depois fazer as operações assíncronas
+                              (async () => {
+                                // Rastrear clique no cupom
+                                await trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, coupon.storeUrl || null);
+
+                                try {
+                                  const codigo = coupon.code || '';
+
+                                  // Tentar copiar o código - com fallback para iOS
+                                  if (codigo && codigo.trim() !== '') {
+                                    try {
+                                      // Método moderno - funciona na maioria dos navegadores
+                                      await navigator.clipboard.writeText(codigo);
+                                    } catch (clipboardError) {
+                                      // Fallback para iOS e navegadores que bloqueiam clipboard
+                                      try {
+                                        const textArea = document.createElement('textarea');
+                                        textArea.value = codigo;
+                                        textArea.style.position = 'fixed';
+                                        textArea.style.top = '0';
+                                        textArea.style.left = '0';
+                                        textArea.style.opacity = '0';
+                                        document.body.appendChild(textArea);
+                                        textArea.focus();
+                                        textArea.select();
+                                        document.execCommand('copy');
+                                        document.body.removeChild(textArea);
+                                      } catch (fallbackError) {
+                                        console.warn('Não foi possível copiar automaticamente:', fallbackError);
+                                      }
+                                    }
+
+                                    toast({
+                                      title: `Cupom ${codigo} copiado! 🎉`,
+                                      description: `Redirecionando para ${coupon.brand || 'loja'}...`,
+                                      duration: 2000,
+                                    });
+                                  } else {
+                                    toast({
+                                      title: "Cupom selecionado! 🎉",
+                                      description: `Redirecionando para ${coupon.brand || 'loja'}...`,
+                                      duration: 2000,
+                                    });
+                                  }
+                                } catch (error) {
+                                  console.error('Erro ao processar cupom:', error);
+                                  toast({
+                                    title: "Erro ao processar cupom",
+                                    description: "Tente novamente",
+                                    variant: "destructive",
+                                  });
+                                }
+                              })();
                             }}
                             className="relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
                             data-testid={`coupon-${coupon.id}`}
