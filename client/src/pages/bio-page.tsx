@@ -23,7 +23,7 @@ export default function BioPage() {
 
   const [isSocialMenuOpen, setIsSocialMenuOpen] = useState(false);
   const [isCouponsModalOpen, setIsCouponsModalOpen] = useState(false);
-  
+
   // Estado para geolocalização e session tracking
   const [geoData, setGeoData] = useState<{city?: string, state?: string, country?: string} | null>(null);
   const sessionId = useRef<string>('');
@@ -62,7 +62,7 @@ export default function BioPage() {
   useEffect(() => {
     if (!pageViewTracked.current && geoData !== null && sessionId.current) {
       pageViewTracked.current = true;
-      
+
       async function trackPageView() {
         try {
           await apiRequest('POST', '/api/analytics/pageview', {
@@ -79,7 +79,7 @@ export default function BioPage() {
           console.error('Erro ao rastrear pageview:', error);
         }
       }
-      
+
       trackPageView();
     }
   }, [geoData]);
@@ -526,12 +526,12 @@ export default function BioPage() {
               <div className="flex justify-center gap-4 mt-3 mb-0 flex-wrap">
                 {adminProfile.socialNetworks.filter(social => social && social.type).map((social, index) => {
                   const socialData = getSocialData(social.type);
-                  
+
                   // Formatar URL do email como mailto:
                   const linkUrl = social.type?.toLowerCase() === 'email' 
                     ? `mailto:${social.url}` 
                     : social.url;
-                  
+
                   return (
                     <a
                       key={index}
@@ -712,29 +712,29 @@ export default function BioPage() {
                                         await navigator.clipboard.writeText(text);
                                         return true;
                                       }
-                                      
+
                                       // Método 2: Fallback usando textarea (compatível com iOS Safari)
                                       const textArea = document.createElement('textarea');
                                       textArea.value = text;
-                                      
+
                                       // Configurar textarea para ser invisível mas acessível
                                       textArea.style.position = 'fixed';
                                       textArea.style.top = '0';
                                       textArea.style.left = '-9999px';
                                       textArea.style.opacity = '0';
                                       textArea.setAttribute('readonly', '');
-                                      
+
                                       document.body.appendChild(textArea);
-                                      
+
                                       // iOS/Safari precisa de foco e seleção explícitos
                                       textArea.focus();
                                       textArea.select();
                                       textArea.setSelectionRange(0, text.length);
-                                      
+
                                       // Executar comando de cópia
                                       const successful = document.execCommand('copy');
                                       document.body.removeChild(textArea);
-                                      
+
                                       return successful;
                                     } catch (error) {
                                       console.error('Erro ao copiar:', error);
@@ -752,34 +752,25 @@ export default function BioPage() {
                                   }
 
                                   // Copiar código do cupom (se existir)
-                                  let copiado = false;
                                   if (codigo && codigo.trim() !== '') {
-                                    copiado = await copyToClipboard(codigo);
-                                  }
-
-                                  // Mostrar notificação
-                                  if (codigo && codigo.trim() !== '') {
-                                    toast({
-                                      title: copiado ? `Cupom ${codigo} copiado! 🎉` : `Cupom: ${codigo}`,
-                                      description: `Redirecionando para ${coupon.brand || 'loja'}...`,
-                                      duration: 3000,
-                                    });
-                                  } else {
-                                    toast({
-                                      title: "Cupom selecionado! 🎉",
-                                      description: `Redirecionando para ${coupon.brand || 'loja'}...`,
-                                      duration: 3000,
-                                    });
+                                    await copyToClipboard(codigo);
                                   }
 
                                   // Rastrear clique no cupom (sem await para não atrasar)
                                   trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, redirectUrl || null);
 
-                                  // Redirecionar após delay - usar window.location.href para compatibilidade com Safari
+                                  // Mostrar notificação ANTES do redirecionamento
+                                  toast({
+                                    title: "Cupom ativado! 🎉",
+                                    description: `Abrindo ${coupon.brand || 'loja'} em 3 segundos...`,
+                                    duration: 4000,
+                                  });
+
+                                  // Aguardar 3 segundos antes de redirecionar
                                   if (redirectUrl) {
                                     setTimeout(() => {
                                       window.location.href = redirectUrl;
-                                    }, 2000);
+                                    }, 3000);
                                   }
                                 } catch (error) {
                                   console.error('Erro ao processar cupom:', error);
