@@ -310,57 +310,158 @@ export default function AdminAnalyticsPage() {
                 </Card>
               </div>
 
-              {/* Detailed Table */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Detalhamento de Cliques</CardTitle>
-                  <CardDescription className="text-xs">Lista completa de itens rastreados ({stats?.topClickedItems?.length || 0} itens)</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-                    <Table>
-                      <TableHeader className="sticky top-0 bg-background z-10">
-                        <TableRow>
-                          <TableHead className="text-xs">Item</TableHead>
-                          <TableHead className="text-xs">Tipo</TableHead>
-                          <TableHead className="text-right text-xs">Cliques</TableHead>
-                          <TableHead className="text-right text-xs">% do Total</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {stats?.topClickedItems && stats.topClickedItems.length > 0 ? (
-                          stats.topClickedItems.map((item, index) => (
-                            <TableRow key={index}>
-                              <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="text-xs">
-                                  {item.targetType === 'social_network' ? 'Redes Sociais' : item.targetType}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-right text-xs">{item.count.toLocaleString()}</TableCell>
-                              <TableCell className="text-right text-xs font-medium">
-                                {stats.totalClicks > 0 ? ((item.count / stats.totalClicks) * 100).toFixed(1) : 0}%
+              {/* Detailed Tables by Category */}
+              <div className="space-y-4">
+                {/* Cupons */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Tag className="w-5 h-5 text-pink-500" />
+                      Cupons
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Cliques em cupons ({stats?.topClickedItems?.filter(item => item.targetType === 'coupon').length || 0} itens)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-background z-10">
+                          <TableRow>
+                            <TableHead className="text-xs">Cupom</TableHead>
+                            <TableHead className="text-right text-xs">Cliques</TableHead>
+                            <TableHead className="text-right text-xs">% do Total</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'coupon').length > 0 ? (
+                            stats.topClickedItems
+                              .filter(item => item.targetType === 'coupon')
+                              .map((item, index) => (
+                                <TableRow key={index}>
+                                  <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
+                                  <TableCell className="text-right text-xs">{item.count.toLocaleString()}</TableCell>
+                                  <TableCell className="text-right text-xs font-medium">
+                                    {stats.totalClicks > 0 ? ((item.count / stats.totalClicks) * 100).toFixed(1) : 0}%
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={3} className="h-24 text-center">
+                                <div className="flex flex-col items-center justify-center py-6">
+                                  <Tag className="w-8 h-8 text-muted-foreground opacity-50 mb-2" />
+                                  <p className="text-xs text-muted-foreground">Nenhum clique em cupons</p>
+                                </div>
                               </TableCell>
                             </TableRow>
-                          ))
-                        ) : (
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Banners */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Image className="w-5 h-5 text-purple-500" />
+                      Banners
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Cliques em banners ({stats?.topClickedItems?.filter(item => item.targetType === 'banner').length || 0} itens)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-background z-10">
                           <TableRow>
-                            <TableCell colSpan={4} className="h-32 text-center">
-                              <div className="flex flex-col items-center justify-center py-8">
-                                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
-                                  <MousePointerClick className="w-6 h-6 text-muted-foreground opacity-50" />
-                                </div>
-                                <p className="text-sm font-medium text-muted-foreground">Nenhum dado disponível</p>
-                                <p className="text-xs text-muted-foreground/70 mt-1">Aguardando primeiras interações</p>
-                              </div>
-                            </TableCell>
+                            <TableHead className="text-xs">Banner</TableHead>
+                            <TableHead className="text-right text-xs">Cliques</TableHead>
+                            <TableHead className="text-right text-xs">% do Total</TableHead>
                           </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
+                        </TableHeader>
+                        <TableBody>
+                          {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'banner').length > 0 ? (
+                            stats.topClickedItems
+                              .filter(item => item.targetType === 'banner')
+                              .map((item, index) => (
+                                <TableRow key={index}>
+                                  <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
+                                  <TableCell className="text-right text-xs">{item.count.toLocaleString()}</TableCell>
+                                  <TableCell className="text-right text-xs font-medium">
+                                    {stats.totalClicks > 0 ? ((item.count / stats.totalClicks) * 100).toFixed(1) : 0}%
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={3} className="h-24 text-center">
+                                <div className="flex flex-col items-center justify-center py-6">
+                                  <Image className="w-8 h-8 text-muted-foreground opacity-50 mb-2" />
+                                  <p className="text-xs text-muted-foreground">Nenhum clique em banners</p>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Redes Sociais */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Users className="w-5 h-5 text-blue-500" />
+                      Redes Sociais
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Cliques em redes sociais ({stats?.topClickedItems?.filter(item => item.targetType === 'social_network').length || 0} itens)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-background z-10">
+                          <TableRow>
+                            <TableHead className="text-xs">Rede Social</TableHead>
+                            <TableHead className="text-right text-xs">Cliques</TableHead>
+                            <TableHead className="text-right text-xs">% do Total</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'social_network').length > 0 ? (
+                            stats.topClickedItems
+                              .filter(item => item.targetType === 'social_network')
+                              .map((item, index) => (
+                                <TableRow key={index}>
+                                  <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
+                                  <TableCell className="text-right text-xs">{item.count.toLocaleString()}</TableCell>
+                                  <TableCell className="text-right text-xs font-medium">
+                                    {stats.totalClicks > 0 ? ((item.count / stats.totalClicks) * 100).toFixed(1) : 0}%
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={3} className="h-24 text-center">
+                                <div className="flex flex-col items-center justify-center py-6">
+                                  <Users className="w-8 h-8 text-muted-foreground opacity-50 mb-2" />
+                                  <p className="text-xs text-muted-foreground">Nenhum clique em redes sociais</p>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             {/* Engagement Tab */}
