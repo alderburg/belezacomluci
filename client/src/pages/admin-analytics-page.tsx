@@ -25,7 +25,7 @@ interface AnalyticsStats {
   uniqueVisitors: number;
   totalClicks: number;
   clicksByType: { type: string; count: number }[];
-  topClickedItems: { targetName: string; targetType: string; targetOrder: number; count: number }[];
+  topClickedItems: { targetName: string; targetType: string; count: number }[];
   clicksOverTime: { date: string; count: number }[];
   topCities: { city: string; state: string; count: number }[];
   topStates: { state: string; count: number }[];
@@ -341,14 +341,6 @@ export default function AdminAnalyticsPage() {
                           {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'coupon').length > 0 ? (
                             stats.topClickedItems
                               .filter(item => item.targetType === 'coupon')
-                              .sort((a, b) => {
-                                // Primeiro ordena por cliques (decrescente)
-                                if (b.count !== a.count) {
-                                  return b.count - a.count;
-                                }
-                                // Em caso de empate, ordena por targetOrder (crescente)
-                                return (a.targetOrder || 0) - (b.targetOrder || 0);
-                              })
                               .map((item, index) => (
                                 <TableRow key={index}>
                                   <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
@@ -399,14 +391,6 @@ export default function AdminAnalyticsPage() {
                           {stats?.topClickedItems && stats.topClickedItems.filter(item => item.targetType === 'banner').length > 0 ? (
                             stats.topClickedItems
                               .filter(item => item.targetType === 'banner')
-                              .sort((a, b) => {
-                                // Primeiro ordena por cliques (decrescente)
-                                if (b.count !== a.count) {
-                                  return b.count - a.count;
-                                }
-                                // Em caso de empate, ordena por targetOrder (crescente)
-                                return (a.targetOrder || 0) - (b.targetOrder || 0);
-                              })
                               .map((item, index) => (
                                 <TableRow key={index}>
                                   <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>

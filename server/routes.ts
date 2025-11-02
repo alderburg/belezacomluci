@@ -10,13 +10,13 @@ import {
   insertRaffleSchema, insertRewardSchema, shareSettings, referrals,
   insertNotificationSchema, insertUserNotificationSchema, notifications, userNotifications,
   insertPopupSchema, insertPopupViewSchema, insertCategorySchema,
-  insertUserSchema, coupons, categories, commentLikes, commentReplies, bioClicks, analyticsTargets
+  insertUserSchema, coupons, categories, commentLikes, commentReplies
 } from "../shared/schema";
 import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
 import { youtubeOAuth } from './youtube-oauth';
 import { db } from './db';
-import { eq, desc, and, or, isNull, lte, gte, sql, asc } from 'drizzle-orm';
+import { eq, desc, and, or, isNull, lte, gte, sql } from 'drizzle-orm';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -157,9 +157,9 @@ export function registerRoutes(app: Express): Server {
         });
 
         // Notificar analytics quando redes sociais mudarem (community settings incluem redes sociais)
-        wsService.broadcastDataUpdate('analytics', 'updated', {
-          type: 'social_network',
-          source: 'community_settings'
+        wsService.broadcastDataUpdate('analytics', 'updated', { 
+          type: 'social_network', 
+          source: 'community_settings' 
         });
       }
 
@@ -750,10 +750,10 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         wsService.broadcastDataUpdate('coupons', 'updated', coupon);
         // Notificar também analytics para atualização em tempo real
-        wsService.broadcastDataUpdate('analytics', 'updated', {
-          type: 'coupon',
+        wsService.broadcastDataUpdate('analytics', 'updated', { 
+          type: 'coupon', 
           id: req.params.id,
-          name: coupon.brand
+          name: coupon.brand 
         });
       }
 
@@ -1028,10 +1028,10 @@ export function registerRoutes(app: Express): Server {
       if (wsService) {
         wsService.broadcastDataUpdate('banners', 'updated', banner);
         // Notificar também analytics para atualização em tempo real
-        wsService.broadcastDataUpdate('analytics', 'updated', {
-          type: 'banner',
+        wsService.broadcastDataUpdate('analytics', 'updated', { 
+          type: 'banner', 
           id: id,
-          name: banner.title
+          name: banner.title 
         });
       }
 
@@ -3948,7 +3948,7 @@ export function registerRoutes(app: Express): Server {
       // Broadcast analytics update via WebSocket para todos os admins conectados
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('analytics', 'click', {
+        wsService.broadcastDataUpdate('analytics', 'click', { 
           targetType,
           targetName,
           timestamp: new Date().toISOString()
@@ -3980,24 +3980,7 @@ export function registerRoutes(app: Express): Server {
         endDate ? new Date(endDate as string) : undefined
       );
 
-      // Top clicked items com informações adicionais
-      const topClickedItems = await db
-        .select({
-          targetName: analyticsTargets.targetName,
-          targetType: analyticsTargets.targetType,
-          targetOrder: analyticsTargets.targetOrder,
-          count: sql<number>`cast(count(${bioClicks.id}) as int)`,
-        })
-        .from(bioClicks)
-        .innerJoin(analyticsTargets, eq(bioClicks.analyticsTargetId, analyticsTargets.id))
-        .where(clickConditions.length > 0 ? and(...clickConditions) : undefined)
-        .groupBy(analyticsTargets.targetName, analyticsTargets.targetType, analyticsTargets.targetOrder)
-        .orderBy(
-          desc(sql`count(${bioClicks.id})`),
-          asc(analyticsTargets.targetOrder)
-        );
-
-      res.json({...stats, topClickedItems});
+      res.json(stats);
     } catch (error) {
       console.error('Error getting analytics stats:', error);
       res.status(500).json({ message: "Failed to get analytics stats" });
