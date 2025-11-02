@@ -702,35 +702,36 @@ export default function BioPage() {
 
                               (async () => {
                                 try {
-                                  // Rastrear clique no cupom
-                                  await trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, coupon.storeUrl || null);
-
                                   const codigo = coupon.code || '';
 
-                                  // Função para copiar texto no iOS/Safari
-                                  const copyToClipboard = (text: string): boolean => {
+                                  // Função melhorada para copiar texto no iOS/Safari
+                                  const copyToClipboard = async (text: string): Promise<boolean> => {
                                     try {
-                                      // Método 1: Clipboard API (navegadores modernos)
+                                      // Método 1: Clipboard API moderna (funciona em HTTPS)
                                       if (navigator.clipboard && window.isSecureContext) {
-                                        navigator.clipboard.writeText(text);
+                                        await navigator.clipboard.writeText(text);
                                         return true;
                                       }
                                       
-                                      // Método 2: Fallback com textarea (funciona no iOS)
+                                      // Método 2: Fallback usando textarea (compatível com iOS Safari)
                                       const textArea = document.createElement('textarea');
                                       textArea.value = text;
+                                      
+                                      // Configurar textarea para ser invisível mas acessível
                                       textArea.style.position = 'fixed';
                                       textArea.style.top = '0';
                                       textArea.style.left = '-9999px';
                                       textArea.style.opacity = '0';
                                       textArea.setAttribute('readonly', '');
+                                      
                                       document.body.appendChild(textArea);
                                       
-                                      // iOS precisa de foco e seleção
+                                      // iOS/Safari precisa de foco e seleção explícitos
                                       textArea.focus();
                                       textArea.select();
                                       textArea.setSelectionRange(0, text.length);
                                       
+                                      // Executar comando de cópia
                                       const successful = document.execCommand('copy');
                                       document.body.removeChild(textArea);
                                       
@@ -741,40 +742,44 @@ export default function BioPage() {
                                     }
                                   };
 
-                                  // Copiar o código do cupom
-                                  if (codigo && codigo.trim() !== '') {
-                                    const copiado = copyToClipboard(codigo);
-                                    
-                                    if (copiado) {
-                                      toast({
-                                        title: `Cupom ${codigo} copiado! 🎉`,
-                                        description: `Redirecionando para ${coupon.brand || 'loja'}...`,
-                                        duration: 2500,
-                                      });
-                                    } else {
-                                      toast({
-                                        title: `Cupom: ${codigo}`,
-                                        description: `Redirecionando para ${coupon.brand || 'loja'}...`,
-                                        duration: 2500,
-                                      });
+                                  // Preparar URL do cupom ANTES de copiar (importante para Safari)
+                                  let redirectUrl = '';
+                                  if (coupon.storeUrl) {
+                                    redirectUrl = coupon.storeUrl.trim();
+                                    if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
+                                      redirectUrl = 'https://' + redirectUrl;
                                     }
+                                  }
+
+                                  // Copiar código do cupom (se existir)
+                                  let copiado = false;
+                                  if (codigo && codigo.trim() !== '') {
+                                    copiado = await copyToClipboard(codigo);
+                                  }
+
+                                  // Mostrar notificação
+                                  if (codigo && codigo.trim() !== '') {
+                                    toast({
+                                      title: copiado ? `Cupom ${codigo} copiado! 🎉` : `Cupom: ${codigo}`,
+                                      description: `Redirecionando para ${coupon.brand || 'loja'}...`,
+                                      duration: 3000,
+                                    });
                                   } else {
                                     toast({
                                       title: "Cupom selecionado! 🎉",
                                       description: `Redirecionando para ${coupon.brand || 'loja'}...`,
-                                      duration: 2500,
+                                      duration: 3000,
                                     });
                                   }
 
-                                  // Redirecionar imediatamente (window.open dentro do evento de clique evita bloqueio)
-                                  if (coupon.storeUrl) {
-                                    let url = coupon.storeUrl.trim();
-                                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                                      url = 'https://' + url;
-                                    }
-                                    
-                                    // Abrir imediatamente para evitar bloqueio de pop-up no Safari/iPhone
-                                    window.location.href = url;
+                                  // Rastrear clique no cupom (sem await para não atrasar)
+                                  trackClick('coupon', coupon.id, `${coupon.brand} - ${coupon.discount}`, redirectUrl || null);
+
+                                  // Redirecionar após delay - usar window.location.href para compatibilidade com Safari
+                                  if (redirectUrl) {
+                                    setTimeout(() => {
+                                      window.location.href = redirectUrl;
+                                    }, 2000);
                                   }
                                 } catch (error) {
                                   console.error('Erro ao processar cupom:', error);
