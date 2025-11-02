@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,18 +62,18 @@ export default function AdminAnalyticsPage() {
       if (dateRange.to) {
         params.append('endDate', dateRange.to.toISOString());
       }
-      
+
       const response = await fetch(`/api/analytics/stats?${params.toString()}`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch analytics stats');
       }
-      
+
       return response.json();
     },
     enabled: !!user?.isAdmin,
@@ -339,7 +338,7 @@ export default function AdminAnalyticsPage() {
                               .filter(item => item.targetType === 'coupon')
                               .map((item, index) => (
                                 <TableRow key={index}>
-                                  <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
+                                  <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName.split(' - ')[0]}</TableCell>
                                   <TableCell className="text-right text-xs">{item.count.toLocaleString()}</TableCell>
                                   <TableCell className="text-right text-xs font-medium">
                                     {stats.totalClicks > 0 ? ((item.count / stats.totalClicks) * 100).toFixed(1) : 0}%
