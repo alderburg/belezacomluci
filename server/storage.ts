@@ -2938,11 +2938,15 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
   }
 
   async updateAnalyticsTargetsByCoupon(couponId: string, brand: string, targetUrl?: string): Promise<void> {
+    // Buscar o cupom para garantir que temos a marca correta
+    const coupon = await this.getCoupon(couponId);
+    if (!coupon) return;
+
     await this.db
       .update(analyticsTargets)
       .set({
-        targetName: brand, // usar marca ao invés de código
-        targetUrl: targetUrl || null
+        targetName: brand || coupon.brand, // usar marca fornecida ou a do cupom
+        targetUrl: targetUrl !== undefined ? targetUrl : null
       })
       .where(eq(analyticsTargets.couponId, couponId));
   }

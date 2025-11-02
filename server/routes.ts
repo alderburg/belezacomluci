@@ -730,12 +730,12 @@ export function registerRoutes(app: Express): Server {
       // TERCEIRO: Atualizar o cupom na nova posição
       const coupon = await storage.updateCoupon(req.params.id, couponData);
 
-      // QUARTO: Atualizar analytics_targets se nome ou URL mudaram
-      if (couponData.code || couponData.brand || couponData.storeUrl !== undefined) {
+      // QUARTO: Atualizar analytics_targets se marca ou URL mudaram
+      if (couponData.brand || couponData.storeUrl !== undefined) {
         // Atualizar os analytics targets relacionados a este cupom
         await storage.updateAnalyticsTargetsByCoupon(
           req.params.id,
-          couponData.brand, // usar marca ao invés de código
+          couponData.brand || coupon.brand, // usar marca (atual ou existente)
           couponData.storeUrl !== undefined ? couponData.storeUrl : coupon.storeUrl
         );
       }
