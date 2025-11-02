@@ -240,7 +240,10 @@ export default function AdminAnalyticsPage() {
                         <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
                             <Pie
-                              data={stats.clicksByType}
+                              data={stats.clicksByType.map(item => ({
+                                ...item,
+                                type: item.type === 'social_network' ? 'Redes Sociais' : item.type
+                              }))}
                               dataKey="count"
                               nameKey="type"
                               cx="50%"
@@ -282,7 +285,10 @@ export default function AdminAnalyticsPage() {
                     {stats?.topClickedItems && stats.topClickedItems.length > 0 ? (
                       <div className="h-[250px]">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={stats.topClickedItems.slice(0, 10)} layout="vertical">
+                          <BarChart data={stats.topClickedItems.slice(0, 10).map(item => ({
+                            ...item,
+                            targetType: item.targetType === 'social_network' ? 'Redes Sociais' : item.targetType
+                          }))} layout="vertical">
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis type="number" tick={{ fontSize: 11 }} />
                             <YAxis dataKey="targetName" type="category" width={90} tick={{ fontSize: 10 }} />
@@ -323,11 +329,13 @@ export default function AdminAnalyticsPage() {
                       </TableHeader>
                       <TableBody>
                         {stats?.topClickedItems && stats.topClickedItems.length > 0 ? (
-                          stats.topClickedItems.slice(0, 15).map((item, index) => (
+                          stats.topClickedItems.map((item, index) => (
                             <TableRow key={index}>
                               <TableCell className="font-medium text-xs max-w-[200px] truncate">{item.targetName}</TableCell>
                               <TableCell>
-                                <Badge variant="outline" className="text-xs">{item.targetType}</Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {item.targetType === 'social_network' ? 'Redes Sociais' : item.targetType}
+                                </Badge>
                               </TableCell>
                               <TableCell className="text-right text-xs">{item.count.toLocaleString()}</TableCell>
                               <TableCell className="text-right text-xs font-medium">
