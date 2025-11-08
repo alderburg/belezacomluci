@@ -69,6 +69,7 @@ export default function AdminAnalyticsPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { isOpen } = useSidebar();
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [tempDateRange, setTempDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [timelineType, setTimelineType] = useState<string>("all");
   const [timelineItem, setTimelineItem] = useState<string>("all");
@@ -185,10 +186,21 @@ export default function AdminAnalyticsPage() {
     refetchOnWindowFocus: true,
   });
 
-  // Recarregar dados quando o calendário fechar
+  // Funções para gerenciar o calendário
+  const handleApplyDateRange = () => {
+    setDateRange(tempDateRange);
+    setIsCalendarOpen(false);
+  };
+
+  const handleClearDateRange = () => {
+    setTempDateRange({});
+    setDateRange({});
+    setIsCalendarOpen(false);
+  };
+
   const handleCalendarOpenChange = (open: boolean) => {
-    if (!open && isCalendarOpen) {
-      refetch();
+    if (open) {
+      setTempDateRange(dateRange);
     }
     setIsCalendarOpen(open);
   };
@@ -235,7 +247,7 @@ export default function AdminAnalyticsPage() {
             </div>
             <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpenChange}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="gap-2 text-xs sm:text-sm">
+                <Button variant="outline" className="gap-2 text-xs sm:text-sm" data-testid="button-date-picker">
                   <Calendar className="w-4 h-4" />
                   {dateRange.from ? (
                     dateRange.to ? (
@@ -251,20 +263,35 @@ export default function AdminAnalyticsPage() {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end" onInteractOutside={(e) => {
-                // Permitir fechar apenas clicando fora
-                handleCalendarOpenChange(false);
-              }}>
-                <CalendarComponent
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={(range) => {
-                    setDateRange(range || {});
-                    // Não fechar o modal ao selecionar
-                  }}
-                  numberOfMonths={2}
-                  locale={ptBR}
-                />
+              <PopoverContent className="w-auto p-0" align="end">
+                <div className="p-3">
+                  <CalendarComponent
+                    mode="range"
+                    selected={tempDateRange}
+                    onSelect={(range) => {
+                      setTempDateRange(range || {});
+                    }}
+                    numberOfMonths={2}
+                    locale={ptBR}
+                  />
+                  <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleClearDateRange}
+                      data-testid="button-clear-dates"
+                    >
+                      Limpar
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={handleApplyDateRange}
+                      data-testid="button-apply-dates"
+                    >
+                      Aplicar
+                    </Button>
+                  </div>
+                </div>
               </PopoverContent>
             </Popover>
           </div>
