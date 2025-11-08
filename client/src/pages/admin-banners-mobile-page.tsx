@@ -70,7 +70,40 @@ export default function AdminBannersMobilePage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest('DELETE', `/api/admin/banners/${id}`);
+      // Buscar o banner antes de excluir para reordenar os demais
+      const bannerToDeleteItem = banners?.find(b => b.id === id);
+      
+      // Excluir o banner
+      await apiRequest('DELETE', `/api/admin/banners/${id}`);
+
+      // Reordenar banners se necessário
+      if (bannerToDeleteItem && banners) {
+        const deletedOrder = bannerToDeleteItem.order ?? 0;
+        const updates: Promise<any>[] = [];
+
+        // Reordenar banners na mesma página/vídeo
+        banners.forEach(b => {
+          if (b.id !== id && b.page === bannerToDeleteItem.page) {
+            // Para vídeos específicos, verificar também o videoId
+            if (bannerToDeleteItem.page === 'video_specific' && b.videoId !== bannerToDeleteItem.videoId) {
+              return;
+            }
+            
+            // Decrementar ordem de todos os banners com ordem maior que o excluído
+            if (b.order !== null && b.order !== undefined && b.order > deletedOrder) {
+              updates.push(
+                apiRequest('PUT', `/api/banners/${b.id}`, {
+                  ...b,
+                  order: b.order - 1,
+                })
+              );
+            }
+          }
+        });
+
+        // Aguardar todas as atualizações
+        await Promise.all(updates);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/banners"] });

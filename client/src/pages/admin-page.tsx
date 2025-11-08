@@ -1109,7 +1109,60 @@ export default function AdminPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async ({ type, id }: { type: string; id: string }) => {
+      // Buscar o item antes de excluir para reordenar os demais
+      let itemToDelete: any = null;
+      
+      if (type === 'banners') {
+        itemToDelete = banners?.find(b => b.id === id);
+      } else if (type === 'categories') {
+        itemToDelete = categories?.find(c => c.id === id);
+      }
+
+      // Excluir o item
       await apiRequest("DELETE", `/api/${type}/${id}`);
+
+      // Reordenar itens se necessário
+      if (itemToDelete && (type === 'banners' || type === 'categories')) {
+        const deletedOrder = itemToDelete.order ?? 0;
+        const updates: Promise<any>[] = [];
+
+        if (type === 'banners' && banners) {
+          // Reordenar banners na mesma página/vídeo
+          banners.forEach(b => {
+            if (b.id !== id && b.page === itemToDelete.page) {
+              // Para vídeos específicos, verificar também o videoId
+              if (itemToDelete.page === 'video_specific' && b.videoId !== itemToDelete.videoId) {
+                return;
+              }
+              
+              // Decrementar ordem de todos os banners com ordem maior que o excluído
+              if (b.order !== null && b.order !== undefined && b.order > deletedOrder) {
+                updates.push(
+                  apiRequest('PUT', `/api/banners/${b.id}`, {
+                    ...b,
+                    order: b.order - 1,
+                  })
+                );
+              }
+            }
+          });
+        } else if (type === 'categories' && categories) {
+          // Reordenar categorias
+          categories.forEach(c => {
+            if (c.id !== id && c.order !== null && c.order !== undefined && c.order > deletedOrder) {
+              updates.push(
+                apiRequest('PUT', `/api/categories/${c.id}`, {
+                  ...c,
+                  order: c.order - 1,
+                })
+              );
+            }
+          });
+        }
+
+        // Aguardar todas as atualizações
+        await Promise.all(updates);
+      }
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [`/api/${variables.type}`] });

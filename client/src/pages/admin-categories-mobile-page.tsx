@@ -40,7 +40,32 @@ export default function AdminCategoriesMobilePage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest('DELETE', `/api/categories/${id}`);
+      // Buscar a categoria antes de excluir para reordenar as demais
+      const categoryToDeleteItem = categories?.find(c => c.id === id);
+      
+      // Excluir a categoria
+      await apiRequest('DELETE', `/api/categories/${id}`);
+
+      // Reordenar categorias se necessário
+      if (categoryToDeleteItem && categories) {
+        const deletedOrder = categoryToDeleteItem.order ?? 0;
+        const updates: Promise<any>[] = [];
+
+        // Decrementar ordem de todas as categorias com ordem maior que a excluída
+        categories.forEach(c => {
+          if (c.id !== id && c.order !== null && c.order !== undefined && c.order > deletedOrder) {
+            updates.push(
+              apiRequest('PUT', `/api/categories/${c.id}`, {
+                ...c,
+                order: c.order - 1,
+              })
+            );
+          }
+        });
+
+        // Aguardar todas as atualizações
+        await Promise.all(updates);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
