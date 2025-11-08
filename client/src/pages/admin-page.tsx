@@ -2578,7 +2578,7 @@ export default function AdminPage() {
 
                     {/* Banner Form */}
                     {activeTab === 'banners' && (
-                      <form onSubmit={bannerForm.handleSubmit((data) => createBannerMutation.mutate(data))} className="space-y-4">
+                      <form onSubmit={bannerForm.handleSubmit(handleBannerSubmit)} className="space-y-4">
                         <div>
                           <Label htmlFor="banner-title">Título <span className="text-destructive">*</span></Label>
                           <Input
