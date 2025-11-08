@@ -1046,6 +1046,8 @@ export function registerRoutes(app: Express): Server {
     try {
       const insertData = insertBannerSchema.parse({
         ...req.body,
+        videoId: req.body.videoId || null,
+        courseId: req.body.courseId || null,
         opensCouponsModal: req.body.opensCouponsModal ?? false,
         startDateTime: req.body.startDateTime ? new Date(req.body.startDateTime) : null,
         endDateTime: req.body.endDateTime ? new Date(req.body.endDateTime) : null,
@@ -1078,6 +1080,8 @@ export function registerRoutes(app: Express): Server {
       const { id } = req.params;
       const updateData = insertBannerSchema.parse({
         ...req.body,
+        videoId: req.body.videoId || null,
+        courseId: req.body.courseId || null,
         opensCouponsModal: req.body.opensCouponsModal ?? false,
         startDateTime: req.body.startDateTime ? new Date(req.body.startDateTime) : null,
         endDateTime: req.body.endDateTime ? new Date(req.body.endDateTime) : null,

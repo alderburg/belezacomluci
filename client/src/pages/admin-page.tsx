@@ -30,6 +30,7 @@ import { z } from "zod";
 import { useAdmin } from "@/contexts/admin-context";
 import { useEffect } from "react";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { ResourceSearchSelect } from "@/components/resource-search-select";
 
 const createVideoSchema = insertVideoSchema;
 const createProductSchema = insertProductSchema;
@@ -2861,30 +2862,28 @@ export default function AdminPage() {
                           </div>
                         </div>
 
-                        {/* Campo para ID do vídeo específico */}
+                        {/* Campo para selecionar vídeo específico */}
                         {bannerForm.watch("page") === "video_specific" && (
-                          <div>
-                            <Label htmlFor="banner-video-id">ID do Vídeo</Label>
-                            <Input
-                              id="banner-video-id"
-                              {...bannerForm.register("videoId")}
-                              placeholder="Cole o ID do vídeo aqui..."
-                              data-testid="input-banner-video-id"
-                            />
-                          </div>
+                          <ResourceSearchSelect
+                            type="video"
+                            value={bannerForm.watch("videoId")}
+                            onChange={(id) => bannerForm.setValue("videoId", id)}
+                            label="Vídeo"
+                            placeholder="Busque e selecione um vídeo"
+                            required
+                          />
                         )}
 
-                        {/* Campo para ID do curso específico */}
+                        {/* Campo para selecionar curso específico */}
                         {bannerForm.watch("page") === "course_specific" && (
-                          <div>
-                            <Label htmlFor="banner-course-id">ID do Curso</Label>
-                            <Input
-                              id="banner-course-id"
-                              {...bannerForm.register("courseId")}
-                              placeholder="Cole o ID do curso aqui..."
-                              data-testid="input-banner-course-id"
-                            />
-                          </div>
+                          <ResourceSearchSelect
+                            type="course"
+                            value={bannerForm.watch("courseId")}
+                            onChange={(id) => bannerForm.setValue("courseId", id)}
+                            label="Curso"
+                            placeholder="Busque e selecione um curso"
+                            required
+                          />
                         )}
 
                         {/* Campos de Data e Hora para Programação */}

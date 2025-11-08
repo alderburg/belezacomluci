@@ -47,11 +47,16 @@ export function ResourceSearchSelect({
     enabled: type === 'video',
   });
 
-  // Buscar produtos (cursos)
-  const { data: products } = useQuery<Product[]>({
+  // Buscar produtos (cursos) - apenas course_video e course_playlist
+  const { data: allProducts } = useQuery<Product[]>({
     queryKey: ['/api/products'],
     enabled: type === 'course',
   });
+
+  // Filtrar apenas cursos de vídeo único e playlist
+  const products = allProducts?.filter(p => 
+    p.type === 'course_video' || p.type === 'course_playlist'
+  );
 
   const items = type === 'video' ? videos : products;
   const selectedItem = items?.find(item => item.id === value);
