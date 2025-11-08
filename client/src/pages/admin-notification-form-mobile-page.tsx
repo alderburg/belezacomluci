@@ -31,8 +31,12 @@ export default function AdminNotificationFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/notifications-mobile/edit/:id");
-  const notificationId = match && params && params.id ? String(params.id) : undefined;
+  const notificationId = match ? params?.id : undefined;
   const isEditing = Boolean(match && notificationId);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -41,14 +45,21 @@ export default function AdminNotificationFormMobilePage() {
   const { data: notification, isLoading, error } = useQuery<Notification>({
     queryKey: ['/api/admin/notifications', notificationId],
     queryFn: async () => {
-      if (!notificationId) throw new Error('ID não fornecido');
-      console.log('Buscando notificação para edição:', notificationId);
+      if (!notificationId) {
+        console.error('Tentativa de carregar notificação sem ID');
+        throw new Error('ID da notificação não fornecido');
+      }
+      console.log('Buscando notificação para edição, ID:', notificationId);
       const res = await fetch(`/api/admin/notifications/${notificationId}`, {
         credentials: 'include',
       });
-      if (!res.ok) throw new Error('Erro ao carregar notificação');
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`Erro ao carregar notificação (${res.status}):`, errorText);
+        throw new Error(`Erro ao carregar notificação: ${res.status} ${errorText}`);
+      }
       const data = await res.json();
-      console.log('Notificação carregada:', data);
+      console.log('Notificação carregada com sucesso:', data);
       return data;
     },
     enabled: Boolean(isEditing && notificationId),
