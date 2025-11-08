@@ -105,7 +105,7 @@ export default function AdminAnalyticsPage() {
     return <Redirect to="/" />;
   }
 
-  const { data: stats, isLoading, refetch } = useQuery<AnalyticsStats>({
+  const { data: stats, isLoading, isFetching } = useQuery<AnalyticsStats>({
     queryKey: ["/api/analytics/stats", dateRange],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -139,8 +139,9 @@ export default function AdminAnalyticsPage() {
       return data;
     },
     enabled: !!user?.isAdmin,
-    refetchInterval: 5000, // Refetch a cada 5 segundos para dados mais em tempo real
+    refetchInterval: 5000,
     refetchOnWindowFocus: true,
+    keepPreviousData: true,
   });
 
   const { data: timelineData, isLoading: timelineLoading } = useQuery<TimelineData>({
