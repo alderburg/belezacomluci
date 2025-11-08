@@ -2598,7 +2598,7 @@ export function registerRoutes(app: Express): Server {
   // Get single notification by ID
   app.get("/api/notifications/:id", async (req, res) => {
     try {
-      const notification = await storage.getNotification(req.params.id);
+      const notification = await storage.getNotificationById(req.params.id);
       if (!notification) {
         return res.status(404).json({ message: "Notification not found" });
       }
@@ -2615,7 +2615,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const notification = await storage.getNotification(req.params.id);
+      const notification = await storage.getNotificationById(req.params.id);
       if (!notification) {
         return res.status(404).json({ message: "Notification not found" });
       }
