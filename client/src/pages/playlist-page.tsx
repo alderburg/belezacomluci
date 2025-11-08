@@ -955,15 +955,15 @@ export default function PlaylistPage() {
           />
         )}
         <div className="container mx-auto px-6 py-8">
-          {/* Banner carousel for course-specific banners OR video-specific banners */}
+          {/* Banner carousel for course-specific banners */}
           {product && (
             <div className="mb-6">
               <BannerCarousel page="course_specific" courseId={resourceId} />
             </div>
           )}
           
-          {/* Banner carousel for video-specific playlists */}
-          {video && currentVideoId && (
+          {/* Banner carousel for video-specific (both single videos and playlists) */}
+          {currentVideoId && (
             <div className="mb-6">
               <BannerCarousel page="video_specific" videoId={currentVideoId} />
             </div>
