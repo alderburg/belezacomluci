@@ -962,10 +962,10 @@ export default function PlaylistPage() {
             </div>
           )}
           
-          {/* Banner carousel for video-specific (both single videos and playlists) */}
-          {currentVideoId && (
+          {/* Banner carousel for video-specific playlists - usar resourceId da playlist */}
+          {video && resourceId && (
             <div className="mb-6">
-              <BannerCarousel page="video_specific" videoId={currentVideoId} />
+              <BannerCarousel page="video_specific" videoId={resourceId} />
             </div>
           )}
           
