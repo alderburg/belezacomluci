@@ -95,12 +95,16 @@ export function ResourceSearchSelect({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setIsOpen(true);
+    const value = e.target.value;
+    setSearchTerm(value);
+    setIsOpen(value.trim().length > 0);
   };
 
   const handleInputFocus = () => {
-    setIsOpen(true);
+    // Só abre se já houver texto digitado
+    if (searchTerm.trim().length > 0) {
+      setIsOpen(true);
+    }
   };
 
   return (
@@ -185,11 +189,11 @@ export function ResourceSearchSelect({
           />
           
           {/* Dropdown de resultados */}
-          {isOpen && (
+          {isOpen && searchTerm.trim().length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg max-h-[400px] overflow-y-auto z-50">
               {filteredItems.length === 0 ? (
                 <div className="p-8 text-center text-sm text-muted-foreground">
-                  {searchTerm ? `Nenhum ${type === 'video' ? 'vídeo' : 'curso'} encontrado.` : `Digite para buscar ${type === 'video' ? 'vídeos' : 'cursos'}...`}
+                  Nenhum {type === 'video' ? 'vídeo' : 'curso'} encontrado para "{searchTerm}".
                 </div>
               ) : (
                 <div className="divide-y divide-border">
