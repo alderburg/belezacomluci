@@ -625,8 +625,10 @@ export default function AdminPage() {
         return true;
       });
       
-      const maxOrder = filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0);
-      bannerForm.setValue("order", maxOrder + 1);
+      const maxOrder = filteredBanners.length > 0 
+        ? filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0) + 1
+        : 0;
+      bannerForm.setValue("order", maxOrder);
     }
 
     const subscription = bannerForm.watch((value, { name }) => {
@@ -640,8 +642,10 @@ export default function AdminPage() {
           return true;
         });
         
-        const maxOrder = filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0);
-        bannerForm.setValue("order", maxOrder + 1);
+        const maxOrder = filteredBanners.length > 0 
+          ? filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0) + 1
+          : 0;
+        bannerForm.setValue("order", maxOrder);
       }
     });
     return () => subscription.unsubscribe();

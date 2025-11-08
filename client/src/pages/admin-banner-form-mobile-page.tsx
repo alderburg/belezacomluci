@@ -122,8 +122,10 @@ export default function AdminBannerFormMobilePage() {
         return true;
       });
       
-      const maxOrder = filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0);
-      form.setValue("order", maxOrder + 1);
+      const maxOrder = filteredBanners.length > 0 
+        ? filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0) + 1
+        : 0;
+      form.setValue("order", maxOrder);
     }
 
     const subscription = form.watch((value, { name }) => {
@@ -137,8 +139,10 @@ export default function AdminBannerFormMobilePage() {
           return true;
         });
         
-        const maxOrder = filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0);
-        form.setValue("order", maxOrder + 1);
+        const maxOrder = filteredBanners.length > 0 
+          ? filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0) + 1
+          : 0;
+        form.setValue("order", maxOrder);
       }
     });
     return () => subscription.unsubscribe();
