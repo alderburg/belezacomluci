@@ -85,7 +85,7 @@ export default function AdminNotificationFormMobilePage() {
       imageUrl: "",
       linkUrl: "",
       targetAudience: "all",
-      isActive: false,
+      isActive: true,
       startDateTime: "",
       endDateTime: "",
     },
@@ -115,7 +115,7 @@ export default function AdminNotificationFormMobilePage() {
         imageUrl: "",
         linkUrl: "",
         targetAudience: "all",
-        isActive: false,
+        isActive: true,
         startDateTime: "",
         endDateTime: "",
       });
