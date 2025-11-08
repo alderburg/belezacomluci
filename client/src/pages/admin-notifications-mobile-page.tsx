@@ -89,7 +89,9 @@ export default function AdminNotificationsMobilePage() {
   };
 
   const handleEditClick = (notificationId: string) => {
+    console.log('🖱️ [NOTIFICAÇÕES] Click em editar - notificationId:', notificationId);
     setEditingId(notificationId);
+    console.log('🔄 [NOTIFICAÇÕES] Navegando para:', `/admin/notifications-mobile/edit/${notificationId}`);
     setLocation(`/admin/notifications-mobile/edit/${notificationId}`);
   };
 

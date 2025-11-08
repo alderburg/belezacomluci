@@ -26,6 +26,8 @@ import type { z } from 'zod';
 import { useEffect } from 'react';
 
 export default function AdminNotificationFormMobilePage() {
+  console.log('🎬 [NOTIFICAÇÃO FORM] Componente montado/renderizado');
+  
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -34,24 +36,62 @@ export default function AdminNotificationFormMobilePage() {
   const notificationId = match && params && params.id ? String(params.id) : undefined;
   const isEditing = Boolean(match && notificationId);
 
+  console.log('🔍 [NOTIFICAÇÃO FORM] Detecção de rota:', {
+    match,
+    params,
+    notificationId,
+    isEditing
+  });
+
   if (!user?.isAdmin) {
+    console.log('⚠️ [NOTIFICAÇÃO FORM] Usuário não é admin, redirecionando');
     return <Redirect to="/" />;
   }
 
-  const { data: notification, isLoading } = useQuery<Notification>({
+  const { data: notification, isLoading, error } = useQuery<Notification>({
     queryKey: ['/api/admin/notifications', notificationId],
     queryFn: async () => {
-      if (!notificationId) throw new Error('ID não fornecido');
-      console.log('🔍 [NOTIFICAÇÃO] Buscando notificação para edição:', notificationId);
-      const res = await fetch(`/api/admin/notifications/${notificationId}`, {
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('Erro ao carregar notificação');
-      const data = await res.json();
-      console.log('✅ [NOTIFICAÇÃO] Notificação carregada:', data);
-      return data;
+      console.log('🔍 [NOTIFICAÇÃO] Iniciando queryFn');
+      console.log('🔍 [NOTIFICAÇÃO] notificationId:', notificationId);
+      
+      if (!notificationId) {
+        console.error('❌ [NOTIFICAÇÃO] ID não fornecido!');
+        throw new Error('ID não fornecido');
+      }
+      
+      const url = `/api/admin/notifications/${notificationId}`;
+      console.log('🔍 [NOTIFICAÇÃO] Fazendo fetch para:', url);
+      
+      try {
+        const res = await fetch(url, {
+          credentials: 'include',
+        });
+        
+        console.log('📡 [NOTIFICAÇÃO] Response status:', res.status);
+        console.log('📡 [NOTIFICAÇÃO] Response ok:', res.ok);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('❌ [NOTIFICAÇÃO] Erro na resposta:', errorText);
+          throw new Error(`Erro ao carregar notificação: ${res.status} - ${errorText}`);
+        }
+        
+        const data = await res.json();
+        console.log('✅ [NOTIFICAÇÃO] Notificação carregada com sucesso:', data);
+        return data;
+      } catch (err) {
+        console.error('❌ [NOTIFICAÇÃO] Erro no fetch:', err);
+        throw err;
+      }
     },
     enabled: Boolean(isEditing && notificationId),
+  });
+
+  console.log('📊 [NOTIFICAÇÃO] Estado da query:', {
+    notification,
+    isLoading,
+    error,
+    enabled: Boolean(isEditing && notificationId)
   });
 
   const form = useForm<z.infer<typeof insertNotificationSchema>>({
@@ -69,27 +109,44 @@ export default function AdminNotificationFormMobilePage() {
   });
 
   useEffect(() => {
+    console.log('🔄 [NOTIFICAÇÃO] useEffect disparado');
+    console.log('🔍 [NOTIFICAÇÃO] Valores atuais:', {
+      notification,
+      isEditing,
+      notificationId,
+      isLoading,
+      error
+    });
+
     if (notification && isEditing) {
       console.log('📝 [NOTIFICAÇÃO] Populando formulário com dados:', notification);
-      form.reset({
-        title: notification.title,
-        description: notification.description || "",
-        imageUrl: notification.imageUrl || "",
-        linkUrl: notification.linkUrl || "",
-        targetAudience: notification.targetAudience,
-        isActive: notification.isActive ?? true,
-        startDateTime: notification.startDateTime ? 
-          new Date(notification.startDateTime).toISOString().slice(0, 16) : "",
-        endDateTime: notification.endDateTime ? 
-          new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
-      });
-      console.log('✅ [NOTIFICAÇÃO] Formulário populado com sucesso');
+      
+      try {
+        form.reset({
+          title: notification.title,
+          description: notification.description || "",
+          imageUrl: notification.imageUrl || "",
+          linkUrl: notification.linkUrl || "",
+          targetAudience: notification.targetAudience,
+          isActive: notification.isActive ?? true,
+          startDateTime: notification.startDateTime ? 
+            new Date(notification.startDateTime).toISOString().slice(0, 16) : "",
+          endDateTime: notification.endDateTime ? 
+            new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
+        });
+        console.log('✅ [NOTIFICAÇÃO] Formulário populado com sucesso');
+      } catch (err) {
+        console.error('❌ [NOTIFICAÇÃO] Erro ao popular formulário:', err);
+      }
     } else if (isEditing && !notification) {
       console.log('⚠️ [NOTIFICAÇÃO] isEditing=true mas notification está vazio');
       console.log('🔍 [NOTIFICAÇÃO] notificationId:', notificationId);
       console.log('🔍 [NOTIFICAÇÃO] isLoading:', isLoading);
+      console.log('🔍 [NOTIFICAÇÃO] error:', error);
+    } else if (!isEditing) {
+      console.log('ℹ️ [NOTIFICAÇÃO] Modo de criação (não edição)');
     }
-  }, [notification, isEditing, notificationId, isLoading, form]);
+  }, [notification, isEditing, notificationId, isLoading, error, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {
@@ -147,6 +204,16 @@ export default function AdminNotificationFormMobilePage() {
       {isEditing && isLoading ? (
         <div className="pt-20 px-4 flex items-center justify-center min-h-[50vh]">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : error ? (
+        <div className="pt-20 px-4 flex flex-col items-center justify-center min-h-[50vh] gap-4">
+          <div className="text-destructive text-center">
+            <h2 className="text-lg font-semibold mb-2">Erro ao carregar notificação</h2>
+            <p className="text-sm">{error.message}</p>
+          </div>
+          <Button onClick={() => setLocation('/admin/notifications-mobile')}>
+            Voltar para lista
+          </Button>
         </div>
       ) : (
         <Form {...form}>
