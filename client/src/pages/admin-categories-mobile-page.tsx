@@ -142,6 +142,11 @@ export default function AdminCategoriesMobilePage() {
                       {category.description}
                     </p>
                     <div className="flex gap-2 mt-2">
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+                        Posição: {category.order}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-2 mt-2">
                       {category.isActive ? (
                         <Badge className="bg-green-100 text-green-700 text-xs">Ativa</Badge>
                       ) : (
