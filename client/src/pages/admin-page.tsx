@@ -39,9 +39,14 @@ const createBannerSchema = insertBannerSchema.extend({
   endDateTime: z.string().optional().nullable(),
   opensCouponsModal: z.boolean().default(false),
   imageUrl: z.string().min(1, "A imagem do banner é obrigatória"),
+  // Adicionar campo courseId para a opção de curso específico
+  courseId: z.string().optional().nullable(),
 });
 
-const createPopupSchema = insertPopupSchema;
+const createPopupSchema = insertPopupSchema.extend({
+  // Adicionar campo targetCourseId para a opção de curso específico
+  targetCourseId: z.string().optional().nullable(),
+});
 const createNotificationSchema = insertNotificationSchema;
 const createCategorySchema = insertCategorySchema;
 
@@ -133,6 +138,7 @@ export default function AdminPage() {
   const [originalBannerOrder, setOriginalBannerOrder] = useState<number | null>(null);
   const [originalBannerPage, setOriginalBannerPage] = useState<string | null>(null);
   const [originalBannerVideoId, setOriginalBannerVideoId] = useState<string | null>(null);
+  const [originalBannerCourseId, setOriginalBannerCourseId] = useState<string | null>(null); // Adicionado para curso específico
 
   // Atualizar URL quando a aba mudar
   useEffect(() => {
@@ -190,7 +196,7 @@ export default function AdminPage() {
 
   // Estado para controlar se algum item está sendo deletado
   const [isDeletingItem, setIsDeletingItem] = useState(false);
-  
+
   // Estado para controlar se algum item está sendo criado
   const [isCreatingItem, setIsCreatingItem] = useState(false);
 
@@ -229,7 +235,7 @@ export default function AdminPage() {
   const banners = bannersData?.sort((a, b) => {
     // Primeiro critério: ordenar por página
     if (a.page !== b.page) {
-      const pageOrder = ['home', 'videos', 'products', 'coupons', 'community', 'profile', 'bio', 'video_specific'];
+      const pageOrder = ['home', 'videos', 'products', 'coupons', 'community', 'profile', 'bio', 'video_specific', 'course_specific']; // Adicionado 'course_specific'
       const pageIndexA = pageOrder.indexOf(a.page) !== -1 ? pageOrder.indexOf(a.page) : 999;
       const pageIndexB = pageOrder.indexOf(b.page) !== -1 ? pageOrder.indexOf(b.page) : 999;
       return pageIndexA - pageIndexB;
@@ -241,6 +247,15 @@ export default function AdminPage() {
       const videoIdB = b.videoId || '';
       if (videoIdA !== videoIdB) {
         return videoIdA.localeCompare(videoIdB);
+      }
+    }
+
+    // Para cursos específicos, agrupar por courseId
+    if (a.page === 'course_specific' && b.page === 'course_specific') {
+      const courseIdA = a.courseId || ''; // Adicionado
+      const courseIdB = b.courseId || ''; // Adicionado
+      if (courseIdA !== courseIdB) {
+        return courseIdA.localeCompare(courseIdB);
       }
     }
 
@@ -546,6 +561,8 @@ export default function AdminPage() {
       opensCouponsModal: false,
       startDateTime: "",
       endDateTime: "",
+      videoId: null, // Certificar que videoId é opcional
+      courseId: null, // Adicionar courseId como opcional
     },
   });
 
@@ -560,6 +577,7 @@ export default function AdminPage() {
       trigger: "login",
       targetPage: "",
       targetVideoId: "",
+      targetCourseId: "", // Adicionar targetCourseId
       showFrequency: "always",
       showTitle: false,
       showDescription: false,
@@ -616,6 +634,7 @@ export default function AdminPage() {
       setOriginalBannerOrder(orderValue);
       setOriginalBannerPage(editingItem.page);
       setOriginalBannerVideoId(editingItem.videoId || null);
+      setOriginalBannerCourseId(editingItem.courseId || null); // Adicionado
     }
   }, [editingItem, activeTab]);
 
@@ -624,10 +643,12 @@ export default function AdminPage() {
     if (!editingItem && banners && activeTab === 'banners' && dialogOpen) {
       const currentPage = bannerForm.watch("page") || "home";
       const currentVideoId = bannerForm.watch("videoId") || "";
+      const currentCourseId = bannerForm.watch("courseId") || ""; // Adicionado
 
       const filteredBanners = banners.filter(b => {
         if (b.page !== currentPage) return false;
         if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
+        if (currentPage === 'course_specific' && b.courseId !== currentCourseId) return false; // Adicionado
         return true;
       });
 
@@ -638,14 +659,16 @@ export default function AdminPage() {
     }
 
     const subscription = bannerForm.watch((value, { name }) => {
-      // Só atualizar ordem se mudou page ou videoId, não se mudou order (evita loop infinito)
-      if (!editingItem && banners && activeTab === 'banners' && dialogOpen && (name === 'page' || name === 'videoId')) {
+      // Só atualizar ordem se mudou page, videoId ou courseId, não se mudou order (evita loop infinito)
+      if (!editingItem && banners && activeTab === 'banners' && dialogOpen && (name === 'page' || name === 'videoId' || name === 'courseId')) { // Adicionado 'courseId'
         const currentPage = value.page || "home";
         const currentVideoId = value.videoId || "";
+        const currentCourseId = value.courseId || ""; // Adicionado
 
         const filteredBanners = banners.filter(b => {
           if (b.page !== currentPage) return false;
           if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
+          if (currentPage === 'course_specific' && b.courseId !== currentCourseId) return false; // Adicionado
           return true;
         });
 
@@ -685,7 +708,7 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Vídeo atualizado!" : "Vídeo criado!",
       });
-      
+
       setIsCreatingItem(false);
     },
     onError: () => {
@@ -709,9 +732,9 @@ export default function AdminPage() {
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      
+
       await queryClient.refetchQueries({ queryKey: ["/api/products"] });
-      
+
       productForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -719,7 +742,7 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Produto atualizado!" : "Produto criado!",
       });
-      
+
       setIsCreatingItem(false);
     },
     onError: () => {
@@ -744,9 +767,9 @@ export default function AdminPage() {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/coupons"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/coupons"] });
-      
+
       await queryClient.refetchQueries({ queryKey: ["/api/coupons"] });
-      
+
       couponForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -756,7 +779,7 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Cupom atualizado!" : "Cupom criado!",
       });
-      
+
       setIsCreatingItem(false);
     },
     onError: (error: any) => {
@@ -801,9 +824,9 @@ export default function AdminPage() {
       if (editingItem) {
         queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${editingItem.id}`] });
       }
-      
+
       await queryClient.refetchQueries({ queryKey: ["/api/admin/banners"] });
-      
+
       toast({
         title: "Sucesso",
         description: editingItem ? "Banner atualizado!" : "Banner criado!",
@@ -817,8 +840,9 @@ export default function AdminPage() {
       setOriginalBannerOrder(null);
       setOriginalBannerPage(null);
       setOriginalBannerVideoId(null);
+      setOriginalBannerCourseId(null); // Resetar também
       console.log('[createBannerMutation] onSuccess concluído');
-      
+
       setIsCreatingItem(false);
     },
     onError: (error: any) => {
@@ -847,58 +871,33 @@ export default function AdminPage() {
         return;
       }
 
+      const bannerId = editingItem?.id; // ID do banner que está sendo editado/criado
       const newOrder = data.order || 0;
       const oldOrder = originalBannerOrder ?? -1;
+      const currentPage = data.page;
+      const currentVideoId = data.videoId || null;
+      const currentCourseId = data.courseId || null; // Adicionado
+
       console.log('[reorganizeBannerMutation] newOrder:', newOrder, 'oldOrder:', oldOrder);
+      console.log('[reorganizeBannerMutation] currentPage:', currentPage, 'currentVideoId:', currentVideoId, 'currentCourseId:', currentCourseId);
 
       const updates: Promise<any>[] = [];
 
-      if (editingItem) {
-        console.log('[reorganizeBannerMutation] Modo edição');
-        if (newOrder < oldOrder) {
-          console.log('[reorganizeBannerMutation] Movendo para cima');
-          // Movendo para cima: empurrar para baixo os banners entre newOrder e oldOrder
-          banners.forEach(b => {
-            if (b.id !== editingItem.id && b.page === data.page) {
-              if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
-              if (b.order !== null && b.order !== undefined) {
-                if (b.order >= newOrder && b.order < oldOrder) {
-                  updates.push(
-                    apiRequest('PUT', `/api/banners/${b.id}`, {
-                      ...b,
-                      order: b.order + 1,
-                    })
-                  );
-                }
-              }
-            }
-          });
-        } else if (newOrder > oldOrder) {
-          console.log('[reorganizeBannerMutation] Movendo para baixo');
-          // Movendo para baixo: empurrar para cima os banners entre oldOrder e newOrder
-          banners.forEach(b => {
-            if (b.id !== editingItem.id && b.page === data.page) {
-              if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
-              if (b.order !== null && b.order !== undefined) {
-                if (b.order > oldOrder && b.order <= newOrder) {
-                  updates.push(
-                    apiRequest('PUT', `/api/banners/${b.id}`, {
-                      ...b,
-                      order: b.order - 1,
-                    })
-                  );
-                }
-              }
-            }
-          });
-        }
-      } else {
-        console.log('[reorganizeBannerMutation] Modo criação');
-        // Modo criação: empurrar para baixo todos os banners >= newOrder
-        banners.forEach(b => {
-          if (b.page === data.page) {
-            if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
-            if (b.order !== null && b.order !== undefined && b.order >= newOrder) {
+      // Lógica para empurrar outros banners
+      banners.forEach(b => {
+        // Ignorar o próprio banner que está sendo editado/criado
+        if (b.id === bannerId) return;
+        
+        // Verificar se o banner pertence ao mesmo contexto (página, vídeo ou curso)
+        if (b.page !== currentPage) return;
+        if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return;
+        if (currentPage === 'course_specific' && b.courseId !== currentCourseId) return; // Adicionado
+
+        // Lógica de reordenação
+        if (editingItem) { // Modo edição
+          if (newOrder < oldOrder) { // Movendo para cima
+            if (b.order !== null && b.order !== undefined && b.order >= newOrder && b.order < oldOrder) {
+              console.log(`Empurrando para baixo banner ${b.id}: ${b.order} -> ${b.order + 1}`);
               updates.push(
                 apiRequest('PUT', `/api/banners/${b.id}`, {
                   ...b,
@@ -906,21 +905,42 @@ export default function AdminPage() {
                 })
               );
             }
+          } else if (newOrder > oldOrder) { // Movendo para baixo
+            if (b.order !== null && b.order !== undefined && b.order > oldOrder && b.order <= newOrder) {
+              console.log(`Empurrando para cima banner ${b.id}: ${b.order} -> ${b.order - 1}`);
+              updates.push(
+                apiRequest('PUT', `/api/banners/${b.id}`, {
+                  ...b,
+                  order: b.order - 1,
+                })
+              );
+            }
           }
-        });
-      }
+        } else { // Modo criação
+          // Empurrar para baixo todos os banners que estão na mesma posição ou posterior
+          if (b.order !== null && b.order !== undefined && b.order >= newOrder) {
+            console.log(`Empurrando para baixo banner ${b.id} (criação): ${b.order} -> ${b.order + 1}`);
+            updates.push(
+              apiRequest('PUT', `/api/banners/${b.id}`, {
+                ...b,
+                order: b.order + 1,
+              })
+            );
+          }
+        }
+      });
 
-      console.log('[reorganizeBannerMutation] Total de atualizações:', updates.length);
+      console.log('[reorganizeBannerMutation] Total de atualizações de outros banners:', updates.length);
       await Promise.all(updates);
-      console.log('[reorganizeBannerMutation] Todas as atualizações concluídas');
+      console.log('[reorganizeBannerMutation] Todas as atualizações de outros banners concluídas');
 
       try {
         let response;
         if (editingItem) {
-          console.log('[reorganizeBannerMutation] Salvando banner editado');
+          console.log('[reorganizeBannerMutation] Salvando banner editado com nova ordem:', data.order);
           response = await apiRequest('PUT', `/api/banners/${editingItem.id}`, data);
         } else {
-          console.log('[reorganizeBannerMutation] Salvando novo banner');
+          console.log('[reorganizeBannerMutation] Salvando novo banner com nova ordem:', data.order);
           response = await apiRequest('POST', '/api/banners', data);
         }
         console.log('[reorganizeBannerMutation] Banner salvo com sucesso:', response);
@@ -937,9 +957,9 @@ export default function AdminPage() {
       if (editingItem) {
         queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${editingItem.id}`] });
       }
-      
+
       await queryClient.refetchQueries({ queryKey: ["/api/admin/banners"] });
-      
+
       toast({
         title: "Sucesso",
         description: editingItem ? "Banner atualizado e banners reorganizados!" : "Banner criado e banners reorganizados!",
@@ -954,8 +974,9 @@ export default function AdminPage() {
       setOriginalBannerOrder(null);
       setOriginalBannerPage(null);
       setOriginalBannerVideoId(null);
+      setOriginalBannerCourseId(null); // Resetar também
       console.log('[reorganizeBannerMutation] onSuccess concluído');
-      
+
       setIsCreatingItem(false);
     },
     onError: (error: any) => {
@@ -1003,7 +1024,7 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Popup atualizado!" : "Popup criado!",
       });
-      
+
       setIsCreatingItem(false);
     },
     onError: (error: any) => {
@@ -1062,9 +1083,9 @@ export default function AdminPage() {
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
-      
+
       await queryClient.refetchQueries({ queryKey: ["/api/admin/notifications"] });
-      
+
       notificationForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -1072,7 +1093,7 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Notificação atualizada!" : "Notificação criada!",
       });
-      
+
       setIsCreatingItem(false);
     },
     onError: () => {
@@ -1116,9 +1137,9 @@ export default function AdminPage() {
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
-      
+
       await queryClient.refetchQueries({ queryKey: ["/api/categories"] });
-      
+
       categoryForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -1128,7 +1149,7 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Categoria atualizada!" : "Categoria criada!",
       });
-      
+
       setIsCreatingItem(false);
     },
     onError: () => {
@@ -1146,7 +1167,7 @@ export default function AdminPage() {
       if (!editingItem) {
         setIsCreatingItem(true);
       }
-      
+
       if (!categories) return;
 
       const newOrder = data.order || 0;
@@ -1208,9 +1229,9 @@ export default function AdminPage() {
       if (editingItem) {
         queryClient.invalidateQueries({ queryKey: [`/api/categories/${editingItem.id}`] });
       }
-      
+
       await queryClient.refetchQueries({ queryKey: ["/api/categories"] });
-      
+
       toast({
         title: "Sucesso",
         description: editingItem ? "Categoria atualizada e categorias reorganizadas!" : "Categoria criada e categorias reorganizadas!",
@@ -1221,7 +1242,7 @@ export default function AdminPage() {
       setConflictingCategory(null);
       setDialogOpen(false);
       setEditingItem(null);
-      
+
       setIsCreatingItem(false);
     },
     onError: () => {
@@ -1256,11 +1277,15 @@ export default function AdminPage() {
         const updates: Promise<any>[] = [];
 
         if (type === 'banners' && banners) {
-          // Reordenar banners na mesma página/vídeo
+          // Reordenar banners na mesma página/vídeo/curso
           banners.forEach(b => {
             if (b.id !== id && b.page === itemToDelete.page) {
               // Para vídeos específicos, verificar também o videoId
               if (itemToDelete.page === 'video_specific' && b.videoId !== itemToDelete.videoId) {
+                return;
+              }
+              // Para cursos específicos, verificar também o courseId
+              if (itemToDelete.page === 'course_specific' && b.courseId !== itemToDelete.courseId) { // Adicionado
                 return;
               }
 
@@ -1346,12 +1371,12 @@ export default function AdminPage() {
       if (variables.type === 'banners') {
         await queryClient.refetchQueries({ queryKey: ["/api/admin/banners"] });
       }
-      
+
       toast({
         title: "Sucesso",
         description: "Item excluído com sucesso!",
       });
-      
+
       // Liberar botões somente após refetch completo
       setIsDeletingItem(false);
     },
@@ -1396,6 +1421,8 @@ export default function AdminPage() {
             new Date(item.startDateTime).toISOString().slice(0, 16) : "",
           endDateTime: item.endDateTime ? 
             new Date(item.endDateTime).toISOString().slice(0, 16) : "",
+          videoId: item.videoId || null, // Garantir que seja null se não existir
+          courseId: item.courseId || null, // Garantir que seja null se não existir
         };
         bannerForm.reset(bannerData);
         break;
@@ -1406,6 +1433,7 @@ export default function AdminPage() {
             new Date(item.startDateTime).toISOString().slice(0, 16) : "",
           endDateTime: item.endDateTime ? 
             new Date(item.endDateTime).toISOString().slice(0, 16) : "",
+          targetCourseId: item.targetCourseId || null, // Adicionado
         };
         popupForm.reset(popupData);
         break;
@@ -1474,20 +1502,24 @@ export default function AdminPage() {
   };
 
   const handleBannerSubmit = (data: z.infer<typeof createBannerSchema>) => {
-    // Se está editando e não mudou ordem, página ou videoId, pode salvar direto
+    const bannerId = editingItem?.id; // ID do banner que está sendo editado
+
+    // Se está editando e não mudou ordem, página, videoId ou courseId, pode salvar direto
     if (editingItem && 
         data.order === originalBannerOrder && 
         data.page === originalBannerPage &&
-        (data.page !== 'video_specific' || data.videoId === originalBannerVideoId)) {
+        data.videoId === originalBannerVideoId &&
+        data.courseId === originalBannerCourseId) { // Verificação adicionada para courseId
       createBannerMutation.mutate(data);
       return;
     }
 
     // Verificar se há conflito de posição
     const conflicting = banners?.find(b => {
-      if (b.id === editingItem?.id) return false;
+      if (b.id === bannerId) return false; // Ignora o próprio banner
       if (b.page !== data.page) return false;
       if (data.page === 'video_specific' && b.videoId !== data.videoId) return false;
+      if (data.page === 'course_specific' && b.courseId !== data.courseId) return false; // Verificação adicionada para curso específico
       if (b.order !== data.order) return false;
       return true;
     });
@@ -1605,7 +1637,8 @@ export default function AdminPage() {
           showTitle: false,
           showDescription: false,
           showButton: false,
-          videoId: "",
+          videoId: null, // Resetar para null
+          courseId: null, // Resetar para null
           opensCouponsModal: false,
           startDateTime: "",
           endDateTime: ""
@@ -1620,6 +1653,7 @@ export default function AdminPage() {
           trigger: "login",
           targetPage: "",
           targetVideoId: "",
+          targetCourseId: "", // Resetar para null
           showFrequency: "always",
           showTitle: false,
           showDescription: false,
@@ -2787,21 +2821,25 @@ export default function AdminPage() {
 
                           <div>
                             <Label htmlFor="banner-page">Página</Label>
-                            <select
-                              id="banner-page"
-                              {...bannerForm.register("page")}
-                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              data-testid="select-banner-page"
+                            <Select 
+                              value={bannerForm.watch("page") || "home"}
+                              onValueChange={(value) => bannerForm.setValue("page", value)}
                             >
-                              <option value="home">Página Inicial</option>
-                              <option value="videos">Vídeos Exclusivos</option>
-                              <option value="products">Produtos Digitais</option>
-                              <option value="coupons">Cupons</option>
-                              <option value="community">Comunidade</option>
-                              <option value="profile">Perfil</option>
-                              <option value="bio">Link da Bio</option>
-                              <option value="video_specific">Video Específico</option>
-                            </select>
+                              <SelectTrigger data-testid="select-banner-page">
+                                <SelectValue placeholder="Selecione a página" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="home">Página Inicial</SelectItem>
+                                <SelectItem value="videos">Vídeos Exclusivos</SelectItem>
+                                <SelectItem value="products">Produtos Digitais</SelectItem>
+                                <SelectItem value="coupons">Cupons</SelectItem>
+                                <SelectItem value="community">Comunidade</SelectItem>
+                                <SelectItem value="profile">Perfil</SelectItem>
+                                <SelectItem value="bio">Link da Bio</SelectItem>
+                                <SelectItem value="video_specific">Video Específico</SelectItem>
+                                <SelectItem value="course_specific">Curso Específico</SelectItem> {/* Opção adicionada */}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
 
@@ -2814,6 +2852,19 @@ export default function AdminPage() {
                               {...bannerForm.register("videoId")}
                               placeholder="Cole o ID do vídeo aqui..."
                               data-testid="input-banner-video-id"
+                            />
+                          </div>
+                        )}
+
+                        {/* Campo para ID do curso específico */}
+                        {bannerForm.watch("page") === "course_specific" && (
+                          <div>
+                            <Label htmlFor="banner-course-id">ID do Curso</Label>
+                            <Input
+                              id="banner-course-id"
+                              {...bannerForm.register("courseId")}
+                              placeholder="Cole o ID do curso aqui..."
+                              data-testid="input-banner-course-id"
                             />
                           </div>
                         )}
@@ -4037,11 +4088,18 @@ export default function AdminPage() {
                                      banner.page === 'coupons' ? 'Cupons' :
                                      banner.page === 'community' ? 'Comunidade' :
                                      banner.page === 'profile' ? 'Perfil' :
-                                     banner.page === 'video_specific' ? 'Video Específico' : banner.page}
+                                     banner.page === 'bio' ? 'Link da Bio' :
+                                     banner.page === 'video_specific' ? 'Video Específico' :
+                                     banner.page === 'course_specific' ? 'Curso Específico' : banner.page} {/* Adicionado curso específico */}
                                   </Badge>
                                   {banner.page === 'video_specific' && banner.videoId && (
                                     <Badge variant="outline" className="bg-purple-50 text-purple-700">
-                                      ID: {banner.videoId.substring(0, 8)}...
+                                      Vídeo ID: {banner.videoId.substring(0, 8)}...
+                                    </Badge>
+                                  )}
+                                  {banner.page === 'course_specific' && banner.courseId && ( // Adicionado para curso específico
+                                    <Badge variant="outline" className="bg-amber-50 text-amber-700">
+                                      Curso ID: {banner.courseId.substring(0, 8)}...
                                     </Badge>
                                   )}
                                   <Badge variant="outline" className="bg-blue-50 text-blue-700">
@@ -4288,9 +4346,9 @@ export default function AdminPage() {
                                       ID: {popup.targetVideoId.substring(0, 8)}...
                                     </Badge>
                                   )}
-                                  {popup.targetPage === 'course_specific' && popup.targetCourseId && (
-                                    <Badge variant="outline" className="bg-purple-50 text-purple-700">
-                                      ID: {popup.targetCourseId.substring(0, 8)}...
+                                  {popup.targetPage === 'course_specific' && popup.targetCourseId && ( // Adicionado para curso específico
+                                    <Badge variant="outline" className="bg-amber-50 text-amber-700">
+                                      Curso ID: {popup.targetCourseId.substring(0, 8)}...
                                     </Badge>
                                   )}
                                   {popup.showFrequency === 'once_per_session' && (
@@ -5146,6 +5204,8 @@ export default function AdminPage() {
               A posição {pendingBannerData?.order} já está ocupada pelo banner "{conflictingBanner?.title}" 
               {pendingBannerData?.page === 'video_specific' && pendingBannerData?.videoId 
                 ? ` no vídeo selecionado` 
+                : pendingBannerData?.page === 'course_specific' && pendingBannerData?.courseId // Adicionado para curso específico
+                ? ` no curso selecionado`
                 : ' na página selecionada'}.
               Deseja reorganizar automaticamente os banners?
             </AlertDialogDescription>

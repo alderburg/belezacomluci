@@ -973,7 +973,7 @@ export default function PlaylistPage() {
         )}
         
         {/* Banner carousel for course-specific banners */}
-        {product && (
+        {product && resourceId && (
           <BannerCarousel page="course_specific" courseId={resourceId} />
         )}
         

@@ -19,12 +19,15 @@ export default function BannerCarousel({ page = "home", courseId, videoId }: Ban
   const [, setLocation] = useLocation();
   const isMobile = useIsMobile();
 
+  // Determinar a query key baseado no tipo de banner
+  const queryKey = courseId 
+    ? [`/api/banners/course/${courseId}`] 
+    : videoId 
+      ? [`/api/banners/video/${videoId}`]
+      : ["/api/banners"];
+
   const { data: banners, isLoading } = useQuery<Banner[]>({
-    queryKey: courseId 
-      ? [`/api/banners/course/${courseId}`] 
-      : videoId 
-        ? [`/api/banners/video/${videoId}`]
-        : ["/api/banners"],
+    queryKey,
   });
 
   // Função para verificar se o link é interno
