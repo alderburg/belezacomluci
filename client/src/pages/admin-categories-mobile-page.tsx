@@ -32,17 +32,6 @@ export default function AdminCategoriesMobilePage() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Detectar quando a lista foi atualizada após criação
-  useEffect(() => {
-    if (isCreatingItem && !isLoading && categories) {
-      // Aguardar um pouco para garantir que a lista foi totalmente atualizada
-      const timer = setTimeout(() => {
-        setIsCreatingItem(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isCreatingItem, isLoading, categories]);
-
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
   }
@@ -50,6 +39,16 @@ export default function AdminCategoriesMobilePage() {
   const { data: categories, isLoading } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
+
+  // Detectar quando a lista foi atualizada após criação
+  useEffect(() => {
+    if (isCreatingItem && !isLoading && categories) {
+      const timer = setTimeout(() => {
+        setIsCreatingItem(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isCreatingItem, isLoading, categories]);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {

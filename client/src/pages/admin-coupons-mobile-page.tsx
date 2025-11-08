@@ -41,6 +41,14 @@ export default function AdminCouponsMobilePage() {
     window.scrollTo(0, 0);
   }, []);
 
+  if (!user?.isAdmin) {
+    return <Redirect to="/" />;
+  }
+
+  const { data: coupons, isLoading } = useQuery<Coupon[]>({
+    queryKey: ["/api/coupons"],
+  });
+
   // Detectar quando a lista foi atualizada após criação
   useEffect(() => {
     if (isCreatingItem && !isLoading && coupons) {
@@ -51,14 +59,6 @@ export default function AdminCouponsMobilePage() {
       return () => clearTimeout(timer);
     }
   }, [isCreatingItem, isLoading, coupons]);
-
-  if (!user?.isAdmin) {
-    return <Redirect to="/" />;
-  }
-
-  const { data: coupons, isLoading } = useQuery<Coupon[]>({
-    queryKey: ["/api/coupons"],
-  });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {

@@ -32,17 +32,6 @@ export default function AdminBannersMobilePage() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Detectar quando a lista foi atualizada após criação
-  useEffect(() => {
-    if (isCreatingItem && !isLoading && banners) {
-      // Aguardar um pouco para garantir que a lista foi totalmente atualizada
-      const timer = setTimeout(() => {
-        setIsCreatingItem(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isCreatingItem, isLoading, banners]);
-
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
   }
@@ -80,6 +69,16 @@ export default function AdminBannersMobilePage() {
     // Terceiro critério: por data de criação
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
+
+  // Detectar quando a lista foi atualizada após criação
+  useEffect(() => {
+    if (isCreatingItem && !isLoading && banners) {
+      const timer = setTimeout(() => {
+        setIsCreatingItem(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isCreatingItem, isLoading, banners]);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {

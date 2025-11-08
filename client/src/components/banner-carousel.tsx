@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSidebar } from "@/contexts/sidebar-context";
 import { cn } from "@/lib/utils";
 
 interface BannerCarouselProps {
@@ -17,7 +16,6 @@ export default function BannerCarousel({ page = "home" }: BannerCarouselProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [, setLocation] = useLocation();
   const isMobile = useIsMobile();
-  const { isCollapsed } = useSidebar();
 
   const { data: banners, isLoading } = useQuery<Banner[]>({
     queryKey: ["/api/banners"],
