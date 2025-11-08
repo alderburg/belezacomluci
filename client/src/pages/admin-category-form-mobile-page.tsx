@@ -323,10 +323,10 @@ export default function AdminCategoryFormMobilePage() {
         <Button
           type="submit"
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || reorganizeMutation.isPending}
           data-testid="button-save-category"
         >
-          {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Categoria" : "Criar Categoria"}
+          {reorganizeMutation.isPending ? "Reorganizando..." : mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Categoria" : "Criar Categoria"}
         </Button>
         </form>
         </Form>

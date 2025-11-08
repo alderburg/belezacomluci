@@ -108,7 +108,11 @@ export default function AdminBannerFormMobilePage() {
           new Date(banner.endDateTime).toISOString().slice(0, 16) : "",
         videoId: banner.videoId || "",
       });
-    } else if (!isEditing && banners) {
+    }
+  }, [banner, isEditing, form]);
+
+  useEffect(() => {
+    if (!isEditing && banners) {
       const currentPage = form.watch("page") || "home";
       const currentVideoId = form.watch("videoId") || "";
       
@@ -121,9 +125,7 @@ export default function AdminBannerFormMobilePage() {
       const maxOrder = filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0);
       form.setValue("order", maxOrder + 1);
     }
-  }, [banner, isEditing, banners, form]);
 
-  useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if ((name === "page" || name === "videoId") && !isEditing && banners) {
         const currentPage = value.page || "home";
@@ -175,20 +177,65 @@ export default function AdminBannerFormMobilePage() {
     mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {
       if (!banners) return;
 
-      const affectedBanners = banners.filter(b => {
-        if (b.id === bannerId) return false;
-        if (b.page !== data.page) return false;
-        if (data.page === 'video_specific' && b.videoId !== data.videoId) return false;
-        if ((b.order || 0) < (data.order || 0)) return false;
-        return true;
-      }).sort((a, b) => (a.order || 0) - (b.order || 0));
+      const newOrder = data.order || 0;
+      const oldOrder = originalOrder ?? -1;
 
-      for (const affectedBanner of affectedBanners) {
-        await apiRequest('PUT', `/api/banners/${affectedBanner.id}`, {
-          ...affectedBanner,
-          order: (affectedBanner.order || 0) + 1,
+      const updates: Promise<any>[] = [];
+
+      if (isEditing) {
+        if (newOrder < oldOrder) {
+          // Movendo para cima: empurrar para baixo os banners entre newOrder e oldOrder
+          banners.forEach(b => {
+            if (b.id !== bannerId && b.page === data.page) {
+              if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
+              if (b.order !== null && b.order !== undefined) {
+                if (b.order >= newOrder && b.order < oldOrder) {
+                  updates.push(
+                    apiRequest('PUT', `/api/banners/${b.id}`, {
+                      ...b,
+                      order: b.order + 1,
+                    })
+                  );
+                }
+              }
+            }
+          });
+        } else if (newOrder > oldOrder) {
+          // Movendo para baixo: empurrar para cima os banners entre oldOrder e newOrder
+          banners.forEach(b => {
+            if (b.id !== bannerId && b.page === data.page) {
+              if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
+              if (b.order !== null && b.order !== undefined) {
+                if (b.order > oldOrder && b.order <= newOrder) {
+                  updates.push(
+                    apiRequest('PUT', `/api/banners/${b.id}`, {
+                      ...b,
+                      order: b.order - 1,
+                    })
+                  );
+                }
+              }
+            }
+          });
+        }
+      } else {
+        // Modo criação: empurrar para baixo todos os banners >= newOrder
+        banners.forEach(b => {
+          if (b.page === data.page) {
+            if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
+            if (b.order !== null && b.order !== undefined && b.order >= newOrder) {
+              updates.push(
+                apiRequest('PUT', `/api/banners/${b.id}`, {
+                  ...b,
+                  order: b.order + 1,
+                })
+              );
+            }
+          }
         });
       }
+
+      await Promise.all(updates);
 
       if (isEditing) {
         return await apiRequest('PUT', `/api/banners/${bannerId}`, data);
@@ -469,10 +516,10 @@ export default function AdminBannerFormMobilePage() {
         <Button
           type="submit"
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || reorganizeMutation.isPending}
           data-testid="button-save-banner"
         >
-          {mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Banner" : "Criar Banner"}
+          {reorganizeMutation.isPending ? "Reorganizando..." : mutation.isPending ? "Salvando..." : isEditing ? "Atualizar Banner" : "Criar Banner"}
         </Button>
         </form>
         </Form>

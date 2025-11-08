@@ -120,6 +120,20 @@ export default function AdminPage() {
   const [couponConflictData, setCouponConflictData] = useState<{ order: number; conflictCoupon?: Coupon } | null>(null);
   const [pendingCouponData, setPendingCouponData] = useState<z.infer<typeof createCouponSchema> | null>(null);
   
+  // Estados para controle de conflito de ordem de categorias
+  const [showCategoryConflictDialog, setShowCategoryConflictDialog] = useState(false);
+  const [pendingCategoryData, setPendingCategoryData] = useState<z.infer<typeof createCategorySchema> | null>(null);
+  const [conflictingCategory, setConflictingCategory] = useState<Category | null>(null);
+  const [originalCategoryOrder, setOriginalCategoryOrder] = useState<number | null>(null);
+  
+  // Estados para controle de conflito de ordem de banners
+  const [showBannerConflictDialog, setShowBannerConflictDialog] = useState(false);
+  const [pendingBannerData, setPendingBannerData] = useState<z.infer<typeof createBannerSchema> | null>(null);
+  const [conflictingBanner, setConflictingBanner] = useState<Banner | null>(null);
+  const [originalBannerOrder, setOriginalBannerOrder] = useState<number | null>(null);
+  const [originalBannerPage, setOriginalBannerPage] = useState<string | null>(null);
+  const [originalBannerVideoId, setOriginalBannerVideoId] = useState<string | null>(null);
+  
   // Atualizar URL quando a aba mudar
   useEffect(() => {
     const newPath = `/admin/${activeTab}`;
@@ -578,6 +592,61 @@ export default function AdminPage() {
     },
   });
 
+  // Auto-preencher ordem de categoria ao criar
+  useEffect(() => {
+    if (editingItem && activeTab === 'categories') {
+      const orderValue = editingItem.order || 0;
+      setOriginalCategoryOrder(orderValue);
+    } else if (!editingItem && categories && activeTab === 'categories' && dialogOpen) {
+      const maxOrder = categories.reduce((max, cat) => Math.max(max, cat.order || 0), 0);
+      categoryForm.setValue("order", maxOrder + 1);
+    }
+  }, [editingItem, categories, activeTab, dialogOpen, categoryForm]);
+
+  // Armazenar valores originais ao editar banner
+  useEffect(() => {
+    if (editingItem && activeTab === 'banners') {
+      const orderValue = editingItem.order || 0;
+      setOriginalBannerOrder(orderValue);
+      setOriginalBannerPage(editingItem.page);
+      setOriginalBannerVideoId(editingItem.videoId || null);
+    }
+  }, [editingItem, activeTab]);
+
+  // Watch page and videoId changes para auto-preencher ordem de banner ao criar
+  useEffect(() => {
+    if (!editingItem && banners && activeTab === 'banners' && dialogOpen) {
+      const currentPage = bannerForm.watch("page") || "home";
+      const currentVideoId = bannerForm.watch("videoId") || "";
+      
+      const filteredBanners = banners.filter(b => {
+        if (b.page !== currentPage) return false;
+        if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
+        return true;
+      });
+      
+      const maxOrder = filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0);
+      bannerForm.setValue("order", maxOrder + 1);
+    }
+
+    const subscription = bannerForm.watch((value, { name }) => {
+      if (!editingItem && banners && activeTab === 'banners' && dialogOpen) {
+        const currentPage = value.page || "home";
+        const currentVideoId = value.videoId || "";
+        
+        const filteredBanners = banners.filter(b => {
+          if (b.page !== currentPage) return false;
+          if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
+          return true;
+        });
+        
+        const maxOrder = filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0);
+        bannerForm.setValue("order", maxOrder + 1);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [bannerForm, editingItem, banners, activeTab, dialogOpen]);
+
   // Mutations
   const createVideoMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createVideoSchema>) => {
@@ -687,6 +756,8 @@ export default function AdminPage() {
       bannerForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
+      setPendingBannerData(null);
+      setConflictingBanner(null);
       toast({
         title: "Sucesso",
         description: editingItem ? "Banner atualizado!" : "Banner criado!",
@@ -700,6 +771,103 @@ export default function AdminPage() {
         description: `Falha ao salvar banner: ${error.message || JSON.stringify(error)}`,
         variant: "destructive",
       });
+    },
+  });
+
+  const reorganizeBannerMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
+      if (!banners) return;
+
+      const newOrder = data.order || 0;
+      const oldOrder = originalBannerOrder ?? -1;
+
+      const updates: Promise<any>[] = [];
+
+      if (editingItem) {
+        if (newOrder < oldOrder) {
+          // Movendo para cima: empurrar para baixo os banners entre newOrder e oldOrder
+          banners.forEach(b => {
+            if (b.id !== editingItem.id && b.page === data.page) {
+              if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
+              if (b.order !== null && b.order !== undefined) {
+                if (b.order >= newOrder && b.order < oldOrder) {
+                  updates.push(
+                    apiRequest('PUT', `/api/banners/${b.id}`, {
+                      ...b,
+                      order: b.order + 1,
+                    })
+                  );
+                }
+              }
+            }
+          });
+        } else if (newOrder > oldOrder) {
+          // Movendo para baixo: empurrar para cima os banners entre oldOrder e newOrder
+          banners.forEach(b => {
+            if (b.id !== editingItem.id && b.page === data.page) {
+              if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
+              if (b.order !== null && b.order !== undefined) {
+                if (b.order > oldOrder && b.order <= newOrder) {
+                  updates.push(
+                    apiRequest('PUT', `/api/banners/${b.id}`, {
+                      ...b,
+                      order: b.order - 1,
+                    })
+                  );
+                }
+              }
+            }
+          });
+        }
+      } else {
+        // Modo criação: empurrar para baixo todos os banners >= newOrder
+        banners.forEach(b => {
+          if (b.page === data.page) {
+            if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
+            if (b.order !== null && b.order !== undefined && b.order >= newOrder) {
+              updates.push(
+                apiRequest('PUT', `/api/banners/${b.id}`, {
+                  ...b,
+                  order: b.order + 1,
+                })
+              );
+            }
+          }
+        });
+      }
+
+      await Promise.all(updates);
+
+      if (editingItem) {
+        return await apiRequest('PUT', `/api/banners/${editingItem.id}`, data);
+      } else {
+        return await apiRequest('POST', '/api/banners', data);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      if (editingItem) {
+        queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${editingItem.id}`] });
+      }
+      toast({
+        title: "Sucesso",
+        description: editingItem ? "Banner atualizado e banners reorganizados!" : "Banner criado e banners reorganizados!",
+      });
+      bannerForm.reset();
+      setShowBannerConflictDialog(false);
+      setPendingBannerData(null);
+      setConflictingBanner(null);
+      setDialogOpen(false);
+      setEditingItem(null);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao reorganizar banners",
+        variant: "destructive",
+      });
+      setShowBannerConflictDialog(false);
     },
   });
 
@@ -830,6 +998,8 @@ export default function AdminPage() {
       categoryForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
+      setPendingCategoryData(null);
+      setConflictingCategory(null);
       toast({
         title: "Sucesso",
         description: editingItem ? "Categoria atualizada!" : "Categoria criada!",
@@ -841,6 +1011,90 @@ export default function AdminPage() {
         description: "Falha ao salvar categoria",
         variant: "destructive",
       });
+    },
+  });
+
+  const reorganizeCategoryMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof createCategorySchema>) => {
+      if (!categories) return;
+
+      const newOrder = data.order || 0;
+      const oldOrder = originalCategoryOrder ?? -1;
+
+      const updates: Promise<any>[] = [];
+
+      if (editingItem) {
+        if (newOrder < oldOrder) {
+          categories.forEach(cat => {
+            if (cat.id !== editingItem.id && cat.order !== null && cat.order !== undefined) {
+              if (cat.order >= newOrder && cat.order < oldOrder) {
+                updates.push(
+                  apiRequest('PUT', `/api/categories/${cat.id}`, {
+                    ...cat,
+                    order: cat.order + 1,
+                  })
+                );
+              }
+            }
+          });
+        } else if (newOrder > oldOrder) {
+          categories.forEach(cat => {
+            if (cat.id !== editingItem.id && cat.order !== null && cat.order !== undefined) {
+              if (cat.order > oldOrder && cat.order <= newOrder) {
+                updates.push(
+                  apiRequest('PUT', `/api/categories/${cat.id}`, {
+                    ...cat,
+                    order: cat.order - 1,
+                  })
+                );
+              }
+            }
+          });
+        }
+      } else {
+        categories.forEach(cat => {
+          if (cat.order !== null && cat.order !== undefined && cat.order >= newOrder) {
+            updates.push(
+              apiRequest('PUT', `/api/categories/${cat.id}`, {
+                ...cat,
+                order: cat.order + 1,
+              })
+            );
+          }
+        });
+      }
+
+      await Promise.all(updates);
+
+      if (editingItem) {
+        return await apiRequest('PUT', `/api/categories/${editingItem.id}`, data);
+      } else {
+        return await apiRequest('POST', '/api/categories', data);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      if (editingItem) {
+        queryClient.invalidateQueries({ queryKey: [`/api/categories/${editingItem.id}`] });
+      }
+      toast({
+        title: "Sucesso",
+        description: editingItem ? "Categoria atualizada e categorias reorganizadas!" : "Categoria criada e categorias reorganizadas!",
+      });
+      categoryForm.reset();
+      setShowCategoryConflictDialog(false);
+      setPendingCategoryData(null);
+      setConflictingCategory(null);
+      setDialogOpen(false);
+      setEditingItem(null);
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao reorganizar categorias",
+        variant: "destructive",
+      });
+      setShowCategoryConflictDialog(false);
     },
   });
 
@@ -1029,7 +1283,31 @@ export default function AdminPage() {
         couponForm.handleSubmit((data) => createCouponMutation.mutate(data))();
         break;
       case 'banners':
-        bannerForm.handleSubmit((data) => createBannerMutation.mutate(data))();
+        bannerForm.handleSubmit((data) => {
+          if (editingItem && 
+              data.order === originalBannerOrder && 
+              data.page === originalBannerPage &&
+              (data.page !== 'video_specific' || data.videoId === originalBannerVideoId)) {
+            createBannerMutation.mutate(data);
+            return;
+          }
+
+          const conflicting = banners?.find(b => {
+            if (b.id === editingItem?.id) return false;
+            if (b.page !== data.page) return false;
+            if (data.page === 'video_specific' && b.videoId !== data.videoId) return false;
+            if (b.order !== data.order) return false;
+            return true;
+          });
+
+          if (conflicting) {
+            setPendingBannerData(data);
+            setConflictingBanner(conflicting);
+            setShowBannerConflictDialog(true);
+          } else {
+            createBannerMutation.mutate(data);
+          }
+        })();
         break;
       case 'popups':
         popupForm.handleSubmit((data) => createPopupMutation.mutate(data))();
@@ -1038,7 +1316,24 @@ export default function AdminPage() {
         notificationForm.handleSubmit((data) => createNotificationMutation.mutate(data))();
         break;
       case 'categories':
-        categoryForm.handleSubmit((data) => createCategoryMutation.mutate(data))();
+        categoryForm.handleSubmit((data) => {
+          if (editingItem && data.order === originalCategoryOrder) {
+            createCategoryMutation.mutate(data);
+            return;
+          }
+
+          const conflicting = categories?.find(
+            cat => cat.order === data.order && cat.id !== editingItem?.id
+          );
+
+          if (conflicting) {
+            setPendingCategoryData(data);
+            setConflictingCategory(conflicting);
+            setShowCategoryConflictDialog(true);
+          } else {
+            createCategoryMutation.mutate(data);
+          }
+        })();
         break;
     }
   };
@@ -2420,10 +2715,10 @@ export default function AdminPage() {
                         <Button
                           type="submit"
                           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                          disabled={createBannerMutation.isPending}
+                          disabled={createBannerMutation.isPending || reorganizeBannerMutation.isPending}
                           data-testid="button-save-banner"
                         >
-                          {createBannerMutation.isPending ? "Salvando..." : "Salvar Banner"}
+                          {reorganizeBannerMutation.isPending ? "Reorganizando..." : createBannerMutation.isPending ? "Salvando..." : "Salvar Banner"}
                         </Button>
                       </form>
                     )}
@@ -2867,10 +3162,10 @@ export default function AdminPage() {
                         <Button
                           type="submit"
                           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                          disabled={createCategoryMutation.isPending}
+                          disabled={createCategoryMutation.isPending || reorganizeCategoryMutation.isPending}
                           data-testid="button-save-category"
                         >
-                          {createCategoryMutation.isPending ? "Salvando..." : "Salvar Categoria"}
+                          {reorganizeCategoryMutation.isPending ? "Reorganizando..." : createCategoryMutation.isPending ? "Salvando..." : "Salvar Categoria"}
                         </Button>
                       </form>
                     )}
@@ -4538,6 +4833,77 @@ export default function AdminPage() {
               data-testid="button-confirm-reorder"
             >
               Confirmar e Reordenar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* AlertDialog de conflito de ordem de categorias */}
+      <AlertDialog open={showCategoryConflictDialog} onOpenChange={setShowCategoryConflictDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conflito de Posição</AlertDialogTitle>
+            <AlertDialogDescription>
+              A posição {pendingCategoryData?.order} já está ocupada pela categoria "{conflictingCategory?.title}".
+              Deseja reorganizar automaticamente as categorias?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setShowCategoryConflictDialog(false);
+                setPendingCategoryData(null);
+                setConflictingCategory(null);
+              }}
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingCategoryData) {
+                  reorganizeCategoryMutation.mutate(pendingCategoryData);
+                }
+              }}
+              disabled={reorganizeCategoryMutation.isPending}
+            >
+              {reorganizeCategoryMutation.isPending ? "Reorganizando..." : "Reorganizar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* AlertDialog de conflito de ordem de banners */}
+      <AlertDialog open={showBannerConflictDialog} onOpenChange={setShowBannerConflictDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conflito de Posição</AlertDialogTitle>
+            <AlertDialogDescription>
+              A posição {pendingBannerData?.order} já está ocupada pelo banner "{conflictingBanner?.title}" 
+              {pendingBannerData?.page === 'video_specific' && pendingBannerData?.videoId 
+                ? ` no vídeo selecionado` 
+                : ' na página selecionada'}.
+              Deseja reorganizar automaticamente os banners?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setShowBannerConflictDialog(false);
+                setPendingBannerData(null);
+                setConflictingBanner(null);
+              }}
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingBannerData) {
+                  reorganizeBannerMutation.mutate(pendingBannerData);
+                }
+              }}
+              disabled={reorganizeBannerMutation.isPending}
+            >
+              {reorganizeBannerMutation.isPending ? "Reorganizando..." : "Reorganizar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
