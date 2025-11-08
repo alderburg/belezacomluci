@@ -353,7 +353,7 @@ export default function AdminCouponFormMobilePage() {
             label="Imagem para Modal Bio"
             value={form.watch("modalImageUrl")}
             onChange={(base64) => form.setValue("modalImageUrl", base64)}
-            placeholder="Selecionar imagem do modal (ou deixe vazio para usar a imagem de capa)"
+            placeholder="Selecionar imagem cupom bio"
           />
         </div>
 
