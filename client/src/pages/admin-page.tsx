@@ -740,47 +740,32 @@ export default function AdminPage() {
 
   const createBannerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
-      try {
-        console.log("Original data:", data);
-
-        const response = await apiRequest(editingItem ? "PUT" : "POST",
-          editingItem ? `/api/banners/${editingItem.id}` : "/api/banners", data);
-
-        return response.json();
-      } catch (error) {
-        console.error("Mutation error:", error);
-        console.error("Banner creation error:", error);
-        console.error("Error details:", error.message);
-        throw error;
+      if (editingItem) {
+        return await apiRequest('PUT', `/api/banners/${editingItem.id}`, data);
+      } else {
+        return await apiRequest('POST', '/api/banners', data);
       }
     },
     onSuccess: () => {
-      // Invalidar apenas as queries necessárias de forma síncrona
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/admin/banners"],
-        exact: true 
+      queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      if (editingItem) {
+        queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${editingItem.id}`] });
+      }
+      toast({
+        title: "Sucesso",
+        description: editingItem ? "Banner atualizado!" : "Banner criado!",
       });
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/banners"],
-        exact: true 
-      });
-
       bannerForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
       setPendingBannerData(null);
       setConflictingBanner(null);
-      toast({
-        title: "Sucesso",
-        description: editingItem ? "Banner atualizado!" : "Banner criado!",
-      });
     },
-    onError: (error: any) => {
-      console.error("Banner creation error:", error);
-      console.error("Error details:", error.response);
+    onError: () => {
       toast({
         title: "Erro",
-        description: `Falha ao salvar banner: ${error.message || JSON.stringify(error)}`,
+        description: "Erro ao salvar banner",
         variant: "destructive",
       });
     },
@@ -857,16 +842,11 @@ export default function AdminPage() {
       }
     },
     onSuccess: () => {
-      // Invalidar apenas as queries necessárias de forma síncrona
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/admin/banners"],
-        exact: true 
-      });
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/banners"],
-        exact: true 
-      });
-
+      queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      if (editingItem) {
+        queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${editingItem.id}`] });
+      }
       toast({
         title: "Sucesso",
         description: editingItem ? "Banner atualizado e banners reorganizados!" : "Banner criado e banners reorganizados!",
@@ -1342,7 +1322,6 @@ export default function AdminPage() {
   };
 
   const handleBannerSubmit = (data: z.infer<typeof createBannerSchema>) => {
-    // Se está editando e nada mudou na ordem/página/vídeo, apenas salva
     if (editingItem && 
         data.order === originalBannerOrder && 
         data.page === originalBannerPage &&
@@ -1351,7 +1330,6 @@ export default function AdminPage() {
       return;
     }
 
-    // Verifica se há conflito
     const conflicting = banners?.find(b => {
       if (b.id === editingItem?.id) return false;
       if (b.page !== data.page) return false;
