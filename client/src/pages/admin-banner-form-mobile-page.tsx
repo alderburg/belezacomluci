@@ -308,31 +308,35 @@ export default function AdminBannerFormMobilePage() {
   };
 
   const onSubmit = (data: z.infer<typeof insertBannerSchema>) => {
-    // Validar se vídeo ou curso foi selecionado quando necessário
-    if (data.page === 'video_specific' && (!data.videoId || data.videoId.trim() === '')) {
-      form.setError('videoId', { 
-        type: 'manual', 
-        message: 'Por favor, selecione um vídeo' 
-      });
-      toast({
-        title: "Erro de validação",
-        description: "Por favor, selecione um vídeo antes de salvar.",
-        variant: "destructive",
-      });
-      return;
+    // VALIDAÇÃO CRÍTICA: Verificar se vídeo ou curso foi selecionado quando necessário
+    if (data.page === 'video_specific') {
+      if (!data.videoId || data.videoId.trim() === '') {
+        form.setError('videoId', { 
+          type: 'manual', 
+          message: 'Por favor, selecione um vídeo' 
+        });
+        toast({
+          title: "Erro de validação",
+          description: "Por favor, selecione um vídeo antes de salvar.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
-    if (data.page === 'course_specific' && (!data.courseId || data.courseId.trim() === '')) {
-      form.setError('courseId', { 
-        type: 'manual', 
-        message: 'Por favor, selecione um curso' 
-      });
-      toast({
-        title: "Erro de validação",
-        description: "Por favor, selecione um curso antes de salvar.",
-        variant: "destructive",
-      });
-      return;
+    if (data.page === 'course_specific') {
+      if (!data.courseId || data.courseId.trim() === '') {
+        form.setError('courseId', { 
+          type: 'manual', 
+          message: 'Por favor, selecione um curso' 
+        });
+        toast({
+          title: "Erro de validação",
+          description: "Por favor, selecione um curso antes de salvar.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     if (isEditing && 

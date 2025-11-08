@@ -44,6 +44,7 @@ export function ResourceSearchSelect({
 }: ResourceSearchSelectProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -94,6 +95,7 @@ export function ResourceSearchSelect({
     onChange(itemId);
     setIsOpen(false);
     setSearchTerm('');
+    setValidationError(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,8 +261,8 @@ export function ResourceSearchSelect({
       )}
       
       {/* Mensagem de erro */}
-      {error && (
-        <p className="text-sm text-destructive mt-1">{error}</p>
+      {(error || validationError) && (
+        <p className="text-sm text-destructive mt-1">{error || validationError}</p>
       )}
     </div>
   );

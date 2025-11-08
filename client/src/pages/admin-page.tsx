@@ -1521,6 +1521,33 @@ export default function AdminPage() {
   };
 
   const handleBannerSubmit = (data: z.infer<typeof createBannerSchema>) => {
+    // Validar se vídeo ou curso foi selecionado quando necessário
+    if (data.page === 'video_specific' && (!data.videoId || data.videoId.trim() === '')) {
+      bannerForm.setError('videoId', { 
+        type: 'manual', 
+        message: 'Por favor, selecione um vídeo' 
+      });
+      toast({
+        title: "Erro de validação",
+        description: "Por favor, selecione um vídeo antes de salvar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (data.page === 'course_specific' && (!data.courseId || data.courseId.trim() === '')) {
+      bannerForm.setError('courseId', { 
+        type: 'manual', 
+        message: 'Por favor, selecione um curso' 
+      });
+      toast({
+        title: "Erro de validação",
+        description: "Por favor, selecione um curso antes de salvar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const bannerId = editingItem?.id; // ID do banner que está sendo editado
 
     // Se está editando e não mudou ordem, página, videoId ou courseId, pode salvar direto
@@ -3000,7 +3027,36 @@ export default function AdminPage() {
 
                     {/* Popup Form */}
                     {activeTab === 'popups' && (
-                      <form onSubmit={popupForm.handleSubmit((data) => createPopupMutation.mutate(data))} className="space-y-4">
+                      <form onSubmit={popupForm.handleSubmit((data) => {
+                        // Validar se vídeo ou curso foi selecionado quando necessário
+                        if (data.targetPage === 'video_specific' && (!data.targetVideoId || data.targetVideoId.trim() === '')) {
+                          popupForm.setError('targetVideoId', { 
+                            type: 'manual', 
+                            message: 'Por favor, selecione um vídeo' 
+                          });
+                          toast({
+                            title: "Erro de validação",
+                            description: "Por favor, selecione um vídeo antes de salvar.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        if (data.targetPage === 'course_specific' && (!data.targetCourseId || data.targetCourseId.trim() === '')) {
+                          popupForm.setError('targetCourseId', { 
+                            type: 'manual', 
+                            message: 'Por favor, selecione um curso' 
+                          });
+                          toast({
+                            title: "Erro de validação",
+                            description: "Por favor, selecione um curso antes de salvar.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        createPopupMutation.mutate(data);
+                      })} className="space-y-4">
                         <div>
                           <Label htmlFor="popup-title">Título <span className="text-destructive">*</span></Label>
                           <Input
