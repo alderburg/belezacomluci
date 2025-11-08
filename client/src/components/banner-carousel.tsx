@@ -11,15 +11,20 @@ import { cn } from "@/lib/utils";
 interface BannerCarouselProps {
   page?: string;
   courseId?: string;
+  videoId?: string;
 }
 
-export default function BannerCarousel({ page = "home", courseId }: BannerCarouselProps) {
+export default function BannerCarousel({ page = "home", courseId, videoId }: BannerCarouselProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [, setLocation] = useLocation();
   const isMobile = useIsMobile();
 
   const { data: banners, isLoading } = useQuery<Banner[]>({
-    queryKey: courseId ? [`/api/banners/course/${courseId}`] : ["/api/banners"],
+    queryKey: courseId 
+      ? [`/api/banners/course/${courseId}`] 
+      : videoId 
+        ? [`/api/banners/video/${videoId}`]
+        : ["/api/banners"],
   });
 
   // Função para verificar se o link é interno
