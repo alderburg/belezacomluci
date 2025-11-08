@@ -51,6 +51,7 @@ export default function AdminBannerFormMobilePage() {
   const [originalOrder, setOriginalOrder] = useState<number | null>(null);
   const [originalPage, setOriginalPage] = useState<string | null>(null);
   const [originalVideoId, setOriginalVideoId] = useState<string | null>(null);
+  const [originalCourseId, setOriginalCourseId] = useState<string | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -81,7 +82,8 @@ export default function AdminBannerFormMobilePage() {
       opensCouponsModal: false,
       startDateTime: "",
       endDateTime: "",
-      videoId: "",
+      videoId: null,
+      courseId: null,
     },
   });
 
@@ -91,6 +93,7 @@ export default function AdminBannerFormMobilePage() {
       setOriginalOrder(orderValue);
       setOriginalPage(banner.page);
       setOriginalVideoId(banner.videoId || null);
+      setOriginalCourseId(banner.courseId || null);
       form.reset({
         title: banner.title,
         description: banner.description,
@@ -108,6 +111,7 @@ export default function AdminBannerFormMobilePage() {
         endDateTime: banner.endDateTime ?
           new Date(banner.endDateTime).toISOString().slice(0, 16) : "",
         videoId: banner.videoId || "",
+        courseId: banner.courseId || "",
       });
     }
   }, [banner, isEditing, form]);
@@ -116,10 +120,12 @@ export default function AdminBannerFormMobilePage() {
     if (!isEditing && banners) {
       const currentPage = form.watch("page") || "home";
       const currentVideoId = form.watch("videoId") || "";
+      const currentCourseId = form.watch("courseId") || "";
       
       const filteredBanners = banners.filter(b => {
         if (b.page !== currentPage) return false;
         if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
+        if (currentPage === 'course_specific' && b.courseId !== currentCourseId) return false;
         return true;
       });
       
@@ -130,13 +136,15 @@ export default function AdminBannerFormMobilePage() {
     }
 
     const subscription = form.watch((value, { name }) => {
-      if ((name === "page" || name === "videoId") && !isEditing && banners) {
+      if ((name === "page" || name === "videoId" || name === "courseId") && !isEditing && banners) {
         const currentPage = value.page || "home";
         const currentVideoId = value.videoId || "";
+        const currentCourseId = value.courseId || "";
         
         const filteredBanners = banners.filter(b => {
           if (b.page !== currentPage) return false;
           if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
+          if (currentPage === 'course_specific' && b.courseId !== currentCourseId) return false;
           return true;
         });
         
@@ -193,6 +201,7 @@ export default function AdminBannerFormMobilePage() {
           banners.forEach(b => {
             if (b.id !== bannerId && b.page === data.page) {
               if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
+              if (data.page === 'course_specific' && b.courseId !== data.courseId) return;
               if (b.order !== null && b.order !== undefined) {
                 if (b.order >= newOrder && b.order < oldOrder) {
                   updates.push(
@@ -210,6 +219,7 @@ export default function AdminBannerFormMobilePage() {
           banners.forEach(b => {
             if (b.id !== bannerId && b.page === data.page) {
               if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
+              if (data.page === 'course_specific' && b.courseId !== data.courseId) return;
               if (b.order !== null && b.order !== undefined) {
                 if (b.order > oldOrder && b.order <= newOrder) {
                   updates.push(
@@ -228,6 +238,7 @@ export default function AdminBannerFormMobilePage() {
         banners.forEach(b => {
           if (b.page === data.page) {
             if (data.page === 'video_specific' && b.videoId !== data.videoId) return;
+            if (data.page === 'course_specific' && b.courseId !== data.courseId) return;
             if (b.order !== null && b.order !== undefined && b.order >= newOrder) {
               updates.push(
                 apiRequest('PUT', `/api/banners/${b.id}`, {
@@ -281,7 +292,8 @@ export default function AdminBannerFormMobilePage() {
     if (isEditing && 
         data.order === originalOrder && 
         data.page === originalPage &&
-        (data.page !== 'video_specific' || data.videoId === originalVideoId)) {
+        (data.page !== 'video_specific' || data.videoId === originalVideoId) &&
+        (data.page !== 'course_specific' || data.courseId === originalCourseId)) {
       mutation.mutate(data);
       return;
     }
@@ -290,6 +302,7 @@ export default function AdminBannerFormMobilePage() {
       if (b.id === bannerId) return false;
       if (b.page !== data.page) return false;
       if (data.page === 'video_specific' && b.videoId !== data.videoId) return false;
+      if (data.page === 'course_specific' && b.courseId !== data.courseId) return false;
       if (b.order !== data.order) return false;
       return true;
     });
@@ -549,6 +562,8 @@ export default function AdminBannerFormMobilePage() {
               A posição {pendingData?.order} já está ocupada pelo banner "{conflictingBanner?.title}" 
               {pendingData?.page === 'video_specific' && pendingData?.videoId 
                 ? ` no vídeo selecionado` 
+                : pendingData?.page === 'course_specific' && pendingData?.courseId
+                ? ` no curso selecionado`
                 : ' na página selecionada'}.
               Deseja reorganizar automaticamente os banners?
             </AlertDialogDescription>
