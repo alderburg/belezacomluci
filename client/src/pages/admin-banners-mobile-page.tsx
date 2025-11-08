@@ -25,6 +25,7 @@ export default function AdminBannersMobilePage() {
   const [bannerToDelete, setBannerToDelete] = useState<{ id: string; title: string } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDeletingItem, setIsDeletingItem] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -70,6 +71,8 @@ export default function AdminBannersMobilePage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      setIsDeletingItem(true);
+      
       // Buscar o banner antes de excluir para reordenar os demais
       const bannerToDeleteItem = banners?.find(b => b.id === id);
       
@@ -114,6 +117,7 @@ export default function AdminBannersMobilePage() {
       });
       setDeleteDialogOpen(false);
       setBannerToDelete(null);
+      setIsDeletingItem(false);
     },
     onError: () => {
       toast({
@@ -121,6 +125,7 @@ export default function AdminBannersMobilePage() {
         description: "Erro ao excluir banner",
         variant: "destructive",
       });
+      setIsDeletingItem(false);
     },
   });
 
@@ -299,6 +304,7 @@ export default function AdminBannersMobilePage() {
                       size="sm"
                       className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
                       onClick={() => handleDeleteClick(banner)}
+                      disabled={isDeletingItem}
                       data-testid={`button-delete-${banner.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -339,8 +345,9 @@ export default function AdminBannersMobilePage() {
             <AlertDialogAction
               onClick={confirmDelete}
               className="flex-1 h-10 rounded-xl flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed mt-0"
+              disabled={isDeletingItem}
             >
-              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+              {isDeletingItem ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

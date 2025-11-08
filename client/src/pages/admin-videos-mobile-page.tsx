@@ -34,6 +34,7 @@ export default function AdminVideosMobilePage() {
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDeletingItem, setIsDeletingItem] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -49,6 +50,7 @@ export default function AdminVideosMobilePage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      setIsDeletingItem(true);
       return await apiRequest('DELETE', `/api/admin/videos/${id}`);
     },
     onSuccess: () => {
@@ -59,6 +61,7 @@ export default function AdminVideosMobilePage() {
         description: "Vídeo excluído com sucesso",
       });
       setVideoToDelete(null);
+      setIsDeletingItem(false);
     },
     onError: (error: Error) => {
       toast({
@@ -66,6 +69,7 @@ export default function AdminVideosMobilePage() {
         title: "Erro",
         description: error.message || "Erro ao excluir vídeo",
       });
+      setIsDeletingItem(false);
     },
   });
 
@@ -208,6 +212,7 @@ export default function AdminVideosMobilePage() {
                     size="sm"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
                     onClick={() => handleDeleteClick(video)}
+                    disabled={isDeletingItem}
                     data-testid={`button-delete-${video.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -247,8 +252,9 @@ export default function AdminVideosMobilePage() {
             <AlertDialogAction
               onClick={confirmDelete}
               className="flex-1 h-10 rounded-xl flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed mt-0"
+              disabled={isDeletingItem}
             >
-              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+              {isDeletingItem ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

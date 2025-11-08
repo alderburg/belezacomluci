@@ -34,6 +34,7 @@ export default function AdminCouponsMobilePage() {
   const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDeletingItem, setIsDeletingItem] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -49,6 +50,7 @@ export default function AdminCouponsMobilePage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      setIsDeletingItem(true);
       return await apiRequest('DELETE', `/api/admin/coupons/${id}`);
     },
     onSuccess: () => {
@@ -59,6 +61,7 @@ export default function AdminCouponsMobilePage() {
         description: "Cupom excluído com sucesso",
       });
       setCouponToDelete(null);
+      setIsDeletingItem(false);
     },
     onError: (error: Error) => {
       toast({
@@ -66,6 +69,7 @@ export default function AdminCouponsMobilePage() {
         title: "Erro",
         description: error.message || "Erro ao excluir cupom",
       });
+      setIsDeletingItem(false);
     },
   });
 
@@ -212,6 +216,7 @@ export default function AdminCouponsMobilePage() {
                     size="sm"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
                     onClick={() => handleDeleteClick(coupon)}
+                    disabled={isDeletingItem}
                     data-testid={`button-delete-${coupon.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -251,8 +256,9 @@ export default function AdminCouponsMobilePage() {
             <AlertDialogAction
               onClick={confirmDelete}
               className="flex-1 h-10 rounded-xl flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed mt-0"
+              disabled={isDeletingItem}
             >
-              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+              {isDeletingItem ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

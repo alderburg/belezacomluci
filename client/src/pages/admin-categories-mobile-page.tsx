@@ -25,6 +25,7 @@ export default function AdminCategoriesMobilePage() {
   const [categoryToDelete, setCategoryToDelete] = useState<{ id: string; title: string } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDeletingItem, setIsDeletingItem] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -40,6 +41,8 @@ export default function AdminCategoriesMobilePage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      setIsDeletingItem(true);
+      
       // Buscar a categoria antes de excluir para reordenar as demais
       const categoryToDeleteItem = categories?.find(c => c.id === id);
       
@@ -75,6 +78,7 @@ export default function AdminCategoriesMobilePage() {
       });
       setDeleteDialogOpen(false);
       setCategoryToDelete(null);
+      setIsDeletingItem(false);
     },
     onError: () => {
       toast({
@@ -82,6 +86,7 @@ export default function AdminCategoriesMobilePage() {
         description: "Erro ao excluir categoria",
         variant: "destructive",
       });
+      setIsDeletingItem(false);
     },
   });
 
@@ -221,6 +226,7 @@ export default function AdminCategoriesMobilePage() {
                     size="sm"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
                     onClick={() => handleDeleteClick(category)}
+                    disabled={isDeletingItem}
                     data-testid={`button-delete-${category.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -260,8 +266,9 @@ export default function AdminCategoriesMobilePage() {
             <AlertDialogAction
               onClick={confirmDelete}
               className="flex-1 h-10 rounded-xl flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed mt-0"
+              disabled={isDeletingItem}
             >
-              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+              {isDeletingItem ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

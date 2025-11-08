@@ -25,6 +25,7 @@ export default function AdminNotificationsMobilePage() {
   const [notificationToDelete, setNotificationToDelete] = useState<{ id: string; title: string } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDeletingItem, setIsDeletingItem] = useState(false); // State to track deletion in progress
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -59,6 +60,7 @@ export default function AdminNotificationsMobilePage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      setIsDeletingItem(true); // Set deleting flag
       return await apiRequest('DELETE', `/api/admin/notifications/${id}`);
     },
     onSuccess: () => {
@@ -70,6 +72,7 @@ export default function AdminNotificationsMobilePage() {
       });
       setDeleteDialogOpen(false);
       setNotificationToDelete(null);
+      setIsDeletingItem(false); // Reset deleting flag
     },
     onError: () => {
       toast({
@@ -77,6 +80,7 @@ export default function AdminNotificationsMobilePage() {
         description: "Erro ao excluir notificação",
         variant: "destructive",
       });
+      setIsDeletingItem(false); // Reset deleting flag on error
     },
   });
 
@@ -206,7 +210,7 @@ export default function AdminNotificationsMobilePage() {
                     variant="outline"
                     size="sm"
                     onClick={() => sendNotificationMutation.mutate(notification.id)}
-                    disabled={sendNotificationMutation.isPending}
+                    disabled={sendNotificationMutation.isPending || isDeletingItem}
                     className="text-green-600 border-green-300 hover:bg-green-50"
                     data-testid={`button-send-${notification.id}`}
                   >
@@ -217,7 +221,7 @@ export default function AdminNotificationsMobilePage() {
                     size="sm"
                     className="flex-1"
                     onClick={() => handleEditClick(notification.id)}
-                    disabled={editingId === notification.id}
+                    disabled={editingId === notification.id || isDeletingItem}
                     data-testid={`button-edit-${notification.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -228,6 +232,7 @@ export default function AdminNotificationsMobilePage() {
                     size="sm"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
                     onClick={() => handleDeleteClick(notification)}
+                    disabled={isDeletingItem}
                     data-testid={`button-delete-${notification.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -247,6 +252,7 @@ export default function AdminNotificationsMobilePage() {
       <Button
         className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg"
         onClick={handleAddClick}
+        disabled={isDeletingItem}
         data-testid="button-add-notification"
       >
         <Plus className="h-6 w-6" />
@@ -267,8 +273,9 @@ export default function AdminNotificationsMobilePage() {
             <AlertDialogAction
               onClick={confirmDelete}
               className="flex-1 h-10 rounded-xl flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed mt-0"
+              disabled={isDeletingItem}
             >
-              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+              {isDeletingItem ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

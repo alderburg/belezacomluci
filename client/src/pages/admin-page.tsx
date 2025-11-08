@@ -188,6 +188,9 @@ export default function AdminPage() {
   const [categoryCurrentPage, setCategoryCurrentPage] = useState(1);
   const [categoryItemsPerPage, setCategoryItemsPerPage] = useState(10);
 
+  // Estado para controlar se algum item está sendo deletado
+  const [isDeletingItem, setIsDeletingItem] = useState(false);
+
   // Ativar modo admin quando entrar na página
   useEffect(() => {
     setAdminMode(true);
@@ -743,7 +746,7 @@ export default function AdminPage() {
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
       console.log('[createBannerMutation] Iniciando mutation com data:', data);
       console.log('[createBannerMutation] editingItem:', editingItem);
-      
+
       try {
         let response;
         if (editingItem) {
@@ -797,7 +800,7 @@ export default function AdminPage() {
   const reorganizeBannerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
       console.log('[reorganizeBannerMutation] Iniciando reorganização com data:', data);
-      
+
       if (!banners) {
         console.log('[reorganizeBannerMutation] Sem banners disponíveis');
         return;
@@ -1151,6 +1154,7 @@ export default function AdminPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async ({ type, id }: { type: string; id: string }) => {
+      setIsDeletingItem(true); // Inicia o estado de deleção
       // Buscar o item antes de excluir para reordenar os demais
       let itemToDelete: any = null;
 
@@ -1264,6 +1268,9 @@ export default function AdminPage() {
         description: "Falha ao excluir item",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      setIsDeletingItem(false); // Finaliza o estado de deleção
     },
   });
 
@@ -4665,6 +4672,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleDelete(notification.id, 'notifications', notification.title)}
+                                  disabled={isDeletingItem} 
                                   data-testid={`button-delete-notification-${notification.id}`}
                                 >
                                   <Trash2 className="w-4 h-4" />
