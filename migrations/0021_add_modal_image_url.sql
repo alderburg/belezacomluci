@@ -1,6 +1,9 @@
 
--- Add modal_image_url column to coupons table
-ALTER TABLE coupons ADD COLUMN modal_image_url TEXT;
+-- Adiciona coluna modal_image_url à tabela coupons
+ALTER TABLE coupons 
+ADD COLUMN IF NOT EXISTS modal_image_url TEXT;
 
--- Copy existing cover_image_url to modal_image_url for all records
-UPDATE coupons SET modal_image_url = cover_image_url WHERE cover_image_url IS NOT NULL;
+-- Copia os valores de cover_image_url para modal_image_url onde estiver vazio
+UPDATE coupons 
+SET modal_image_url = cover_image_url 
+WHERE modal_image_url IS NULL;
