@@ -1280,6 +1280,34 @@ export default function AdminPage() {
     createCouponMutation.mutate(data);
   };
 
+  const handleBannerSubmit = (data: z.infer<typeof createBannerSchema>) => {
+    // Se está editando e nada mudou na ordem/página/vídeo, apenas salva
+    if (editingItem && 
+        data.order === originalBannerOrder && 
+        data.page === originalBannerPage &&
+        (data.page !== 'video_specific' || data.videoId === originalBannerVideoId)) {
+      createBannerMutation.mutate(data);
+      return;
+    }
+
+    // Verifica se há conflito
+    const conflicting = banners?.find(b => {
+      if (b.id === editingItem?.id) return false;
+      if (b.page !== data.page) return false;
+      if (data.page === 'video_specific' && b.videoId !== data.videoId) return false;
+      if (b.order !== data.order) return false;
+      return true;
+    });
+
+    if (conflicting) {
+      setPendingBannerData(data);
+      setConflictingBanner(conflicting);
+      setShowBannerConflictDialog(true);
+    } else {
+      createBannerMutation.mutate(data);
+    }
+  };
+
   const handleSubmit = (type: string) => {
     switch (type) {
       case 'videos':
@@ -1292,31 +1320,7 @@ export default function AdminPage() {
         couponForm.handleSubmit((data) => createCouponMutation.mutate(data))();
         break;
       case 'banners':
-        bannerForm.handleSubmit((data) => {
-          if (editingItem && 
-              data.order === originalBannerOrder && 
-              data.page === originalBannerPage &&
-              (data.page !== 'video_specific' || data.videoId === originalBannerVideoId)) {
-            createBannerMutation.mutate(data);
-            return;
-          }
-
-          const conflicting = banners?.find(b => {
-            if (b.id === editingItem?.id) return false;
-            if (b.page !== data.page) return false;
-            if (data.page === 'video_specific' && b.videoId !== data.videoId) return false;
-            if (b.order !== data.order) return false;
-            return true;
-          });
-
-          if (conflicting) {
-            setPendingBannerData(data);
-            setConflictingBanner(conflicting);
-            setShowBannerConflictDialog(true);
-          } else {
-            createBannerMutation.mutate(data);
-          }
-        })();
+        bannerForm.handleSubmit(handleBannerSubmit)();
         break;
       case 'popups':
         popupForm.handleSubmit((data) => createPopupMutation.mutate(data))();
@@ -4943,14 +4947,23 @@ export default function AdminPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel 
-              onClick={handleCancelBannerReorder}
+              onClick={() => {
+                setShowBannerConflictDialog(false);
+                setPendingBannerData(null);
+                setConflictingBanner(null);
+              }}
             >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleConfirmBannerReorder}
+              onClick={() => {
+                if (pendingBannerData) {
+                  reorganizeBannerMutation.mutate(pendingBannerData);
+                }
+              }}
+              disabled={reorganizeBannerMutation.isPending}
             >
-              Reorganizar
+              {reorganizeBannerMutation.isPending ? "Reorganizando..." : "Reorganizar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
