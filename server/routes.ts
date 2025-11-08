@@ -316,6 +316,41 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Admin alias for delete video
+  app.delete('/api/admin/videos/:id', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      const videoId = req.params.id;
+
+      // Excluir o vídeo e todos os vínculos
+      await storage.deleteVideo(videoId);
+
+      // Broadcast data updates para todas as entidades relacionadas
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        // Notificar que o vídeo foi deletado
+        wsService.broadcastDataUpdate('videos', 'deleted', { id: videoId });
+
+        // Notificar que banners podem ter sido afetados
+        wsService.broadcastDataUpdate('banners', 'deleted', { videoId: videoId });
+
+        // Notificar que popups podem ter sido afetados
+        wsService.broadcastDataUpdate('popups', 'deleted', { videoId: videoId });
+
+        // Notificar que comentários podem ter sido afetados
+        wsService.broadcastDataUpdate('comments', 'deleted', { videoId: videoId });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error('Erro ao deletar vídeo:', error);
+      res.status(500).json({ message: "Failed to delete video" });
+    }
+  });
+
   app.post("/api/videos/:id/like", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
@@ -416,6 +451,27 @@ export function registerRoutes(app: Express): Server {
 
     try {
       await storage.deleteProduct(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
+  // Admin alias for delete product
+  app.delete("/api/admin/products/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      await storage.deleteProduct(req.params.id);
+
+      // Broadcast data update
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('products', 'deleted', { id: req.params.id });
+      }
+
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete product" });
@@ -1042,6 +1098,27 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.delete("/api/banners/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      await storage.deleteBanner(req.params.id);
+
+      // Broadcast data update
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('banners', 'deleted', { id: req.params.id });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete banner" });
+    }
+  });
+
+  // Admin alias for delete banner
+  app.delete("/api/admin/banners/:id", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
       return res.status(403).json({ message: "Admin access required" });
     }
@@ -2364,6 +2441,28 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.delete("/api/popups/:id", async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    try {
+      await storage.deletePopup(req.params.id);
+
+      // Broadcast data update
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('popups', 'deleted', { id: req.params.id });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting popup:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin alias for delete popup
+  app.delete("/api/admin/popups/:id", async (req, res) => {
     if (!req.user?.isAdmin) {
       return res.status(403).json({ error: "Admin access required" });
     }
