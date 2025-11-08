@@ -34,13 +34,43 @@ async function main() {
     
     console.log('📝 Adicionando coluna course_id à tabela banners...');
     
-    // Adicionar a coluna course_id
+    // Adicionar a coluna course_id com tipo VARCHAR (mesmo tipo do products.id)
     await railwayPool.query(`
       ALTER TABLE banners 
-      ADD COLUMN course_id INTEGER;
+      ADD COLUMN course_id VARCHAR;
     `);
     
     console.log('✅ Coluna course_id adicionada com sucesso');
+    
+    // Verificar se existem valores inválidos
+    console.log('🔍 Verificando dados existentes...');
+    
+    const invalidData = await railwayPool.query(`
+      SELECT b.id, b.course_id 
+      FROM banners b
+      WHERE b.course_id IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM products p WHERE p.id = b.course_id
+        );
+    `);
+    
+    if (invalidData.rows.length > 0) {
+      console.log(`⚠️  Encontrados ${invalidData.rows.length} registros com course_id inválido`);
+      console.log('🧹 Limpando valores inválidos...');
+      
+      await railwayPool.query(`
+        UPDATE banners 
+        SET course_id = NULL 
+        WHERE course_id IS NOT NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM products p WHERE p.id = banners.course_id
+          );
+      `);
+      
+      console.log('✅ Valores inválidos removidos');
+    } else {
+      console.log('✅ Nenhum dado inválido encontrado');
+    }
     
     // Adicionar foreign key constraint
     console.log('🔗 Adicionando constraint de foreign key...');
