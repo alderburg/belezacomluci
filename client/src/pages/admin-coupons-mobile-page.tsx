@@ -35,10 +35,22 @@ export default function AdminCouponsMobilePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeletingItem, setIsDeletingItem] = useState(false);
+  const [isCreatingItem, setIsCreatingItem] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Detectar quando a lista foi atualizada após criação
+  useEffect(() => {
+    if (isCreatingItem && !isLoading && coupons) {
+      // Aguardar um pouco para garantir que a lista foi totalmente atualizada
+      const timer = setTimeout(() => {
+        setIsCreatingItem(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isCreatingItem, isLoading, coupons]);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -82,6 +94,7 @@ export default function AdminCouponsMobilePage() {
   };
 
   const handleCreateClick = () => {
+    setIsCreatingItem(true);
     setLocation('/admin/coupons-mobile/new');
   };
 
@@ -209,7 +222,7 @@ export default function AdminCouponsMobilePage() {
                     size="sm"
                     className="flex-1"
                     onClick={() => handleEditClick(coupon.id)}
-                    disabled={editingId === coupon.id || isDeletingItem}
+                    disabled={editingId === coupon.id || isDeletingItem || isCreatingItem}
                     data-testid={`button-edit-${coupon.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -220,7 +233,7 @@ export default function AdminCouponsMobilePage() {
                     size="sm"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
                     onClick={() => handleDeleteClick(coupon)}
-                    disabled={isDeletingItem}
+                    disabled={isDeletingItem || isCreatingItem}
                     data-testid={`button-delete-${coupon.id}`}
                   >
                     <Trash2 className="h-4 w-4" />

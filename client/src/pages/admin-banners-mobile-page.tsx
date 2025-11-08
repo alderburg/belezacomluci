@@ -26,10 +26,22 @@ export default function AdminBannersMobilePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeletingItem, setIsDeletingItem] = useState(false);
+  const [isCreatingItem, setIsCreatingItem] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Detectar quando a lista foi atualizada após criação
+  useEffect(() => {
+    if (isCreatingItem && !isLoading && banners) {
+      // Aguardar um pouco para garantir que a lista foi totalmente atualizada
+      const timer = setTimeout(() => {
+        setIsCreatingItem(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isCreatingItem, isLoading, banners]);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -138,6 +150,7 @@ export default function AdminBannersMobilePage() {
   };
 
   const handleAddClick = () => {
+    setIsCreatingItem(true);
     setLocation('/admin/banners-mobile/new');
   };
 
@@ -297,7 +310,7 @@ export default function AdminBannersMobilePage() {
                       size="sm"
                       className="flex-1"
                       onClick={() => handleEditClick(banner.id)}
-                      disabled={editingId === banner.id || isDeletingItem}
+                      disabled={editingId === banner.id || isDeletingItem || isCreatingItem}
                       data-testid={`button-edit-${banner.id}`}
                     >
                       <Edit className="h-4 w-4 mr-2" />
@@ -308,7 +321,7 @@ export default function AdminBannersMobilePage() {
                       size="sm"
                       className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
                       onClick={() => handleDeleteClick(banner)}
-                      disabled={isDeletingItem}
+                      disabled={isDeletingItem || isCreatingItem}
                       data-testid={`button-delete-${banner.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
