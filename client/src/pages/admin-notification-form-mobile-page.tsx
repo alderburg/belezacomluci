@@ -31,12 +31,8 @@ export default function AdminNotificationFormMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [match, params] = useRoute("/admin/notifications-mobile/edit/:id");
-  const notificationId = match ? params?.id : undefined;
+  const notificationId = match && params && params.id ? String(params.id) : undefined;
   const isEditing = Boolean(match && notificationId);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
