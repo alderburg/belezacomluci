@@ -62,44 +62,46 @@ export function ImageUpload({ label, value, onChange, id, placeholder, required 
         {label}
         {required && <span className="text-destructive"> *</span>}
       </Label>
-      <div className="flex items-center gap-2">
-        <Input
-          id={id}
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => fileInputRef.current?.click()}
-          className="w-full"
-        >
-          <Upload className="w-4 h-4 mr-2" />
-          {preview ? 'Alterar Imagem' : placeholder || 'Selecionar Imagem'}
-        </Button>
-        {preview && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={handleClear}
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        )}
-      </div>
+      
+      <Input
+        id={id}
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+      
       {preview && (
-        <div className="mt-2 relative w-full h-40 bg-muted rounded-lg overflow-hidden">
+        <div className="relative w-full h-40 bg-muted rounded-lg overflow-hidden">
           <img
             src={preview}
             alt="Preview"
             className="w-full h-full object-contain"
           />
+          {preview && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleClear}
+              className="absolute top-2 right-2 bg-background/80 hover:bg-background"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       )}
+      
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => fileInputRef.current?.click()}
+        className="w-full"
+      >
+        <Upload className="w-4 h-4 mr-2" />
+        {preview ? 'Alterar Imagem' : placeholder || 'Selecionar Imagem'}
+      </Button>
     </div>
   );
 }
