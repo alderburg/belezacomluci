@@ -3891,6 +3891,10 @@ export function registerRoutes(app: Express): Server {
         return res.json({ message: "Admin pageviews are not tracked" });
       }
 
+      // Criar timestamp em horário brasileiro (UTC-3)
+      const now = new Date();
+      const brTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+
       const pageView = await storage.createPageView({
         page,
         sessionId,
@@ -3901,6 +3905,7 @@ export function registerRoutes(app: Express): Server {
         country: country || null,
         userId: req.isAuthenticated() ? req.user!.id : null,
         ipAddress: null,
+        createdAt: brTime, // Usar o timestamp brasileiro
       });
 
       // Broadcast analytics update via WebSocket
@@ -3939,10 +3944,15 @@ export function registerRoutes(app: Express): Server {
         targetUrl: targetUrl || null,
       });
 
+      // Criar timestamp em horário brasileiro (UTC-3)
+      const now = new Date();
+      const brTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+
       const click = await storage.createBioClick({
         analyticsTargetId: analyticsTarget.id,
         sessionId,
         userId: req.isAuthenticated() ? req.user!.id : null,
+        createdAt: brTime, // Usar o timestamp brasileiro
       });
 
       // Broadcast analytics update via WebSocket para todos os admins conectados
@@ -3951,7 +3961,7 @@ export function registerRoutes(app: Express): Server {
         wsService.broadcastDataUpdate('analytics', 'click', { 
           targetType,
           targetName,
-          timestamp: new Date().toISOString()
+          timestamp: brTime.toISOString() // Usar o timestamp brasileiro
         });
         console.log(`📊 Analytics click broadcast enviado via WebSocket: ${targetName} (${targetType})`);
       }
@@ -4004,10 +4014,15 @@ export function registerRoutes(app: Express): Server {
         targetUrl: targetUrl || null,
       });
 
+      // Criar timestamp em horário brasileiro (UTC-3)
+      const now = new Date();
+      const brTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+
       const click = await storage.createBioClick({
         analyticsTargetId: analyticsTarget.id,
         sessionId,
         userId: req.isAuthenticated() ? req.user!.id : null,
+        createdAt: brTime, // Usar o timestamp brasileiro
       });
 
       // Broadcast analytics update via WebSocket
