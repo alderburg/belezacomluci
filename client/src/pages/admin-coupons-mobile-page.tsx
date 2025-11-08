@@ -205,7 +205,7 @@ export default function AdminCouponsMobilePage() {
                     size="sm"
                     className="flex-1"
                     onClick={() => handleEditClick(coupon.id)}
-                    disabled={editingId === coupon.id}
+                    disabled={editingId === coupon.id || isDeletingItem}
                     data-testid={`button-edit-${coupon.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />

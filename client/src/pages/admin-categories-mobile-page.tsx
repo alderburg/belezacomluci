@@ -215,7 +215,7 @@ export default function AdminCategoriesMobilePage() {
                     size="sm"
                     className="flex-1"
                     onClick={() => handleEditClick(category.id)}
-                    disabled={editingId === category.id}
+                    disabled={editingId === category.id || isDeletingItem}
                     data-testid={`button-edit-${category.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />

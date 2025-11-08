@@ -48,7 +48,7 @@ export default function AdminBannersMobilePage() {
       const pageIndexB = pageOrder.indexOf(b.page) !== -1 ? pageOrder.indexOf(b.page) : 999;
       return pageIndexA - pageIndexB;
     }
-    
+
     // Para vídeos específicos, agrupar por videoId
     if (a.page === 'video_specific' && b.page === 'video_specific') {
       const videoIdA = a.videoId || '';
@@ -57,14 +57,14 @@ export default function AdminBannersMobilePage() {
         return videoIdA.localeCompare(videoIdB);
       }
     }
-    
+
     // Segundo critério: ordenar por posição (order) dentro do mesmo grupo
     const orderA = a.order ?? 0;
     const orderB = b.order ?? 0;
     if (orderA !== orderB) {
       return orderA - orderB;
     }
-    
+
     // Terceiro critério: por data de criação
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
@@ -72,10 +72,10 @@ export default function AdminBannersMobilePage() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       setIsDeletingItem(true);
-      
+
       // Buscar o banner antes de excluir para reordenar os demais
       const bannerToDeleteItem = banners?.find(b => b.id === id);
-      
+
       // Excluir o banner
       await apiRequest('DELETE', `/api/admin/banners/${id}`);
 
@@ -91,7 +91,7 @@ export default function AdminBannersMobilePage() {
             if (bannerToDeleteItem.page === 'video_specific' && b.videoId !== bannerToDeleteItem.videoId) {
               return;
             }
-            
+
             // Decrementar ordem de todos os banners com ordem maior que o excluído
             if (b.order !== null && b.order !== undefined && b.order > deletedOrder) {
               updates.push(
@@ -293,7 +293,7 @@ export default function AdminBannersMobilePage() {
                       size="sm"
                       className="flex-1"
                       onClick={() => handleEditClick(banner.id)}
-                      disabled={editingId === banner.id}
+                      disabled={editingId === banner.id || isDeletingItem}
                       data-testid={`button-edit-${banner.id}`}
                     >
                       <Edit className="h-4 w-4 mr-2" />
