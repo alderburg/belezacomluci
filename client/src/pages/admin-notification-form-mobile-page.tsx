@@ -41,6 +41,8 @@ export default function AdminNotificationFormMobilePage() {
   const { data: notification, isLoading } = useQuery<Notification>({
     queryKey: [`/api/admin/notifications/${notificationId}`],
     enabled: Boolean(isEditing && notificationId),
+    staleTime: 0, // Sempre buscar dados frescos
+    gcTime: 0, // Não manter em cache (gcTime é o novo nome de cacheTime)
   });
 
   const form = useForm<z.infer<typeof insertNotificationSchema>>({
