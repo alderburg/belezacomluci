@@ -133,6 +133,11 @@ export default function AdminBannersMobilePage() {
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2">
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+                      Posição: {banner.order}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
                       {banner.page === 'home' ? 'Página Inicial' : 
                        banner.page === 'videos' ? 'Vídeos Exclusivos' :
                        banner.page === 'products' ? 'Produtos Digitais' :
@@ -147,7 +152,6 @@ export default function AdminBannersMobilePage() {
                         ID: {banner.videoId.substring(0, 8)}...
                       </Badge>
                     )}
-                    <Badge variant="outline" className="text-xs">Ordem: {banner.order}</Badge>
                     {banner.isExclusive && (
                       <Badge className="bg-purple-100 text-purple-700 text-xs">
                         Premium
