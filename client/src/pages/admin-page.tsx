@@ -754,9 +754,13 @@ export default function AdminPage() {
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+    onSuccess: async () => {
+      // Invalidar apenas uma vez de forma assíncrona
+      await queryClient.invalidateQueries({ 
+        queryKey: ["/api/admin/banners"],
+        exact: false 
+      });
+      
       bannerForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -848,12 +852,13 @@ export default function AdminPage() {
         return await apiRequest('POST', '/api/banners', data);
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
-      if (editingItem) {
-        queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${editingItem.id}`] });
-      }
+    onSuccess: async () => {
+      // Invalidar apenas uma vez de forma assíncrona
+      await queryClient.invalidateQueries({ 
+        queryKey: ["/api/admin/banners"],
+        exact: false 
+      });
+      
       toast({
         title: "Sucesso",
         description: editingItem ? "Banner atualizado e banners reorganizados!" : "Banner criado e banners reorganizados!",
