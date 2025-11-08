@@ -21,6 +21,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const COLORS = ['#ff6b9d', '#c084fc', '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#fb923c'];
 
+// Função para traduzir tipos de target
+const translateTargetType = (type: string): string => {
+  const translations: Record<string, string> = {
+    'coupon': 'Cupom',
+    'banner': 'Banner',
+    'social_network': 'Rede Social',
+  };
+  return translations[type] || type;
+};
+
+// Tooltip customizado em português
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-background border rounded-md shadow-lg p-3">
+        <p className="text-sm font-medium">{data.type || data.targetName || data.state || data.city}</p>
+        <p className="text-xs text-muted-foreground">
+          Cliques: <span className="font-bold text-foreground">{data.count?.toLocaleString()}</span>
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 interface AnalyticsStats {
   totalPageViews: number;
   uniqueVisitors: number;
@@ -301,7 +327,8 @@ export default function AdminAnalyticsPage() {
                             <Pie
                               data={stats.clicksByType.map(item => ({
                                 ...item,
-                                type: item.type === 'social_network' ? 'Redes Sociais' : item.type
+                                type: translateTargetType(item.type),
+                                count: item.count
                               }))}
                               dataKey="count"
                               nameKey="type"
@@ -315,7 +342,7 @@ export default function AdminAnalyticsPage() {
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                               ))}
                             </Pie>
-                            <Tooltip />
+                            <Tooltip content={<CustomTooltip />} />
                           </PieChart>
                         </ResponsiveContainer>
                       </div>
@@ -346,12 +373,13 @@ export default function AdminAnalyticsPage() {
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={stats.topClickedItems.slice(0, 10).map(item => ({
                             ...item,
-                            targetType: item.targetType === 'social_network' ? 'Redes Sociais' : item.targetType
+                            targetName: item.targetName,
+                            count: item.count
                           }))} layout="vertical">
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis type="number" tick={{ fontSize: 11 }} />
                             <YAxis dataKey="targetName" type="category" width={90} tick={{ fontSize: 10 }} />
-                            <Tooltip contentStyle={{ fontSize: 12 }} />
+                            <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="count" fill="#ff6b9d" radius={[0, 4, 4, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
@@ -690,12 +718,13 @@ export default function AdminAnalyticsPage() {
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={stats.clicksOverTime.map(item => ({
                             ...item,
-                            date: format(parseISO(item.date), "dd/MM/yyyy", { locale: ptBR })
+                            date: format(parseISO(item.date), "dd/MM/yyyy", { locale: ptBR }),
+                            count: item.count
                           }))}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis dataKey="date" tick={{ fontSize: 11 }} angle={-45} textAnchor="end" height={70} />
                             <YAxis tick={{ fontSize: 11 }} />
-                            <Tooltip contentStyle={{ fontSize: 12 }} />
+                            <Tooltip content={<CustomTooltip />} />
                             <Legend wrapperStyle={{ fontSize: 12 }} />
                             <Line type="monotone" dataKey="count" stroke="#ff6b9d" strokeWidth={2} name="Cliques" dot={{ r: 3 }} />
                           </LineChart>
@@ -769,11 +798,15 @@ export default function AdminAnalyticsPage() {
                     {stats?.topCities && stats.topCities.length > 0 ? (
                       <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={stats.topCities.slice(0, 10)}>
+                          <BarChart data={stats.topCities.slice(0, 10).map(item => ({
+                            ...item,
+                            city: item.city,
+                            count: item.count
+                          }))}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis dataKey="city" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10 }} />
                             <YAxis tick={{ fontSize: 11 }} />
-                            <Tooltip contentStyle={{ fontSize: 12 }} />
+                            <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="count" fill="#34d399" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
@@ -805,7 +838,11 @@ export default function AdminAnalyticsPage() {
                         <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
                             <Pie
-                              data={stats.topStates.slice(0, 10)}
+                              data={stats.topStates.slice(0, 10).map(item => ({
+                                ...item,
+                                state: item.state,
+                                count: item.count
+                              }))}
                               dataKey="count"
                               nameKey="state"
                               cx="50%"
@@ -818,7 +855,7 @@ export default function AdminAnalyticsPage() {
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                               ))}
                             </Pie>
-                            <Tooltip />
+                            <Tooltip content={<CustomTooltip />} />
                           </PieChart>
                         </ResponsiveContainer>
                       </div>
@@ -1015,11 +1052,15 @@ export default function AdminAnalyticsPage() {
                     {timelineData?.hourlyDistribution && timelineData.hourlyDistribution.some(h => h.count > 0) ? (
                       <div className="h-[250px]">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={timelineData.hourlyDistribution}>
+                          <BarChart data={timelineData.hourlyDistribution.map(item => ({
+                            ...item,
+                            hour: item.hour,
+                            count: item.count
+                          }))}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis dataKey="hour" tick={{ fontSize: 10 }} label={{ value: 'Hora', position: 'insideBottom', offset: -5, fontSize: 11 }} />
                             <YAxis tick={{ fontSize: 10 }} />
-                            <Tooltip contentStyle={{ fontSize: 12 }} />
+                            <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="count" fill="#ff6b9d" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
@@ -1050,12 +1091,13 @@ export default function AdminAnalyticsPage() {
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={timelineData.dailyDistribution.map(item => ({
                             ...item,
-                            displayDate: format(parseISO(item.date), "dd/MM", { locale: ptBR })
+                            displayDate: format(parseISO(item.date), "dd/MM", { locale: ptBR }),
+                            count: item.count
                           }))}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis dataKey="displayDate" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={70} />
                             <YAxis tick={{ fontSize: 10 }} />
-                            <Tooltip contentStyle={{ fontSize: 12 }} />
+                            <Tooltip content={<CustomTooltip />} />
                             <Line 
                               type="monotone" 
                               dataKey="count" 

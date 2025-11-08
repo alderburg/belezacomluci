@@ -94,4 +94,16 @@ if (DB_PROVIDER === 'replit') {
 }
 
 export const pool = new Pool(dbConfig);
+
+// Configurar o fuso horário do Brasil (UTC-3) para todas as conexões
+pool.on('connect', (client) => {
+  client.query("SET TIME ZONE 'America/Sao_Paulo'", (err) => {
+    if (err) {
+      console.error('Erro ao configurar fuso horário:', err);
+    } else {
+      console.log('✅ Fuso horário configurado para America/Sao_Paulo (UTC-3)');
+    }
+  });
+});
+
 export const db = drizzle(pool, { schema });

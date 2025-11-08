@@ -4067,6 +4067,39 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Clear analytics data (admin only - maintenance route)
+  app.delete("/api/analytics/clear", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Limpar todas as tabelas de analytics usando uma transação
+      await db.transaction(async (tx) => {
+        // Ordem correta: primeiro os filhos, depois os pais (devido a foreign keys)
+        await tx.execute(sql`TRUNCATE TABLE bio_clicks RESTART IDENTITY CASCADE`);
+        await tx.execute(sql`TRUNCATE TABLE page_views RESTART IDENTITY CASCADE`);
+        await tx.execute(sql`TRUNCATE TABLE analytics_targets RESTART IDENTITY CASCADE`);
+      });
+
+      console.log('✅ Analytics: Todas as tabelas de analytics foram limpas');
+
+      // Broadcast analytics clear via WebSocket
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('analytics', 'clear', { cleared: true });
+      }
+
+      res.json({ 
+        message: "Analytics data cleared successfully",
+        cleared: ['bio_clicks', 'page_views', 'analytics_targets']
+      });
+    } catch (error) {
+      console.error('Error clearing analytics data:', error);
+      res.status(500).json({ message: "Failed to clear analytics data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
