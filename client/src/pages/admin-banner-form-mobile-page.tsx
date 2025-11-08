@@ -12,6 +12,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useLocation, useRoute, Redirect } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -22,7 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import type { z } from 'zod';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function AdminBannerFormMobilePage() {
   const { user } = useAuth();
@@ -33,6 +43,12 @@ export default function AdminBannerFormMobilePage() {
   const bannerId = match && params && params.id ? String(params.id) : undefined;
   const isEditing = Boolean(match && bannerId);
 
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [pendingData, setPendingData] = useState<z.infer<typeof insertBannerSchema> | null>(null);
+  const [conflictingBanner, setConflictingBanner] = useState<Banner | null>(null);
+  const [originalOrder, setOriginalOrder] = useState<number | null>(null);
+  const [originalPage, setOriginalPage] = useState<string | null>(null);
+
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
   }
@@ -40,6 +56,10 @@ export default function AdminBannerFormMobilePage() {
   const { data: banner, isLoading } = useQuery<Banner>({
     queryKey: [`/api/admin/banners/${bannerId}`],
     enabled: Boolean(isEditing && bannerId),
+  });
+
+  const { data: banners } = useQuery<Banner[]>({
+    queryKey: ["/api/admin/banners"],
   });
 
   const form = useForm<z.infer<typeof insertBannerSchema>>({
@@ -64,13 +84,16 @@ export default function AdminBannerFormMobilePage() {
 
   useEffect(() => {
     if (banner && isEditing) {
+      const orderValue = banner.order || 0;
+      setOriginalOrder(orderValue);
+      setOriginalPage(banner.page);
       form.reset({
         title: banner.title,
         description: banner.description,
         imageUrl: banner.imageUrl,
         linkUrl: banner.linkUrl || "",
         page: banner.page,
-        order: banner.order,
+        order: orderValue,
         showTitle: banner.showTitle ?? true,
         showDescription: banner.showDescription ?? true,
         showButton: banner.showButton ?? true,
@@ -82,8 +105,27 @@ export default function AdminBannerFormMobilePage() {
           new Date(banner.endDateTime).toISOString().slice(0, 16) : "",
         videoId: banner.videoId || "",
       });
+    } else if (!isEditing && banners) {
+      const currentPage = form.watch("page") || "home";
+      const maxOrder = banners
+        .filter(b => b.page === currentPage)
+        .reduce((max, b) => Math.max(max, b.order || 0), 0);
+      form.setValue("order", maxOrder + 1);
     }
-  }, [banner, isEditing, form]);
+  }, [banner, isEditing, banners, form]);
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "page" && !isEditing && banners) {
+        const currentPage = value.page || "home";
+        const maxOrder = banners
+          .filter(b => b.page === currentPage)
+          .reduce((max, b) => Math.max(max, b.order || 0), 0);
+        form.setValue("order", maxOrder + 1);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, isEditing, banners]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {
@@ -96,7 +138,6 @@ export default function AdminBannerFormMobilePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
-      // Invalidar também a query individual do banner editado
       if (isEditing && bannerId) {
         queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${bannerId}`] });
       }
@@ -115,12 +156,83 @@ export default function AdminBannerFormMobilePage() {
     },
   });
 
+  const reorganizeMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {
+      const conflicting = banners?.find(
+        b => b.page === data.page && b.order === data.order && b.id !== bannerId
+      );
+
+      if (conflicting) {
+        await apiRequest('PUT', `/api/banners/${conflicting.id}`, {
+          ...conflicting,
+          order: (conflicting.order || 0) + 1,
+        });
+      }
+
+      if (isEditing) {
+        return await apiRequest('PUT', `/api/banners/${bannerId}`, data);
+      } else {
+        return await apiRequest('POST', '/api/banners', data);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      if (isEditing && bannerId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${bannerId}`] });
+      }
+      toast({
+        title: "Sucesso",
+        description: isEditing ? "Banner atualizado e banners reorganizados!" : "Banner criado e banners reorganizados!",
+      });
+      setShowConflictDialog(false);
+      setPendingData(null);
+      setConflictingBanner(null);
+      setLocation('/admin/banners-mobile');
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao reorganizar banners",
+        variant: "destructive",
+      });
+      setShowConflictDialog(false);
+    },
+  });
+
   const handleBackClick = () => {
     setLocation('/admin/banners-mobile');
   };
 
   const onSubmit = (data: z.infer<typeof insertBannerSchema>) => {
-    mutation.mutate(data);
+    if (isEditing && data.order === originalOrder && data.page === originalPage) {
+      mutation.mutate(data);
+      return;
+    }
+
+    const conflicting = banners?.find(
+      b => b.page === data.page && b.order === data.order && b.id !== bannerId
+    );
+
+    if (conflicting) {
+      setPendingData(data);
+      setConflictingBanner(conflicting);
+      setShowConflictDialog(true);
+    } else {
+      mutation.mutate(data);
+    }
+  };
+
+  const handleConfirmReorganize = () => {
+    if (pendingData) {
+      reorganizeMutation.mutate(pendingData);
+    }
+  };
+
+  const handleCancelReorganize = () => {
+    setShowConflictDialog(false);
+    setPendingData(null);
+    setConflictingBanner(null);
   };
 
   return (
@@ -337,6 +449,33 @@ export default function AdminBannerFormMobilePage() {
         </form>
         </Form>
       )}
+
+      <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
+        <AlertDialogContent className="mx-auto w-[calc(100vw-32px)] sm:max-w-sm rounded-2xl border-0 shadow-xl p-4">
+          <AlertDialogHeader className="text-center space-y-2">
+            <AlertDialogTitle>Conflito de Posição</AlertDialogTitle>
+            <AlertDialogDescription>
+              A posição {pendingData?.order} já está ocupada pelo banner "{conflictingBanner?.title}" na página selecionada.
+              Deseja reorganizar automaticamente os banners?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row items-center justify-center gap-2 mt-4 sm:space-y-0">
+            <AlertDialogCancel 
+              onClick={handleCancelReorganize}
+              className="flex-1 h-10 rounded-xl flex items-center justify-center border border-input bg-background text-foreground hover:bg-muted mt-0"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmReorganize}
+              className="flex-1 h-10 rounded-xl flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 mt-0"
+              disabled={reorganizeMutation.isPending}
+            >
+              {reorganizeMutation.isPending ? "Reorganizando..." : "Reorganizar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

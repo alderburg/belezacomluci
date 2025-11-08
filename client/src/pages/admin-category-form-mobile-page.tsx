@@ -12,6 +12,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useLocation, useRoute, Redirect } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -22,7 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 import type { z } from 'zod';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function AdminCategoryFormMobilePage() {
   const { user } = useAuth();
@@ -37,9 +47,18 @@ export default function AdminCategoryFormMobilePage() {
     return <Redirect to="/" />;
   }
 
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [pendingData, setPendingData] = useState<z.infer<typeof insertCategorySchema> | null>(null);
+  const [conflictingCategory, setConflictingCategory] = useState<Category | null>(null);
+  const [originalOrder, setOriginalOrder] = useState<number | null>(null);
+
   const { data: category, isLoading } = useQuery<Category>({
     queryKey: [`/api/categories/${categoryId}`],
     enabled: Boolean(isEditing && categoryId),
+  });
+
+  const { data: categories } = useQuery<Category[]>({
+    queryKey: ["/api/categories"],
   });
 
   const form = useForm<z.infer<typeof insertCategorySchema>>({
@@ -55,15 +74,20 @@ export default function AdminCategoryFormMobilePage() {
 
   useEffect(() => {
     if (category && isEditing) {
+      const orderValue = category.order || 0;
+      setOriginalOrder(orderValue);
       form.reset({
         title: category.title,
         description: category.description || "",
         coverImageUrl: category.coverImageUrl || "",
-        order: category.order || 0,
+        order: orderValue,
         isActive: category.isActive ?? true,
       });
+    } else if (!isEditing && categories) {
+      const maxOrder = categories.reduce((max, cat) => Math.max(max, cat.order || 0), 0);
+      form.setValue("order", maxOrder + 1);
     }
-  }, [category, isEditing, form]);
+  }, [category, isEditing, categories, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCategorySchema>) => {
@@ -90,12 +114,79 @@ export default function AdminCategoryFormMobilePage() {
     },
   });
 
+  const reorganizeMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof insertCategorySchema>) => {
+      const conflicting = categories?.find(
+        cat => cat.order === data.order && cat.id !== categoryId
+      );
+
+      if (conflicting) {
+        await apiRequest('PUT', `/api/categories/${conflicting.id}`, {
+          ...conflicting,
+          order: (conflicting.order || 0) + 1,
+        });
+      }
+
+      if (isEditing) {
+        return await apiRequest('PUT', `/api/categories/${categoryId}`, data);
+      } else {
+        return await apiRequest('POST', '/api/categories', data);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      toast({
+        title: "Sucesso",
+        description: isEditing ? "Categoria atualizada e categorias reorganizadas!" : "Categoria criada e categorias reorganizadas!",
+      });
+      setShowConflictDialog(false);
+      setPendingData(null);
+      setConflictingCategory(null);
+      setLocation('/admin/categories-mobile');
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao reorganizar categorias",
+        variant: "destructive",
+      });
+      setShowConflictDialog(false);
+    },
+  });
+
   const handleBackClick = () => {
     setLocation('/admin/categories-mobile');
   };
 
   const onSubmit = (data: z.infer<typeof insertCategorySchema>) => {
-    mutation.mutate(data);
+    if (isEditing && data.order === originalOrder) {
+      mutation.mutate(data);
+      return;
+    }
+
+    const conflicting = categories?.find(
+      cat => cat.order === data.order && cat.id !== categoryId
+    );
+
+    if (conflicting) {
+      setPendingData(data);
+      setConflictingCategory(conflicting);
+      setShowConflictDialog(true);
+    } else {
+      mutation.mutate(data);
+    }
+  };
+
+  const handleConfirmReorganize = () => {
+    if (pendingData) {
+      reorganizeMutation.mutate(pendingData);
+    }
+  };
+
+  const handleCancelReorganize = () => {
+    setShowConflictDialog(false);
+    setPendingData(null);
+    setConflictingCategory(null);
   };
 
   return (
@@ -186,6 +277,33 @@ export default function AdminCategoryFormMobilePage() {
         </form>
         </Form>
       )}
+
+      <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
+        <AlertDialogContent className="mx-auto w-[calc(100vw-32px)] sm:max-w-sm rounded-2xl border-0 shadow-xl p-4">
+          <AlertDialogHeader className="text-center space-y-2">
+            <AlertDialogTitle>Conflito de Posição</AlertDialogTitle>
+            <AlertDialogDescription>
+              A posição {pendingData?.order} já está ocupada pela categoria "{conflictingCategory?.title}".
+              Deseja reorganizar automaticamente as categorias?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row items-center justify-center gap-2 mt-4 sm:space-y-0">
+            <AlertDialogCancel 
+              onClick={handleCancelReorganize}
+              className="flex-1 h-10 rounded-xl flex items-center justify-center border border-input bg-background text-foreground hover:bg-muted mt-0"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmReorganize}
+              className="flex-1 h-10 rounded-xl flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 mt-0"
+              disabled={reorganizeMutation.isPending}
+            >
+              {reorganizeMutation.isPending ? "Reorganizando..." : "Reorganizar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
