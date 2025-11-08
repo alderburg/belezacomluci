@@ -32,6 +32,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { ResourceSearchSelect } from '@/components/resource-search-select';
 import type { z } from 'zod';
 import { useEffect, useState } from 'react';
 
@@ -417,21 +418,32 @@ export default function AdminBannerFormMobilePage() {
               <option value="community">Comunidade</option>
               <option value="profile">Perfil</option>
               <option value="bio">Link da Bio</option>
-              <option value="video_specific">Video Específico</option>
+              <option value="video_specific">Vídeo Específico</option>
+              <option value="course_specific">Curso Específico</option>
             </select>
           </div>
         </div>
 
         {form.watch("page") === "video_specific" && (
-          <div>
-            <Label htmlFor="banner-video-id">ID do Vídeo</Label>
-            <Input
-              id="banner-video-id"
-              {...form.register("videoId")}
-              placeholder="Cole o ID do vídeo aqui..."
-              data-testid="input-banner-video-id"
-            />
-          </div>
+          <ResourceSearchSelect
+            type="video"
+            value={form.watch("videoId")}
+            onChange={(id) => form.setValue("videoId", id)}
+            label="Vídeo"
+            placeholder="Busque e selecione um vídeo"
+            required
+          />
+        )}
+
+        {form.watch("page") === "course_specific" && (
+          <ResourceSearchSelect
+            type="course"
+            value={form.watch("courseId")}
+            onChange={(id) => form.setValue("courseId", id)}
+            label="Curso"
+            placeholder="Busque e selecione um curso"
+            required
+          />
         )}
 
         <div className="grid grid-cols-2 gap-4">

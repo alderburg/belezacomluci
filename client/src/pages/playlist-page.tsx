@@ -954,6 +954,13 @@ export default function PlaylistPage() {
           />
         )}
         <div className="container mx-auto px-6 py-8">
+          {/* Banner carousel for course-specific banners */}
+          {product && (
+            <div className="mb-6">
+              <BannerCarousel page="course_specific" courseId={resourceId} />
+            </div>
+          )}
+          
           <div className="flex items-center justify-between mb-6">
             <Button 
               variant="ghost" 

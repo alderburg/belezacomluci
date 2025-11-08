@@ -22,6 +22,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { ResourceSearchSelect } from '@/components/resource-search-select';
 import type { z } from 'zod';
 import { useEffect } from 'react';
 
@@ -348,27 +349,25 @@ export default function AdminPopupFormMobilePage() {
             />
 
             {form.watch("targetPage") === "video_specific" && (
-              <div>
-                <Label htmlFor="popup-video-id">ID do Vídeo</Label>
-                <Input
-                  id="popup-video-id"
-                  {...form.register("targetVideoId")}
-                  placeholder="Cole o ID do vídeo aqui..."
-                  data-testid="input-popup-video-id"
-                />
-              </div>
+              <ResourceSearchSelect
+                type="video"
+                value={form.watch("targetVideoId")}
+                onChange={(id) => form.setValue("targetVideoId", id)}
+                label="Vídeo"
+                placeholder="Busque e selecione um vídeo"
+                required
+              />
             )}
 
             {form.watch("targetPage") === "course_specific" && (
-              <div>
-                <Label htmlFor="popup-course-id">ID do Curso</Label>
-                <Input
-                  id="popup-course-id"
-                  {...form.register("targetCourseId")}
-                  placeholder="Cole o ID do curso aqui..."
-                  data-testid="input-popup-course-id"
-                />
-              </div>
+              <ResourceSearchSelect
+                type="course"
+                value={form.watch("targetCourseId")}
+                onChange={(id) => form.setValue("targetCourseId", id)}
+                label="Curso"
+                placeholder="Busque e selecione um curso"
+                required
+              />
             )}
           </>
         )}

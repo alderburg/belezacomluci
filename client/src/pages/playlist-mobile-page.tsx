@@ -927,6 +927,10 @@ export default function PlaylistMobilePage() {
 
       {/* Content com padding-top para compensar header fixo */}
       <div className="pt-24 px-4 py-6 space-y-6">
+        {/* Banner carousel for course-specific banners */}
+        {product && (
+          <BannerCarousel page="course_specific" courseId={resourceId} />
+        )}
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {!showVideo && currentVideoId && (

@@ -987,6 +987,17 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Get banners specific to a course
+  app.get("/api/banners/course/:courseId", async (req, res) => {
+    try {
+      const courseId = req.params.courseId;
+      const banners = await storage.getCourseBanners(courseId);
+      res.json(banners);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch course banners" });
+    }
+  });
+
   // Admin route to get all banners (including expired and inactive)
   app.get("/api/admin/banners", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {

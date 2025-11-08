@@ -124,8 +124,9 @@ export const banners = pgTable("banners", {
   description: text("description"),
   imageUrl: text("image_url").notNull(),
   linkUrl: text("link_url"),
-  page: text("page").notNull().default("home"), // 'home', 'videos', 'produtos', 'cupons', 'comunidade', 'perfil', 'bio', 'video_specific'
+  page: text("page").notNull().default("home"), // 'home', 'videos', 'produtos', 'cupons', 'comunidade', 'perfil', 'bio', 'video_specific', 'course_specific'
   videoId: varchar("video_id").references(() => videos.id), // Para banners específicos de vídeo
+  courseId: varchar("course_id").references(() => products.id), // Para banners específicos de curso
   isActive: boolean("is_active").default(true),
   order: integer("order").default(0),
   showTitle: boolean("show_title").notNull().default(true),
@@ -780,6 +781,10 @@ export const insertBannerSchema = createInsertSchema(banners).omit({
     return new Date(val).toISOString();
   }),
   videoId: z.string().optional().nullable().transform(val => {
+    if (!val || val === "" || val === null || val === undefined) return null;
+    return val;
+  }),
+  courseId: z.string().optional().nullable().transform(val => {
     if (!val || val === "" || val === null || val === undefined) return null;
     return val;
   }),

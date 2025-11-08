@@ -112,6 +112,7 @@ export interface IStorage {
   getBanners(isActive?: boolean): Promise<Banner[]>;
   getBanner(id: string): Promise<Banner | undefined>;
   getVideoBanners(videoId: string): Promise<Banner[]>;
+  getCourseBanners(courseId: string): Promise<Banner[]>;
   createBanner(banner: InsertBanner): Promise<Banner>;
   updateBanner(id: string, banner: Partial<InsertBanner>): Promise<Banner>;
   deleteBanner(id: string): Promise<void>;
@@ -801,31 +802,48 @@ export class DatabaseStorage implements IStorage {
 
   async getVideoBanners(videoId: string): Promise<Banner[]> {
     const now = new Date();
-
-    return await this.db.select().from(banners).where(
-      and(
-        eq(banners.videoId, videoId),
-        eq(banners.page, 'video_specific'),
-        eq(banners.isActive, true),
-        // Verificar se o banner está dentro do período programado
-        or(
-          and(
+    return await db
+      .select()
+      .from(banners)
+      .where(
+        and(
+          eq(banners.videoId, videoId),
+          eq(banners.page, 'video_specific'),
+          eq(banners.isActive, true),
+          or(
             isNull(banners.startDateTime),
-            isNull(banners.endDateTime)
+            lte(banners.startDateTime, now)
           ),
-          and(
-            or(
-              isNull(banners.startDateTime),
-              lte(banners.startDateTime, now)
-            ),
-            or(
-              isNull(banners.endDateTime),
-              gte(banners.endDateTime, now)
-            )
+          or(
+            isNull(banners.endDateTime),
+            gte(banners.endDateTime, now)
           )
         )
       )
-    ).orderBy(banners.order);
+      .orderBy(banners.order);
+  }
+
+  async getCourseBanners(courseId: string): Promise<Banner[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(banners)
+      .where(
+        and(
+          eq(banners.courseId, courseId),
+          eq(banners.page, 'course_specific'),
+          eq(banners.isActive, true),
+          or(
+            isNull(banners.startDateTime),
+            lte(banners.startDateTime, now)
+          ),
+          or(
+            isNull(banners.endDateTime),
+            gte(banners.endDateTime, now)
+          )
+        )
+      )
+      .orderBy(banners.order);
   }
 
   async getBanner(id: string): Promise<Banner | undefined> {
