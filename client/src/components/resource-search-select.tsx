@@ -1,17 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { X, Video, BookOpen, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 
 interface Video {
   id: string;
@@ -48,6 +42,8 @@ export function ResourceSearchSelect({
 }: ResourceSearchSelectProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   // Buscar vídeos
   const { data: videos } = useQuery<Video[]>({
@@ -74,9 +70,22 @@ export function ResourceSearchSelect({
     item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleClear = () => {
     onChange(null);
     setSearchTerm('');
+    setIsOpen(false);
   };
 
   const handleSelect = (itemId: string) => {
@@ -85,13 +94,17 @@ export function ResourceSearchSelect({
     setSearchTerm('');
   };
 
-  const handleOpenModal = () => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
     setIsOpen(true);
-    setSearchTerm('');
+  };
+
+  const handleInputFocus = () => {
+    setIsOpen(true);
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" ref={dropdownRef}>
       {label && (
         <Label>
           {label} {required && <span className="text-destructive">*</span>}
@@ -145,7 +158,7 @@ export function ResourceSearchSelect({
               </div>
             </div>
 
-            {/* Botão X apenas */}
+            {/* Botão X */}
             <Button
               type="button"
               variant="ghost"
@@ -160,106 +173,84 @@ export function ResourceSearchSelect({
       ) : (
         /* Campo de pesquisa quando não há seleção */
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 z-10" />
           <Input
+            ref={inputRef}
             type="text"
             placeholder={placeholder || `Buscar ${type === 'video' ? 'vídeo' : 'curso'}...`}
-            value=""
-            onFocus={handleOpenModal}
-            readOnly
-            className="pl-10 cursor-pointer"
+            value={searchTerm}
+            onChange={handleInputChange}
+            onFocus={handleInputFocus}
+            className="pl-10"
           />
+          
+          {/* Dropdown de resultados */}
+          {isOpen && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg max-h-[400px] overflow-y-auto z-50">
+              {filteredItems.length === 0 ? (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  {searchTerm ? `Nenhum ${type === 'video' ? 'vídeo' : 'curso'} encontrado.` : `Digite para buscar ${type === 'video' ? 'vídeos' : 'cursos'}...`}
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {filteredItems.map((item) => {
+                    const isVideo = type === 'video';
+                    const imageUrl = isVideo 
+                      ? (item as Video).thumbnailUrl 
+                      : (item as Product).coverImageUrl;
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleSelect(item.id)}
+                        className="w-full p-4 flex items-start gap-3 hover:bg-muted/50 transition-colors text-left"
+                      >
+                        {/* Imagem/Thumbnail */}
+                        <div className="flex-shrink-0">
+                          {imageUrl ? (
+                            <img 
+                              src={imageUrl} 
+                              alt={item.title}
+                              className="w-32 h-20 object-cover rounded"
+                            />
+                          ) : (
+                            <div className="w-32 h-20 bg-muted rounded flex items-center justify-center">
+                              {isVideo ? (
+                                <Video className="h-8 w-8 text-muted-foreground" />
+                              ) : (
+                                <BookOpen className="h-8 w-8 text-muted-foreground" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Informações */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm line-clamp-2 mb-1">{item.title}</h4>
+                          {item.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                              {item.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-xs text-muted-foreground">
+                              {isVideo 
+                                ? ((item as Video).type === 'live' ? 'Live' : (item as Video).type === 'playlist' ? 'Playlist' : 'Vídeo')
+                                : ((item as Product).type === 'course_playlist' ? 'Curso Playlist' : 'Curso Vídeo Único')
+                              }
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
-
-      {/* Modal de pesquisa */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] p-0">
-          <DialogHeader className="p-6 pb-4">
-            <DialogTitle>
-              Selecionar {type === 'video' ? 'Vídeo' : 'Curso'}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="px-6 pb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                type="text"
-                placeholder={placeholder || `Buscar ${type === 'video' ? 'vídeo' : 'curso'}...`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-                autoFocus
-              />
-            </div>
-          </div>
-
-          {/* Lista de resultados */}
-          <div className="overflow-y-auto max-h-[calc(80vh-180px)]">
-            {filteredItems.length === 0 ? (
-              <div className="p-8 text-center text-sm text-muted-foreground">
-                Nenhum {type === 'video' ? 'vídeo' : 'curso'} encontrado.
-              </div>
-            ) : (
-              <div className="divide-y divide-border">
-                {filteredItems.map((item) => {
-                  const isVideo = type === 'video';
-                  const imageUrl = isVideo 
-                    ? (item as Video).thumbnailUrl 
-                    : (item as Product).coverImageUrl;
-
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => handleSelect(item.id)}
-                      className="w-full p-4 flex items-start gap-3 hover:bg-muted/50 transition-colors text-left"
-                    >
-                      {/* Imagem/Thumbnail */}
-                      <div className="flex-shrink-0">
-                        {imageUrl ? (
-                          <img 
-                            src={imageUrl} 
-                            alt={item.title}
-                            className="w-32 h-20 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-32 h-20 bg-muted rounded flex items-center justify-center">
-                            {isVideo ? (
-                              <Video className="h-8 w-8 text-muted-foreground" />
-                            ) : (
-                              <BookOpen className="h-8 w-8 text-muted-foreground" />
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Informações */}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm line-clamp-2 mb-1">{item.title}</h4>
-                        {item.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                            {item.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-xs text-muted-foreground">
-                            {isVideo 
-                              ? ((item as Video).type === 'live' ? 'Live' : (item as Video).type === 'playlist' ? 'Playlist' : 'Vídeo')
-                              : ((item as Product).type === 'course_playlist' ? 'Curso Playlist' : 'Curso Vídeo Único')
-                            }
-                          </span>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
