@@ -794,7 +794,16 @@ export default function AdminPage() {
 
   const createBannerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
-      console.log('[createBannerMutation] Iniciando mutation com data:', data);
+      // Garantir que campos vazios sejam null
+      const cleanedData = {
+        ...data,
+        videoId: data.videoId || null,
+        courseId: data.courseId || null,
+        startDateTime: data.startDateTime || null,
+        endDateTime: data.endDateTime || null,
+      };
+      
+      console.log('[createBannerMutation] Iniciando mutation com data:', cleanedData);
       console.log('[createBannerMutation] editingItem:', editingItem);
 
       if (!editingItem) {
@@ -805,10 +814,10 @@ export default function AdminPage() {
         let response;
         if (editingItem) {
           console.log('[createBannerMutation] Atualizando banner ID:', editingItem.id);
-          response = await apiRequest('PUT', `/api/banners/${editingItem.id}`, data);
+          response = await apiRequest('PUT', `/api/banners/${editingItem.id}`, cleanedData);
         } else {
           console.log('[createBannerMutation] Criando novo banner');
-          response = await apiRequest('POST', '/api/banners', data);
+          response = await apiRequest('POST', '/api/banners', cleanedData);
         }
         console.log('[createBannerMutation] Resposta recebida:', response);
         return response;
@@ -860,7 +869,16 @@ export default function AdminPage() {
 
   const reorganizeBannerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
-      console.log('[reorganizeBannerMutation] Iniciando reorganização com data:', data);
+      // Garantir que campos vazios sejam null
+      const cleanedData = {
+        ...data,
+        videoId: data.videoId || null,
+        courseId: data.courseId || null,
+        startDateTime: data.startDateTime || null,
+        endDateTime: data.endDateTime || null,
+      };
+      
+      console.log('[reorganizeBannerMutation] Iniciando reorganização com data:', cleanedData);
 
       if (!editingItem) {
         setIsCreatingItem(true);
@@ -872,11 +890,11 @@ export default function AdminPage() {
       }
 
       const bannerId = editingItem?.id; // ID do banner que está sendo editado/criado
-      const newOrder = data.order || 0;
+      const newOrder = cleanedData.order || 0;
       const oldOrder = originalBannerOrder ?? -1;
-      const currentPage = data.page;
-      const currentVideoId = data.videoId || null;
-      const currentCourseId = data.courseId || null; // Adicionado
+      const currentPage = cleanedData.page;
+      const currentVideoId = cleanedData.videoId || null;
+      const currentCourseId = cleanedData.courseId || null;
 
       console.log('[reorganizeBannerMutation] newOrder:', newOrder, 'oldOrder:', oldOrder);
       console.log('[reorganizeBannerMutation] currentPage:', currentPage, 'currentVideoId:', currentVideoId, 'currentCourseId:', currentCourseId);
@@ -937,11 +955,11 @@ export default function AdminPage() {
       try {
         let response;
         if (editingItem) {
-          console.log('[reorganizeBannerMutation] Salvando banner editado com nova ordem:', data.order);
-          response = await apiRequest('PUT', `/api/banners/${editingItem.id}`, data);
+          console.log('[reorganizeBannerMutation] Salvando banner editado com nova ordem:', cleanedData.order);
+          response = await apiRequest('PUT', `/api/banners/${editingItem.id}`, cleanedData);
         } else {
-          console.log('[reorganizeBannerMutation] Salvando novo banner com nova ordem:', data.order);
-          response = await apiRequest('POST', '/api/banners', data);
+          console.log('[reorganizeBannerMutation] Salvando novo banner com nova ordem:', cleanedData.order);
+          response = await apiRequest('POST', '/api/banners', cleanedData);
         }
         console.log('[reorganizeBannerMutation] Banner salvo com sucesso:', response);
         return response;

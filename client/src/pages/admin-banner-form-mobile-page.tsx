@@ -159,10 +159,21 @@ export default function AdminBannerFormMobilePage() {
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {
+      // Garantir que campos vazios sejam null
+      const cleanedData = {
+        ...data,
+        videoId: data.videoId || null,
+        courseId: data.courseId || null,
+        startDateTime: data.startDateTime || null,
+        endDateTime: data.endDateTime || null,
+      };
+      
+      console.log('[Banner Form] Enviando dados:', cleanedData);
+      
       if (isEditing) {
-        return await apiRequest('PUT', `/api/banners/${bannerId}`, data);
+        return await apiRequest('PUT', `/api/banners/${bannerId}`, cleanedData);
       } else {
-        return await apiRequest('POST', '/api/banners', data);
+        return await apiRequest('POST', '/api/banners', cleanedData);
       }
     },
     onSuccess: () => {
@@ -190,7 +201,16 @@ export default function AdminBannerFormMobilePage() {
     mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {
       if (!banners) return;
 
-      const newOrder = data.order || 0;
+      // Garantir que campos vazios sejam null
+      const cleanedData = {
+        ...data,
+        videoId: data.videoId || null,
+        courseId: data.courseId || null,
+        startDateTime: data.startDateTime || null,
+        endDateTime: data.endDateTime || null,
+      };
+
+      const newOrder = cleanedData.order || 0;
       const oldOrder = originalOrder ?? -1;
 
       const updates: Promise<any>[] = [];
