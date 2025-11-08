@@ -879,7 +879,7 @@ export default function AdminPage() {
       // Invalidar cache do sistema de popups em todas as páginas
       queryClient.invalidateQueries({ queryKey: ["/api/popups"] });
 
-      // Limpar cache específico do sessionStorage para popups
+      // Limpar cache do sessionStorage para popups
       const keys = Object.keys(sessionStorage);
       keys.forEach(key => {
         if (key.startsWith('popup_') && key.endsWith('_seen')) {
@@ -1099,7 +1099,7 @@ export default function AdminPage() {
     mutationFn: async ({ type, id }: { type: string; id: string }) => {
       // Buscar o item antes de excluir para reordenar os demais
       let itemToDelete: any = null;
-      
+
       if (type === 'banners') {
         itemToDelete = banners?.find(b => b.id === id);
       } else if (type === 'categories') {
@@ -1122,7 +1122,7 @@ export default function AdminPage() {
               if (itemToDelete.page === 'video_specific' && b.videoId !== itemToDelete.videoId) {
                 return;
               }
-              
+
               // Decrementar ordem de todos os banners com ordem maior que o excluído
               if (b.order !== null && b.order !== undefined && b.order > deletedOrder) {
                 updates.push(
@@ -3287,7 +3287,7 @@ export default function AdminPage() {
                                     }}
                                   />
                                 ) : null}
-                                <div className={`absolute inset-0 flex items-center justify-center ${video.thumbnailUrl ? 'hidden' : 'pt-16'}`}>
+                                <div className={`absolute inset-0 flex items-center justify-center ${video.thumbnailUrl ? 'hidden' : ''}`}>
                                   <Play className="w-6 h-6 text-muted-foreground" />
                                 </div>
                               </div>
@@ -3468,7 +3468,7 @@ export default function AdminPage() {
                                     }}
                                   />
                                 ) : null}
-                                <div className={`absolute inset-0 flex items-center justify-center ${product.coverImageUrl ? 'hidden' : 'pt-16'}`}>
+                                <div className={`absolute inset-0 flex items-center justify-center ${product.coverImageUrl ? 'hidden' : ''}`}>
                                   <Download className="w-6 h-6 text-muted-foreground" />
                                 </div>
                               </div>
@@ -3864,7 +3864,7 @@ export default function AdminPage() {
                                     }}
                                   />
                                 ) : null}
-                                <div className={`absolute inset-0 flex items-center justify-center ${banner.imageUrl ? 'hidden' : 'pt-16'}`}>
+                                <div className={`absolute inset-0 flex items-center justify-center ${banner.imageUrl ? 'hidden' : ''}`}>
                                   <Image className="w-6 h-6 text-muted-foreground" />
                                 </div>
                               </div>
