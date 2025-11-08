@@ -754,11 +754,15 @@ export default function AdminPage() {
         throw error;
       }
     },
-    onSuccess: async () => {
-      // Invalidar apenas uma vez de forma assíncrona
-      await queryClient.invalidateQueries({ 
+    onSuccess: () => {
+      // Invalidar apenas as queries necessárias de forma síncrona
+      queryClient.invalidateQueries({ 
         queryKey: ["/api/admin/banners"],
-        exact: false 
+        exact: true 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/banners"],
+        exact: true 
       });
 
       bannerForm.reset();
@@ -852,11 +856,15 @@ export default function AdminPage() {
         return await apiRequest('POST', '/api/banners', data);
       }
     },
-    onSuccess: async () => {
-      // Invalidar apenas uma vez de forma assíncrona
-      await queryClient.invalidateQueries({ 
+    onSuccess: () => {
+      // Invalidar apenas as queries necessárias de forma síncrona
+      queryClient.invalidateQueries({ 
         queryKey: ["/api/admin/banners"],
-        exact: false 
+        exact: true 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/banners"],
+        exact: true 
       });
 
       toast({
