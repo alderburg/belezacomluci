@@ -320,7 +320,7 @@ export default function NotificationsMobilePage() {
     }
 
     // Verificar se tem link para redirecionamento
-    if (notification.notification.linkUrl) {
+    if (notification.notification?.linkUrl) {
       const linkUrl = notification.notification.linkUrl;
 
       // Verificar se é link interno ou externo
@@ -333,10 +333,15 @@ export default function NotificationsMobilePage() {
             const url = new URL(linkUrl);
             internalPath = url.pathname + url.search + url.hash;
           } catch (e) {
+            console.error('Erro ao processar URL:', e);
             internalPath = linkUrl;
           }
         }
-        setLocation(internalPath);
+        
+        // Pequeno delay para garantir que a marcação como lida seja processada
+        setTimeout(() => {
+          setLocation(internalPath);
+        }, 100);
       } else {
         // Link externo - abrir em nova aba
         window.open(linkUrl, '_blank', 'noopener,noreferrer');
@@ -419,6 +424,12 @@ export default function NotificationsMobilePage() {
               const isLoading = loadingReads.has(notification.notificationId);
               // Prioriza o estado do banco, mas permite otimização para melhor UX
               const isRead = notification.isRead || isOptimisticallyRead;
+              
+              // Verificar se a notificação tem os dados necessários
+              if (!notification.notification) {
+                console.error('Notificação sem dados:', notification);
+                return null;
+              }
 
               return (
                 <Card
@@ -429,23 +440,25 @@ export default function NotificationsMobilePage() {
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0">
-                        {notification.notification.imageUrl ? (
+                        {notification.notification?.imageUrl ? (
                           <img
                             src={notification.notification.imageUrl}
-                            alt={notification.notification.title}
+                            alt={notification.notification.title || 'Notificação'}
                             className="w-12 h-12 rounded-lg object-cover"
                             onError={(e) => {
                               // Se a imagem falhar ao carregar, mostra o ícone
                               e.currentTarget.style.display = 'none';
-                              e.currentTarget.nextElementSibling.style.display = 'flex';
+                              if (e.currentTarget.nextElementSibling) {
+                                (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                              }
                             }}
                           />
                         ) : null}
                         <div
-                          className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl bg-muted ${notification.notification.imageUrl ? 'hidden' : 'flex'}`}
-                          style={{ display: notification.notification.imageUrl ? 'none' : 'flex' }}
+                          className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl bg-muted ${notification.notification?.imageUrl ? 'hidden' : 'flex'}`}
+                          style={{ display: notification.notification?.imageUrl ? 'none' : 'flex' }}
                         >
-                          {getNotificationIcon(notification.notification.targetAudience)}
+                          {getNotificationIcon(notification.notification?.targetAudience || 'all')}
                         </div>
                       </div>
                       <div className="flex-1">
@@ -453,11 +466,11 @@ export default function NotificationsMobilePage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <h3 className={`font-semibold text-sm ${!isRead ? 'text-foreground' : 'text-muted-foreground'}`}>
-                                {notification.notification.title}
+                                {notification.notification?.title || 'Notificação'}
                               </h3>
-                              <Badge variant="outline" className={`text-xs ${getTypeColor(notification.notification.targetAudience)}`}>
-                                {notification.notification.targetAudience === 'premium' ? 'Premium' :
-                                 notification.notification.targetAudience === 'free' ? 'Gratuito' : 'Todos'}
+                              <Badge variant="outline" className={`text-xs ${getTypeColor(notification.notification?.targetAudience || 'all')}`}>
+                                {notification.notification?.targetAudience === 'premium' ? 'Premium' :
+                                 notification.notification?.targetAudience === 'free' ? 'Gratuito' : 'Todos'}
                               </Badge>
                               {!isRead && !isLoading && (
                                 <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
@@ -469,9 +482,9 @@ export default function NotificationsMobilePage() {
                               )}
                             </div>
                             <p className={`text-sm whitespace-pre-line ${!isRead ? 'text-foreground' : 'text-muted-foreground'}`}>
-                              {notification.notification.description || 'Sem descrição'}
+                              {notification.notification?.description || 'Sem descrição'}
                             </p>
-                            {notification.notification.linkUrl && (
+                            {notification.notification?.linkUrl && (
                               <p className="text-xs text-primary mt-1">
                                 Toque para ver mais
                               </p>
