@@ -3247,8 +3247,7 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
       .from(pageViews)
       .where(and(...pageConditions, sql`${pageViews.city} IS NOT NULL`))
       .groupBy(pageViews.city, pageViews.state)
-      .orderBy(desc(sql`count(*)`))
-      .limit(10);
+      .orderBy(desc(sql`count(*)`));
 
     const topStatesResult = await this.db
       .select({
@@ -3258,8 +3257,7 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
       .from(pageViews)
       .where(and(...pageConditions, sql`${pageViews.state} IS NOT NULL`))
       .groupBy(pageViews.state)
-      .orderBy(desc(sql`count(*)`))
-      .limit(10);
+      .orderBy(desc(sql`count(*)`));
 
     return {
       totalPageViews: totalPageViewsResult[0]?.count || 0,
