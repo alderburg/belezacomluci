@@ -116,17 +116,63 @@ export default function AdminCategoryFormMobilePage() {
 
   const reorganizeMutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertCategorySchema>) => {
-      const conflicting = categories?.find(
-        cat => cat.order === data.order && cat.id !== categoryId
-      );
+      if (!categories) return;
 
-      if (conflicting) {
-        await apiRequest('PUT', `/api/categories/${conflicting.id}`, {
-          ...conflicting,
-          order: (conflicting.order || 0) + 1,
+      const newOrder = data.order || 0;
+      const oldOrder = originalOrder ?? -1;
+
+      // Reorganizar todas as categorias afetadas
+      const updates: Promise<any>[] = [];
+
+      if (isEditing) {
+        // Modo edição: movendo de oldOrder para newOrder
+        if (newOrder < oldOrder) {
+          // Movendo para cima: empurrar para baixo as categorias entre newOrder e oldOrder
+          categories.forEach(cat => {
+            if (cat.id !== categoryId && cat.order !== null && cat.order !== undefined) {
+              if (cat.order >= newOrder && cat.order < oldOrder) {
+                updates.push(
+                  apiRequest('PUT', `/api/categories/${cat.id}`, {
+                    ...cat,
+                    order: cat.order + 1,
+                  })
+                );
+              }
+            }
+          });
+        } else if (newOrder > oldOrder) {
+          // Movendo para baixo: empurrar para cima as categorias entre oldOrder e newOrder
+          categories.forEach(cat => {
+            if (cat.id !== categoryId && cat.order !== null && cat.order !== undefined) {
+              if (cat.order > oldOrder && cat.order <= newOrder) {
+                updates.push(
+                  apiRequest('PUT', `/api/categories/${cat.id}`, {
+                    ...cat,
+                    order: cat.order - 1,
+                  })
+                );
+              }
+            }
+          });
+        }
+      } else {
+        // Modo criação: empurrar para baixo todas as categorias >= newOrder
+        categories.forEach(cat => {
+          if (cat.order !== null && cat.order !== undefined && cat.order >= newOrder) {
+            updates.push(
+              apiRequest('PUT', `/api/categories/${cat.id}`, {
+                ...cat,
+                order: cat.order + 1,
+              })
+            );
+          }
         });
       }
 
+      // Executar todas as atualizações em paralelo
+      await Promise.all(updates);
+
+      // Agora criar/atualizar a categoria principal
       if (isEditing) {
         return await apiRequest('PUT', `/api/categories/${categoryId}`, data);
       } else {
