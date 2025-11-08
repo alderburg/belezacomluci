@@ -603,6 +603,7 @@ export function registerRoutes(app: Express): Server {
         .select({
           id: coupons.id,
           coverImageUrl: coupons.coverImageUrl,
+          modalImageUrl: coupons.modalImageUrl,
           brand: coupons.brand,
           discount: coupons.discount,
           categoryId: coupons.categoryId,

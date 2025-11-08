@@ -842,9 +842,9 @@ export default function BioPage() {
                             className="relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
                             data-testid={`coupon-${coupon.id}`}
                           >
-                            {coupon.coverImageUrl ? (
+                            {(coupon.modalImageUrl || coupon.coverImageUrl) ? (
                               <img
-                                src={coupon.coverImageUrl}
+                                src={coupon.modalImageUrl || coupon.coverImageUrl}
                                 alt={`${coupon.brand} - ${coupon.discount}`}
                                 className="w-full h-auto object-cover"
                               />
