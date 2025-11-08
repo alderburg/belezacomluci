@@ -3911,7 +3911,13 @@ export function registerRoutes(app: Express): Server {
       // Broadcast analytics update via WebSocket
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('analytics', 'pageview', { pageView });
+        wsService.broadcastDataUpdate('analytics', 'pageview', { 
+          page,
+          timestamp: brTime.toISOString(),
+          city: city || null,
+          state: state || null
+        });
+        console.log(`📊 Analytics pageview broadcast: ${page} - ${city || 'Unknown'}, ${state || 'Unknown'}`);
       }
 
       res.json(pageView);
@@ -3959,9 +3965,12 @@ export function registerRoutes(app: Express): Server {
       const wsService = (global as any).notificationWS;
       if (wsService) {
         wsService.broadcastDataUpdate('analytics', 'click', { 
+          id: click.id,
           targetType,
           targetName,
-          timestamp: brTime.toISOString() // Usar o timestamp brasileiro
+          targetUrl: targetUrl || null,
+          timestamp: brTime.toISOString(), // Usar o timestamp brasileiro
+          analyticsTargetId: analyticsTarget.id
         });
         console.log(`📊 Analytics click broadcast enviado via WebSocket: ${targetName} (${targetType})`);
       }

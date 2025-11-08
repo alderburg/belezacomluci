@@ -127,10 +127,13 @@ export default function AdminAnalyticsPage() {
       }
 
       const data = await response.json();
-      console.log('📊 Analytics stats atualizado:', {
+      const timestamp = new Date().toISOString();
+      console.log(`📊 [${timestamp}] Analytics stats atualizado:`, {
         totalPageViews: data.totalPageViews,
         totalClicks: data.totalClicks,
-        uniqueVisitors: data.uniqueVisitors
+        uniqueVisitors: data.uniqueVisitors,
+        clicksByType: data.clicksByType?.length || 0,
+        topClickedItems: data.topClickedItems?.length || 0
       });
       return data;
     },
@@ -168,9 +171,12 @@ export default function AdminAnalyticsPage() {
       }
 
       const data = await response.json();
-      console.log('📊 Timeline data atualizado:', {
+      const timestamp = new Date().toISOString();
+      console.log(`📊 [${timestamp}] Timeline data atualizado:`, {
         clicksCount: data.clicks?.length || 0,
-        itemsCount: data.items?.length || 0
+        itemsCount: data.items?.length || 0,
+        hourlyDistribution: data.hourlyDistribution?.length || 0,
+        dailyDistribution: data.dailyDistribution?.length || 0
       });
       return data;
     },

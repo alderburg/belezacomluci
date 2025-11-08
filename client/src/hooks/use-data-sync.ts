@@ -290,26 +290,34 @@ export function useDataSync() {
         break;
 
       case 'analytics':
+        const timestamp = new Date().toISOString();
+        console.log(`📊 [${timestamp}] Analytics WebSocket event received:`, {
+          action,
+          data: data ? JSON.stringify(data).substring(0, 100) : 'no data'
+        });
+        
         // Invalidar todas as queries relacionadas à analytics
         queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats'] });
         queryClient.invalidateQueries({ queryKey: ['/api/analytics/clicks'] });
         queryClient.invalidateQueries({ queryKey: ['/api/analytics/timeline'] });
         
         // Forçar refetch imediato para atualização em tempo real
-        queryClient.refetchQueries({
+        const statsRefetch = queryClient.refetchQueries({
           queryKey: ['/api/analytics/stats'],
           type: 'active'
         });
-        queryClient.refetchQueries({
+        const clicksRefetch = queryClient.refetchQueries({
           queryKey: ['/api/analytics/clicks'],
           type: 'active'
         });
-        queryClient.refetchQueries({
+        const timelineRefetch = queryClient.refetchQueries({
           queryKey: ['/api/analytics/timeline'],
           type: 'active'
         });
         
-        console.log(`📊 Analytics ${action} - Cache invalidated and refetched - All analytics data refreshed in real-time`);
+        Promise.all([statsRefetch, clicksRefetch, timelineRefetch]).then(() => {
+          console.log(`📊 [${timestamp}] Analytics ${action} - Cache invalidated and refetched successfully`);
+        });
         break;
 
       default:
