@@ -14,9 +14,15 @@ import { useQuery } from "@tanstack/react-query";
 import type { Banner } from "@shared/schema";
 import { useDataSync } from "@/hooks/use-data-sync";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth"; // Importar hook de autenticação
+import { Redirect } from "wouter"; // Importar Redirect
 
 export default function BioPage() {
   const { toast } = useToast();
+  const { user, authLoading } = useAuth(); // Obter usuário e estado de loading da autenticação
+
+  // Determinar se é admin ANTES de rastrear qualquer coisa
+  const isAdmin = user?.isAdmin || false;
 
   // Ativar sincronização global de dados para atualização automática
   useDataSync(['/api/admin/community-settings', '/api/admin/public-profile']);
@@ -67,7 +73,7 @@ export default function BioPage() {
 
   // Rastrear pageview quando a página carregar
   useEffect(() => {
-    if (!pageViewTracked.current && geoData !== null && sessionId.current) {
+    if (!pageViewTracked.current && geoData !== null && sessionId.current && !isAdmin) { // Adicionar verificação de !isAdmin
       pageViewTracked.current = true;
 
       async function trackPageView() {
@@ -89,7 +95,7 @@ export default function BioPage() {
 
       trackPageView();
     }
-  }, [geoData]);
+  }, [geoData, isAdmin]); // Adicionar isAdmin às dependências
 
   // Função helper para rastrear cliques
   const trackClick = useCallback(async (
@@ -98,6 +104,8 @@ export default function BioPage() {
     targetName: string,
     targetUrl: string | null = null
   ) => {
+    if (isAdmin) return; // Não rastrear cliques de administradores
+
     try {
       await apiRequest('POST', '/api/analytics/bio-click', {
         targetType,
@@ -109,7 +117,7 @@ export default function BioPage() {
     } catch (error) {
       console.error('Erro ao rastrear clique:', error);
     }
-  }, []);
+  }, [isAdmin]); // Adicionar isAdmin às dependências
 
   // Buscar dados do admin (bio e redes sociais)
   const { data: adminProfile, isLoading: isLoadingProfile } = useQuery<{
@@ -307,8 +315,33 @@ export default function BioPage() {
     }
   };
 
+  // Mudar a cor da barra do navegador para verde apenas quando o conteúdo carregar
+  useEffect(() => {
+    if (!isLoading) {
+      // Criar ou atualizar meta tag
+      let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', '#034738');
+      } else {
+        const meta = document.createElement('meta');
+        meta.name = 'theme-color';
+        meta.content = '#034738';
+        document.head.appendChild(meta);
+      }
+
+      // Remover meta tag ao sair da página (volta para cor padrão do navegador)
+      return () => {
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+          meta.remove();
+        }
+      };
+    }
+  }, [isLoading]);
+
   // Mostrar preloader enquanto carrega
-  if (isLoading) {
+  if (isLoading || authLoading) { // Adicionar authLoading à condição de carregamento
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50">
         <div className="text-center space-y-6">
@@ -333,6 +366,11 @@ export default function BioPage() {
         </div>
       </div>
     );
+  }
+
+  // Se não for admin, redirecionar
+  if (!isAdmin) {
+    return <Redirect to="/" />;
   }
 
   return (
@@ -484,7 +522,7 @@ export default function BioPage() {
                     <div
                       key={banner.id}
                       onClick={() => {
-                        trackClick('banner', banner.id, banner.title, null);
+                        trackClick('banner', banner.id, banner.title, null); // trackClick já verifica isAdmin
                         setIsCouponsModalOpen(true);
                       }}
                       className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
@@ -506,7 +544,7 @@ export default function BioPage() {
                     href={banner.linkUrl || "#"}
                     target={banner.linkUrl?.startsWith('http') ? "_blank" : undefined}
                     rel={banner.linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
-                    onClick={() => trackClick('banner', banner.id, banner.title, banner.linkUrl || null)}
+                    onClick={() => trackClick('banner', banner.id, banner.title, banner.linkUrl || null)} // trackClick já verifica isAdmin
                     className="block w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
                     data-testid={`banner-${banner.id}`}
                   >
@@ -545,7 +583,7 @@ export default function BioPage() {
                       href={linkUrl || '#'}
                       target={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "_blank" : undefined}
                       rel={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
-                      onClick={() => trackClick('social_network', null, socialData.name, linkUrl || null)}
+                      onClick={() => trackClick('social_network', null, socialData.name, linkUrl || null)} // trackClick já verifica isAdmin
                       className={`w-12 h-12 rounded-full flex items-center justify-center ${socialData.bgColor} text-white hover:scale-110 transition-transform duration-300 shadow-lg`}
                       title={socialData.name}
                       data-testid={`social-${social.type}`}
@@ -618,7 +656,7 @@ export default function BioPage() {
                       target={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "_blank" : undefined}
                       rel={social.type?.toLowerCase() !== 'email' && linkUrl?.startsWith('http') ? "noopener noreferrer" : undefined}
                       onClick={() => {
-                        trackClick('social_network', null, `${socialData.name} (Menu)`, linkUrl || null);
+                        trackClick('social_network', null, `${socialData.name} (Menu)`, linkUrl || null); // trackClick já verifica isAdmin
                         setIsSocialMenuOpen(false);
                       }}
                       className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer"
@@ -713,6 +751,9 @@ export default function BioPage() {
                             onClick={async (e) => {
                               e.preventDefault();
 
+                              // Não executar a lógica de rastreamento e redirecionamento se for admin
+                              if (isAdmin) return;
+
                               try {
                                 const codigo = coupon.code || '';
 
@@ -787,7 +828,7 @@ export default function BioPage() {
                                     duration: 3500,
                                   });
                                 }
-                                
+
                                 // Aguardar 3 segundos antes de redirecionar
                                 if (redirectUrl) {
                                   setTimeout(() => {
