@@ -2871,6 +2871,7 @@ export default function AdminPage() {
                             label="Vídeo"
                             placeholder="Busque e selecione um vídeo"
                             required
+                            error={bannerForm.formState.errors.videoId?.message}
                           />
                         )}
 

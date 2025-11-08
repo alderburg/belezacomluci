@@ -30,6 +30,7 @@ interface ResourceSearchSelectProps {
   label?: string;
   placeholder?: string;
   required?: boolean;
+  error?: string;
 }
 
 export function ResourceSearchSelect({ 
@@ -38,7 +39,8 @@ export function ResourceSearchSelect({
   onChange, 
   label,
   placeholder,
-  required = false 
+  required = false,
+  error
 }: ResourceSearchSelectProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -254,6 +256,11 @@ export function ResourceSearchSelect({
             </div>
           )}
         </div>
+      )}
+      
+      {/* Mensagem de erro */}
+      {error && (
+        <p className="text-sm text-destructive mt-1">{error}</p>
       )}
     </div>
   );

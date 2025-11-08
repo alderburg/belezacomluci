@@ -308,6 +308,33 @@ export default function AdminBannerFormMobilePage() {
   };
 
   const onSubmit = (data: z.infer<typeof insertBannerSchema>) => {
+    // Validar se vídeo ou curso foi selecionado quando necessário
+    if (data.page === 'video_specific' && (!data.videoId || data.videoId.trim() === '')) {
+      form.setError('videoId', { 
+        type: 'manual', 
+        message: 'Por favor, selecione um vídeo' 
+      });
+      toast({
+        title: "Erro de validação",
+        description: "Por favor, selecione um vídeo antes de salvar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (data.page === 'course_specific' && (!data.courseId || data.courseId.trim() === '')) {
+      form.setError('courseId', { 
+        type: 'manual', 
+        message: 'Por favor, selecione um curso' 
+      });
+      toast({
+        title: "Erro de validação",
+        description: "Por favor, selecione um curso antes de salvar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (isEditing && 
         data.order === originalOrder && 
         data.page === originalPage &&
@@ -464,6 +491,7 @@ export default function AdminBannerFormMobilePage() {
             label="Vídeo"
             placeholder="Busque e selecione um vídeo"
             required
+            error={form.formState.errors.videoId?.message}
           />
         )}
 
@@ -475,6 +503,7 @@ export default function AdminBannerFormMobilePage() {
             label="Curso"
             placeholder="Busque e selecione um curso"
             required
+            error={form.formState.errors.courseId?.message}
           />
         )}
 
