@@ -3288,12 +3288,21 @@ export default function AdminPage() {
                       </>
                     ) : (
                       <div className="text-center py-8">
-                        <Play className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Play className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum vídeo encontrado</h3>
+                        <p className="text-muted-foreground mb-4">
                           {videoSearchTerm 
-                            ? "Nenhum vídeo encontrado com o termo pesquisado" 
-                            : "Nenhum vídeo cadastrado"}
+                            ? `Não encontramos vídeos com "${videoSearchTerm}"`
+                            : "Crie seu primeiro vídeo para começar"}
                         </p>
+                        {!videoSearchTerm && (
+                          <Button onClick={() => openCreateDialog('videos')}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Criar Primeiro Vídeo
+                          </Button>
+                        )}
                       </div>
                     )}
 
@@ -3456,12 +3465,21 @@ export default function AdminPage() {
                       </>
                     ) : (
                       <div className="text-center py-8">
-                        <Download className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Download className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum produto encontrado</h3>
+                        <p className="text-muted-foreground mb-4">
                           {productSearchTerm 
-                            ? "Nenhum produto encontrado com o termo pesquisado" 
-                            : "Nenhum produto cadastrado"}
+                            ? `Não encontramos produtos com "${productSearchTerm}"`
+                            : "Crie seu primeiro produto digital para começar"}
                         </p>
+                        {!productSearchTerm && (
+                          <Button onClick={() => openCreateDialog('products')}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Criar Primeiro Produto
+                          </Button>
+                        )}
                       </div>
                     )}
 
@@ -3716,12 +3734,21 @@ export default function AdminPage() {
                       </>
                     ) : (
                       <div className="text-center py-8">
-                        <Tag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Tag className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum cupom encontrado</h3>
+                        <p className="text-muted-foreground mb-4">
                           {couponSearchTerm 
-                            ? "Nenhum cupom encontrado com o termo pesquisado" 
-                            : "Nenhum cupom cadastrado"}
+                            ? `Não encontramos cupons com "${couponSearchTerm}"`
+                            : "Crie seu primeiro cupom de desconto para começar"}
                         </p>
+                        {!couponSearchTerm && (
+                          <Button onClick={() => openCreateDialog('coupons')}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Criar Primeiro Cupom
+                          </Button>
+                        )}
                       </div>
                     )}
                   </CardContent>
@@ -3930,12 +3957,21 @@ export default function AdminPage() {
                       </>
                     ) : (
                       <div className="text-center py-8">
-                        <Image className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Image className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum banner encontrado</h3>
+                        <p className="text-muted-foreground mb-4">
                           {bannerSearchTerm 
-                            ? "Nenhum banner encontrado com o termo pesquisado" 
-                            : "Nenhum banner cadastrado"}
+                            ? `Não encontramos banners com "${bannerSearchTerm}"`
+                            : "Crie seu primeiro banner promocional para começar"}
                         </p>
+                        {!bannerSearchTerm && (
+                          <Button onClick={() => openCreateDialog('banners')}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Criar Primeiro Banner
+                          </Button>
+                        )}
                       </div>
                     )}
                   </CardContent>
@@ -4164,16 +4200,27 @@ export default function AdminPage() {
                       </>
                     ) : (
                       <div className="text-center py-8">
-                        <svg className="w-12 h-12 text-muted-foreground mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                          <circle cx="8.5" cy="8.5" r="1.5"/>
-                          <path d="M21 15l-5-5L5 21"/>
-                        </svg>
-                        <p className="text-muted-foreground">
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                          <div className="w-8 h-8 text-muted-foreground">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                              <circle cx="8.5" cy="8.5" r="1.5"/>
+                              <path d="M21 15l-5-5L5 21"/>
+                            </svg>
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum popup encontrado</h3>
+                        <p className="text-muted-foreground mb-4">
                           {popupSearchTerm 
-                            ? "Nenhum popup encontrado com o termo pesquisado" 
-                            : "Nenhum popup cadastrado"}
+                            ? `Não encontramos popups com "${popupSearchTerm}"`
+                            : "Crie seu primeiro popup para engajar os usuários"}
                         </p>
+                        {!popupSearchTerm && (
+                          <Button onClick={() => openCreateDialog('popups')}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Criar Primeiro Popup
+                          </Button>
+                        )}
                       </div>
                     )}
                   </CardContent>
