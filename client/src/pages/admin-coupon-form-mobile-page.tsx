@@ -422,8 +422,8 @@ export default function AdminCouponFormMobilePage() {
       )}
 
       <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
-        <AlertDialogContent data-testid="dialog-order-conflict">
-          <AlertDialogHeader>
+        <AlertDialogContent className="mx-auto w-[calc(100vw-32px)] sm:max-w-sm rounded-2xl border-0 shadow-xl p-4" data-testid="dialog-order-conflict">
+          <AlertDialogHeader className="text-center space-y-2">
             <AlertDialogTitle>Conflito de Ordem de Exibição</AlertDialogTitle>
             <AlertDialogDescription>
               Já existe um cupom cadastrado com a posição de exibição número {conflictData?.order}.
@@ -437,16 +437,18 @@ export default function AdminCouponFormMobilePage() {
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="flex flex-row items-center justify-center gap-2 mt-4 sm:space-y-0">
             <AlertDialogCancel 
               onClick={handleCancelReorder}
               data-testid="button-cancel-reorder"
+              className="flex-1 h-10 rounded-xl flex items-center justify-center border border-input bg-background text-foreground hover:bg-muted mt-0"
             >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmReorder}
               data-testid="button-confirm-reorder"
+              className="flex-1 h-10 rounded-xl flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 mt-0"
             >
               Confirmar e Reordenar
             </AlertDialogAction>
