@@ -3,14 +3,16 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft, Users, Search } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useDataSync } from '@/hooks/use-data-sync';
 import { User } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState } from "react";
 
 export default function AdminUsersMobilePage() {
   const { user } = useAuth();
@@ -18,6 +20,7 @@ export default function AdminUsersMobilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
+  const [searchTerm, setSearchTerm] = useState("");
 
 
   if (!user?.isAdmin) {
@@ -56,6 +59,19 @@ export default function AdminUsersMobilePage() {
       </div>
 
       <div className="pt-24 px-4 pb-4">
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Buscar usuário..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-full"
+            />
+          </div>
+        </div>
+
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -64,7 +80,12 @@ export default function AdminUsersMobilePage() {
           </div>
         ) : users && users.length > 0 ? (
           <div className="space-y-3">
-            {users.map((userData) => (
+            {users
+              .filter(userData => 
+                userData.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                userData.email.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((userData) => (
               <div
                 key={userData.id}
                 className="bg-card rounded-xl border border-border p-4"

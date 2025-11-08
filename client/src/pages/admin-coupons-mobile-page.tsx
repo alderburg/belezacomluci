@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { ArrowLeft, Plus, Ticket, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Ticket, Edit, Trash2, Search } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useDataSync } from '@/hooks/use-data-sync';
 import { Coupon } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +32,7 @@ export default function AdminCouponsMobilePage() {
   const { isConnected } = useDataSync();
   const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -109,6 +111,19 @@ export default function AdminCouponsMobilePage() {
       </div>
 
       <div className="pt-24 px-4 pb-24">
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Buscar marca..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-full"
+            />
+          </div>
+        </div>
+
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -117,7 +132,13 @@ export default function AdminCouponsMobilePage() {
           </div>
         ) : coupons && coupons.length > 0 ? (
           <div className="space-y-3">
-            {coupons.map((coupon) => (
+            {coupons
+              .filter(coupon => 
+                coupon.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                coupon.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                coupon.code.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((coupon) => (
               <div
                 key={coupon.id}
                 className="bg-card rounded-xl border border-border p-4"

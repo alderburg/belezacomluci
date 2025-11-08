@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { ArrowLeft, Plus, FolderTree, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, FolderTree, Edit, Trash2, Search } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useDataSync } from '@/hooks/use-data-sync';
 import { Category } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { apiRequest } from '@/lib/queryClient';
 import { useState } from "react";
@@ -23,6 +24,7 @@ export default function AdminCategoriesMobilePage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<{ id: string; title: string } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -102,6 +104,19 @@ export default function AdminCategoriesMobilePage() {
       </div>
 
       <div className="pt-24 px-4 pb-24">
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Buscar categoria..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-full"
+            />
+          </div>
+        </div>
+
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -110,7 +125,12 @@ export default function AdminCategoriesMobilePage() {
           </div>
         ) : categories && categories.length > 0 ? (
           <div className="space-y-3">
-            {categories.map((category) => (
+            {categories
+              .filter(category => 
+                category.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                category.description?.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((category) => (
               <div
                 key={category.id}
                 className="bg-card rounded-xl border border-border p-4"
