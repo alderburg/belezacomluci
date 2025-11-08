@@ -1,8 +1,15 @@
 
-const { Pool } = require('pg');
-const fs = require('fs');
-const path = require('path');
-require('dotenv').config({ path: '.env.railway' });
+import pg from 'pg';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+const { Pool } = pg;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: '.env.railway' });
 
 const pool = new Pool({
   host: process.env.RAILWAY_DB_HOST?.trim(),
