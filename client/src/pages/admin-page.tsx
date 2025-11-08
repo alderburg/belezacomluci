@@ -3780,6 +3780,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleEdit(coupon, 'coupons')}
+                                  disabled={isDeletingItem}
                                   data-testid={`button-edit-coupon-${coupon.id}`}
                                 >
                                   <Edit2 className="w-4 h-4" />
@@ -3788,6 +3789,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleDelete(coupon.id, 'coupons', coupon.brand)}
+                                  disabled={isDeletingItem}
                                   data-testid={`button-delete-coupon-${coupon.id}`}
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -4003,6 +4005,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleEdit(banner, 'banners')}
+                                  disabled={isDeletingItem}
                                   data-testid={`button-edit-banner-${banner.id}`}
                                 >
                                   <Edit2 className="w-4 h-4" />
@@ -4011,6 +4014,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleDelete(banner.id, 'banners', banner.title)}
+                                  disabled={isDeletingItem}
                                   data-testid={`button-delete-banner-${banner.id}`}
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -4847,6 +4851,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleEdit(category, 'categories')}
+                                  disabled={isDeletingItem}
                                   data-testid={`button-edit-category-${category.id}`}
                                 >
                                   <Edit2 className="w-4 h-4" />
@@ -4855,6 +4860,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleDelete(category.id, 'categories', category.title)}
+                                  disabled={isDeletingItem}
                                   data-testid={`button-delete-category-${category.id}`}
                                 >
                                   <Trash2 className="w-4 h-4" />
