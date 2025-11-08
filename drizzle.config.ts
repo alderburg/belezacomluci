@@ -1,12 +1,11 @@
-import { defineConfig } from "drizzle-kit";
 
-const DB_PROVIDER = process.env.DB_PROVIDER || 'railway';
+import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
   out: "./migrations",
   schema: "./shared/schema.ts",
   dialect: "postgresql",
-  dbCredentials: DB_PROVIDER === 'railway' ? {
+  dbCredentials: {
     host: process.env.RAILWAY_DB_HOST!.trim(),
     port: parseInt(process.env.RAILWAY_DB_PORT || '5432'),
     database: process.env.RAILWAY_DB_NAME!.trim(),
@@ -15,12 +14,5 @@ export default defineConfig({
     ssl: {
       rejectUnauthorized: false,
     },
-  } : {
-    host: process.env.LOCAWEB_DB_HOST!,
-    port: parseInt(process.env.LOCAWEB_DB_PORT || '5432'),
-    database: process.env.LOCAWEB_DB_NAME!,
-    user: process.env.LOCAWEB_DB_USER!,
-    password: process.env.LOCAWEB_DB_PASSWORD!,
-    ssl: false,
   },
 });
