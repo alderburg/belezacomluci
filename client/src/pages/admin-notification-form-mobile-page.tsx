@@ -42,40 +42,10 @@ export default function AdminNotificationFormMobilePage() {
     return <Redirect to="/" />;
   }
 
-  const { data: notification, isLoading, error } = useQuery<Notification>({
-    queryKey: ['/api/admin/notifications', notificationId],
-    queryFn: async () => {
-      if (!notificationId) {
-        console.error('Tentativa de carregar notificação sem ID');
-        throw new Error('ID da notificação não fornecido');
-      }
-      console.log('Buscando notificação para edição, ID:', notificationId);
-      const res = await fetch(`/api/admin/notifications/${notificationId}`, {
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error(`Erro ao carregar notificação (${res.status}):`, errorText);
-        throw new Error(`Erro ao carregar notificação: ${res.status} ${errorText}`);
-      }
-      const data = await res.json();
-      console.log('Notificação carregada com sucesso:', data);
-      return data;
-    },
+  const { data: notification, isLoading } = useQuery<Notification>({
+    queryKey: [`/api/admin/notifications/${notificationId}`],
     enabled: Boolean(isEditing && notificationId),
   });
-
-  // Mostrar erro se houver
-  useEffect(() => {
-    if (error) {
-      console.error('Erro ao carregar notificação:', error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível carregar os dados da notificação",
-      });
-    }
-  }, [error, toast]);
 
   const form = useForm<z.infer<typeof insertNotificationSchema>>({
     resolver: zodResolver(insertNotificationSchema),
@@ -91,10 +61,8 @@ export default function AdminNotificationFormMobilePage() {
     },
   });
 
-  // Reset form when notification data loads or ID changes
   useEffect(() => {
     if (notification && isEditing) {
-      console.log('Populando formulário com dados da notificação:', notification);
       form.reset({
         title: notification.title,
         description: notification.description,
@@ -107,20 +75,8 @@ export default function AdminNotificationFormMobilePage() {
         endDateTime: notification.endDateTime ? 
           new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
       });
-    } else if (!isEditing) {
-      console.log('Resetando formulário para nova notificação');
-      form.reset({
-        title: "",
-        description: "",
-        imageUrl: "",
-        linkUrl: "",
-        targetAudience: "all",
-        isActive: true,
-        startDateTime: "",
-        endDateTime: "",
-      });
     }
-  }, [notification, isEditing, notificationId, form]);
+  }, [notification, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {
