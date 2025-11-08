@@ -3104,7 +3104,7 @@ export default function AdminPage() {
 
                         {/* Campo para página específica */}
                         {popupForm.watch("trigger") === "page_specific" && (
-                          <div className="grid grid-cols-2 gap-4">
+                          <>
                             <div>
                               <Label htmlFor="popup-target-page">Página de Destino</Label>
                               <Select
@@ -3128,29 +3128,29 @@ export default function AdminPage() {
                             </div>
 
                             {popupForm.watch("targetPage") === "video_specific" && (
-                              <div>
-                                <Label htmlFor="popup-video-id">ID do Vídeo</Label>
-                                <Input
-                                  id="popup-video-id"
-                                  {...popupForm.register("targetVideoId")}
-                                  placeholder="Cole o ID do vídeo aqui..."
-                                  data-testid="input-popup-video-id"
-                                />
-                              </div>
+                              <ResourceSearchSelect
+                                type="video"
+                                value={popupForm.watch("targetVideoId")}
+                                onChange={(id) => popupForm.setValue("targetVideoId", id)}
+                                label="Vídeo"
+                                placeholder="Busque e selecione um vídeo"
+                                required
+                                error={popupForm.formState.errors.targetVideoId?.message}
+                              />
                             )}
 
                             {popupForm.watch("targetPage") === "course_specific" && (
-                              <div>
-                                <Label htmlFor="popup-course-id">ID do Curso</Label>
-                                <Input
-                                  id="popup-course-id"
-                                  {...popupForm.register("targetCourseId")}
-                                  placeholder="Cole o ID do curso aqui..."
-                                  data-testid="input-popup-course-id"
-                                />
-                              </div>
+                              <ResourceSearchSelect
+                                type="course"
+                                value={popupForm.watch("targetCourseId")}
+                                onChange={(id) => popupForm.setValue("targetCourseId", id)}
+                                label="Curso"
+                                placeholder="Busque e selecione um curso"
+                                required
+                                error={popupForm.formState.errors.targetCourseId?.message}
+                              />
                             )}
-                          </div>
+                          </>
                         )}
 
                         {/* Campos de Data e Hora para Agendamento */}
