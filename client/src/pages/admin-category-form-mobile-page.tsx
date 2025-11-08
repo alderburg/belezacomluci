@@ -99,6 +99,10 @@ export default function AdminCategoryFormMobilePage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      // Invalidar também a query específica desta categoria
+      if (isEditing && categoryId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/categories/${categoryId}`] });
+      }
       toast({
         title: "Sucesso",
         description: isEditing ? "Categoria atualizada!" : "Categoria criada!",
@@ -181,6 +185,10 @@ export default function AdminCategoryFormMobilePage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      // Invalidar também a query específica desta categoria
+      if (isEditing && categoryId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/categories/${categoryId}`] });
+      }
       toast({
         title: "Sucesso",
         description: isEditing ? "Categoria atualizada e categorias reorganizadas!" : "Categoria criada e categorias reorganizadas!",
