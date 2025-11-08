@@ -3476,7 +3476,9 @@ export default function AdminPage() {
                                       ID: {banner.videoId.substring(0, 8)}...
                                     </Badge>
                                   )}
-                                  <Badge variant="outline">Ordem: {banner.order}</Badge>
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                    Posição: {banner.order}
+                                  </Badge>
                                   {(() => {
                                     const now = new Date();
 
