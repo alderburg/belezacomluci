@@ -740,13 +740,27 @@ export default function AdminPage() {
 
   const createBannerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
-      if (editingItem) {
-        return await apiRequest('PUT', `/api/banners/${editingItem.id}`, data);
-      } else {
-        return await apiRequest('POST', '/api/banners', data);
+      console.log('[createBannerMutation] Iniciando mutation com data:', data);
+      console.log('[createBannerMutation] editingItem:', editingItem);
+      
+      try {
+        let response;
+        if (editingItem) {
+          console.log('[createBannerMutation] Atualizando banner ID:', editingItem.id);
+          response = await apiRequest('PUT', `/api/banners/${editingItem.id}`, data);
+        } else {
+          console.log('[createBannerMutation] Criando novo banner');
+          response = await apiRequest('POST', '/api/banners', data);
+        }
+        console.log('[createBannerMutation] Resposta recebida:', response);
+        return response;
+      } catch (error) {
+        console.error('[createBannerMutation] Erro no mutationFn:', error);
+        throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('[createBannerMutation] onSuccess chamado com data:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
       if (editingItem) {
@@ -756,6 +770,7 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Banner atualizado!" : "Banner criado!",
       });
+      console.log('[createBannerMutation] Resetando formulário e fechando dialog');
       bannerForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -764,12 +779,15 @@ export default function AdminPage() {
       setOriginalBannerOrder(null);
       setOriginalBannerPage(null);
       setOriginalBannerVideoId(null);
+      console.log('[createBannerMutation] onSuccess concluído');
     },
     onError: (error: any) => {
-      console.error('Erro ao salvar banner:', error);
+      console.error('[createBannerMutation] onError chamado com erro:', error);
+      console.error('[createBannerMutation] Tipo do erro:', typeof error);
+      console.error('[createBannerMutation] Stack do erro:', error?.stack);
       toast({
         title: "Erro",
-        description: "Erro ao salvar banner",
+        description: error?.message || "Erro ao salvar banner",
         variant: "destructive",
       });
     },
@@ -777,15 +795,23 @@ export default function AdminPage() {
 
   const reorganizeBannerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
-      if (!banners) return;
+      console.log('[reorganizeBannerMutation] Iniciando reorganização com data:', data);
+      
+      if (!banners) {
+        console.log('[reorganizeBannerMutation] Sem banners disponíveis');
+        return;
+      }
 
       const newOrder = data.order || 0;
       const oldOrder = originalBannerOrder ?? -1;
+      console.log('[reorganizeBannerMutation] newOrder:', newOrder, 'oldOrder:', oldOrder);
 
       const updates: Promise<any>[] = [];
 
       if (editingItem) {
+        console.log('[reorganizeBannerMutation] Modo edição');
         if (newOrder < oldOrder) {
+          console.log('[reorganizeBannerMutation] Movendo para cima');
           // Movendo para cima: empurrar para baixo os banners entre newOrder e oldOrder
           banners.forEach(b => {
             if (b.id !== editingItem.id && b.page === data.page) {
@@ -803,6 +829,7 @@ export default function AdminPage() {
             }
           });
         } else if (newOrder > oldOrder) {
+          console.log('[reorganizeBannerMutation] Movendo para baixo');
           // Movendo para baixo: empurrar para cima os banners entre oldOrder e newOrder
           banners.forEach(b => {
             if (b.id !== editingItem.id && b.page === data.page) {
@@ -821,6 +848,7 @@ export default function AdminPage() {
           });
         }
       } else {
+        console.log('[reorganizeBannerMutation] Modo criação');
         // Modo criação: empurrar para baixo todos os banners >= newOrder
         banners.forEach(b => {
           if (b.page === data.page) {
@@ -837,15 +865,28 @@ export default function AdminPage() {
         });
       }
 
+      console.log('[reorganizeBannerMutation] Total de atualizações:', updates.length);
       await Promise.all(updates);
+      console.log('[reorganizeBannerMutation] Todas as atualizações concluídas');
 
-      if (editingItem) {
-        return await apiRequest('PUT', `/api/banners/${editingItem.id}`, data);
-      } else {
-        return await apiRequest('POST', '/api/banners', data);
+      try {
+        let response;
+        if (editingItem) {
+          console.log('[reorganizeBannerMutation] Salvando banner editado');
+          response = await apiRequest('PUT', `/api/banners/${editingItem.id}`, data);
+        } else {
+          console.log('[reorganizeBannerMutation] Salvando novo banner');
+          response = await apiRequest('POST', '/api/banners', data);
+        }
+        console.log('[reorganizeBannerMutation] Banner salvo com sucesso:', response);
+        return response;
+      } catch (error) {
+        console.error('[reorganizeBannerMutation] Erro ao salvar banner:', error);
+        throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('[reorganizeBannerMutation] onSuccess chamado com data:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
       if (editingItem) {
@@ -855,6 +896,7 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Banner atualizado e banners reorganizados!" : "Banner criado e banners reorganizados!",
       });
+      console.log('[reorganizeBannerMutation] Resetando formulário e fechando dialog');
       bannerForm.reset();
       setShowBannerConflictDialog(false);
       setPendingBannerData(null);
@@ -864,12 +906,15 @@ export default function AdminPage() {
       setOriginalBannerOrder(null);
       setOriginalBannerPage(null);
       setOriginalBannerVideoId(null);
+      console.log('[reorganizeBannerMutation] onSuccess concluído');
     },
     onError: (error: any) => {
-      console.error('Erro ao reorganizar banners:', error);
+      console.error('[reorganizeBannerMutation] onError chamado com erro:', error);
+      console.error('[reorganizeBannerMutation] Tipo do erro:', typeof error);
+      console.error('[reorganizeBannerMutation] Stack do erro:', error?.stack);
       toast({
         title: "Erro",
-        description: "Erro ao reorganizar banners",
+        description: error?.message || "Erro ao reorganizar banners",
         variant: "destructive",
       });
       setShowBannerConflictDialog(false);
