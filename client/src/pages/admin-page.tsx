@@ -761,8 +761,12 @@ export default function AdminPage() {
       setEditingItem(null);
       setPendingBannerData(null);
       setConflictingBanner(null);
+      setOriginalBannerOrder(null);
+      setOriginalBannerPage(null);
+      setOriginalBannerVideoId(null);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Erro ao salvar banner:', error);
       toast({
         title: "Erro",
         description: "Erro ao salvar banner",
@@ -857,8 +861,12 @@ export default function AdminPage() {
       setConflictingBanner(null);
       setDialogOpen(false);
       setEditingItem(null);
+      setOriginalBannerOrder(null);
+      setOriginalBannerPage(null);
+      setOriginalBannerVideoId(null);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Erro ao reorganizar banners:', error);
       toast({
         title: "Erro",
         description: "Erro ao reorganizar banners",
@@ -1322,6 +1330,7 @@ export default function AdminPage() {
   };
 
   const handleBannerSubmit = (data: z.infer<typeof createBannerSchema>) => {
+    // Se está editando e não mudou ordem, página ou videoId, pode salvar direto
     if (editingItem && 
         data.order === originalBannerOrder && 
         data.page === originalBannerPage &&
@@ -1330,6 +1339,7 @@ export default function AdminPage() {
       return;
     }
 
+    // Verificar se há conflito de posição
     const conflicting = banners?.find(b => {
       if (b.id === editingItem?.id) return false;
       if (b.page !== data.page) return false;
