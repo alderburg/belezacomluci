@@ -747,9 +747,6 @@ export default function BioPage() {
                             onClick={async (e) => {
                               e.preventDefault();
 
-                              // Não executar a lógica de rastreamento e redirecionamento se for admin
-                              if (isAdmin) return;
-
                               try {
                                 const codigo = coupon.code || '';
 
@@ -806,8 +803,10 @@ export default function BioPage() {
                                   copiado = await copyToClipboard(codigo);
                                 }
 
-                                // Rastrear clique no cupom (sem await para não atrasar)
-                                trackClick('coupon', coupon.id, coupon.brand, redirectUrl || null);
+                                // Rastrear clique no cupom APENAS se NÃO for admin
+                                if (!isAdmin) {
+                                  trackClick('coupon', coupon.id, coupon.brand, redirectUrl || null);
+                                }
 
                                 // Mostrar notificação IMEDIATAMENTE (garantir que apareça no iPhone)
                                 const brandName = coupon.brand || 'loja';

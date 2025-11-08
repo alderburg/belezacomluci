@@ -123,6 +123,17 @@ export default function CouponCard({ coupon, viewMode: propViewMode }: CouponCar
       return;
     }
 
+    // Se for admin, copiar código sem registrar atividade
+    if (user?.isAdmin) {
+      navigator.clipboard.writeText(coupon.code);
+      toast({
+        title: "Cupom Copiado!",
+        description: "O código foi copiado para a área de transferência",
+      });
+      return;
+    }
+
+    // Usuário comum: registrar atividade normalmente
     copyCouponMutation.mutate();
   };
 
