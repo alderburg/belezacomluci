@@ -201,8 +201,18 @@ export default function AdminPage() {
     queryKey: ["/api/coupons"],
   });
 
-  const { data: banners, isLoading: bannersLoading } = useQuery<Banner[]>({
+  const { data: bannersData, isLoading: bannersLoading } = useQuery<Banner[]>({
     queryKey: ["/api/admin/banners"],
+  });
+
+  // Ordenar banners por posição (order) crescente, depois por data de criação
+  const banners = bannersData?.sort((a, b) => {
+    const orderA = a.order ?? 0;
+    const orderB = b.order ?? 0;
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   const { data: popups, isLoading: popupsLoading } = useQuery<Popup[]>({
