@@ -190,6 +190,9 @@ export default function AdminPage() {
 
   // Estado para controlar se algum item está sendo deletado
   const [isDeletingItem, setIsDeletingItem] = useState(false);
+  
+  // Estado para controlar se algum item está sendo criado
+  const [isCreatingItem, setIsCreatingItem] = useState(false);
 
   // Ativar modo admin quando entrar na página
   useEffect(() => {
@@ -658,6 +661,9 @@ export default function AdminPage() {
   // Mutations
   const createVideoMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createVideoSchema>) => {
+      if (!editingItem) {
+        setIsCreatingItem(true);
+      }
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/videos/${editingItem.id}` : "/api/videos", data);
       return response.json();
@@ -679,6 +685,8 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Vídeo atualizado!" : "Vídeo criado!",
       });
+      
+      setIsCreatingItem(false);
     },
     onError: () => {
       toast({
@@ -686,17 +694,24 @@ export default function AdminPage() {
         description: "Falha ao salvar vídeo",
         variant: "destructive",
       });
+      setIsCreatingItem(false);
     },
   });
 
   const createProductMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createProductSchema>) => {
+      if (!editingItem) {
+        setIsCreatingItem(true);
+      }
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/products/${editingItem.id}` : "/api/products", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      
+      await queryClient.refetchQueries({ queryKey: ["/api/products"] });
+      
       productForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -704,6 +719,8 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Produto atualizado!" : "Produto criado!",
       });
+      
+      setIsCreatingItem(false);
     },
     onError: () => {
       toast({
@@ -711,18 +728,25 @@ export default function AdminPage() {
         description: "Falha ao salvar produto",
         variant: "destructive",
       });
+      setIsCreatingItem(false);
     },
   });
 
   const createCouponMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createCouponSchema> & { shouldReorder?: boolean }) => {
+      if (!editingItem) {
+        setIsCreatingItem(true);
+      }
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/coupons/${editingItem.id}` : "/api/coupons", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/coupons"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/coupons"] });
+      
+      await queryClient.refetchQueries({ queryKey: ["/api/coupons"] });
+      
       couponForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -732,6 +756,8 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Cupom atualizado!" : "Cupom criado!",
       });
+      
+      setIsCreatingItem(false);
     },
     onError: (error: any) => {
       toast({
@@ -739,6 +765,7 @@ export default function AdminPage() {
         description: `Falha ao salvar cupom: ${error.message}`,
         variant: "destructive",
       });
+      setIsCreatingItem(false);
     },
   });
 
@@ -746,6 +773,10 @@ export default function AdminPage() {
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
       console.log('[createBannerMutation] Iniciando mutation com data:', data);
       console.log('[createBannerMutation] editingItem:', editingItem);
+
+      if (!editingItem) {
+        setIsCreatingItem(true);
+      }
 
       try {
         let response;
@@ -763,13 +794,16 @@ export default function AdminPage() {
         throw error;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('[createBannerMutation] onSuccess chamado com data:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
       if (editingItem) {
         queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${editingItem.id}`] });
       }
+      
+      await queryClient.refetchQueries({ queryKey: ["/api/admin/banners"] });
+      
       toast({
         title: "Sucesso",
         description: editingItem ? "Banner atualizado!" : "Banner criado!",
@@ -784,6 +818,8 @@ export default function AdminPage() {
       setOriginalBannerPage(null);
       setOriginalBannerVideoId(null);
       console.log('[createBannerMutation] onSuccess concluído');
+      
+      setIsCreatingItem(false);
     },
     onError: (error: any) => {
       console.error('[createBannerMutation] onError chamado com erro:', error);
@@ -794,12 +830,17 @@ export default function AdminPage() {
         description: error?.message || "Erro ao salvar banner",
         variant: "destructive",
       });
+      setIsCreatingItem(false);
     },
   });
 
   const reorganizeBannerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
       console.log('[reorganizeBannerMutation] Iniciando reorganização com data:', data);
+
+      if (!editingItem) {
+        setIsCreatingItem(true);
+      }
 
       if (!banners) {
         console.log('[reorganizeBannerMutation] Sem banners disponíveis');
@@ -889,13 +930,16 @@ export default function AdminPage() {
         throw error;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('[reorganizeBannerMutation] onSuccess chamado com data:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
       if (editingItem) {
         queryClient.invalidateQueries({ queryKey: [`/api/admin/banners/${editingItem.id}`] });
       }
+      
+      await queryClient.refetchQueries({ queryKey: ["/api/admin/banners"] });
+      
       toast({
         title: "Sucesso",
         description: editingItem ? "Banner atualizado e banners reorganizados!" : "Banner criado e banners reorganizados!",
@@ -911,6 +955,8 @@ export default function AdminPage() {
       setOriginalBannerPage(null);
       setOriginalBannerVideoId(null);
       console.log('[reorganizeBannerMutation] onSuccess concluído');
+      
+      setIsCreatingItem(false);
     },
     onError: (error: any) => {
       console.error('[reorganizeBannerMutation] onError chamado com erro:', error);
@@ -922,16 +968,20 @@ export default function AdminPage() {
         variant: "destructive",
       });
       setShowBannerConflictDialog(false);
+      setIsCreatingItem(false);
     },
   });
 
   const createPopupMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createPopupSchema>) => {
+      if (!editingItem) {
+        setIsCreatingItem(true);
+      }
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/popups/${editingItem.id}` : "/api/popups", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/popups"] });
       // Invalidar cache do sistema de popups em todas as páginas
       queryClient.invalidateQueries({ queryKey: ["/api/popups"] });
@@ -944,6 +994,8 @@ export default function AdminPage() {
         }
       });
 
+      await queryClient.refetchQueries({ queryKey: ["/api/admin/popups"] });
+
       popupForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -951,6 +1003,8 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Popup atualizado!" : "Popup criado!",
       });
+      
+      setIsCreatingItem(false);
     },
     onError: (error: any) => {
       console.log('Erro completo capturado:', error);
@@ -993,17 +1047,24 @@ export default function AdminPage() {
         description: errorMessage,
         variant: "destructive",
       });
+      setIsCreatingItem(false);
     },
   });
 
   const createNotificationMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createNotificationSchema>) => {
+      if (!editingItem) {
+        setIsCreatingItem(true);
+      }
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/admin/notifications/${editingItem.id}` : "/api/admin/notifications", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
+      
+      await queryClient.refetchQueries({ queryKey: ["/api/admin/notifications"] });
+      
       notificationForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -1011,6 +1072,8 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Notificação atualizada!" : "Notificação criada!",
       });
+      
+      setIsCreatingItem(false);
     },
     onError: () => {
       toast({
@@ -1018,6 +1081,7 @@ export default function AdminPage() {
         description: "Falha ao salvar notificação",
         variant: "destructive",
       });
+      setIsCreatingItem(false);
     },
   });
 
@@ -1043,12 +1107,18 @@ export default function AdminPage() {
 
   const createCategoryMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createCategorySchema>) => {
+      if (!editingItem) {
+        setIsCreatingItem(true);
+      }
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/categories/${editingItem.id}` : "/api/categories", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      
+      await queryClient.refetchQueries({ queryKey: ["/api/categories"] });
+      
       categoryForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -1058,6 +1128,8 @@ export default function AdminPage() {
         title: "Sucesso",
         description: editingItem ? "Categoria atualizada!" : "Categoria criada!",
       });
+      
+      setIsCreatingItem(false);
     },
     onError: () => {
       toast({
@@ -1065,11 +1137,16 @@ export default function AdminPage() {
         description: "Falha ao salvar categoria",
         variant: "destructive",
       });
+      setIsCreatingItem(false);
     },
   });
 
   const reorganizeCategoryMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createCategorySchema>) => {
+      if (!editingItem) {
+        setIsCreatingItem(true);
+      }
+      
       if (!categories) return;
 
       const newOrder = data.order || 0;
@@ -1126,11 +1203,14 @@ export default function AdminPage() {
         return await apiRequest('POST', '/api/categories', data);
       }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
       if (editingItem) {
         queryClient.invalidateQueries({ queryKey: [`/api/categories/${editingItem.id}`] });
       }
+      
+      await queryClient.refetchQueries({ queryKey: ["/api/categories"] });
+      
       toast({
         title: "Sucesso",
         description: editingItem ? "Categoria atualizada e categorias reorganizadas!" : "Categoria criada e categorias reorganizadas!",
@@ -1141,6 +1221,8 @@ export default function AdminPage() {
       setConflictingCategory(null);
       setDialogOpen(false);
       setEditingItem(null);
+      
+      setIsCreatingItem(false);
     },
     onError: () => {
       toast({
@@ -1149,6 +1231,7 @@ export default function AdminPage() {
         variant: "destructive",
       });
       setShowCategoryConflictDialog(false);
+      setIsCreatingItem(false);
     },
   });
 
@@ -3788,7 +3871,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleEdit(coupon, 'coupons')}
-                                  disabled={isDeletingItem}
+                                  disabled={isDeletingItem || isCreatingItem}
                                   data-testid={`button-edit-coupon-${coupon.id}`}
                                 >
                                   <Edit2 className="w-4 h-4" />
@@ -3797,7 +3880,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleDelete(coupon.id, 'coupons', coupon.brand)}
-                                  disabled={isDeletingItem}
+                                  disabled={isDeletingItem || isCreatingItem}
                                   data-testid={`button-delete-coupon-${coupon.id}`}
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -4013,7 +4096,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleEdit(banner, 'banners')}
-                                  disabled={isDeletingItem}
+                                  disabled={isDeletingItem || isCreatingItem}
                                   data-testid={`button-edit-banner-${banner.id}`}
                                 >
                                   <Edit2 className="w-4 h-4" />
@@ -4022,7 +4105,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleDelete(banner.id, 'banners', banner.title)}
-                                  disabled={isDeletingItem}
+                                  disabled={isDeletingItem || isCreatingItem}
                                   data-testid={`button-delete-banner-${banner.id}`}
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -4859,7 +4942,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleEdit(category, 'categories')}
-                                  disabled={isDeletingItem}
+                                  disabled={isDeletingItem || isCreatingItem}
                                   data-testid={`button-edit-category-${category.id}`}
                                 >
                                   <Edit2 className="w-4 h-4" />
@@ -4868,7 +4951,7 @@ export default function AdminPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleDelete(category.id, 'categories', category.title)}
-                                  disabled={isDeletingItem}
+                                  disabled={isDeletingItem || isCreatingItem}
                                   data-testid={`button-delete-category-${category.id}`}
                                 >
                                   <Trash2 className="w-4 h-4" />
