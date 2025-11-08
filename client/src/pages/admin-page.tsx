@@ -2099,10 +2099,18 @@ export default function AdminPage() {
 
                         <ImageUpload
                           id="coupon-cover"
-                          label="Imagem de Capa"
+                          label="Imagem de Capa (Página de Cupons)"
                           value={couponForm.watch("coverImageUrl")}
                           onChange={(base64) => couponForm.setValue("coverImageUrl", base64)}
                           placeholder="Selecionar imagem de capa"
+                        />
+
+                        <ImageUpload
+                          id="coupon-modal"
+                          label="Imagem para Modal Bio"
+                          value={couponForm.watch("modalImageUrl")}
+                          onChange={(base64) => couponForm.setValue("modalImageUrl", base64)}
+                          placeholder="Selecionar imagem do modal (ou deixe vazio para usar a imagem de capa)"
                         />
 
                         <div>

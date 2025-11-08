@@ -85,6 +85,7 @@ export default function AdminCouponFormMobilePage() {
       categoryId: "",
       storeUrl: "",
       coverImageUrl: "",
+      modalImageUrl: "",
       order: 0,
       startDateTime: "",
       endDateTime: "",
@@ -104,6 +105,7 @@ export default function AdminCouponFormMobilePage() {
         categoryId: coupon.categoryId || "",
         storeUrl: coupon.storeUrl || "",
         coverImageUrl: coupon.coverImageUrl || "",
+        modalImageUrl: coupon.modalImageUrl || "",
         order: coupon.order ?? 0,
         startDateTime: coupon.startDateTime ? 
           new Date(coupon.startDateTime).toISOString().slice(0, 16) : "",
@@ -127,6 +129,7 @@ export default function AdminCouponFormMobilePage() {
         categoryId: "",
         storeUrl: "",
         coverImageUrl: "",
+        modalImageUrl: "",
         order: nextOrder,
         startDateTime: "",
         endDateTime: "",
@@ -337,10 +340,20 @@ export default function AdminCouponFormMobilePage() {
         <div>
           <ImageUpload
             id="coupon-cover"
-            label="Imagem de Capa"
+            label="Imagem de Capa (Página de Cupons)"
             value={form.watch("coverImageUrl")}
             onChange={(base64) => form.setValue("coverImageUrl", base64)}
             placeholder="Selecionar imagem de capa"
+          />
+        </div>
+
+        <div>
+          <ImageUpload
+            id="coupon-modal"
+            label="Imagem para Modal Bio"
+            value={form.watch("modalImageUrl")}
+            onChange={(base64) => form.setValue("modalImageUrl", base64)}
+            placeholder="Selecionar imagem do modal (ou deixe vazio para usar a imagem de capa)"
           />
         </div>
 

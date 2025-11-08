@@ -111,6 +111,7 @@ export const coupons = pgTable("coupons", {
   isActive: boolean("is_active").default(true),
   storeUrl: text("store_url"),
   coverImageUrl: text("cover_image_url"),
+  modalImageUrl: text("modal_image_url"), // Imagem específica para o modal da bio
   order: integer("order").default(0),
   startDateTime: timestamp("start_date_time"), // Data e hora de início para ativação automática
   endDateTime: timestamp("end_date_time"), // Data e hora de fim para desativação automática
