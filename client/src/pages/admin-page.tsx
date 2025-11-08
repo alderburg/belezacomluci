@@ -205,13 +205,33 @@ export default function AdminPage() {
     queryKey: ["/api/admin/banners"],
   });
 
-  // Ordenar banners por posição (order) crescente, depois por data de criação
+  // Agrupar banners por página e vídeo específico, depois ordenar por posição dentro de cada grupo
   const banners = bannersData?.sort((a, b) => {
+    // Primeiro critério: ordenar por página
+    if (a.page !== b.page) {
+      const pageOrder = ['home', 'videos', 'products', 'coupons', 'community', 'profile', 'bio', 'video_specific'];
+      const pageIndexA = pageOrder.indexOf(a.page) !== -1 ? pageOrder.indexOf(a.page) : 999;
+      const pageIndexB = pageOrder.indexOf(b.page) !== -1 ? pageOrder.indexOf(b.page) : 999;
+      return pageIndexA - pageIndexB;
+    }
+    
+    // Para vídeos específicos, agrupar por videoId
+    if (a.page === 'video_specific' && b.page === 'video_specific') {
+      const videoIdA = a.videoId || '';
+      const videoIdB = b.videoId || '';
+      if (videoIdA !== videoIdB) {
+        return videoIdA.localeCompare(videoIdB);
+      }
+    }
+    
+    // Segundo critério: ordenar por posição (order) dentro do mesmo grupo
     const orderA = a.order ?? 0;
     const orderB = b.order ?? 0;
     if (orderA !== orderB) {
       return orderA - orderB;
     }
+    
+    // Terceiro critério: por data de criação
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
