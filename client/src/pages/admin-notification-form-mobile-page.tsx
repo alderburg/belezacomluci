@@ -49,18 +49,7 @@ export default function AdminNotificationFormMobilePage() {
 
   const form = useForm<z.infer<typeof insertNotificationSchema>>({
     resolver: zodResolver(insertNotificationSchema),
-    values: isEditing && notification ? {
-      title: notification.title,
-      description: notification.description || "",
-      imageUrl: notification.imageUrl || "",
-      linkUrl: notification.linkUrl || "",
-      targetAudience: notification.targetAudience,
-      isActive: notification.isActive ?? true,
-      startDateTime: notification.startDateTime ? 
-        new Date(notification.startDateTime).toISOString().slice(0, 16) : "",
-      endDateTime: notification.endDateTime ? 
-        new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
-    } : {
+    defaultValues: {
       title: "",
       description: "",
       imageUrl: "",
@@ -71,6 +60,23 @@ export default function AdminNotificationFormMobilePage() {
       endDateTime: "",
     },
   });
+
+  useEffect(() => {
+    if (notification && isEditing) {
+      form.reset({
+        title: notification.title,
+        description: notification.description || "",
+        imageUrl: notification.imageUrl || "",
+        linkUrl: notification.linkUrl || "",
+        targetAudience: notification.targetAudience,
+        isActive: notification.isActive ?? true,
+        startDateTime: notification.startDateTime ? 
+          new Date(notification.startDateTime).toISOString().slice(0, 16) : "",
+        endDateTime: notification.endDateTime ? 
+          new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
+      });
+    }
+  }, [notification, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {

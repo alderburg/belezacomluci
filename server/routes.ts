@@ -2800,22 +2800,25 @@ export function registerRoutes(app: Express): Server {
           (notification.targetAudience === 'free' && user.planType !== 'premium');
 
         if (shouldReceive) {
-          await storage.createUserNotification({
+          // Criar user_notification (com ON CONFLICT DO NOTHING para evitar duplicatas)
+          const newUserNotification = await storage.createUserNotification({
             userId: user.id,
             notificationId: notification.id,
             isRead: false,
           });
 
-          // Enviar via WebSocket se disponível
-          const wsService = (global as any).notificationWS;
-          if (wsService) {
-            wsService.broadcastToUser(user.id, {
-              type: 'new_notification',
-              notification: notification
-            });
-          }
+          // Só conta e envia via WebSocket se realmente criou uma nova notificação
+          if (newUserNotification) {
+            const wsService = (global as any).notificationWS;
+            if (wsService) {
+              wsService.broadcastToUser(user.id, {
+                type: 'new_notification',
+                notification: notification
+              });
+            }
 
-          sentCount++;
+            sentCount++;
+          }
         }
       }
 
@@ -2885,20 +2888,18 @@ export function registerRoutes(app: Express): Server {
           eligibleUsers = allUsers;
       }
 
-      // Enviar notificação para cada usuário elegível (com controle anti-spam)
+      // Enviar notificação para cada usuário elegível (com ON CONFLICT DO NOTHING para evitar duplicatas)
       let successCount = 0;
       for (const user of eligibleUsers) {
-        try {
-          await storage.createUserNotification({
-            userId: user.id,
-            notificationId: notification.id
-          });
+        const newUserNotification = await storage.createUserNotification({
+          userId: user.id,
+          notificationId: notification.id,
+          isRead: false,
+        });
+        
+        // Só conta se realmente criou uma nova notificação (não era duplicata)
+        if (newUserNotification) {
           successCount++;
-        } catch (error: any) {
-          // Se o erro for de constraint unique (duplicate), ignorar (anti-spam)
-          if (error?.code !== '23505') {
-            console.error(`Erro ao enviar notificação para usuário ${user.id}:`, error);
-          }
         }
       }
 

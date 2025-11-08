@@ -160,7 +160,7 @@ export interface IStorage {
 
   // User Notification methods
   getUserNotifications(userId: string, isRead?: boolean): Promise<(UserNotification & { notification: Notification })[]>;
-  createUserNotification(userNotification: InsertUserNotification): Promise<UserNotification>;
+  createUserNotification(userNotification: InsertUserNotification): Promise<UserNotification | undefined>;
   markNotificationAsRead(userId: string, notificationId: string): Promise<UserNotification>;
   markAllNotificationsAsRead(userId: string): Promise<void>;
   removeUserNotification(userId: string, notificationId: string): Promise<void>;
@@ -1517,8 +1517,14 @@ export class DatabaseStorage implements IStorage {
     .orderBy(desc(userNotifications.createdAt));
   }
 
-  async createUserNotification(userNotification: InsertUserNotification): Promise<UserNotification> {
-    const [newUserNotification] = await this.db.insert(userNotifications).values(userNotification).returning();
+  async createUserNotification(userNotification: InsertUserNotification): Promise<UserNotification | undefined> {
+    const [newUserNotification] = await this.db
+      .insert(userNotifications)
+      .values(userNotification)
+      .onConflictDoNothing({
+        target: [userNotifications.userId, userNotifications.notificationId]
+      })
+      .returning();
     return newUserNotification;
   }
 
