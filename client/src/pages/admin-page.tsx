@@ -101,31 +101,31 @@ export default function AdminPage() {
   const { toast } = useToast();
   const { isAdminMode, viewMode, setAdminMode, setViewMode } = useAdmin();
   const [location, setLocation] = useLocation();
-  
+
   // Extrair a aba da URL
   const getTabFromUrl = () => {
     const path = location.replace('/admin/', '').replace('/admin', '');
     const validTabs = ['videos', 'products', 'coupons', 'banners', 'popups', 'notifications', 'categories', 'users'];
     return validTabs.includes(path) ? path : 'videos';
   };
-  
+
   const [activeTab, setActiveTab] = useState(getTabFromUrl());
   const [editingItem, setEditingItem] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{id: string, type: string, title?: string} | null>(null);
-  
+
   // Estados para controle de conflito de ordem de cupons
   const [showCouponConflictDialog, setShowCouponConflictDialog] = useState(false);
   const [couponConflictData, setCouponConflictData] = useState<{ order: number; conflictCoupon?: Coupon } | null>(null);
   const [pendingCouponData, setPendingCouponData] = useState<z.infer<typeof createCouponSchema> | null>(null);
-  
+
   // Estados para controle de conflito de ordem de categorias
   const [showCategoryConflictDialog, setShowCategoryConflictDialog] = useState(false);
   const [pendingCategoryData, setPendingCategoryData] = useState<z.infer<typeof createCategorySchema> | null>(null);
   const [conflictingCategory, setConflictingCategory] = useState<Category | null>(null);
   const [originalCategoryOrder, setOriginalCategoryOrder] = useState<number | null>(null);
-  
+
   // Estados para controle de conflito de ordem de banners
   const [showBannerConflictDialog, setShowBannerConflictDialog] = useState(false);
   const [pendingBannerData, setPendingBannerData] = useState<z.infer<typeof createBannerSchema> | null>(null);
@@ -133,7 +133,7 @@ export default function AdminPage() {
   const [originalBannerOrder, setOriginalBannerOrder] = useState<number | null>(null);
   const [originalBannerPage, setOriginalBannerPage] = useState<string | null>(null);
   const [originalBannerVideoId, setOriginalBannerVideoId] = useState<string | null>(null);
-  
+
   // Atualizar URL quando a aba mudar
   useEffect(() => {
     const newPath = `/admin/${activeTab}`;
@@ -141,7 +141,7 @@ export default function AdminPage() {
       setLocation(newPath);
     }
   }, [activeTab]);
-  
+
   // Atualizar aba quando a URL mudar
   useEffect(() => {
     const tabFromUrl = getTabFromUrl();
@@ -228,7 +228,7 @@ export default function AdminPage() {
       const pageIndexB = pageOrder.indexOf(b.page) !== -1 ? pageOrder.indexOf(b.page) : 999;
       return pageIndexA - pageIndexB;
     }
-    
+
     // Para vídeos específicos, agrupar por videoId
     if (a.page === 'video_specific' && b.page === 'video_specific') {
       const videoIdA = a.videoId || '';
@@ -237,14 +237,14 @@ export default function AdminPage() {
         return videoIdA.localeCompare(videoIdB);
       }
     }
-    
+
     // Segundo critério: ordenar por posição (order) dentro do mesmo grupo
     const orderA = a.order ?? 0;
     const orderB = b.order ?? 0;
     if (orderA !== orderB) {
       return orderA - orderB;
     }
-    
+
     // Terceiro critério: por data de criação
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
@@ -618,13 +618,13 @@ export default function AdminPage() {
     if (!editingItem && banners && activeTab === 'banners' && dialogOpen) {
       const currentPage = bannerForm.watch("page") || "home";
       const currentVideoId = bannerForm.watch("videoId") || "";
-      
+
       const filteredBanners = banners.filter(b => {
         if (b.page !== currentPage) return false;
         if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
         return true;
       });
-      
+
       const maxOrder = filteredBanners.length > 0 
         ? filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0) + 1
         : 0;
@@ -635,13 +635,13 @@ export default function AdminPage() {
       if (!editingItem && banners && activeTab === 'banners' && dialogOpen) {
         const currentPage = value.page || "home";
         const currentVideoId = value.videoId || "";
-        
+
         const filteredBanners = banners.filter(b => {
           if (b.page !== currentPage) return false;
           if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
           return true;
         });
-        
+
         const maxOrder = filteredBanners.length > 0 
           ? filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0) + 1
           : 0;
@@ -760,7 +760,7 @@ export default function AdminPage() {
         queryKey: ["/api/admin/banners"],
         exact: false 
       });
-      
+
       bannerForm.reset();
       setDialogOpen(false);
       setEditingItem(null);
@@ -858,7 +858,7 @@ export default function AdminPage() {
         queryKey: ["/api/admin/banners"],
         exact: false 
       });
-      
+
       toast({
         title: "Sucesso",
         description: editingItem ? "Banner atualizado e banners reorganizados!" : "Banner criado e banners reorganizados!",
@@ -910,18 +910,18 @@ export default function AdminPage() {
     onError: (error: any) => {
       console.log('Erro completo capturado:', error);
       let errorMessage = "Falha ao salvar popup";
-      
+
       // Verificar o erro completo (mensagem e response)
       const errorString = JSON.stringify(error);
       const errorMsg = (error?.message || '').toLowerCase();
       const errorResponse = JSON.stringify(error?.response || {}).toLowerCase();
-      
+
       console.log('Verificando erro:', {
         errorMsg,
         errorResponse,
         errorString: errorString.toLowerCase()
       });
-      
+
       // Verificar se é erro de foreign key
       const isForeignKeyError = 
         errorMsg.includes('foreign') || 
@@ -934,7 +934,7 @@ export default function AdminPage() {
         errorString.toLowerCase().includes('foreign') ||
         errorString.toLowerCase().includes('video_id') ||
         errorString.toLowerCase().includes('course_id');
-      
+
       if (isForeignKeyError) {
         if (popupForm.watch("targetPage") === "video_specific") {
           errorMessage = "Vídeo não encontrado. Verifique o ID adicionado.";
@@ -942,7 +942,7 @@ export default function AdminPage() {
           errorMessage = "Curso não encontrado. Verifique o ID adicionado.";
         }
       }
-      
+
       toast({
         title: "Erro",
         description: errorMessage,
@@ -1113,7 +1113,7 @@ export default function AdminPage() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [`/api/${variables.type}`] });
-      
+
       // Se for vídeo, também invalidar banners, popups e comentários vinculados
       if (variables.type === 'videos') {
         queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
@@ -1121,7 +1121,7 @@ export default function AdminPage() {
         queryClient.invalidateQueries({ queryKey: ["/api/popups"] });
         queryClient.invalidateQueries({ queryKey: ["/api/admin/popups"] });
         queryClient.invalidateQueries({ queryKey: ["/api/comments"] });
-        
+
         // Limpar cache de popups do sessionStorage
         const keys = Object.keys(sessionStorage);
         keys.forEach(key => {
@@ -1130,7 +1130,7 @@ export default function AdminPage() {
           }
         });
       }
-      
+
       // Se for banner, também invalidar a rota admin
       if (variables.type === 'banners') {
         queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
@@ -1265,10 +1265,10 @@ export default function AdminPage() {
   const handleCouponSubmit = async (data: z.infer<typeof createCouponSchema>) => {
     // Se estiver editando, verificar se a ordem foi realmente alterada
     const isOrderChanged = editingItem ? editingItem.order !== data.order : true;
-    
+
     if (data.order !== undefined && data.order >= 0 && isOrderChanged) {
       const { hasConflict, conflict } = await checkCouponOrderConflict(data.order);
-      
+
       if (hasConflict && conflict) {
         setPendingCouponData(data);
         setCouponConflictData({ order: data.order, conflictCoupon: conflict });
@@ -1276,7 +1276,7 @@ export default function AdminPage() {
         return;
       }
     }
-    
+
     createCouponMutation.mutate(data);
   };
 
@@ -1509,20 +1509,20 @@ export default function AdminPage() {
 
     try {
       console.log('Buscando dados do YouTube para vídeo:', videoId);
-      
+
       // Primeiro, detectar o tipo baseado na URL
       const isPlaylist = isPlaylistUrl(url);
-      
+
       // Se for playlist, calcular duração total
       if (isPlaylist) {
         const playlistIdMatch = url.match(/[?&]list=([^&\n?#]+)/);
         if (playlistIdMatch && playlistIdMatch[1]) {
           const playlistId = playlistIdMatch[1];
           console.log('Detectada playlist, buscando vídeos para calcular duração total:', playlistId);
-          
+
           try {
             const playlistResponse = await fetch(`/api/youtube/playlist/${playlistId}`);
-            
+
             if (!playlistResponse.ok) {
               console.error('Erro ao buscar playlist:', playlistResponse.status);
               toast({
@@ -1533,7 +1533,7 @@ export default function AdminPage() {
               // Continua para buscar dados do vídeo individual
             } else {
               const playlistData = await playlistResponse.json();
-              
+
               if (playlistData && playlistData.videos && playlistData.videos.length > 0) {
                 // Calcular duração total
                 let totalSeconds = 0;
@@ -1548,22 +1548,22 @@ export default function AdminPage() {
                     }
                   }
                 }
-                
+
                 // Converter total de segundos para HH:MM:SS
                 const hours = Math.floor(totalSeconds / 3600);
                 const minutes = Math.floor((totalSeconds % 3600) / 60);
                 const seconds = totalSeconds % 60;
                 const totalDuration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
+
                 videoForm.setValue('duration', totalDuration);
                 console.log(`Duração total da playlist calculada: ${totalDuration} (${playlistData.videos.length} vídeos)`);
-                
+
                 // Usar título da playlist
                 if (playlistData.playlistTitle) {
                   videoForm.setValue('title', playlistData.playlistTitle);
                   console.log('Título da playlist preenchido:', playlistData.playlistTitle);
                 }
-                
+
                 // Usar descrição da playlist (somente se existir e não estiver vazia)
                 if (playlistData.playlistDescription && playlistData.playlistDescription.trim() !== '') {
                   videoForm.setValue('description', playlistData.playlistDescription);
@@ -1571,21 +1571,21 @@ export default function AdminPage() {
                 } else {
                   console.log('Playlist não possui descrição, deixando campo vazio');
                 }
-                
+
                 // Usar thumbnail da playlist
                 if (playlistData.playlistThumbnail) {
                   videoForm.setValue('thumbnailUrl', playlistData.playlistThumbnail);
                   console.log('Thumbnail da playlist preenchida');
                 }
-                
+
                 videoForm.setValue('type', 'playlist');
                 console.log('Tipo alterado para: playlist');
-                
+
                 toast({
                   title: "Playlist detectada!",
                   description: `${playlistData.videos.length} vídeos encontrados. Duração total: ${totalDuration}`,
                 });
-                
+
                 return; // Não precisa buscar dados do vídeo individual
               }
             }
@@ -1594,10 +1594,10 @@ export default function AdminPage() {
           }
         }
       }
-      
+
       // Se não for playlist ou falhou, buscar dados do vídeo individual
       const response = await fetch(`/api/youtube/video/${videoId}`);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Erro ao buscar dados do YouTube:', response.status, errorText);
@@ -1611,17 +1611,17 @@ export default function AdminPage() {
 
       const videoData = await response.json();
       console.log('Dados recebidos do YouTube:', videoData);
-      
+
       // Auto-fill title
       if (videoData.title) {
         videoForm.setValue('title', videoData.title);
         console.log('Título preenchido:', videoData.title);
       }
-      
+
       // Auto-fill type based on detection
       let detectedType = 'video'; // default
       let typeMessage = 'vídeo único';
-      
+
       if (videoData.isLive) {
         detectedType = 'live';
         typeMessage = 'live';
@@ -1629,29 +1629,29 @@ export default function AdminPage() {
       } else {
         console.log('Tipo detectado: vídeo único');
       }
-      
+
       videoForm.setValue('type', detectedType);
       console.log('Tipo alterado para:', detectedType);
-      
+
       // Auto-fill duration field - only for non-live videos
       if (videoData.duration && !videoData.isLive) {
         const formattedDuration = ensureHHMMSSFormat(videoData.duration);
         videoForm.setValue('duration', formattedDuration);
         console.log('Duração preenchida:', formattedDuration);
       }
-      
+
       // Auto-fill description if not already set
       if (videoData.description) {
         videoForm.setValue('description', videoData.description);
         console.log('Descrição preenchida automaticamente');
       }
-      
+
       // Auto-fill thumbnail if not already set
       if (videoData.thumbnail) {
         videoForm.setValue('thumbnailUrl', videoData.thumbnail);
         console.log('Thumbnail preenchida automaticamente');
       }
-      
+
       // Show appropriate toast message
       toast({
         title: `${typeMessage.charAt(0).toUpperCase() + typeMessage.slice(1)} detectada!`,
@@ -2169,16 +2169,16 @@ export default function AdminPage() {
                               onChange={async (e) => {
                                 const url = e.target.value.trim();
                                 productForm.setValue("fileUrl", e.target.value);
-                                
+
                                 if (!url) return;
 
                                 // Verificar se é URL do YouTube
                                 const isYouTubeUrl = /(?:youtube\.com|youtu\.be)/.test(url);
-                                
+
                                 if (isYouTubeUrl) {
                                   // Verificar se é playlist ou vídeo único
                                   const isPlaylist = /[?&]list=([^&\n?#]+)/.test(url);
-                                  
+
                                   if (isPlaylist) {
                                     productForm.setValue("type", "course_playlist");
                                     console.log('URL de Playlist do YouTube detectada, tipo alterado para: course_playlist');
@@ -2194,27 +2194,27 @@ export default function AdminPage() {
                                       if (playlistIdMatch && playlistIdMatch[1]) {
                                         const playlistId = playlistIdMatch[1];
                                         console.log('Detectada playlist de produto, buscando dados:', playlistId);
-                                        
+
                                         const playlistResponse = await fetch(`/api/youtube/playlist/${playlistId}`);
                                         if (playlistResponse.ok) {
                                           const playlistData = await playlistResponse.json();
-                                          
+
                                           if (playlistData && playlistData.videos && playlistData.videos.length > 0) {
                                             // Preencher título da playlist
                                             if (playlistData.playlistTitle) {
                                               productForm.setValue('title', playlistData.playlistTitle);
                                             }
-                                            
+
                                             // Preencher descrição se existir
                                             if (playlistData.playlistDescription && playlistData.playlistDescription.trim() !== '') {
                                               productForm.setValue('description', playlistData.playlistDescription);
                                             }
-                                            
+
                                             // Preencher thumbnail
                                             if (playlistData.playlistThumbnail) {
                                               productForm.setValue('coverImageUrl', playlistData.playlistThumbnail);
                                             }
-                                            
+
                                             toast({
                                               title: "Playlist detectada!",
                                               description: `${playlistData.videos.length} vídeos encontrados. Tipo alterado para "Curso - Playlist".`,
@@ -2230,28 +2230,28 @@ export default function AdminPage() {
                                         if (videoId.includes('?')) {
                                           videoId = videoId.split('?')[0];
                                         }
-                                        
+
                                         console.log('Detectado vídeo único de produto, buscando dados:', videoId);
-                                        
+
                                         const videoResponse = await fetch(`/api/youtube/video/${videoId}`);
                                         if (videoResponse.ok) {
                                           const videoData = await videoResponse.json();
-                                          
+
                                           // Preencher título
                                           if (videoData.title) {
                                             productForm.setValue('title', videoData.title);
                                           }
-                                          
+
                                           // Preencher descrição
                                           if (videoData.description) {
                                             productForm.setValue('description', videoData.description);
                                           }
-                                          
+
                                           // Preencher thumbnail
                                           if (videoData.thumbnail) {
                                             productForm.setValue('coverImageUrl', videoData.thumbnail);
                                           }
-                                          
+
                                           toast({
                                             title: "Vídeo do YouTube detectado!",
                                             description: "Tipo alterado para 'Curso - Vídeo Único'. Dados preenchidos automaticamente.",
@@ -4943,23 +4943,14 @@ export default function AdminPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel 
-              onClick={() => {
-                setShowBannerConflictDialog(false);
-                setPendingBannerData(null);
-                setConflictingBanner(null);
-              }}
+              onClick={handleCancelBannerReorder}
             >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                if (pendingBannerData) {
-                  reorganizeBannerMutation.mutate(pendingBannerData);
-                }
-              }}
-              disabled={reorganizeBannerMutation.isPending}
+              onClick={handleConfirmBannerReorder}
             >
-              {reorganizeBannerMutation.isPending ? "Reorganizando..." : "Reorganizar"}
+              Reorganizar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
