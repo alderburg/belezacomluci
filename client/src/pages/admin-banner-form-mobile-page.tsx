@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +49,7 @@ export default function AdminBannerFormMobilePage() {
   const [conflictingBanner, setConflictingBanner] = useState<Banner | null>(null);
   const [originalOrder, setOriginalOrder] = useState<number | null>(null);
   const [originalPage, setOriginalPage] = useState<string | null>(null);
+  const [originalVideoId, setOriginalVideoId] = useState<string | null>(null);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -87,6 +89,7 @@ export default function AdminBannerFormMobilePage() {
       const orderValue = banner.order || 0;
       setOriginalOrder(orderValue);
       setOriginalPage(banner.page);
+      setOriginalVideoId(banner.videoId || null);
       form.reset({
         title: banner.title,
         description: banner.description,
@@ -107,20 +110,32 @@ export default function AdminBannerFormMobilePage() {
       });
     } else if (!isEditing && banners) {
       const currentPage = form.watch("page") || "home";
-      const maxOrder = banners
-        .filter(b => b.page === currentPage)
-        .reduce((max, b) => Math.max(max, b.order || 0), 0);
+      const currentVideoId = form.watch("videoId") || "";
+      
+      const filteredBanners = banners.filter(b => {
+        if (b.page !== currentPage) return false;
+        if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
+        return true;
+      });
+      
+      const maxOrder = filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0);
       form.setValue("order", maxOrder + 1);
     }
   }, [banner, isEditing, banners, form]);
 
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
-      if (name === "page" && !isEditing && banners) {
+      if ((name === "page" || name === "videoId") && !isEditing && banners) {
         const currentPage = value.page || "home";
-        const maxOrder = banners
-          .filter(b => b.page === currentPage)
-          .reduce((max, b) => Math.max(max, b.order || 0), 0);
+        const currentVideoId = value.videoId || "";
+        
+        const filteredBanners = banners.filter(b => {
+          if (b.page !== currentPage) return false;
+          if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
+          return true;
+        });
+        
+        const maxOrder = filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0);
         form.setValue("order", maxOrder + 1);
       }
     });
@@ -158,14 +173,20 @@ export default function AdminBannerFormMobilePage() {
 
   const reorganizeMutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {
-      const conflicting = banners?.find(
-        b => b.page === data.page && b.order === data.order && b.id !== bannerId
-      );
+      if (!banners) return;
 
-      if (conflicting) {
-        await apiRequest('PUT', `/api/banners/${conflicting.id}`, {
-          ...conflicting,
-          order: (conflicting.order || 0) + 1,
+      const affectedBanners = banners.filter(b => {
+        if (b.id === bannerId) return false;
+        if (b.page !== data.page) return false;
+        if (data.page === 'video_specific' && b.videoId !== data.videoId) return false;
+        if ((b.order || 0) < (data.order || 0)) return false;
+        return true;
+      }).sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      for (const affectedBanner of affectedBanners) {
+        await apiRequest('PUT', `/api/banners/${affectedBanner.id}`, {
+          ...affectedBanner,
+          order: (affectedBanner.order || 0) + 1,
         });
       }
 
@@ -205,14 +226,21 @@ export default function AdminBannerFormMobilePage() {
   };
 
   const onSubmit = (data: z.infer<typeof insertBannerSchema>) => {
-    if (isEditing && data.order === originalOrder && data.page === originalPage) {
+    if (isEditing && 
+        data.order === originalOrder && 
+        data.page === originalPage &&
+        (data.page !== 'video_specific' || data.videoId === originalVideoId)) {
       mutation.mutate(data);
       return;
     }
 
-    const conflicting = banners?.find(
-      b => b.page === data.page && b.order === data.order && b.id !== bannerId
-    );
+    const conflicting = banners?.find(b => {
+      if (b.id === bannerId) return false;
+      if (b.page !== data.page) return false;
+      if (data.page === 'video_specific' && b.videoId !== data.videoId) return false;
+      if (b.order !== data.order) return false;
+      return true;
+    });
 
     if (conflicting) {
       setPendingData(data);
@@ -455,7 +483,10 @@ export default function AdminBannerFormMobilePage() {
           <AlertDialogHeader className="text-center space-y-2">
             <AlertDialogTitle>Conflito de Posição</AlertDialogTitle>
             <AlertDialogDescription>
-              A posição {pendingData?.order} já está ocupada pelo banner "{conflictingBanner?.title}" na página selecionada.
+              A posição {pendingData?.order} já está ocupada pelo banner "{conflictingBanner?.title}" 
+              {pendingData?.page === 'video_specific' && pendingData?.videoId 
+                ? ` no vídeo selecionado` 
+                : ' na página selecionada'}.
               Deseja reorganizar automaticamente os banners?
             </AlertDialogDescription>
           </AlertDialogHeader>
