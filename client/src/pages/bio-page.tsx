@@ -15,13 +15,14 @@ import type { Banner } from "@shared/schema";
 import { useDataSync } from "@/hooks/use-data-sync";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth"; // Importar hook de autenticação
-import { Redirect } from "wouter"; // Importar Redirect
 
 export default function BioPage() {
   const { toast } = useToast();
   const { user, authLoading } = useAuth(); // Obter usuário e estado de loading da autenticação
 
   // Determinar se é admin ANTES de rastrear qualquer coisa
+  // Se estiver logado E for admin, não contabiliza
+  // Se NÃO estiver logado OU for usuário comum, contabiliza
   const isAdmin = user?.isAdmin || false;
 
   // Ativar sincronização global de dados para atualização automática
@@ -340,8 +341,8 @@ export default function BioPage() {
     }
   }, [isLoading]);
 
-  // Mostrar preloader enquanto carrega
-  if (isLoading || authLoading) { // Adicionar authLoading à condição de carregamento
+  // Mostrar preloader enquanto carrega APENAS os dados necessários (não autenticação)
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#439b1e]/10 via-white to-pink-50">
         <div className="text-center space-y-6">
@@ -366,11 +367,6 @@ export default function BioPage() {
         </div>
       </div>
     );
-  }
-
-  // Se não for admin, redirecionar
-  if (!isAdmin) {
-    return <Redirect to="/" />;
   }
 
   return (
