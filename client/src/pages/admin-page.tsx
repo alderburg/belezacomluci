@@ -632,7 +632,8 @@ export default function AdminPage() {
     }
 
     const subscription = bannerForm.watch((value, { name }) => {
-      if (!editingItem && banners && activeTab === 'banners' && dialogOpen) {
+      // Só atualizar ordem se mudou page ou videoId, não se mudou order (evita loop infinito)
+      if (!editingItem && banners && activeTab === 'banners' && dialogOpen && (name === 'page' || name === 'videoId')) {
         const currentPage = value.page || "home";
         const currentVideoId = value.videoId || "";
 

@@ -1,0 +1,64 @@
+Uncaught (in promise) RangeError: Maximum call stack size exceeded
+    at setFieldValue (chunk-ZDQXM6G4.js?v=ff9b87af:1146:36)
+    at Object.setValue (chunk-ZDQXM6G4.js?v=ff9b87af:1188:101)
+    at admin-page.tsx:648:20
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:1340:47)
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:443:33)
+    at Object.setValue (chunk-ZDQXM6G4.js?v=ff9b87af:1191:21)
+    at admin-page.tsx:648:20
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:1340:47)
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:443:33)
+    at Object.setValue (chunk-ZDQXM6G4.js?v=ff9b87af:1191:21)Entenda o erro
+18chunk-RPCDYKBN.js?v=ff9b87af:1856 Uncaught (in promise) RangeError: Maximum call stack size exceeded
+    at HTMLInputElement.set [as value] (chunk-RPCDYKBN.js?v=ff9b87af:1856:26)
+    at setFieldValue (chunk-ZDQXM6G4.js?v=ff9b87af:1146:36)
+    at Object.setValue (chunk-ZDQXM6G4.js?v=ff9b87af:1188:101)
+    at admin-page.tsx:648:20
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:1340:47)
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:443:33)
+    at Object.setValue (chunk-ZDQXM6G4.js?v=ff9b87af:1191:21)
+    at admin-page.tsx:648:20
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:1340:47)
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:443:33)Entenda o erro
+chunk-RPCDYKBN.js?v=ff9b87af:1856 Uncaught RangeError: Maximum call stack size exceeded
+    at HTMLInputElement.set [as value] (chunk-RPCDYKBN.js?v=ff9b87af:1856:26)
+    at setFieldValue (chunk-ZDQXM6G4.js?v=ff9b87af:1146:36)
+    at Object.setValue (chunk-ZDQXM6G4.js?v=ff9b87af:1188:101)
+    at admin-page.tsx:648:20
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:1340:47)
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:443:33)
+    at Object.setValue (chunk-ZDQXM6G4.js?v=ff9b87af:1191:21)
+    at admin-page.tsx:648:20
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:1340:47)
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:443:33)Entenda o erro
+admin-page.tsx:743 [createBannerMutation] Iniciando mutation com data: Object
+admin-page.tsx:744 [createBannerMutation] editingItem: null
+admin-page.tsx:752 [createBannerMutation] Criando novo banner
+admin-page.tsx:755 [createBannerMutation] Resposta recebida: Response
+admin-page.tsx:763 [createBannerMutation] onSuccess chamado com data: Response
+admin-page.tsx:773 [createBannerMutation] Resetando formulário e fechando dialog
+admin-page.tsx:785 [createBannerMutation] onError chamado com erro: RangeError: Maximum call stack size exceeded
+    at _getWatch (chunk-ZDQXM6G4.js?v=ff9b87af:1115:21)
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:1340:52)
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:443:33)
+    at Object.setValue (chunk-ZDQXM6G4.js?v=ff9b87af:1191:21)
+    at admin-page.tsx:648:20
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:1340:47)
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:443:33)
+    at Object.setValue (chunk-ZDQXM6G4.js?v=ff9b87af:1191:21)
+    at admin-page.tsx:648:20
+    at Object.next (chunk-ZDQXM6G4.js?v=ff9b87af:1340:47)
+onError @ admin-page.tsx:785Entenda o erro
+admin-page.tsx:786 [createBannerMutation] Tipo do erro: object
+onError @ admin-page.tsx:786Entenda o erro
+admin-page.tsx:787 [createBannerMutation] Stack do erro: RangeError: Maximum call stack size exceeded
+    at _getWatch (https://a81814f4-4d43-441b-acc1-3a9b92729048-00-1v2byqe753ite.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZDQXM6G4.js?v=ff9b87af:1115:21)
+    at Object.next (https://a81814f4-4d43-441b-acc1-3a9b92729048-00-1v2byqe753ite.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZDQXM6G4.js?v=ff9b87af:1340:52)
+    at Object.next (https://a81814f4-4d43-441b-acc1-3a9b92729048-00-1v2byqe753ite.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZDQXM6G4.js?v=ff9b87af:443:33)
+    at Object.setValue (https://a81814f4-4d43-441b-acc1-3a9b92729048-00-1v2byqe753ite.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZDQXM6G4.js?v=ff9b87af:1191:21)
+    at https://a81814f4-4d43-441b-acc1-3a9b92729048-00-1v2byqe753ite.janeway.replit.dev/src/pages/admin-page.tsx:498:20
+    at Object.next (https://a81814f4-4d43-441b-acc1-3a9b92729048-00-1v2byqe753ite.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZDQXM6G4.js?v=ff9b87af:1340:47)
+    at Object.next (https://a81814f4-4d43-441b-acc1-3a9b92729048-00-1v2byqe753ite.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZDQXM6G4.js?v=ff9b87af:443:33)
+    at Object.setValue (https://a81814f4-4d43-441b-acc1-3a9b92729048-00-1v2byqe753ite.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZDQXM6G4.js?v=ff9b87af:1191:21)
+    at https://a81814f4-4d43-441b-acc1-3a9b92729048-00-1v2byqe753ite.janeway.replit.dev/src/pages/admin-page.tsx:498:20
+    at Object.next (https://a81814f4-4d43-441b-acc1-3a9b92729048-00-1v2byqe753ite.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZDQXM6G4.js?v=ff9b87af:1340:47)
