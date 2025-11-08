@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { apiRequest } from '@/lib/queryClient';
+import { useEffect } from "react";
 
 export default function AdminVideosMobilePage() {
   const { user } = useAuth();
@@ -33,6 +34,10 @@ export default function AdminVideosMobilePage() {
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;

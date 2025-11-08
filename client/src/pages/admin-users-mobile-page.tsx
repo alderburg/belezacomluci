@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AdminUsersMobilePage() {
   const { user } = useAuth();
@@ -21,6 +21,10 @@ export default function AdminUsersMobilePage() {
   const queryClient = useQueryClient();
   const { isConnected } = useDataSync();
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
 
   if (!user?.isAdmin) {
