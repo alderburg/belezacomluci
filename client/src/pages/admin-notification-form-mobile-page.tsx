@@ -67,6 +67,7 @@ export default function AdminNotificationFormMobilePage() {
 
   useEffect(() => {
     if (notification && isEditing) {
+      console.log('Populando formulário com notificação:', notification);
       form.reset({
         title: notification.title,
         description: notification.description || "",
@@ -78,17 +79,6 @@ export default function AdminNotificationFormMobilePage() {
           new Date(notification.startDateTime).toISOString().slice(0, 16) : "",
         endDateTime: notification.endDateTime ? 
           new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
-      });
-    } else if (!isEditing) {
-      form.reset({
-        title: "",
-        description: "",
-        imageUrl: "",
-        linkUrl: "",
-        targetAudience: "all",
-        isActive: true,
-        startDateTime: "",
-        endDateTime: "",
       });
     }
   }, [notification, isEditing, form]);
