@@ -173,6 +173,16 @@ export default function AdminPopupsMobilePage() {
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
                       {getTriggerLabel(popup.trigger)}
                     </Badge>
+                    {popup.targetPage === 'video_specific' && popup.targetVideoId && (
+                      <Badge variant="outline" className="bg-purple-50 text-purple-700 text-xs">
+                        ID: {popup.targetVideoId.substring(0, 8)}...
+                      </Badge>
+                    )}
+                    {popup.targetPage === 'course_specific' && popup.targetCourseId && (
+                      <Badge variant="outline" className="bg-purple-50 text-purple-700 text-xs">
+                        ID: {popup.targetCourseId.substring(0, 8)}...
+                      </Badge>
+                    )}
                     {popup.isExclusive && (
                       <Badge className="bg-purple-100 text-purple-700 text-xs">
                         Premium

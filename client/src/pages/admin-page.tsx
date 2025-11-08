@@ -4283,6 +4283,11 @@ export default function AdminPage() {
                                        popup.targetPage === 'course_specific' ? 'Curso Específico' : popup.targetPage}
                                     </Badge>
                                   )}
+                                  {popup.targetPage === 'video_specific' && popup.targetVideoId && (
+                                    <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                                      ID: {popup.targetVideoId.substring(0, 8)}...
+                                    </Badge>
+                                  )}
                                   {popup.targetPage === 'course_specific' && popup.targetCourseId && (
                                     <Badge variant="outline" className="bg-purple-50 text-purple-700">
                                       ID: {popup.targetCourseId.substring(0, 8)}...
