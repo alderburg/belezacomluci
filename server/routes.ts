@@ -2610,6 +2610,10 @@ export function registerRoutes(app: Express): Server {
 
   // Admin alias route for getting single notification
   app.get("/api/admin/notifications/:id", async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
     try {
       const notification = await storage.getNotification(req.params.id);
       if (!notification) {
@@ -2785,15 +2789,15 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Enviar notificação para todos os usuários
-      const users = await storage.getUsers();
+      const users = await storage.getAllUsers();
       let sentCount = 0;
 
       for (const user of users) {
         // Verificar se o usuário está no público-alvo
         const shouldReceive = 
           notification.targetAudience === 'all' ||
-          (notification.targetAudience === 'premium' && user.isPremium) ||
-          (notification.targetAudience === 'free' && !user.isPremium);
+          (notification.targetAudience === 'premium' && user.planType === 'premium') ||
+          (notification.targetAudience === 'free' && user.planType !== 'premium');
 
         if (shouldReceive) {
           await storage.createUserNotification({
