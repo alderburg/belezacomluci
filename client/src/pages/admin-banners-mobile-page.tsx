@@ -108,9 +108,13 @@ export default function AdminBannersMobilePage() {
         await Promise.all(updates);
       }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      
+      // Aguardar refetch antes de liberar botões
+      await queryClient.refetchQueries({ queryKey: ["/api/admin/banners"] });
+      
       toast({
         title: "Sucesso",
         description: "Banner excluído com sucesso!",

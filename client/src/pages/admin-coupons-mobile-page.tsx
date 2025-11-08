@@ -53,9 +53,13 @@ export default function AdminCouponsMobilePage() {
       setIsDeletingItem(true);
       return await apiRequest('DELETE', `/api/admin/coupons/${id}`);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['/api/coupons'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/coupons'] });
+      
+      // Aguardar refetch antes de liberar botões
+      await queryClient.refetchQueries({ queryKey: ['/api/coupons'] });
+      
       toast({
         title: "Sucesso!",
         description: "Cupom excluído com sucesso",

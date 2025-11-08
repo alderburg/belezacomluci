@@ -70,8 +70,12 @@ export default function AdminCategoriesMobilePage() {
         await Promise.all(updates);
       }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      
+      // Aguardar refetch antes de liberar botões
+      await queryClient.refetchQueries({ queryKey: ["/api/categories"] });
+      
       toast({
         title: "Sucesso",
         description: "Categoria excluída com sucesso!",

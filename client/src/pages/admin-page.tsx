@@ -1210,7 +1210,7 @@ export default function AdminPage() {
         await Promise.all(updates);
       }
     },
-    onSuccess: (_, variables) => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [`/api/${variables.type}`] });
 
       // Se for vídeo, também invalidar banners, popups e comentários vinculados
@@ -1257,10 +1257,20 @@ export default function AdminPage() {
       if (variables.type === 'notifications') {
         queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
       }
+
+      // Aguardar o refetch das queries principais antes de liberar os botões
+      await queryClient.refetchQueries({ queryKey: [`/api/${variables.type}`] });
+      if (variables.type === 'banners') {
+        await queryClient.refetchQueries({ queryKey: ["/api/admin/banners"] });
+      }
+      
       toast({
         title: "Sucesso",
         description: "Item excluído com sucesso!",
       });
+      
+      // Liberar botões somente após refetch completo
+      setIsDeletingItem(false);
     },
     onError: () => {
       toast({
@@ -1268,9 +1278,7 @@ export default function AdminPage() {
         description: "Falha ao excluir item",
         variant: "destructive",
       });
-    },
-    onSettled: () => {
-      setIsDeletingItem(false); // Finaliza o estado de deleção
+      setIsDeletingItem(false);
     },
   });
 
