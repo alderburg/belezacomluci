@@ -272,6 +272,23 @@ export default function PlaylistPage() {
   const product = resource?._type === 'product' ? resource : null;
   const video = resource?._type === 'video' ? resource : null;
 
+  // Query para buscar banners ativos
+  const { data: banners } = useQuery({
+    queryKey: product 
+      ? [`/api/banners/course/${resourceId}`]
+      : video
+        ? [`/api/banners/video/${resourceId}`]
+        : ["/api/banners"],
+    enabled: !!resourceId,
+  });
+
+  // Verificar se há banners ativos
+  const activeBanners = banners?.filter((banner: any) => 
+    banner.isActive && 
+    (product ? banner.page === "course_specific" : banner.page === "video_specific")
+  ) || [];
+  const hasActiveBanners = activeBanners.length > 0;
+
   // Check access when resource loads
   useEffect(() => {
     if (resource && resource.isExclusive) {
@@ -939,7 +956,7 @@ export default function PlaylistPage() {
 
       <Sidebar />
 
-      <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0 pt-32' : 'pt-16'}`}>
+      <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0' : ''}`}>
         {/* Added PopupSystem for course-specific popups */}
         {video ? (
           <PopupSystem 
@@ -954,21 +971,18 @@ export default function PlaylistPage() {
             targetCourseId={resourceId} 
           />
         )}
-        <div className="container mx-auto px-6 py-8">
-          {/* Banner carousel for course-specific banners */}
-          {product && (
-            <div className="mb-6">
-              <BannerCarousel page="course_specific" courseId={resourceId} />
-            </div>
-          )}
-          
-          {/* Banner carousel for video-specific playlists - usar resourceId da playlist */}
-          {video && resourceId && (
-            <div className="mb-6">
-              <BannerCarousel page="video_specific" videoId={resourceId} />
-            </div>
-          )}
-          
+        
+        {/* Banner carousel for course-specific banners */}
+        {product && (
+          <BannerCarousel page="course_specific" courseId={resourceId} />
+        )}
+        
+        {/* Banner carousel for video-specific playlists - usar resourceId da playlist */}
+        {video && resourceId && (
+          <BannerCarousel page="video_specific" videoId={resourceId} />
+        )}
+        
+        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-20') : ''}`}>
           <div className="flex items-center justify-between mb-6">
             <Button 
               variant="ghost" 
