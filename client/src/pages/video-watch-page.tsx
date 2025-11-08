@@ -698,7 +698,19 @@ export default function VideoWatchPage() {
 
       <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0 pt-32' : 'pt-16'}`}>
         {/* Added PopupSystem for page-specific popups */}
-        <PopupSystem trigger="page_specific" targetPage="video_specific" targetVideoId={videoId} />
+        {product ? (
+          <PopupSystem 
+            trigger="page_specific" 
+            targetPage="course_specific" 
+            targetCourseId={videoId} 
+          />
+        ) : (
+          <PopupSystem 
+            trigger="page_specific" 
+            targetPage="video_specific" 
+            targetVideoId={videoId} 
+          />
+        )}
         <div className="container mx-auto px-6 py-8">
           <Button
             variant="ghost"

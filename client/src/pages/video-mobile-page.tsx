@@ -687,7 +687,19 @@ export default function VideoMobilePage() {
         </div>
       </div>
 
-      <PopupSystem trigger="page_specific" targetPage="video_specific" targetVideoId={videoId} />
+      {product ? (
+        <PopupSystem 
+          trigger="page_specific" 
+          targetPage="course_specific" 
+          targetCourseId={videoId} 
+        />
+      ) : (
+        <PopupSystem 
+          trigger="page_specific" 
+          targetPage="video_specific" 
+          targetVideoId={videoId} 
+        />
+      )}
 
       {/* Content com padding-top para compensar header fixo */}
       <div className="pt-24 px-4 py-6 space-y-6">
