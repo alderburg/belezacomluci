@@ -2936,9 +2936,16 @@ export class DatabaseStorageWithGamification extends DatabaseStorage {
       return existing[0];
     }
 
+    // Criar timestamp em horário brasileiro (UTC-3)
+    const now = new Date();
+    const brTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+
     const [created] = await this.db
       .insert(analyticsTargets)
-      .values(target)
+      .values({
+        ...target,
+        createdAt: brTime
+      })
       .returning();
     return created;
   }
