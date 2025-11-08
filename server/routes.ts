@@ -3879,7 +3879,7 @@ export function registerRoutes(app: Express): Server {
   // Track page view
   app.post("/api/analytics/pageview", async (req, res) => {
     try {
-      const { page, sessionId, referrer, userAgent, city, state, country } = req.body;
+      const { page, sessionId, referrer, userAgent, ipAddress, city, state, country } = req.body;
 
       if (!page || !sessionId) {
         return res.status(400).json({ message: "Missing required fields" });
@@ -3898,26 +3898,26 @@ export function registerRoutes(app: Express): Server {
       const pageView = await storage.createPageView({
         page,
         sessionId,
-        referrer,
-        userAgent,
+        referrer: referrer || null,
+        userAgent: userAgent || null,
+        ipAddress: ipAddress || null,
         city: city || null,
         state: state || null,
         country: country || null,
         userId: req.isAuthenticated() ? req.user!.id : null,
-        ipAddress: null,
         createdAt: brTime, // Usar o timestamp brasileiro
       });
 
       // Broadcast analytics update via WebSocket
       const wsService = (global as any).notificationWS;
       if (wsService) {
-        wsService.broadcastDataUpdate('analytics', 'pageview', pageView);
+        wsService.broadcastDataUpdate('analytics', 'pageview', { pageView });
       }
 
       res.json(pageView);
     } catch (error) {
-      console.error('Error creating page view:', error);
-      res.status(500).json({ message: "Failed to create page view" });
+      console.error('Error creating pageview:', error);
+      res.status(500).json({ message: "Failed to create pageview" });
     }
   });
 

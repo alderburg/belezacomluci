@@ -126,10 +126,17 @@ export default function AdminAnalyticsPage() {
         throw new Error('Failed to fetch analytics stats');
       }
 
-      return response.json();
+      const data = await response.json();
+      console.log('📊 Analytics stats atualizado:', {
+        totalPageViews: data.totalPageViews,
+        totalClicks: data.totalClicks,
+        uniqueVisitors: data.uniqueVisitors
+      });
+      return data;
     },
     enabled: !!user?.isAdmin,
-    refetchInterval: 30000, // Refetch automático a cada 30 segundos
+    refetchInterval: 5000, // Refetch a cada 5 segundos para dados mais em tempo real
+    refetchOnWindowFocus: true,
   });
 
   const { data: timelineData, isLoading: timelineLoading } = useQuery<TimelineData>({
@@ -160,9 +167,16 @@ export default function AdminAnalyticsPage() {
         throw new Error('Failed to fetch timeline data');
       }
 
-      return response.json();
+      const data = await response.json();
+      console.log('📊 Timeline data atualizado:', {
+        clicksCount: data.clicks?.length || 0,
+        itemsCount: data.items?.length || 0
+      });
+      return data;
     },
     enabled: !!user?.isAdmin,
+    refetchInterval: 5000, // Refetch a cada 5 segundos
+    refetchOnWindowFocus: true,
   });
 
   // Recarregar dados quando o calendário fechar
