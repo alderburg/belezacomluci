@@ -59,16 +59,29 @@ export default function AdminNotificationFormMobilePage() {
 
   useEffect(() => {
     if (notification && isEditing) {
-      form.setValue("title", notification.title);
-      form.setValue("description", notification.description || "");
-      form.setValue("imageUrl", notification.imageUrl || "");
-      form.setValue("linkUrl", notification.linkUrl || "");
-      form.setValue("targetAudience", notification.targetAudience);
-      form.setValue("isActive", notification.isActive ?? true);
-      form.setValue("startDateTime", notification.startDateTime ? 
-        new Date(notification.startDateTime).toISOString().slice(0, 16) : "");
-      form.setValue("endDateTime", notification.endDateTime ? 
-        new Date(notification.endDateTime).toISOString().slice(0, 16) : "");
+      form.reset({
+        title: notification.title,
+        description: notification.description || "",
+        imageUrl: notification.imageUrl || "",
+        linkUrl: notification.linkUrl || "",
+        targetAudience: notification.targetAudience,
+        isActive: notification.isActive ?? true,
+        startDateTime: notification.startDateTime ? 
+          new Date(notification.startDateTime).toISOString().slice(0, 16) : "",
+        endDateTime: notification.endDateTime ? 
+          new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
+      });
+    } else if (!isEditing) {
+      form.reset({
+        title: "",
+        description: "",
+        imageUrl: "",
+        linkUrl: "",
+        targetAudience: "all",
+        isActive: true,
+        startDateTime: "",
+        endDateTime: "",
+      });
     }
   }, [notification, isEditing, form]);
 
