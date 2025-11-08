@@ -2585,6 +2585,147 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Admin alias routes for notifications
+  app.post("/api/admin/notifications", async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    try {
+      const notificationData = insertNotificationSchema.parse(req.body);
+      const notification = await storage.createNotification(notificationData);
+
+      // Broadcast data update
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('notifications', 'created', notification);
+      }
+
+      res.json(notification);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.put("/api/admin/notifications/:id", async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    try {
+      const notificationData = insertNotificationSchema.partial().parse(req.body);
+      const notification = await storage.updateNotification(req.params.id, notificationData);
+
+      // Broadcast data update
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('notifications', 'updated', notification);
+      }
+
+      res.json(notification);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/notifications/:id", async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    try {
+      await storage.deleteNotification(req.params.id);
+
+      // Broadcast data update
+      const wsService = (global as any).notificationWS;
+      if (wsService) {
+        wsService.broadcastDataUpdate('notifications', 'deleted', { id: req.params.id });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/notifications/:id/send", async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    try {
+      const notification = await storage.getNotificationById(req.params.id);
+      if (!notification) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
+
+      // Verificar se a notificação deve ser enviada agora (agendamento)
+      // Ajustar para o fuso horário de Brasília (UTC-3)
+      const now = new Date();
+      const brasiliaOffset = -3 * 60; // UTC-3 em minutos
+      const nowInBrasilia = new Date(now.getTime() - (3 * 60 * 60 * 1000)); // Subtrair 3 horas
+
+      const startDate = notification.startDateTime ? new Date(notification.startDateTime) : null;
+      const endDate = notification.endDateTime ? new Date(notification.endDateTime) : null;
+
+      // Se tem startDateTime e ainda não chegou a hora, não enviar
+      if (startDate && nowInBrasilia < startDate) {
+        return res.status(400).json({
+          error: "Notification is scheduled for future",
+          scheduledFor: startDate
+        });
+      }
+
+      // Se tem endDateTime e já passou, não enviar
+      if (endDate && nowInBrasilia > endDate) {
+        return res.status(400).json({
+          error: "Notification has expired",
+          expiredAt: endDate
+        });
+      }
+
+      // Enviar notificação para todos os usuários
+      const users = await storage.getUsers();
+      let sentCount = 0;
+
+      for (const user of users) {
+        // Verificar se o usuário está no público-alvo
+        const shouldReceive = 
+          notification.targetAudience === 'all' ||
+          (notification.targetAudience === 'premium' && user.isPremium) ||
+          (notification.targetAudience === 'free' && !user.isPremium);
+
+        if (shouldReceive) {
+          await storage.createUserNotification({
+            userId: user.id,
+            notificationId: notification.id,
+            isRead: false,
+          });
+
+          // Enviar via WebSocket se disponível
+          const wsService = (global as any).notificationWS;
+          if (wsService) {
+            wsService.broadcastToUser(user.id, {
+              type: 'new_notification',
+              notification: notification
+            });
+          }
+
+          sentCount++;
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Notification sent to ${sentCount} users`
+      });
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   app.post("/api/notifications/:id/send", async (req, res) => {
     if (!req.user?.isAdmin) {
       return res.status(403).json({ error: "Admin access required" });

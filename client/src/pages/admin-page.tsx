@@ -747,7 +747,7 @@ export default function AdminPage() {
   const createNotificationMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createNotificationSchema>) => {
       const response = await apiRequest(editingItem ? "PUT" : "POST",
-        editingItem ? `/api/notifications/${editingItem.id}` : "/api/notifications", data);
+        editingItem ? `/api/admin/notifications/${editingItem.id}` : "/api/admin/notifications", data);
       return response.json();
     },
     onSuccess: () => {
@@ -771,7 +771,7 @@ export default function AdminPage() {
 
   const sendNotificationMutation = useMutation({
     mutationFn: async (notificationId: string) => {
-      const response = await apiRequest("POST", `/api/notifications/${notificationId}/send`);
+      const response = await apiRequest("POST", `/api/admin/notifications/${notificationId}/send`);
       return response.json();
     },
     onSuccess: () => {
