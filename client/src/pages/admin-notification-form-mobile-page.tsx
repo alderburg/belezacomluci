@@ -62,7 +62,7 @@ export default function AdminNotificationFormMobilePage() {
   });
 
   useEffect(() => {
-    if (notification && isEditing) {
+    if (isEditing && notification) {
       form.reset({
         title: notification.title,
         description: notification.description,
@@ -76,7 +76,7 @@ export default function AdminNotificationFormMobilePage() {
           new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
       });
     }
-  }, [notification, isEditing, form]);
+  }, [isEditing, notification, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {
