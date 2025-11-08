@@ -4334,6 +4334,9 @@ export default function AdminPage() {
                                 </h4>
                                 <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{category.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                    Posição: {category.order}
+                                  </Badge>
                                   {category.isActive ? (
                                     <Badge className="bg-green-100 text-green-700">Ativa</Badge>
                                   ) : (
