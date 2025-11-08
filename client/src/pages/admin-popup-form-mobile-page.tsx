@@ -91,9 +91,9 @@ export default function AdminPopupFormMobilePage() {
         showButton: popup.showButton ?? true,
         isExclusive: popup.isExclusive || false,
         isActive: popup.isActive,
-        startDateTime: popup.startDateTime ? 
+        startDateTime: popup.startDateTime ?
           new Date(popup.startDateTime).toISOString().slice(0, 16) : null,
-        endDateTime: popup.endDateTime ? 
+        endDateTime: popup.endDateTime ?
           new Date(popup.endDateTime).toISOString().slice(0, 16) : null,
       });
     }
@@ -119,22 +119,22 @@ export default function AdminPopupFormMobilePage() {
     onError: (error: any) => {
       console.log('Erro completo capturado:', error);
       let errorMessage = "Erro ao salvar popup";
-      
+
       // Verificar o erro completo (mensagem e response)
       const errorString = JSON.stringify(error);
       const errorMsg = (error?.message || '').toLowerCase();
       const errorResponse = JSON.stringify(error?.response || {}).toLowerCase();
-      
+
       console.log('Verificando erro:', {
         errorMsg,
         errorResponse,
         errorString: errorString.toLowerCase()
       });
-      
+
       // Verificar se é erro de foreign key
-      const isForeignKeyError = 
-        errorMsg.includes('foreign') || 
-        errorMsg.includes('constraint') || 
+      const isForeignKeyError =
+        errorMsg.includes('foreign') ||
+        errorMsg.includes('constraint') ||
         errorMsg.includes('not present') ||
         errorMsg.includes('violates') ||
         errorResponse.includes('foreign') ||
@@ -143,7 +143,7 @@ export default function AdminPopupFormMobilePage() {
         errorString.toLowerCase().includes('foreign') ||
         errorString.toLowerCase().includes('video_id') ||
         errorString.toLowerCase().includes('course_id');
-      
+
       if (isForeignKeyError) {
         if (form.watch("targetPage") === "video_specific") {
           errorMessage = "Vídeo não encontrado. Verifique o ID adicionado.";
@@ -151,7 +151,7 @@ export default function AdminPopupFormMobilePage() {
           errorMessage = "Curso não encontrado. Verifique o ID adicionado.";
         }
       }
-      
+
       toast({
         title: "Erro",
         description: errorMessage,

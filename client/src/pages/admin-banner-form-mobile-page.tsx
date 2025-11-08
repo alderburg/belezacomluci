@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -121,14 +120,14 @@ export default function AdminBannerFormMobilePage() {
       const currentPage = form.watch("page") || "home";
       const currentVideoId = form.watch("videoId") || "";
       const currentCourseId = form.watch("courseId") || "";
-      
+
       const filteredBanners = banners.filter(b => {
         if (b.page !== currentPage) return false;
         if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
         if (currentPage === 'course_specific' && b.courseId !== currentCourseId) return false;
         return true;
       });
-      
+
       const maxOrder = filteredBanners.length > 0 
         ? filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0) + 1
         : 0;
@@ -140,14 +139,14 @@ export default function AdminBannerFormMobilePage() {
         const currentPage = value.page || "home";
         const currentVideoId = value.videoId || "";
         const currentCourseId = value.courseId || "";
-        
+
         const filteredBanners = banners.filter(b => {
           if (b.page !== currentPage) return false;
           if (currentPage === 'video_specific' && b.videoId !== currentVideoId) return false;
           if (currentPage === 'course_specific' && b.courseId !== currentCourseId) return false;
           return true;
         });
-        
+
         const maxOrder = filteredBanners.length > 0 
           ? filteredBanners.reduce((max, b) => Math.max(max, b.order || 0), 0) + 1
           : 0;
@@ -167,9 +166,9 @@ export default function AdminBannerFormMobilePage() {
         startDateTime: data.startDateTime || null,
         endDateTime: data.endDateTime || null,
       };
-      
+
       console.log('[Banner Form] Enviando dados:', cleanedData);
-      
+
       if (isEditing) {
         return await apiRequest('PUT', `/api/banners/${bannerId}`, cleanedData);
       } else {
