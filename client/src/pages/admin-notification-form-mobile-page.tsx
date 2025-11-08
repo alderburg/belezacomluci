@@ -39,10 +39,19 @@ export default function AdminNotificationFormMobilePage() {
   }
 
   const { data: notification, isLoading } = useQuery<Notification>({
-    queryKey: [`/api/admin/notifications/${notificationId}`],
+    queryKey: ['/api/admin/notifications', notificationId],
+    queryFn: async () => {
+      if (!notificationId) throw new Error('ID não fornecido');
+      console.log('🔍 [NOTIFICAÇÃO] Buscando notificação para edição:', notificationId);
+      const res = await fetch(`/api/admin/notifications/${notificationId}`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Erro ao carregar notificação');
+      const data = await res.json();
+      console.log('✅ [NOTIFICAÇÃO] Notificação carregada:', data);
+      return data;
+    },
     enabled: Boolean(isEditing && notificationId),
-    staleTime: 0, // Sempre buscar dados frescos
-    gcTime: 0, // Não manter em cache (gcTime é o novo nome de cacheTime)
   });
 
   const form = useForm<z.infer<typeof insertNotificationSchema>>({
@@ -61,6 +70,7 @@ export default function AdminNotificationFormMobilePage() {
 
   useEffect(() => {
     if (notification && isEditing) {
+      console.log('📝 [NOTIFICAÇÃO] Populando formulário com dados:', notification);
       form.reset({
         title: notification.title,
         description: notification.description || "",
@@ -73,8 +83,13 @@ export default function AdminNotificationFormMobilePage() {
         endDateTime: notification.endDateTime ? 
           new Date(notification.endDateTime).toISOString().slice(0, 16) : "",
       });
+      console.log('✅ [NOTIFICAÇÃO] Formulário populado com sucesso');
+    } else if (isEditing && !notification) {
+      console.log('⚠️ [NOTIFICAÇÃO] isEditing=true mas notification está vazio');
+      console.log('🔍 [NOTIFICAÇÃO] notificationId:', notificationId);
+      console.log('🔍 [NOTIFICAÇÃO] isLoading:', isLoading);
     }
-  }, [notification, isEditing, form]);
+  }, [notification, isEditing, notificationId, isLoading, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertNotificationSchema>) => {
