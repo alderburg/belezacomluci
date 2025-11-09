@@ -243,6 +243,17 @@ export default function AdminBannersMobilePage() {
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
                       Posição: {banner.order}
                     </Badge>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
+                      {banner.page === 'home' ? 'Página Inicial' : 
+                       banner.page === 'videos' ? 'Vídeos Exclusivos' :
+                       banner.page === 'products' ? 'Produtos Digitais' :
+                       banner.page === 'coupons' ? 'Cupons' :
+                       banner.page === 'community' ? 'Comunidade' :
+                       banner.page === 'profile' ? 'Perfil' :
+                       banner.page === 'video_specific' ? 'Vídeo Específico' :
+                       banner.page === 'course_specific' ? 'Curso Específico' :
+                       banner.page === 'bio' ? 'Bio' : banner.page}
+                    </Badge>
                     {banner.displayOn === 'desktop' && (
                       <Badge variant="outline" className="bg-slate-100 text-slate-700 text-xs">
                         🖥️ Desktop
@@ -258,21 +269,14 @@ export default function AdminBannersMobilePage() {
                         🖥️📱 Ambos
                       </Badge>
                     )}
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
-                      {banner.page === 'home' ? 'Página Inicial' : 
-                       banner.page === 'videos' ? 'Vídeos Exclusivos' :
-                       banner.page === 'products' ? 'Produtos Digitais' :
-                       banner.page === 'coupons' ? 'Cupons' :
-                       banner.page === 'community' ? 'Comunidade' :
-                       banner.page === 'profile' ? 'Perfil' :
-                       banner.page === 'video_specific' ? 'Vídeo Específico' :
-                       banner.page === 'bio' ? 'Bio' : banner.page}
-                    </Badge>
                     {banner.page === 'video_specific' && banner.videoId && (
                       <Badge variant="outline" className="bg-purple-50 text-purple-700 text-xs">
-                        ID: {banner.videoId.substring(0, 8)}...
+                        Vídeo ID: {banner.videoId.substring(0, 8)}...
+                      </Badge>
+                    )}
+                    {banner.page === 'course_specific' && banner.courseId && (
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700 text-xs">
+                        Curso ID: {banner.courseId.substring(0, 8)}...
                       </Badge>
                     )}
                     {banner.isExclusive && (
