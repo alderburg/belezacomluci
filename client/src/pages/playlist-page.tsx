@@ -71,11 +71,11 @@ interface VideoProgress {
 export default function PlaylistPage() {
   const [location, navigate] = useLocation();
   // Extract ID from URL - suporta /playlist/:id, /videos/playlist/:id, /produtos/playlist/:id
-  const resourceId = location.includes('/playlist/') 
+  const resourceId = location.includes('/playlist/')
     ? location.split('/playlist/')[1]?.split('?')[0]
     : null;
 
-  
+
   const isMobile = useIsMobile();
   const [isVideo, setIsVideo] = useState(false);
 
@@ -135,7 +135,7 @@ export default function PlaylistPage() {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -246,21 +246,21 @@ export default function PlaylistPage() {
     queryKey: [`/api/resource/${resourceId}`],
     queryFn: async () => {
       if (!resourceId) throw new Error('No resource ID');
-      
+
       // Tenta buscar como produto primeiro
       let response = await fetch(`/api/produtos/${resourceId}`);
       if (response.ok) {
         const data = await response.json();
         return { ...data, _type: 'product' };
       }
-      
+
       // Se não encontrou como produto, tenta como vídeo
       response = await fetch(`/api/videos/${resourceId}`);
       if (response.ok) {
         const data = await response.json();
         return { ...data, _type: 'video' };
       }
-      
+
       // Se nenhum dos dois funcionou, retorna erro
       throw new Error('Resource not found');
     },
@@ -274,7 +274,7 @@ export default function PlaylistPage() {
 
   // Query para buscar banners ativos
   const { data: banners } = useQuery({
-    queryKey: product 
+    queryKey: product
       ? [`/api/banners/course/${resourceId}`]
       : video
         ? [`/api/banners/video/${resourceId}`]
@@ -283,8 +283,8 @@ export default function PlaylistPage() {
   });
 
   // Verificar se há banners ativos
-  const activeBanners = banners?.filter((banner: any) => 
-    banner.isActive && 
+  const activeBanners = banners?.filter((banner: any) =>
+    banner.isActive &&
     (product ? banner.page === "course_specific" : banner.page === "video_specific")
   ) || [];
   const hasActiveBanners = activeBanners.length > 0;
@@ -382,7 +382,7 @@ export default function PlaylistPage() {
     if (resource) {
       // Para produtos usa fileUrl, para vídeos usa videoUrl
       const resourceUrl = product ? resource.fileUrl : (video ? resource.videoUrl : null);
-      
+
       if (resourceUrl) {
         const playlistId = extractPlaylistId(resourceUrl);
         const videoId = extractVideoId(resourceUrl);
@@ -467,7 +467,7 @@ export default function PlaylistPage() {
       if (saveProgress) {
         saveProgress();
       }
-      
+
       // Destruir player atual antes de mudar
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         try {
@@ -477,17 +477,17 @@ export default function PlaylistPage() {
           console.log('Error destroying player on video change:', e);
         }
       }
-      
+
       // Reset estados
       setShowVideo(false);
       setIsLoadingVideoContent(true);
-      
+
       // Pequeno delay para garantir cleanup completo
       setTimeout(() => {
         setCurrentVideoId(videoId);
       }, 50);
     }
-    
+
     if (isMobile) {
       setShowPlaylist(false);
     }
@@ -556,7 +556,7 @@ export default function PlaylistPage() {
     const commentsReady = !isLoadingComments;
     const statsReady = !youtubeStats.loading;
     const hasRequiredIds = currentVideoId && resourceId;
-    
+
     if (descriptionReady && commentsReady && statsReady && hasRequiredIds) {
       // Adiciona um pequeno delay para garantir que a descrição seja renderizada
       setTimeout(() => {
@@ -593,10 +593,10 @@ export default function PlaylistPage() {
     },
     onError: (error: any) => {
       console.error('Error commenting:', error);
-      toast({ 
-        title: "Erro ao comentar", 
+      toast({
+        title: "Erro ao comentar",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive"
       });
     }
   });
@@ -694,16 +694,16 @@ export default function PlaylistPage() {
       // Only close modal and show success after refetch
       setShowDeleteDialog(false);
       setDeleteCommentId(null);
-      toast({ 
+      toast({
         title: "Comentário excluído!",
         description: "O comentário foi removido com sucesso"
       });
     },
     onError: (error: any) => {
-      toast({ 
-        title: "Erro ao excluir comentário", 
+      toast({
+        title: "Erro ao excluir comentário",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive"
       });
     }
   });
@@ -738,7 +738,7 @@ export default function PlaylistPage() {
     return (
       <div className="min-h-screen bg-background flex">
         <Sidebar />
-        
+
         <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0 pt-32' : 'pt-16'}`}>
           <div className="container mx-auto px-6 py-8">
             {/* Header skeleton */}
@@ -880,7 +880,7 @@ export default function PlaylistPage() {
     );
   }
 
-  
+
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -959,33 +959,33 @@ export default function PlaylistPage() {
       <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0' : ''}`}>
         {/* Added PopupSystem for course-specific popups */}
         {video ? (
-          <PopupSystem 
-            trigger="page_specific" 
-            targetPage="video_specific" 
-            targetVideoId={resourceId} 
+          <PopupSystem
+            trigger="page_specific"
+            targetPage="video_specific"
+            targetVideoId={resourceId}
           />
         ) : (
-          <PopupSystem 
-            trigger="page_specific" 
-            targetPage="course_specific" 
-            targetCourseId={resourceId} 
+          <PopupSystem
+            trigger="page_specific"
+            targetPage="course_specific"
+            targetCourseId={resourceId}
           />
         )}
-        
+
         {/* Banner carousel for course-specific banners */}
         {product && resourceId && (
           <BannerCarousel page="course_specific" courseId={resourceId} />
         )}
-        
+
         {/* Banner carousel for video-specific playlists - usar resourceId da playlist */}
         {video && resourceId && (
           <BannerCarousel page="video_specific" videoId={resourceId} />
         )}
-        
-        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-20') : ''}`}>
+
+        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-24') : ''}`}>
           <div className="flex items-center justify-between mb-6">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate(product ? '/produtos' : '/videos')}
               className="flex items-center"
             >
@@ -1020,7 +1020,7 @@ export default function PlaylistPage() {
 
                 {/* Play button overlay */}
                 {!showVideo && currentVideoId && (
-                  <div 
+                  <div
                     className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer z-20 group"
                     onClick={() => setShowVideo(true)}
                   >
@@ -1067,8 +1067,8 @@ export default function PlaylistPage() {
                       <div className="flex items-center gap-1">
                         <Eye className="w-4 h-4" />
                         <span>
-                          {youtubeStats.loading 
-                            ? 'Carregando...' 
+                          {youtubeStats.loading
+                            ? 'Carregando...'
                             : `${youtubeStats.views.toLocaleString()} visualizações`
                           }
                         </span>
@@ -1096,10 +1096,10 @@ export default function PlaylistPage() {
                           className="flex items-center gap-2"
                         >
                           <ThumbsUp className="w-4 h-4" />
-                          {youtubeLikeMutation.isPending 
-                            ? "Curtindo..." 
-                            : youtubeStats.loading 
-                              ? "0" 
+                          {youtubeLikeMutation.isPending
+                            ? "Curtindo..."
+                            : youtubeStats.loading
+                              ? "0"
                               : youtubeStats.likes.toLocaleString()
                           }
                         </Button>
@@ -1222,9 +1222,9 @@ export default function PlaylistPage() {
                                 {comment.user.name}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), { 
-                                  addSuffix: true, 
-                                  locale: ptBR 
+                                {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), {
+                                  addSuffix: true,
+                                  locale: ptBR
                                 }) : 'Agora'}
                               </span>
                             </div>
@@ -1262,7 +1262,7 @@ export default function PlaylistPage() {
                       </p>
                     )}
                     <p className="text-sm text-muted-foreground mt-1 text-left">
-                      {currentVideoId && videos.length > 0 
+                      {currentVideoId && videos.length > 0
                         ? `${videos.findIndex(video => video.id === currentVideoId) + 1} de ${videos.length} vídeos`
                         : `${videos.length} vídeos`
                       }
@@ -1274,9 +1274,9 @@ export default function PlaylistPage() {
                       {videos.map((video, index) => {
                         const progress = getVideoProgress(video.id);
                         const completed = isVideoCompleted(video.id);
-                        
+
                         return (
-                          <Card 
+                          <Card
                             key={video.id}
                             className={`mb-2 cursor-pointer transition-colors hover:bg-accent ${
                               currentVideoId === video.id ? 'ring-2 ring-primary bg-accent' : ''
@@ -1320,12 +1320,12 @@ export default function PlaylistPage() {
                                   <h4 className="text-sm font-medium text-foreground line-clamp-2 mt-1">
                                     {video.title}
                                   </h4>
-                                  
+
                                   {/* Barra de Progresso */}
                                   {user && progress > 0 && (
                                     <div className="mt-2" data-testid={`progress-bar-${video.id}`}>
-                                      <Progress 
-                                        value={progress} 
+                                      <Progress
+                                        value={progress}
                                         className="h-1"
                                       />
                                       <span className="text-xs text-muted-foreground mt-1 block">
@@ -1368,7 +1368,7 @@ export default function PlaylistPage() {
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground mt-1 text-left">
-                  {currentVideoId && videos.length > 0 
+                  {currentVideoId && videos.length > 0
                     ? `${videos.findIndex(video => video.id === currentVideoId) + 1} de ${videos.length} vídeos`
                     : `${videos.length} vídeos`
                   }
@@ -1378,7 +1378,7 @@ export default function PlaylistPage() {
               <ScrollArea className="flex-1">
                 <div className="p-2">
                   {videos.map((video, index) => (
-                    <Card 
+                    <Card
                       key={video.id}
                       className={`mb-2 cursor-pointer transition-colors hover:bg-accent ${
                         currentVideoId === video.id ? 'ring-2 ring-primary bg-accent' : ''
@@ -1461,7 +1461,7 @@ export default function PlaylistPage() {
         title={resource?.title || (product ? 'Curso' : 'Vídeo')}
         description={resource?.description}
       />
-      
+
       {/* Premium Upgrade Modal */}
       <PremiumUpgradeModal
         open={showPremiumModal}

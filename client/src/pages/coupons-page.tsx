@@ -84,7 +84,7 @@ export default function CouponsPage() {
       <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0' : ''}`}>
         <BannerCarousel page="coupons" />
         <PopupSystem trigger="page_specific" targetPage="coupons" />
-        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-20') : ''}`}>
+        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-24') : ''}`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 space-y-4 lg:space-y-0">
             <h2 className="text-3xl font-bold text-foreground">Cupons de Desconto</h2>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">

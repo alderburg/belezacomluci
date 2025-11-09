@@ -495,6 +495,9 @@ export default function VideoMobilePage() {
     navigate(product ? '/produtos' : '/videos');
   };
 
+  const hasActiveBanners = !!(product?.banners && product.banners.length > 0) || !!(video?.banners && video.banners.length > 0);
+
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -717,7 +720,7 @@ export default function VideoMobilePage() {
       )}
 
       {/* Content com padding-top para compensar header fixo */}
-      <div className="px-4 py-6 space-y-6" style={{ paddingTop: (product || video) && videoId ? '0.5rem' : '6rem' }}>
+      <div className={`px-4 py-6 space-y-6 ${!hasActiveBanners ? 'pt-20' : ''}`} style={{ paddingTop: (product || video) && videoId ? '0.5rem' : '6rem' }}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {(product?.coverImageUrl || video?.thumbnailUrl) && (

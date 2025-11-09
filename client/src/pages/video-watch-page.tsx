@@ -702,7 +702,7 @@ export default function VideoWatchPage() {
 
       <Sidebar />
 
-      <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0 pt-32' : 'pt-16'}`}>
+      <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0' : ''}`}>
         {/* Added PopupSystem for page-specific popups */}
         {product ? (
           <PopupSystem 
@@ -717,7 +717,7 @@ export default function VideoWatchPage() {
             targetVideoId={videoId} 
           />
         )}
-        <div className="container mx-auto px-6 py-8">
+        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-24') : ''}`}>
           <Button
             variant="ghost"
             onClick={() => navigate(product ? "/produtos" : "/videos")}

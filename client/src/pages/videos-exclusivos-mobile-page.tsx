@@ -80,7 +80,7 @@ export default function VideosExclusivosMobilePage() {
       </div>
 
       {/* Content Section */}
-      <div className={`px-4 py-6 ${!hasActiveBanners ? 'pt-20' : ''}`}>
+      <div className="px-4 py-6">
         
 
         {/* Filtros */}

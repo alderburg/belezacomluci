@@ -83,7 +83,7 @@ export default function CuponsMobilePage() {
       </div>
 
       {/* Content Section */}
-      <div className={`px-4 py-6 ${!hasActiveBanners ? 'pt-20' : ''}`}>
+      <div className="px-4 py-6">
         {/* Filtros */}
         <div className="mb-6">
           {/* Linha principal com pesquisa e filtros */}

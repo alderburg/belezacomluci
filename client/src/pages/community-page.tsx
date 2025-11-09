@@ -552,7 +552,7 @@ export default function CommunityPage() {
         <PopupSystem trigger="page_specific" targetPage="community" />
         <BannerCarousel page="community" />
 
-        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-20') : ''}`}>
+        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-24') : ''}`}>
 
           {/* Header Moderno da Comunidade */}
           <div className="relative mb-8 overflow-hidden rounded-2xl">

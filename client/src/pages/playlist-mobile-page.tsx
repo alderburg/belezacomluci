@@ -931,21 +931,21 @@ export default function PlaylistMobilePage() {
       )}
 
       {/* Banner carousel para produtos/cursos específicos - começa logo após topbar */}
-      {product && resourceId && (
+      {product && resourceId && hasActiveBanners && (
         <div className="pt-16 w-full">
           <BannerCarousel page="course_specific" courseId={resourceId} />
         </div>
       )}
 
       {/* Banner carousel para vídeos específicos - começa logo após topbar */}
-      {video && resourceId && (
+      {video && resourceId && hasActiveBanners && (
         <div className="pt-16 w-full">
           <BannerCarousel page="video_specific" videoId={resourceId} />
         </div>
       )}
 
-      {/* Content - sem padding-top adicional pois o banner já compensa */}
-      <div className="px-4 py-6 space-y-6">
+      {/* Content */}
+      <div className={`px-4 py-6 space-y-6 ${!hasActiveBanners ? 'pt-20' : ''}`}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {!showVideo && currentVideoId && (
