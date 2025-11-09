@@ -711,8 +711,8 @@ export default function PlaylistMobilePage() {
     navigate(product ? '/produtos' : '/videos');
   };
 
-  // Determine if there are active banners to adjust padding (para produtos ou vídeos)
-  const hasActiveBanners = resource?.isActive;
+  // Verificar se há seção de banner sendo renderizada
+  const hasBannerSection = (product && resourceId) || (video && resourceId);
 
 
   if (isLoading || isLoadingPlaylist || videos.length === 0) {
@@ -945,7 +945,7 @@ export default function PlaylistMobilePage() {
       )}
 
       {/* Content */}
-      <div className={`px-4 space-y-6 ${hasActiveBanners ? 'pt-4 pb-6' : 'pt-20 pb-6'}`}>
+      <div className={`px-4 space-y-6 ${hasBannerSection ? 'pt-4 pb-6' : 'pt-24 pb-6'}`}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {!showVideo && currentVideoId && (
