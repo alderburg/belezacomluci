@@ -495,7 +495,8 @@ export default function VideoMobilePage() {
     navigate(product ? '/produtos' : '/videos');
   };
 
-  const hasActiveBanners = !!(product?.banners && product.banners.length > 0) || !!(video?.banners && video.banners.length > 0);
+  // Verificar se há seção de banner sendo renderizada
+  const hasBannerSection = (product && videoId) || (video && videoId);
 
 
   if (isLoading) {
@@ -719,8 +720,8 @@ export default function VideoMobilePage() {
         </div>
       )}
 
-      {/* Content com padding-top para compensar header fixo */}
-      <div className={`px-4 space-y-6 ${hasActiveBanners ? 'pt-4 pb-6' : 'pt-20 pb-6'}`}>
+      {/* Content - sempre com padding-top da topbar + margin quando há banner */}
+      <div className={`px-4 space-y-6 pt-10 pb-6 ${hasBannerSection ? 'mt-4' : ''}`}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {(product?.coverImageUrl || video?.thumbnailUrl) && (
