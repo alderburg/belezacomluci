@@ -638,10 +638,11 @@ export default function ComunidadeMobilePage() {
         </div>
       </div>
 
-      <main className="pt-24 px-4 pb-4">
+      <main className="pb-20 pt-16">
+        {/* Banner Carousel */}
+        <BannerCarousel page="community" />
+
         <div className="relative mb-6 overflow-hidden rounded-xl">
-          {/* Banner Carousel */}
-          <BannerCarousel />
 
           {/* Input de arquivo oculto para mobile */}
           {user?.isAdmin && (

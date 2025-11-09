@@ -108,7 +108,7 @@ export default function BannerCarousel({ page = "home", courseId, videoId }: Ban
   }
 
   return (
-    <section className={`relative h-80 md:h-96 overflow-hidden w-full ${isMobile ? '' : 'mt-16'}`}>
+    <section className={`relative h-64 md:h-96 overflow-hidden w-full ${isMobile ? 'mt-0' : 'mt-16'}`}>
       <div className="relative w-full h-full">
         {activeBanners.map((banner, index) => (
           <div
