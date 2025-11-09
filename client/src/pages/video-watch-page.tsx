@@ -717,7 +717,7 @@ export default function VideoWatchPage() {
             targetVideoId={videoId} 
           />
         )}
-        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-24') : ''}`}>
+        <div className={`container mx-auto px-6 ${hasActiveBanners ? 'py-8' : (isMobile ? 'pt-20 pb-8' : 'pt-20 pb-8')}`}>
           <Button
             variant="ghost"
             onClick={() => navigate(product ? "/produtos" : "/videos")}

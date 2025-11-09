@@ -201,7 +201,7 @@ export default function ProfilePage() {
       <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0' : ''}`}>
         <BannerCarousel page="profile" />
         <PopupSystem trigger="page_specific" targetPage="profile" />
-        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-24') : ''}`}>
+        <div className={`container mx-auto px-6 ${hasActiveBanners ? 'py-8' : (isMobile ? 'pt-20 pb-8' : 'pt-20 pb-8')}`}>
           {/* Profile Header */}
           <Card className="mb-8">
             <CardContent className="p-8">

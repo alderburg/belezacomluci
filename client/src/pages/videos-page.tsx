@@ -51,7 +51,7 @@ export default function VideosPage() {
       <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0' : ''}`}>
         <BannerCarousel page="videos" />
         <PopupSystem trigger="page_specific" targetPage="videos" />
-        <div className={`container mx-auto px-6 ${!hasActiveBanners ? (isMobile ? 'pt-32 pb-8' : 'pt-24 pb-8') : 'py-8'}`}>
+        <div className={`container mx-auto px-6 ${hasActiveBanners ? 'py-8' : (isMobile ? 'pt-20 pb-8' : 'pt-20 pb-8')}`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 space-y-4 lg:space-y-0">
             <h2 className="text-3xl font-bold text-foreground">Vídeos Exclusivos</h2>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">

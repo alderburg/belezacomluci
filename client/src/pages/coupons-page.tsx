@@ -40,39 +40,8 @@ export default function CouponsPage() {
       coupon.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
       coupon.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Verificar se o cupom deve ser exibido (ativo OU programado)
-    const now = Date.now();
-    const startMs = toEpochMs(coupon.startDateTime);
-    const endMs = toEpochMs(coupon.endDateTime);
-    
-    // Debug logs
-    console.log(`=== CUPOM ${coupon.brand} - ${coupon.code} ===`);
-    console.log('Raw startDateTime:', coupon.startDateTime);
-    console.log('Raw endDateTime:', coupon.endDateTime);
-    console.log('Current time (ms):', now);
-    console.log('Current time (BR):', new Date(now).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
-    console.log('Start time (ms):', startMs);
-    console.log('Start time (BR):', startMs ? new Date(startMs).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'null');
-    console.log('End time (ms):', endMs);
-    console.log('End time (BR):', endMs ? new Date(endMs).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'null');
-    console.log('Is active:', coupon.isActive);
-    
-    // Verificações específicas
-    const isScheduled = startMs !== null && startMs > now;
-    const isActiveNow = (!startMs || now >= startMs) && (!endMs || now <= endMs);
-    const isExpired = endMs !== null && now > endMs;
-    
-    console.log('Is scheduled (future):', isScheduled);
-    console.log('Is in active period:', isActiveNow);
-    console.log('Is expired:', isExpired);
-    
     // Mostrar cupons que estão ativos (inclui expirados, programados e ativos)
-    // Na página de cupons, mostramos todos os cupons ativos, independente do status temporal
     const shouldShow = coupon.isActive;
-    
-    console.log('Should show:', shouldShow);
-    console.log('Final result:', matchesCategory && matchesBrand && shouldShow);
-    console.log('========================\n');
 
     return matchesCategory && matchesBrand && shouldShow;
   }) || [];
@@ -84,7 +53,7 @@ export default function CouponsPage() {
       <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0' : ''}`}>
         <BannerCarousel page="coupons" />
         <PopupSystem trigger="page_specific" targetPage="coupons" />
-        <div className={`container mx-auto px-6 py-8 ${!hasActiveBanners ? (isMobile ? 'pt-32' : 'pt-24') : ''}`}>
+        <div className={`container mx-auto px-6 ${hasActiveBanners ? 'py-8' : (isMobile ? 'pt-20 pb-8' : 'pt-20 pb-8')}`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 space-y-4 lg:space-y-0">
             <h2 className="text-3xl font-bold text-foreground">Cupons de Desconto</h2>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
