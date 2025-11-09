@@ -978,6 +978,33 @@ export default function PlaylistMobilePage() {
           )}
         </div>
 
+        {/* Barra de Progresso do Vídeo Atual - Abaixo do Player */}
+        {user && currentVideoId && videoProgressData && (() => {
+          const currentProgress = videoProgressData.find(p => p.videoId === currentVideoId);
+          const progress = currentProgress?.progressPercentage || 0;
+          const completed = currentProgress?.isCompleted || false;
+          
+          return (progress > 0 || completed) ? (
+            <div className="mt-3 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground">
+                  Progresso do vídeo atual
+                </span>
+                <span className="text-xs font-medium text-foreground flex items-center gap-1">
+                  {completed && (
+                    <Check className="w-3 h-3 text-green-500" />
+                  )}
+                  {completed ? '100' : progress}%
+                </span>
+              </div>
+              <Progress 
+                value={completed ? 100 : progress} 
+                className="h-1.5"
+              />
+            </div>
+          ) : null;
+        })()}
+
         {/* Video info */}
         {isLoadingVideoContent ? (
           <div className="space-y-4">

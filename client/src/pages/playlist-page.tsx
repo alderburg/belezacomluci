@@ -1036,6 +1036,33 @@ export default function PlaylistPage() {
                 )}
               </div>
 
+              {/* Barra de Progresso do Vídeo Atual - Abaixo do Player */}
+              {user && currentVideoId && videoProgressData && (() => {
+                const currentProgress = videoProgressData.find(p => p.videoId === currentVideoId);
+                const progress = currentProgress?.progressPercentage || 0;
+                const completed = currentProgress?.isCompleted || false;
+
+                return (progress > 0 || completed) ? (
+                  <div className="mt-4 mb-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-muted-foreground">
+                        Progresso do vídeo atual
+                      </span>
+                      <span className="text-sm font-medium text-foreground flex items-center gap-1">
+                        {completed && (
+                          <Check className="w-4 h-4 text-green-500" />
+                        )}
+                        {completed ? '100' : progress}%
+                      </span>
+                    </div>
+                    <Progress 
+                      value={completed ? 100 : progress} 
+                      className="h-2"
+                    />
+                  </div>
+                ) : null;
+              })()}
+
               {/* Video info - igual ao video-watch-page */}
               <div className="space-y-4 mb-8">
                 {isLoadingVideoContent ? (
