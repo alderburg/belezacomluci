@@ -944,8 +944,8 @@ export default function PlaylistMobilePage() {
         </div>
       )}
 
-      {/* Content */}
-      <div className={`px-4 space-y-6 ${hasBannerSection ? 'pt-4 pb-6' : 'pt-24 pb-6'}`}>
+      {/* Content - sempre com padding-top da topbar + margin quando há banner */}
+      <div className={`px-4 space-y-6 pt-20 pb-6 ${hasBannerSection ? 'mt-4' : ''}`}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {!showVideo && currentVideoId && (
