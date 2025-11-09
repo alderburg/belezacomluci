@@ -945,7 +945,7 @@ export default function PlaylistMobilePage() {
       )}
 
       {/* Content */}
-      <div className={`px-4 py-6 space-y-6 ${hasActiveBanners ? '' : 'pt-20'}`}>
+      <div className={`px-4 space-y-6 ${hasActiveBanners ? 'pt-4 pb-6' : 'pt-20 pb-6'}`}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {!showVideo && currentVideoId && (
