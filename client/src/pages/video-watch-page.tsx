@@ -74,10 +74,9 @@ const getYouTubeVideoId = (url: string) => {
 export default function VideoWatchPage() {
   const [location, navigate] = useLocation();
   // Extract video ID from URL - suporta /video/:id, /videos/video/:id, /produtos/video/:id
-  const videoId = (() => {
-    const match = location.match(/\/video\/([^/?]+)/);
-    return match ? match[1] : null;
-  })();
+  const videoId = location.includes('/video/')
+    ? location.split('/video/')[1]?.split('?')[0]
+    : null;
 
   console.log("VideoWatchPage - Current location:", location);
   console.log("VideoWatchPage - Extracted video ID:", videoId);
