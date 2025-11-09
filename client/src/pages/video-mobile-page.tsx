@@ -720,7 +720,7 @@ export default function VideoMobilePage() {
       )}
 
       {/* Content com padding-top para compensar header fixo */}
-      <div className={`px-4 space-y-6 ${hasActiveBanners ? 'pt-4 pb-6' : 'pt-20 pb-6'}`} style={{ paddingTop: (product || video) && videoId ? '0.5rem' : '6rem' }}>
+      <div className={`px-4 space-y-6 ${hasActiveBanners ? 'pt-4 pb-6' : 'pt-20 pb-6'}`}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {(product?.coverImageUrl || video?.thumbnailUrl) && (
