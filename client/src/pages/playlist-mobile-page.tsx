@@ -33,6 +33,7 @@ import { PopupSystem } from '@/components/popup-system';
 import MobileBottomNav from '@/components/mobile-bottom-nav';
 import { useVideoProgress } from '@/hooks/use-video-progress';
 import { Progress } from '@/components/ui/progress';
+import BannerCarousel from '@/components/banner-carousel';
 
 interface Product {
   id: string;
