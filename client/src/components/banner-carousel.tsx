@@ -70,7 +70,16 @@ export default function BannerCarousel({ page = "home", courseId, videoId }: Ban
     }
   };
 
-  const activeBanners = banners?.filter(banner => banner.isActive && banner.page === page) || [];
+  const activeBanners = banners?.filter(banner => {
+    if (!banner.isActive || banner.page !== page) return false;
+    
+    const displayOn = (banner as any).displayOn || 'both';
+    if (displayOn === 'both') return true;
+    if (displayOn === 'mobile' && isMobile) return true;
+    if (displayOn === 'desktop' && !isMobile) return true;
+    
+    return false;
+  }) || [];
 
   // Auto-rotate banners
   useEffect(() => {

@@ -133,6 +133,7 @@ export const banners = pgTable("banners", {
   showDescription: boolean("show_description").notNull().default(true),
   showButton: boolean("show_button").notNull().default(true),
   opensCouponsModal: boolean("opens_coupons_modal").default(false), // Para banners da bio que abrem o modal de cupons
+  displayOn: text("display_on").notNull().default("both"), // 'desktop', 'mobile', 'both'
   startDateTime: timestamp("start_date_time"), // Data e hora de início para ativação automática
   endDateTime: timestamp("end_date_time"), // Data e hora de fim para desativação automática
   createdAt: timestamp("created_at").default(sql`now()`),
@@ -770,6 +771,7 @@ export const insertBannerSchema = createInsertSchema(banners).omit({
   showTitle: z.boolean().optional().default(true),
   showDescription: z.boolean().optional().default(true),
   showButton: z.boolean().optional().default(true),
+  displayOn: z.enum(["desktop", "mobile", "both"]).optional().default("both"),
   startDateTime: z.string().optional().nullable().transform(val => {
     if (!val || val === "" || val === null || val === undefined) return null;
     return new Date(val).toISOString();
