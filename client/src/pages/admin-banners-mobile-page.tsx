@@ -260,13 +260,13 @@ export default function AdminBannersMobilePage() {
                          banner.page === 'bio' ? 'Bio' : banner.page}
                       </Badge>
                       {banner.page === 'video_specific' && banner.videoId && (
-                        <Badge variant="outline" className="bg-purple-50 text-purple-700 text-[10px] px-1.5 py-0.5">
-                          ID: {banner.videoId.substring(0, 4)}
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700 text-xs">
+                          Vídeo ID: {banner.videoId.substring(0, 4)}
                         </Badge>
                       )}
                       {banner.page === 'course_specific' && banner.courseId && (
-                        <Badge variant="outline" className="bg-amber-50 text-amber-700 text-[10px] px-1.5 py-0.5">
-                          ID: {banner.courseId.substring(0, 4)}
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 text-xs">
+                          Curso ID: {banner.courseId.substring(0, 4)}
                         </Badge>
                       )}
                     </div>
