@@ -795,15 +795,16 @@ export default function AdminPage() {
 
   const createBannerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
-      // Garantir que campos vazios sejam null
+      // Garantir que campos vazios sejam null e limpar conforme a página selecionada
       const cleanedData = {
         ...data,
-        videoId: data.videoId || null,
-        courseId: data.courseId || null,
+        videoId: data.page === 'video_specific' && data.videoId ? data.videoId : null,
+        courseId: data.page === 'course_specific' && data.courseId ? data.courseId : null,
         startDateTime: data.startDateTime || null,
         endDateTime: data.endDateTime || null,
       };
       
+      console.log('[createBannerMutation] Página selecionada:', data.page);
       console.log('[createBannerMutation] Iniciando mutation com data:', cleanedData);
       console.log('[createBannerMutation] editingItem:', editingItem);
 
@@ -870,15 +871,16 @@ export default function AdminPage() {
 
   const reorganizeBannerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createBannerSchema>) => {
-      // Garantir que campos vazios sejam null
+      // Garantir que campos vazios sejam null e limpar conforme a página
       const cleanedData = {
         ...data,
-        videoId: data.videoId || null,
-        courseId: data.courseId || null,
+        videoId: data.page === 'video_specific' && data.videoId ? data.videoId : null,
+        courseId: data.page === 'course_specific' && data.courseId ? data.courseId : null,
         startDateTime: data.startDateTime || null,
         endDateTime: data.endDateTime || null,
       };
       
+      console.log('[reorganizeBannerMutation] Página:', data.page);
       console.log('[reorganizeBannerMutation] Iniciando reorganização com data:', cleanedData);
 
       if (!editingItem) {

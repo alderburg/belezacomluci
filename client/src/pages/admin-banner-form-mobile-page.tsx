@@ -158,16 +158,17 @@ export default function AdminBannerFormMobilePage() {
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertBannerSchema>) => {
-      // Garantir que campos vazios sejam null
+      // Garantir que campos vazios sejam null e limpar campos conforme a página
       const cleanedData = {
         ...data,
-        videoId: data.videoId || null,
-        courseId: data.courseId || null,
+        videoId: data.page === 'video_specific' && data.videoId ? data.videoId : null,
+        courseId: data.page === 'course_specific' && data.courseId ? data.courseId : null,
         startDateTime: data.startDateTime || null,
         endDateTime: data.endDateTime || null,
       };
 
-      console.log('[Banner Form] Enviando dados:', cleanedData);
+      console.log('[Banner Form Mobile] Página:', data.page);
+      console.log('[Banner Form Mobile] Enviando dados:', cleanedData);
 
       if (isEditing) {
         return await apiRequest('PUT', `/api/banners/${bannerId}`, cleanedData);

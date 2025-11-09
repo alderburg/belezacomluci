@@ -772,12 +772,10 @@ export const insertBannerSchema = createInsertSchema(banners).omit({
   showButton: z.boolean().optional().default(true),
   startDateTime: z.string().optional().nullable().transform(val => {
     if (!val || val === "" || val === null || val === undefined) return null;
-    // Convert datetime-local format to ISO timestamp for database
     return new Date(val).toISOString();
   }),
   endDateTime: z.string().optional().nullable().transform(val => {
     if (!val || val === "" || val === null || val === undefined) return null;
-    // Convert datetime-local format to ISO timestamp for database
     return new Date(val).toISOString();
   }),
   videoId: z.string().optional().nullable().transform(val => {
@@ -788,6 +786,19 @@ export const insertBannerSchema = createInsertSchema(banners).omit({
     if (!val || val === "" || val === null || val === undefined) return null;
     return val;
   }),
+}).refine((data) => {
+  // Se page é video_specific, videoId é obrigatório
+  if (data.page === 'video_specific' && !data.videoId) {
+    return false;
+  }
+  // Se page é course_specific, courseId é obrigatório
+  if (data.page === 'course_specific' && !data.courseId) {
+    return false;
+  }
+  return true;
+}, {
+  message: "VideoId é obrigatório para página de vídeo específico ou CourseId para curso específico",
+  path: ["videoId"],
 });
 export const insertPostSchema = createInsertSchema(posts).omit({ id: true, createdAt: true, likes: true, shares: true });
 export const insertPostLikeSchema = createInsertSchema(postLikes).omit({ id: true, createdAt: true });
