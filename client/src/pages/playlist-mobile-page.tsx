@@ -711,8 +711,8 @@ export default function PlaylistMobilePage() {
     navigate(product ? '/produtos' : '/videos');
   };
 
-  // Determine if there are active banners to adjust padding
-  const hasActiveBanners = product && resource?.isActive;
+  // Determine if there are active banners to adjust padding (para produtos ou vídeos)
+  const hasActiveBanners = resource?.isActive;
 
 
   if (isLoading || isLoadingPlaylist || videos.length === 0) {

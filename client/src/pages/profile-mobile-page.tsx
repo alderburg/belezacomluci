@@ -151,11 +151,9 @@ export default function ProfileMobilePage() {
           </div>
         </div>
 
-        <div className="pt-16 w-full">
-          <BannerCarousel page="profile" />
-        </div>
+        <BannerCarousel page="profile" />
 
-        <main className={`px-4 pb-4 ${!hasActiveBanners ? 'pt-8' : 'pt-4'}`}>
+        <main className={`px-4 pb-4 ${!hasActiveBanners ? 'pt-24' : 'pt-4'}`}>
           {/* Profile Header Skeleton */}
           <Card className="mb-6">
             <CardContent className="p-6">
@@ -237,11 +235,9 @@ export default function ProfileMobilePage() {
         </div>
       </div>
 
-      <div className="pt-16 w-full">
-        <BannerCarousel page="profile" />
-      </div>
+      <BannerCarousel page="profile" />
 
-      <main className={`px-4 pb-4 ${!hasActiveBanners ? 'pt-8' : 'pt-4'}`}>
+      <main className={`px-4 pb-4 ${!hasActiveBanners ? 'pt-24' : 'pt-4'}`}>
         {/* Profile Header */}
         <Card className="mb-6">
           <CardContent className="p-6">
