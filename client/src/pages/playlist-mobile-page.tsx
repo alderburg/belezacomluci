@@ -461,7 +461,7 @@ export default function PlaylistMobilePage() {
       if (saveProgress) {
         saveProgress();
       }
-      
+
       // Destruir player atual antes de mudar
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         try {
@@ -471,17 +471,17 @@ export default function PlaylistMobilePage() {
           console.log('Error destroying player on video change:', e);
         }
       }
-      
+
       // Reset estados
       setShowVideo(false);
       setIsLoadingVideoContent(true);
-      
+
       // Pequeno delay para garantir cleanup completo
       setTimeout(() => {
         setCurrentVideoId(videoId);
       }, 50);
     }
-    
+
     setShowPlaylistModal(false);
   };
 
@@ -711,6 +711,10 @@ export default function PlaylistMobilePage() {
     navigate(product ? '/produtos' : '/videos');
   };
 
+  // Determine if there are active banners to adjust padding
+  const hasActiveBanners = product && resource?.isActive;
+
+
   if (isLoading || isLoadingPlaylist || videos.length === 0) {
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -913,25 +917,35 @@ export default function PlaylistMobilePage() {
       </div>
 
       {video ? (
-        <PopupSystem 
-          trigger="page_specific" 
-          targetPage="video_specific" 
-          targetVideoId={resourceId} 
+        <PopupSystem
+          trigger="page_specific"
+          targetPage="video_specific"
+          targetVideoId={resourceId}
         />
       ) : (
-        <PopupSystem 
-          trigger="page_specific" 
-          targetPage="course_specific" 
-          targetCourseId={resourceId} 
+        <PopupSystem
+          trigger="page_specific"
+          targetPage="course_specific"
+          targetCourseId={resourceId}
         />
       )}
 
-      {/* Content com padding-top para compensar header fixo */}
-      <div className="pt-24 px-4 py-6 space-y-6">
-        {/* Banner carousel for course-specific banners */}
-        {product && (
+      {/* Banner carousel para produtos/cursos específicos - largura total sem espaçamento */}
+      {product && resourceId && (
+        <div className="pt-16">
           <BannerCarousel page="course_specific" courseId={resourceId} />
-        )}
+        </div>
+      )}
+
+      {/* Banner carousel para vídeos específicos - largura total sem espaçamento */}
+      {video && resourceId && (
+        <div className="pt-16">
+          <BannerCarousel page="video_specific" videoId={resourceId} />
+        </div>
+      )}
+
+      {/* Content com padding-top para compensar header fixo */}
+      <div className={`${hasActiveBanners ? 'pt-8' : 'pt-24'} px-4 py-6 space-y-6`}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {!showVideo && currentVideoId && (

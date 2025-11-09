@@ -18,6 +18,7 @@ import MobileBottomNav from "@/components/mobile-bottom-nav";
 import { PopupSystem } from "@/components/popup-system";
 import { useRef } from "react";
 import { useVideoProgress } from "@/hooks/use-video-progress"; // Importar o hook
+import BannerCarousel from "@/components/banner-carousel"; // Importar BannerCarousel
 
 import {
   ThumbsUp,
@@ -688,21 +689,28 @@ export default function VideoMobilePage() {
       </div>
 
       {product ? (
-        <PopupSystem 
-          trigger="page_specific" 
-          targetPage="course_specific" 
-          targetCourseId={videoId} 
+        <PopupSystem
+          trigger="page_specific"
+          targetPage="course_specific"
+          targetCourseId={videoId}
         />
       ) : (
-        <PopupSystem 
-          trigger="page_specific" 
-          targetPage="video_specific" 
-          targetVideoId={videoId} 
+        <PopupSystem
+          trigger="page_specific"
+          targetPage="video_specific"
+          targetVideoId={videoId}
         />
       )}
 
+      {/* Banner Carousel para vídeos específicos */}
+      {videoId && (
+        <div className="pt-16">
+          <BannerCarousel page="video_specific" videoId={videoId} />
+        </div>
+      )}
+
       {/* Content com padding-top para compensar header fixo */}
-      <div className="pt-24 px-4 py-6 space-y-6">
+      <div className="pt-8 px-4 py-6 space-y-6">
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {(product?.coverImageUrl || video?.thumbnailUrl) && (
@@ -748,8 +756,8 @@ export default function VideoMobilePage() {
                 {Math.round(videoProgressData.progressPercentage)}%
               </span>
             </div>
-            <Progress 
-              value={videoProgressData.progressPercentage} 
+            <Progress
+              value={videoProgressData.progressPercentage}
               className="h-2"
             />
           </div>

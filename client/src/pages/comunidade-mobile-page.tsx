@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import EnhancedPostCard from "@/components/enhanced-post-card";
+import EnhancedPostCard from '@/components/enhanced-post-card';
+import BannerCarousel from '@/components/banner-carousel';
 import { 
   ArrowLeft, 
   Users, 
@@ -639,6 +640,9 @@ export default function ComunidadeMobilePage() {
 
       <main className="pt-24 px-4 pb-4">
         <div className="relative mb-6 overflow-hidden rounded-xl">
+          {/* Banner Carousel */}
+          <BannerCarousel />
+
           {/* Input de arquivo oculto para mobile */}
           {user?.isAdmin && (
             <input
