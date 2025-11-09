@@ -218,8 +218,8 @@ export default function MobileTopBar({
         />
       )}
       
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary to-accent shadow-lg border-b border-white/10">
-      <div className="flex items-center justify-between px-4 py-3 h-16">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary to-accent shadow-lg border-b border-white/10 h-16">
+      <div className="flex items-center justify-between px-4">
         {/* Left Side */}
         <div className="flex items-center gap-3">
           {/* User Avatar, Name and Badge */}

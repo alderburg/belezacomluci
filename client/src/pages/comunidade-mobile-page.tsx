@@ -559,7 +559,7 @@ export default function ComunidadeMobilePage() {
   if (isPageLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
+        <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50 h-16">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
@@ -620,7 +620,7 @@ export default function ComunidadeMobilePage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
+      <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50 h-16">
         <div className="flex items-center justify-between">
           <Button
             variant="ghost"
