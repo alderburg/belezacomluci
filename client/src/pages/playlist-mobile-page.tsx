@@ -932,14 +932,14 @@ export default function PlaylistMobilePage() {
 
       {/* Banner carousel para produtos/cursos específicos - largura total sem espaçamento */}
       {product && resourceId && (
-        <div className="pt-16">
+        <div className="pt-16 w-full">
           <BannerCarousel page="course_specific" courseId={resourceId} />
         </div>
       )}
 
       {/* Banner carousel para vídeos específicos - largura total sem espaçamento */}
       {video && resourceId && (
-        <div className="pt-16">
+        <div className="pt-16 w-full">
           <BannerCarousel page="video_specific" videoId={resourceId} />
         </div>
       )}

@@ -78,7 +78,7 @@ export default function CuponsMobilePage() {
       </div>
 
       {/* Banner */}
-      <div className="pt-16">
+      <div className="pt-16 w-full">
         {hasActiveBanners && <BannerCarousel page="coupons" />}
       </div>
 

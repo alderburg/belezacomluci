@@ -704,14 +704,14 @@ export default function VideoMobilePage() {
 
       {/* Banner Carousel para produtos/cursos específicos */}
       {product && videoId && (
-        <div className="pt-16">
+        <div className="pt-16 w-full">
           <BannerCarousel page="course_specific" courseId={videoId} />
         </div>
       )}
 
       {/* Banner Carousel para vídeos específicos */}
       {video && videoId && (
-        <div className="pt-16">
+        <div className="pt-16 w-full">
           <BannerCarousel page="video_specific" videoId={videoId} />
         </div>
       )}

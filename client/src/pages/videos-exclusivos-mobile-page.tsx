@@ -75,7 +75,7 @@ export default function VideosExclusivosMobilePage() {
       </div>
 
       {/* Banner */}
-      <div className="pt-16">
+      <div className="pt-16 w-full">
         {hasActiveBanners && <BannerCarousel page="videos" />}
       </div>
 
