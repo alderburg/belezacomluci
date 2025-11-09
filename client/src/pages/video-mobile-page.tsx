@@ -87,11 +87,6 @@ const getYouTubeVideoId = (url: string) => {
 
 export default function VideoMobilePage() {
   const [location, navigate] = useLocation();
-  // Extract video ID from URL - suporta /video/:id, /videos/video/:id, /produtos/video/:id
-  const videoId = location.includes('/video/')
-    ? location.split('/video/')[1]?.split('?')[0]
-    : null;
-
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -109,6 +104,12 @@ export default function VideoMobilePage() {
   const accessControl = useAccessControl();
 
   const playerRef = useRef<any>(null);
+
+  // Extract video ID from URL - suporta /video/:id, /videos/video/:id, /produtos/video/:id
+  const videoId = (() => {
+    const match = location.match(/\/video\/([^/?]+)/);
+    return match ? match[1] : null;
+  })();
 
   // Inicializar YouTube IFrame API
   useEffect(() => {
