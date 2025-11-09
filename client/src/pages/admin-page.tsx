@@ -35,19 +35,8 @@ import { ResourceSearchSelect } from "@/components/resource-search-select";
 const createVideoSchema = insertVideoSchema;
 const createProductSchema = insertProductSchema;
 const createCouponSchema = insertCouponSchema;
-const createBannerSchema = insertBannerSchema.extend({
-  startDateTime: z.string().optional().nullable(),
-  endDateTime: z.string().optional().nullable(),
-  opensCouponsModal: z.boolean().default(false),
-  imageUrl: z.string().min(1, "A imagem do banner é obrigatória"),
-  // Adicionar campo courseId para a opção de curso específico
-  courseId: z.string().optional().nullable(),
-});
-
-const createPopupSchema = insertPopupSchema.extend({
-  // Adicionar campo targetCourseId para a opção de curso específico
-  targetCourseId: z.string().optional().nullable(),
-});
+const createBannerSchema = insertBannerSchema;
+const createPopupSchema = insertPopupSchema;
 const createNotificationSchema = insertNotificationSchema;
 const createCategorySchema = insertCategorySchema;
 
