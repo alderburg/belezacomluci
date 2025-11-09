@@ -642,7 +642,7 @@ export default function ComunidadeMobilePage() {
         {/* Banner Carousel */}
         <BannerCarousel page="community" />
 
-        <div className="relative mb-6 overflow-hidden rounded-xl">
+        <div className="relative mb-6 overflow-hidden rounded-xl mt-6">
 
           {/* Input de arquivo oculto para mobile */}
           {user?.isAdmin && (

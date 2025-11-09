@@ -710,7 +710,7 @@ export default function VideoMobilePage() {
       )}
 
       {/* Content com padding-top para compensar header fixo */}
-      <div className="pt-8 px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-6" style={{ paddingTop: videoId ? '1.5rem' : '6rem' }}
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {(product?.coverImageUrl || video?.thumbnailUrl) && (

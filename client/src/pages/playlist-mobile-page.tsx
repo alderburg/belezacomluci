@@ -945,7 +945,7 @@ export default function PlaylistMobilePage() {
       )}
 
       {/* Content com padding-top para compensar header fixo */}
-      <div className={`${hasActiveBanners ? 'pt-8' : 'pt-24'} px-4 py-6 space-y-6`}>
+      <div className="px-4 py-6 space-y-6" style={{ paddingTop: hasActiveBanners ? '1.5rem' : '6rem' }}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {!showVideo && currentVideoId && (
