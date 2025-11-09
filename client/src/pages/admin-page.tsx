@@ -2847,6 +2847,26 @@ export default function AdminPage() {
                           />
                         </div>
 
+                        <div>
+                          <Label htmlFor="banner-display-on">Exibir em</Label>
+                          <Select
+                            value={bannerForm.watch("displayOn") || "both"}
+                            onValueChange={(value) => bannerForm.setValue("displayOn", value)}
+                          >
+                            <SelectTrigger data-testid="select-banner-display-on">
+                              <SelectValue placeholder="Selecione onde exibir" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="both">🖥️📱 Desktop e Mobile</SelectItem>
+                              <SelectItem value="desktop">🖥️ Apenas Desktop</SelectItem>
+                              <SelectItem value="mobile">📱 Apenas Mobile</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Escolha em quais dispositivos este banner será exibido
+                          </p>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label htmlFor="banner-order">Ordem</Label>
@@ -2877,7 +2897,7 @@ export default function AdminPage() {
                                 <SelectItem value="profile">Perfil</SelectItem>
                                 <SelectItem value="bio">Link da Bio</SelectItem>
                                 <SelectItem value="video_specific">Video Específico</SelectItem>
-                                <SelectItem value="course_specific">Curso Específico</SelectItem> {/* Opção adicionada */}
+                                <SelectItem value="course_specific">Curso Específico</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -3006,24 +3026,6 @@ export default function AdminPage() {
                               <Label htmlFor="switch-banner-opens-coupons-modal">Abrir Modal de Cupons</Label>
                             </div>
                           )}
-                        </div>
-
-                        {/* Adicionar seleção de exibição: Desktop, Mobile, Ambos */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <Label htmlFor="banner-display-on">Exibir em</Label>
-                          <Select
-                            value={bannerForm.watch("displayOn") || "both"}
-                            onValueChange={(value) => bannerForm.setValue("displayOn", value)}
-                          >
-                            <SelectTrigger data-testid="select-banner-display-on">
-                              <SelectValue placeholder="Selecione onde exibir" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="both">🖥️📱 Ambos</SelectItem>
-                              <SelectItem value="desktop">🖥️ Desktop</SelectItem>
-                              <SelectItem value="mobile">📱 Mobile</SelectItem>
-                            </SelectContent>
-                          </Select>
                         </div>
 
                         <Button

@@ -457,6 +457,23 @@ export default function AdminBannerFormMobilePage() {
           />
         </div>
 
+        <div>
+          <Label htmlFor="banner-display-on">Exibir em</Label>
+          <select
+            id="banner-display-on"
+            {...form.register("displayOn")}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            data-testid="select-banner-display-on"
+          >
+            <option value="both">🖥️📱 Desktop e Mobile</option>
+            <option value="desktop">🖥️ Apenas Desktop</option>
+            <option value="mobile">📱 Apenas Mobile</option>
+          </select>
+          <p className="text-xs text-muted-foreground mt-1">
+            Escolha em quais dispositivos este banner será exibido
+          </p>
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="banner-order">Ordem</Label>
@@ -488,23 +505,6 @@ export default function AdminBannerFormMobilePage() {
               <option value="course_specific">Curso Específico</option>
             </select>
           </div>
-        </div>
-
-        <div>
-          <Label htmlFor="banner-display-on">Exibir em</Label>
-          <select
-            id="banner-display-on"
-            {...form.register("displayOn")}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            data-testid="select-banner-display-on"
-          >
-            <option value="both">Desktop e Mobile</option>
-            <option value="desktop">Apenas Desktop</option>
-            <option value="mobile">Apenas Mobile</option>
-          </select>
-          <p className="text-xs text-muted-foreground mt-1">
-            Escolha em quais dispositivos este banner será exibido
-          </p>
         </div>
 
         {form.watch("page") === "video_specific" && (
