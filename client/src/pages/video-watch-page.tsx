@@ -319,17 +319,23 @@ export default function VideoWatchPage() {
     enabled: !!videoId,
   });
 
-  // Fetch video banners
+  // Fetch video or course banners based on resource type
   const { data: videoBanners = [] } = useQuery({
-    queryKey: ["videoBanners", videoId],
+    queryKey: ["banners", videoId, resource?._type],
     queryFn: async () => {
       if (!videoId) return [];
-      const response = await apiRequest("GET", `/api/banners/video/${videoId}`);
+      
+      // Se for produto (course_video ou course_playlist), buscar banners de curso
+      const endpoint = resource?._type === 'product' 
+        ? `/api/banners/course/${videoId}`
+        : `/api/banners/video/${videoId}`;
+      
+      const response = await apiRequest("GET", endpoint);
       if (!response.ok) return [];
       const result = await response.json();
       return Array.isArray(result) ? result : [];
     },
-    enabled: !!videoId,
+    enabled: !!videoId && !!resource,
   });
 
   // Buscar progresso do vídeo
