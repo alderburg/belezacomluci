@@ -73,7 +73,7 @@ export default function BannerCarousel({ page = "home", courseId, videoId }: Ban
   const activeBanners = banners?.filter(banner => {
     if (!banner.isActive || banner.page !== page) return false;
     
-    const displayOn = (banner as any).displayOn || 'both';
+    const displayOn = banner.displayOn || 'both';
     if (displayOn === 'both') return true;
     if (displayOn === 'mobile' && isMobile) return true;
     if (displayOn === 'desktop' && !isMobile) return true;

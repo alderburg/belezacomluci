@@ -106,7 +106,7 @@ export default function AdminBannerFormMobilePage() {
         showButton: banner.showButton ?? true,
         isActive: banner.isActive,
         opensCouponsModal: banner.opensCouponsModal ?? false,
-        displayOn: (banner as any).displayOn || "both",
+        displayOn: banner.displayOn || "both",
         startDateTime: banner.startDateTime ?
           new Date(banner.startDateTime).toISOString().slice(0, 16) : "",
         endDateTime: banner.endDateTime ?
