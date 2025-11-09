@@ -702,15 +702,22 @@ export default function VideoMobilePage() {
         />
       )}
 
+      {/* Banner Carousel para produtos/cursos específicos */}
+      {product && videoId && (
+        <div className="pt-16">
+          <BannerCarousel page="course_specific" courseId={videoId} />
+        </div>
+      )}
+
       {/* Banner Carousel para vídeos específicos */}
-      {videoId && (
+      {video && videoId && (
         <div className="pt-16">
           <BannerCarousel page="video_specific" videoId={videoId} />
         </div>
       )}
 
       {/* Content com padding-top para compensar header fixo */}
-      <div className="px-4 py-6 space-y-6" style={{ paddingTop: videoId ? '1.5rem' : '6rem' }}>
+      <div className="px-4 py-6 space-y-6" style={{ paddingTop: (product || video) && videoId ? '0.5rem' : '6rem' }}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {(product?.coverImageUrl || video?.thumbnailUrl) && (
