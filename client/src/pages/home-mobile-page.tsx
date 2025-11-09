@@ -108,7 +108,7 @@ export default function HomeMobilePage() {
       />
 
       {/* Main Content */}
-      <main className="overflow-x-hidden pt-16">
+      <main className="overflow-x-hidden pt-20">
         {/* Hero Banner Carousel */}
         <BannerCarousel />
 
