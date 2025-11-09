@@ -243,6 +243,21 @@ export default function AdminBannersMobilePage() {
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
                       Posição: {banner.order}
                     </Badge>
+                    {banner.displayOn === 'desktop' && (
+                      <Badge variant="outline" className="bg-slate-100 text-slate-700 text-xs">
+                        🖥️ Desktop
+                      </Badge>
+                    )}
+                    {banner.displayOn === 'mobile' && (
+                      <Badge variant="outline" className="bg-slate-100 text-slate-700 text-xs">
+                        📱 Mobile
+                      </Badge>
+                    )}
+                    {banner.displayOn === 'both' && (
+                      <Badge variant="outline" className="bg-slate-100 text-slate-700 text-xs">
+                        🖥️📱 Ambos
+                      </Badge>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
