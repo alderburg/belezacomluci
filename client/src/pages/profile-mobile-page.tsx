@@ -237,11 +237,15 @@ export default function ProfileMobilePage() {
         </div>
       </div>
 
-      <div className="pt-20">
-        <BannerCarousel page="profile" />
-      </div>
+      {/* Banner carousel */}
+      {hasActiveBanners && (
+        <div className="w-full">
+          <BannerCarousel page="profile" />
+        </div>
+      )}
 
-      <main className={`px-4 pb-4 ${!hasActiveBanners ? 'pt-4' : 'pt-4'}`}>
+      {/* Content com padding-top para compensar header fixo */}
+      <div className={`px-4 py-6 ${!hasActiveBanners ? 'pt-16' : ''}`}>
         {/* Profile Header */}
         <Card className="mb-6">
           <CardContent className="p-6">
