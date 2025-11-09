@@ -772,13 +772,17 @@ export const insertBannerSchema = createInsertSchema(banners).omit({
   showDescription: z.boolean().optional().default(true),
   showButton: z.boolean().optional().default(true),
   displayOn: z.enum(["desktop", "mobile", "both"]).optional().default("both"),
-  startDateTime: z.string().optional().nullable().transform(val => {
+  startDateTime: z.union([z.string(), z.date(), z.null()]).optional().nullable().transform(val => {
     if (!val || val === "" || val === null || val === undefined) return null;
-    return new Date(val).toISOString();
+    if (val instanceof Date) return val.toISOString();
+    const date = new Date(val);
+    return isNaN(date.getTime()) ? null : date.toISOString();
   }),
-  endDateTime: z.string().optional().nullable().transform(val => {
+  endDateTime: z.union([z.string(), z.date(), z.null()]).optional().nullable().transform(val => {
     if (!val || val === "" || val === null || val === undefined) return null;
-    return new Date(val).toISOString();
+    if (val instanceof Date) return val.toISOString();
+    const date = new Date(val);
+    return isNaN(date.getTime()) ? null : date.toISOString();
   }),
   videoId: z.string().optional().nullable().transform(val => {
     if (!val || val === "" || val === null || val === undefined) return null;
