@@ -338,6 +338,9 @@ export default function VideoWatchPage() {
     enabled: !!videoId && !!resource,
   });
 
+  // Verificar se existem banners ativos
+  const hasActiveBanners = videoBanners && videoBanners.length > 0;
+
   // Buscar progresso do vídeo
   const { data: videoProgressData } = useQuery<any>({
     queryKey: ['/api/video-progress', videoId],
