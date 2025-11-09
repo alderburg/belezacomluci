@@ -781,7 +781,7 @@ export default function VideoWatchPage() {
           </div>
 
           {/* Barra de Progresso */}
-          {user && videoProgressData && videoProgressData.progressPercentage > 0 && (
+          {user && videoProgressData && (videoProgressData.progressPercentage > 0 || videoProgressData.isCompleted) && (
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-muted-foreground">
@@ -795,7 +795,7 @@ export default function VideoWatchPage() {
                 </span>
               </div>
               <Progress 
-                value={videoProgressData.progressPercentage} 
+                value={videoProgressData.isCompleted ? 100 : videoProgressData.progressPercentage} 
                 className="h-2"
               />
             </div>

@@ -1322,14 +1322,14 @@ export default function PlaylistPage() {
                                   </h4>
 
                                   {/* Barra de Progresso */}
-                                  {user && progress > 0 && (
+                                  {user && (progress > 0 || completed) && (
                                     <div className="mt-2" data-testid={`progress-bar-${video.id}`}>
                                       <Progress
-                                        value={progress}
+                                        value={completed ? 100 : progress}
                                         className="h-1"
                                       />
                                       <span className="text-xs text-muted-foreground mt-1 block">
-                                        {progress}% assistido
+                                        {completed ? '100' : progress}% assistido
                                       </span>
                                     </div>
                                   )}
