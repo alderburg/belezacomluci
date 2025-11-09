@@ -721,7 +721,7 @@ export default function VideoMobilePage() {
       )}
 
       {/* Content - sempre com padding-top da topbar + margin quando há banner */}
-      <div className={`px-4 space-y-6 pt-6 pb-6 ${hasBannerSection ? 'mt-4' : ''}`}>
+      <div className={`px-4 space-y-6 pt-6 pb-6 ${hasBannerSection ? 'mt-2' : ''}`}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {(product?.coverImageUrl || video?.thumbnailUrl) && (
