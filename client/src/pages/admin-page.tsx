@@ -2877,7 +2877,7 @@ export default function AdminPage() {
                                 <SelectItem value="profile">Perfil</SelectItem>
                                 <SelectItem value="bio">Link da Bio</SelectItem>
                                 <SelectItem value="video_specific">Video Específico</SelectItem>
-                                <SelectItem value="course_specific">Curso Específico</SelectItem {/* Opção adicionada */}
+                                <SelectItem value="course_specific">Curso Específico</SelectItem> {/* Opção adicionada */}
                               </SelectContent>
                             </Select>
                           </div>
