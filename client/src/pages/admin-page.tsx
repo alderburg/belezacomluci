@@ -2862,9 +2862,6 @@ export default function AdminPage() {
                               <SelectItem value="mobile">📱 Apenas Mobile</SelectItem>
                             </SelectContent>
                           </Select>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Escolha em quais dispositivos este banner será exibido
-                          </p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
