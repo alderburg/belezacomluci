@@ -931,21 +931,21 @@ export default function PlaylistMobilePage() {
       )}
 
       {/* Banner carousel para produtos/cursos específicos - largura total sem espaçamento */}
-      {product && resourceId && (
+      {product && resourceId && hasActiveBanners && (
         <div className="pt-16 w-full">
           <BannerCarousel page="course_specific" courseId={resourceId} />
         </div>
       )}
 
       {/* Banner carousel para vídeos específicos - largura total sem espaçamento */}
-      {video && resourceId && (
+      {video && resourceId && hasActiveBanners && (
         <div className="pt-16 w-full">
           <BannerCarousel page="video_specific" videoId={resourceId} />
         </div>
       )}
 
       {/* Content com padding-top para compensar header fixo */}
-      <div className={`px-4 py-6 space-y-6 ${!hasActiveBanners ? 'pt-20' : ''}`}>
+      <div className={`px-4 py-6 space-y-6 ${!hasActiveBanners ? 'pt-16' : ''}`}>
         {/* Video player */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {!showVideo && currentVideoId && (
