@@ -240,11 +240,14 @@ export default function AdminBannersMobilePage() {
                     {banner.description}
                   </p>
                   <div className="flex flex-col gap-2 mt-2">
-                    {/* Linha 1: Posição + Página + Video ID (se houver) */}
+                    {/* Linha 1: Posição */}
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
                         Posição: {banner.order}
                       </Badge>
+                    </div>
+                    {/* Linha 2: Página + Video ID/Curso ID (se houver) */}
+                    <div className="flex flex-wrap gap-2">
                       <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
                         {banner.page === 'home' ? 'Página Inicial' : 
                          banner.page === 'videos' ? 'Vídeos Exclusivos' :
@@ -257,17 +260,17 @@ export default function AdminBannersMobilePage() {
                          banner.page === 'bio' ? 'Bio' : banner.page}
                       </Badge>
                       {banner.page === 'video_specific' && banner.videoId && (
-                        <Badge variant="outline" className="bg-purple-50 text-purple-700 text-xs">
-                          Vídeo ID: {banner.videoId.substring(0, 8)}...
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700 text-[10px] px-1.5 py-0.5">
+                          ID: {banner.videoId.substring(0, 6)}
                         </Badge>
                       )}
                       {banner.page === 'course_specific' && banner.courseId && (
-                        <Badge variant="outline" className="bg-amber-50 text-amber-700 text-xs">
-                          Curso ID: {banner.courseId.substring(0, 8)}...
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 text-[10px] px-1.5 py-0.5">
+                          ID: {banner.courseId.substring(0, 6)}
                         </Badge>
                       )}
                     </div>
-                    {/* Linha 2: Dispositivo + Status Ativo */}
+                    {/* Linha 3: Dispositivo + Status Ativo */}
                     <div className="flex flex-wrap gap-2">
                       {banner.displayOn === 'desktop' && (
                         <Badge variant="outline" className="bg-slate-100 text-slate-700 text-xs">
