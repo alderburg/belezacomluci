@@ -6,6 +6,14 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
+// Log para debug - verificar se as variáveis estão sendo carregadas
+console.log('🔍 Verificando variáveis de ambiente Railway:');
+console.log('  RAILWAY_DB_HOST:', process.env.RAILWAY_DB_HOST ? 'definido' : 'AUSENTE');
+console.log('  RAILWAY_DB_PORT:', process.env.RAILWAY_DB_PORT || '5432');
+console.log('  RAILWAY_DB_NAME:', process.env.RAILWAY_DB_NAME ? 'definido' : 'AUSENTE');
+console.log('  RAILWAY_DB_USER:', process.env.RAILWAY_DB_USER ? 'definido' : 'AUSENTE');
+console.log('  RAILWAY_DB_PASSWORD:', process.env.RAILWAY_DB_PASSWORD ? 'definido' : 'AUSENTE');
+
 // Configuração para banco PostgreSQL da Railway
 const dbConfig = {
   host: process.env.RAILWAY_DB_HOST?.trim(),
@@ -17,6 +25,12 @@ const dbConfig = {
     rejectUnauthorized: false,
   },
 };
+
+console.log('📊 Configuração do banco:');
+console.log('  Host:', dbConfig.host);
+console.log('  Port:', dbConfig.port);
+console.log('  Database:', dbConfig.database);
+console.log('  User:', dbConfig.user);
 
 // Verificar se todas as variáveis necessárias estão definidas
 const missingVars = [];
