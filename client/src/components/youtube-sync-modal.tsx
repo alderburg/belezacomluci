@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncComplete, setSyncComplete] = useState(false);
+  const [hasAttemptedSync, setHasAttemptedSync] = useState(false);
 
   const [batchConfig, setBatchConfig] = useState({
     type: "video",
@@ -51,17 +53,26 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
   // Buscar o Channel ID das configurações de API
   const { data: channelData, isLoading: isLoadingChannelId } = useQuery<{ channelId: string | null }>({
     queryKey: ["/api/youtube-channel-id"],
-    enabled: isOpen && !!user, // Só buscar se usuário estiver autenticado
+    enabled: isOpen && !!user,
   });
 
-  // Quando o modal abrir e o channelId estiver disponível, iniciar sincronização automaticamente
+  // Sincronização automática quando o modal abre
   useEffect(() => {
-    // Garantir que usuário está autenticado antes de sincronizar
-    if (!isOpen || !user || isAuthLoading || !channelData?.channelId || isSyncing || syncComplete) {
+    // Resetar estado quando modal fecha
+    if (!isOpen) {
+      setHasAttemptedSync(false);
       return;
     }
 
-    // Pequeno delay para garantir que tudo está pronto
+    // Verificações de segurança
+    if (!user || isAuthLoading || !channelData?.channelId || hasAttemptedSync) {
+      return;
+    }
+
+    // Marcar que já tentamos sincronizar nesta sessão
+    setHasAttemptedSync(true);
+
+    // Delay para garantir que tudo está pronto
     const timer = setTimeout(() => {
       handleSync(channelData.channelId);
     }, 300);
@@ -70,7 +81,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
   }, [isOpen, user, isAuthLoading, channelData?.channelId]);
 
   const handleSync = async (channelIdParam: string) => {
-    if (!channelIdParam.trim()) {
+    if (!channelIdParam?.trim()) {
       toast({
         variant: "destructive",
         title: "Erro",
@@ -80,8 +91,12 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
     }
 
     setIsSyncing(true);
-    setSyncComplete(false); // Resetar syncComplete antes de iniciar nova sincronização
+    setSyncComplete(false);
+    setSyncedVideos([]); // Garantir array vazio
+
     try {
+      console.log('🔄 Iniciando sincronização com canal:', channelIdParam);
+      
       const response = await apiRequest<{
         totalChannelVideos: number;
         existingVideos: number;
@@ -89,10 +104,15 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
         videos: YouTubeVideo[];
       }>("POST", "/api/youtube/sync", { channelId: channelIdParam.trim() });
 
-      setSyncedVideos(response.videos);
+      console.log('✅ Resposta da sincronização:', response);
+
+      // Garantir que videos é sempre um array
+      const videos = Array.isArray(response.videos) ? response.videos : [];
+      
+      setSyncedVideos(videos);
       setSyncComplete(true);
 
-      if (response.videos.length === 0) {
+      if (videos.length === 0) {
         toast({
           title: "Sincronização completa",
           description: "Todos os vídeos do canal já estão cadastrados!",
@@ -100,10 +120,14 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
       } else {
         toast({
           title: "Sincronização completa",
-          description: `Encontrados ${response.videos.length} novos vídeos disponíveis para importação`,
+          description: `Encontrados ${videos.length} novos vídeos disponíveis para importação`,
         });
       }
     } catch (error) {
+      console.error('❌ Erro na sincronização:', error);
+      setSyncedVideos([]); // Garantir array vazio em caso de erro
+      setSyncComplete(true); // Marcar como completo mesmo com erro
+      
       toast({
         variant: "destructive",
         title: "Erro na sincronização",
@@ -116,7 +140,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
 
   const importMutation = useMutation({
     mutationFn: async () => {
-      if (!syncedVideos || !Array.isArray(syncedVideos) || syncedVideos.length === 0) {
+      if (!syncedVideos || syncedVideos.length === 0) {
         throw new Error("Nenhum vídeo para importar");
       }
       
@@ -164,7 +188,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
   };
 
   const toggleAll = () => {
-    if (!syncedVideos || !Array.isArray(syncedVideos) || syncedVideos.length === 0) return;
+    if (!syncedVideos || syncedVideos.length === 0) return;
     
     if (selectedVideos.size === syncedVideos.length) {
       setSelectedVideos(new Set());
@@ -178,6 +202,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
     setSelectedVideos(new Set());
     setSyncComplete(false);
     setIsSyncing(false);
+    setHasAttemptedSync(false);
     setBatchConfig({
       type: "video",
       categoryId: "",
@@ -190,6 +215,10 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
     resetState();
   };
 
+  // Estados de loading
+  const isLoading = isAuthLoading || isLoadingChannelId || (isSyncing && !syncComplete);
+  const hasVideos = syncedVideos && syncedVideos.length > 0;
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
@@ -199,15 +228,15 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
             Sincronizar com YouTube
           </DialogTitle>
           <DialogDescription>
-            {isLoadingChannelId || (isSyncing && !syncComplete)
+            {isLoading
               ? "Aguarde enquanto buscamos os vídeos..."
               : syncComplete
-              ? `${Array.isArray(syncedVideos) ? syncedVideos.length : 0} vídeos disponíveis para importação`
+              ? `${syncedVideos.length} vídeos disponíveis para importação`
               : "Sincronizando com o canal configurado"}
           </DialogDescription>
         </DialogHeader>
 
-        {isAuthLoading || isLoadingChannelId || (isSyncing && !syncComplete) ? (
+        {isLoading ? (
           <div className="space-y-4 py-12 text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
             <p className="text-lg font-medium">
@@ -227,7 +256,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
           </div>
         ) : syncComplete ? (
           <div className="flex-1 flex flex-col min-h-0 space-y-4 py-4">
-            {syncedVideos && Array.isArray(syncedVideos) && syncedVideos.length > 0 && (
+            {hasVideos ? (
               <>
                 <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
                   <div className="space-y-2">
@@ -275,17 +304,17 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
 
                   <div className="flex items-center justify-between pt-2 border-t">
                     <span className="text-sm font-medium">
-                      {selectedVideos.size} de {Array.isArray(syncedVideos) ? syncedVideos.length : 0} vídeos selecionados
+                      {selectedVideos.size} de {syncedVideos.length} vídeos selecionados
                     </span>
                     <Button variant="outline" size="sm" onClick={toggleAll} data-testid="button-toggle-all">
-                      {selectedVideos.size === (Array.isArray(syncedVideos) ? syncedVideos.length : 0) ? "Desmarcar todos" : "Selecionar todos"}
+                      {selectedVideos.size === syncedVideos.length ? "Desmarcar todos" : "Selecionar todos"}
                     </Button>
                   </div>
                 </div>
 
                 <ScrollArea className="flex-1 -mx-6 px-6">
                   <div className="space-y-2">
-                    {Array.isArray(syncedVideos) && syncedVideos.map((video) => (
+                    {syncedVideos.map((video) => (
                       <div
                         key={video.id}
                         className={`flex gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
@@ -322,9 +351,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
                   </div>
                 </ScrollArea>
               </>
-            )}
-
-            {(!syncedVideos || !Array.isArray(syncedVideos) || syncedVideos.length === 0) && (
+            ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <CheckCircle2 className="h-12 w-12 text-primary mb-4" />
                 <p className="text-lg font-medium">Tudo sincronizado!</p>
@@ -340,7 +367,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
           <Button variant="outline" onClick={handleClose} data-testid="button-cancel">
             Cancelar
           </Button>
-          {syncComplete && syncedVideos && Array.isArray(syncedVideos) && syncedVideos.length > 0 && (
+          {syncComplete && hasVideos && (
             <Button
               onClick={() => importMutation.mutate()}
               disabled={selectedVideos.size === 0 || importMutation.isPending}
