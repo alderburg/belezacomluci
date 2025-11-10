@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect, useLocation } from "wouter";
 import Sidebar from "@/components/sidebar";
-import { TopBar } from "@/components/top-bar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Youtube, Key, Eye, EyeOff } from "lucide-react";
@@ -105,8 +104,6 @@ export default function ApiSettingsPage() {
       <Sidebar />
 
       <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0 pt-32' : 'pt-16'}`}>
-        <TopBar />
-        
         <div className="container mx-auto px-6 py-8">
           <div className="mb-6 flex items-center gap-4">
             <Button
