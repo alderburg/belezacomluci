@@ -5,8 +5,10 @@ import { Loader2, Youtube, Bell } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { YouTubeSyncModal } from "./youtube-sync-modal";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 
 export function AutoYouTubeCheck() {
+  const [, setLocation] = useLocation();
   const [isChecking, setIsChecking] = useState(false);
   const [newVideosCount, setNewVideosCount] = useState(0);
   const [showSyncModal, setShowSyncModal] = useState(false);
@@ -53,14 +55,15 @@ export function AutoYouTubeCheck() {
 
   if (!isConfigured || !channelId) {
     const handleConfigClick = () => {
-      window.location.href = '/perfil/configuracoes/apis';
+      setLocation('/perfil/configuracoes/apis');
     };
     return (
       <Button
-        variant="outline"
+        variant="default"
         size="sm"
         onClick={handleConfigClick}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+        data-testid="button-config-apis"
       >
         <Youtube className="h-4 w-4" />
         <span>Configurar APIs</span>
