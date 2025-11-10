@@ -98,15 +98,20 @@ export function AutoYouTubeCheck() {
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setShowSyncModal(true)}
-        className="flex items-center gap-2"
-      >
-        <Youtube className="h-4 w-4" />
-        <span>Sincronizar YouTube</span>
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowSyncModal(true)}
+          className="flex items-center gap-2"
+        >
+          <Youtube className="h-4 w-4" />
+          <span>Sincronizar YouTube</span>
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          Tudo sincronizado ✓
+        </span>
+      </div>
 
       <YouTubeSyncModal
         isOpen={showSyncModal}
