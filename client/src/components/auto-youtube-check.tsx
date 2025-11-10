@@ -73,11 +73,11 @@ export function AutoYouTubeCheck() {
           variant="default"
           size="sm"
           onClick={() => setShowSyncModal(true)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90"
         >
           <Bell className="h-4 w-4" />
           <span>
-            {newVideosCount} {newVideosCount === 1 ? "novo vídeo" : "novos vídeos"}
+            {newVideosCount} {newVideosCount === 1 ? "novo vídeo disponível" : "novos vídeos disponíveis"}
           </span>
         </Button>
 
