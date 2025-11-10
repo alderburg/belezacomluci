@@ -8,11 +8,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 
 export function AutoYouTubeCheck() {
-  const [, setLocation] = useLocation();
+  const [location] = useLocation();
   const [isChecking, setIsChecking] = useState(false);
   const [newVideosCount, setNewVideosCount] = useState(0);
   const [showSyncModal, setShowSyncModal] = useState(false);
-  const [hasChecked, setHasChecked] = useState(false);
 
   const { data: channelData, isLoading: channelLoading } = useQuery<{ channelId: string | null; configured?: boolean }>({
     queryKey: ["/api/youtube-channel-id"],
@@ -21,8 +20,9 @@ export function AutoYouTubeCheck() {
   const channelId = channelData?.channelId;
   const isConfigured = channelData?.configured !== false;
 
+  // Verificar sempre que a página for acessada ou quando location mudar
   useEffect(() => {
-    if (!channelId || hasChecked || !isConfigured) return;
+    if (!channelId || !isConfigured) return;
 
     const checkForNewVideos = async () => {
       try {
@@ -32,30 +32,28 @@ export function AutoYouTubeCheck() {
         }>("POST", "/api/youtube/sync", { channelId });
 
         setNewVideosCount(response.newVideos);
-        setHasChecked(true);
       } catch (error) {
         console.error("Erro ao verificar novos vídeos:", error);
-        setHasChecked(true);
       } finally {
         setIsChecking(false);
       }
     };
 
     checkForNewVideos();
-  }, [channelId, hasChecked, isConfigured]);
+  }, [channelId, isConfigured, location]);
 
   if (channelLoading || isChecking) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span>Verificando atualizações no canal...</span>
+        <span>Verificando atualizações...</span>
       </div>
     );
   }
 
   if (!isConfigured || !channelId) {
     const handleConfigClick = () => {
-      setLocation('/perfil/configuracoes/apis');
+      window.location.href = '/perfil/configuracoes/apis';
     };
     return (
       <Button
@@ -78,33 +76,16 @@ export function AutoYouTubeCheck() {
           variant="default"
           size="sm"
           onClick={() => setShowSyncModal(true)}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+          className="relative flex items-center gap-2 bg-primary hover:bg-primary/90 animate-pulse"
         >
-          <Bell className="h-4 w-4" />
-          <span>
-            {newVideosCount} {newVideosCount === 1 ? "novo vídeo disponível" : "novos vídeos disponíveis"}
+          <Bell className="h-4 w-4 animate-bounce" />
+          <span className="font-semibold">
+            Sincronizar {newVideosCount} {newVideosCount === 1 ? "vídeo novo" : "vídeos novos"}
           </span>
-        </Button>
-
-        <YouTubeSyncModal
-          isOpen={showSyncModal}
-          onClose={() => setShowSyncModal(false)}
-        />
-      </>
-    );
-  }
-
-  if (hasChecked && newVideosCount === 0) {
-    return (
-      <>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowSyncModal(true)}
-          className="flex items-center gap-2"
-        >
-          <Youtube className="h-4 w-4" />
-          <span>Sincronizar YouTube</span>
+          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+          </span>
         </Button>
 
         <YouTubeSyncModal

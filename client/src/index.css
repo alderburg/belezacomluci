@@ -270,7 +270,7 @@
     max-width: 280px;
     margin-right: 1rem;
   }
-  
+
   .carousel-container {
     gap: 1rem;
   }
@@ -439,17 +439,17 @@
   [class*="p-8"] {
     padding: 1.5rem !important;
   }
-  
+
   [class*="py-8"] {
     padding-top: 1.5rem !important;
     padding-bottom: 1.5rem !important;
   }
-  
+
   [class*="px-8"] {
     padding-left: 1.5rem !important;
     padding-right: 1.5rem !important;
   }
-  
+
   /* Ajustar gaps maiores em grids */
   [class*="gap-8"] {
     gap: 1.25rem !important;
@@ -492,4 +492,14 @@ html {
 /* Ensure modal content has stable scrollbar */
 .modal-content {
   scrollbar-gutter: stable;
+}
+
+/* Animação de pulsação personalizada */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+  }
 }
