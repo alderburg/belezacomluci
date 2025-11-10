@@ -4,6 +4,35 @@ This is "Beleza com Luci", a beauty platform built for followers to access exclu
 
 # Recent Changes
 
+## 2025-11-10: Sistema de Sincronização com YouTube
+- Implementado sistema completo de sincronização com canal do YouTube via API
+- Serviço backend (`server/youtube-service.ts`) que integra com YouTube Data API v3:
+  - Busca todos os vídeos de um canal do YouTube (até 100 vídeos)
+  - Extrai metadados: título, descrição, thumbnail, duração, data de publicação
+  - Parsing automático de duração ISO 8601 (PT1H30M15S → 1h 30min)
+- Endpoints REST para administração:
+  - `POST /api/youtube/sync`: Compara vídeos do canal com vídeos já cadastrados, retorna apenas novos
+  - `POST /api/videos/import-batch`: Permite importação em lote de múltiplos vídeos
+- Modal interativo de importação (`client/src/components/youtube-sync-modal.tsx`):
+  - Input para ID do canal do YouTube
+  - Busca automática de vídeos novos ao sincronizar
+  - Lista de vídeos com thumbnails, título, descrição e metadados
+  - Sistema de seleção individual com checkboxes
+  - Botão "Selecionar todos" / "Desmarcar todos" para seleção em massa
+  - Configuração compartilhada aplicada a todos os vídeos selecionados:
+    - Tipo de conteúdo (vídeo, playlist, live)
+    - Categoria (opcional)
+    - Exclusividade (premium/free)
+  - Preloader durante sincronização e importação
+  - Notificações de sucesso/erro via toast
+  - Estado "vazio" quando todos os vídeos já estão cadastrados
+- Integração na página `/admin/videos-mobile`:
+  - Botão "Sync" com ícone do YouTube no header
+  - Abre modal de sincronização ao clicar
+  - Cache invalidado automaticamente após importação bem-sucedida
+- Prevenção de duplicatas: Compara vídeos por URL (videoUrl) antes de importar
+- Requisitos: YOUTUBE_API_KEY deve estar configurada nas variáveis de ambiente
+
 ## 2025-11-01: Sistema de Auto-Preenchimento de Posição em Cupons
 - Implementado cálculo automático da próxima posição disponível ao criar novos cupons
 - Sistema busca o cupom com maior ordem e preenche automaticamente o campo "ordem" com maxOrder + 1
