@@ -25,6 +25,7 @@ import { useState } from "react";
 import { apiRequest } from '@/lib/queryClient';
 import { useEffect } from "react";
 import { YouTubeSyncModal } from "@/components/youtube-sync-modal";
+import { AutoYouTubeCheck } from "@/components/auto-youtube-check";
 
 export default function AdminVideosMobilePage() {
   const { user } = useAuth();
@@ -36,7 +37,6 @@ export default function AdminVideosMobilePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeletingItem, setIsDeletingItem] = useState(false);
-  const [showSyncModal, setShowSyncModal] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -121,16 +121,7 @@ export default function AdminVideosMobilePage() {
               {videos?.length || 0} vídeos cadastrados
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowSyncModal(true)}
-            className="flex items-center gap-1 text-xs"
-            data-testid="button-open-sync"
-          >
-            <Youtube className="h-4 w-4" />
-            <span className="hidden sm:inline">Sync</span>
-          </Button>
+          <AutoYouTubeCheck channelId={import.meta.env.VITE_YOUTUBE_CHANNEL_ID || ""} />
         </div>
       </div>
 
@@ -270,11 +261,6 @@ export default function AdminVideosMobilePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <YouTubeSyncModal
-        isOpen={showSyncModal}
-        onClose={() => setShowSyncModal(false)}
-      />
 
       <MobileBottomNav />
     </div>
