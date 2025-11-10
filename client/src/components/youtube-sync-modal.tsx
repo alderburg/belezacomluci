@@ -57,7 +57,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
     if (isOpen && channelData?.channelId && !isSyncing && !syncComplete) {
       handleSync(channelData.channelId);
     }
-  }, [isOpen, channelData?.channelId]);
+  }, [isOpen, channelData?.channelId, isSyncing, syncComplete]); // Adicionadas dependências
 
   const handleSync = async (channelIdParam: string) => {
     if (!channelIdParam.trim()) {
@@ -70,6 +70,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
     }
 
     setIsSyncing(true);
+    setSyncComplete(false); // Resetar syncComplete antes de iniciar nova sincronização
     try {
       const response = await apiRequest<{
         totalChannelVideos: number;
@@ -160,6 +161,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
     setSyncedVideos([]);
     setSelectedVideos(new Set());
     setSyncComplete(false);
+    setIsSyncing(false);
     setBatchConfig({
       type: "video",
       categoryId: "",
