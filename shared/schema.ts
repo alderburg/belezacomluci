@@ -280,6 +280,17 @@ export const notificationSettings = pgTable("notification_settings", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+export const apiSettings = pgTable("api_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull().unique(),
+  googleClientId: text("google_client_id"),
+  googleClientSecret: text("google_client_secret"),
+  youtubeApiKey: text("youtube_api_key"),
+  youtubeChannelId: text("youtube_channel_id"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 // ========== GAMIFICATION SYSTEM "MINHAS CHEIROSAS" ==========
 
 // Configurações do sistema de compartilhamento
@@ -592,6 +603,10 @@ export const userNotificationRelations = relations(userNotifications, ({ one }) 
 
 export const notificationSettingsRelations = relations(notificationSettings, ({ one }) => ({
   user: one(users, { fields: [notificationSettings.userId], references: [users.id] }),
+}));
+
+export const apiSettingsRelations = relations(apiSettings, ({ one }) => ({
+  user: one(users, { fields: [apiSettings.userId], references: [users.id] }),
 }));
 
 // ========== GAMIFICATION RELATIONS ==========
@@ -921,6 +936,12 @@ export const insertNotificationSettingsSchema = createInsertSchema(notificationS
   updatedAt: true
 });
 
+export const insertApiSettingsSchema = createInsertSchema(apiSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 // ========== GAMIFICATION INSERT SCHEMAS ==========
 export const insertUserPointsSchema = createInsertSchema(userPoints).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertMissionSchema = createInsertSchema(missions).omit({ id: true, createdAt: true }).extend({
@@ -1024,6 +1045,8 @@ export type InsertUserNotification = z.infer<typeof insertUserNotificationSchema
 export type UserNotification = typeof userNotifications.$inferSelect;
 export type InsertNotificationSettings = z.infer<typeof insertNotificationSettingsSchema>;
 export type NotificationSettings = typeof notificationSettings.$inferSelect;
+export type InsertApiSettings = z.infer<typeof insertApiSettingsSchema>;
+export type ApiSettings = typeof apiSettings.$inferSelect;
 
 // ========== GAMIFICATION TYPES ==========
 export type InsertUserPoints = z.infer<typeof insertUserPointsSchema>;

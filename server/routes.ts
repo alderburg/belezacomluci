@@ -1,3 +1,4 @@
+replit_final_file>
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
@@ -10,7 +11,8 @@ import {
   insertRaffleSchema, insertRewardSchema, shareSettings, referrals,
   insertNotificationSchema, insertUserNotificationSchema, notifications, userNotifications,
   insertPopupSchema, insertPopupViewSchema, insertCategorySchema,
-  insertUserSchema, coupons, categories, commentLikes, commentReplies
+  insertUserSchema, coupons, categories, commentLikes, commentReplies,
+  apiSettings, insertApiSettingsSchema // Import apiSettings schema and insert function
 } from "../shared/schema";
 import https from 'https';
 import { DOMParser } from '@xmldom/xmldom';
@@ -369,7 +371,7 @@ export function registerRoutes(app: Express): Server {
       const existingVideos = await storage.getVideos();
 
       const existingUrls = new Set(existingVideos.map(v => v.videoUrl));
-      
+
       const newVideos = youtubeVideos.filter(ytVideo => {
         const url = `https://www.youtube.com/watch?v=${ytVideo.id}`;
         return !existingUrls.has(url);
@@ -404,7 +406,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const { videos } = req.body;
-      
+
       if (!Array.isArray(videos) || videos.length === 0) {
         return res.status(400).json({ message: "Videos array is required" });
       }
@@ -2998,7 +3000,7 @@ export function registerRoutes(app: Express): Server {
           notificationId: notification.id,
           isRead: false,
         });
-        
+
         // Só conta se realmente criou uma nova notificação (não era duplicata)
         if (newUserNotification) {
           successCount++;
@@ -4112,7 +4114,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Get user's own referral stats
+  // Get user's referral stats
   app.get("/api/user/referral-stats", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
