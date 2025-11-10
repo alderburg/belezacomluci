@@ -5,8 +5,6 @@ import { storage } from "./storage";
 import { db } from "./db";
 import { NotificationWebSocketService } from "./websocket";
 
-console.log('🌸 Beleza com Luci - Servidor iniciando...');
-
 const app = express();
 
 // CORS configuration
@@ -56,15 +54,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Migrações desabilitadas - conectando diretamente ao banco Railway
-  console.log('🛠️ Registrando rotas...');
   const server = await registerRoutes(app);
-  console.log('✅ Rotas registradas!');
-  
-  console.log('🔌 Configurando WebSocket...');
-  // Configurar WebSocket para notificações
   const wsService = new NotificationWebSocketService(server);
-  console.log('✅ WebSocket configurado!');
   
   // Disponibilizar o serviço WebSocket globalmente
   (global as any).notificationWS = wsService;
@@ -77,31 +68,20 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  console.log('⚙️ Configurando Vite...');
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (app.get("env") === "development") {
     await setupVite(app, server);
-    console.log('✅ Vite configurado!');
   } else {
     serveStatic(app);
-    console.log('✅ Static files configured!');
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  console.log(`🚀 Iniciando servidor na porta ${port}...`);
+  console.log('🚀 Iniciando servidor');
   
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    console.log(`✅ Servidor rodando em http://0.0.0.0:${port}`);
-    console.log('🌸 Beleza com Luci está pronto! 💖');
+    console.log('✅ Servidor rodando');
   });
 })();
