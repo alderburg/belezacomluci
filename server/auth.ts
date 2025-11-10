@@ -79,6 +79,7 @@ export function setupAuth(app: Express) {
 
         return done(null, user);
       } catch (error) {
+        console.error('❌ Erro na estratégia de autenticação:', error);
         return done(error);
       }
     }),
@@ -143,10 +144,12 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) {
+        console.error('❌ Erro no login (passport.authenticate):', err);
         return res.status(500).json({ error: "Erro interno do servidor" });
       }
 
       if (!user) {
+        console.log('⚠️ Login falhou - usuário não encontrado ou senha incorreta:', info?.message);
         return res.status(401).json({ 
           error: info?.message || "Email ou senha incorretos" 
         });
@@ -154,6 +157,7 @@ export function setupAuth(app: Express) {
 
       req.login(user, async (err) => {
         if (err) {
+          console.error('❌ Erro ao iniciar sessão (req.login):', err);
           return res.status(500).json({ error: "Erro ao iniciar sessão" });
         }
 
@@ -165,6 +169,7 @@ export function setupAuth(app: Express) {
           // Don't fail login if tracking fails
         }
 
+        console.log('✅ Login bem-sucedido para:', user.email);
         res.status(200).json(user);
       });
     })(req, res, next);
