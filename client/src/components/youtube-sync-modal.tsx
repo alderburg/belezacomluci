@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Youtube, CheckCircle2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface YouTubeVideo {
   id: string;
@@ -41,6 +42,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -49,15 +51,23 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
   // Buscar o Channel ID das configurações de API
   const { data: channelData, isLoading: isLoadingChannelId } = useQuery<{ channelId: string | null }>({
     queryKey: ["/api/youtube-channel-id"],
-    enabled: isOpen,
+    enabled: isOpen && !!user, // Só buscar se usuário estiver autenticado
   });
 
   // Quando o modal abrir e o channelId estiver disponível, iniciar sincronização automaticamente
   useEffect(() => {
-    if (isOpen && channelData?.channelId && !isSyncing && !syncComplete) {
-      handleSync(channelData.channelId);
+    // Garantir que usuário está autenticado antes de sincronizar
+    if (!isOpen || !user || isAuthLoading || !channelData?.channelId || isSyncing || syncComplete) {
+      return;
     }
-  }, [isOpen, channelData?.channelId, isSyncing, syncComplete]); // Adicionadas dependências
+
+    // Pequeno delay para garantir que tudo está pronto
+    const timer = setTimeout(() => {
+      handleSync(channelData.channelId);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [isOpen, user, isAuthLoading, channelData?.channelId]);
 
   const handleSync = async (channelIdParam: string) => {
     if (!channelIdParam.trim()) {
@@ -191,14 +201,22 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
           </DialogDescription>
         </DialogHeader>
 
-        {isLoadingChannelId || (isSyncing && !syncComplete) ? (
+        {isAuthLoading || isLoadingChannelId || (isSyncing && !syncComplete) ? (
           <div className="space-y-4 py-12 text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
             <p className="text-lg font-medium">
-              {isLoadingChannelId ? "Carregando configurações..." : "Sincronizando com YouTube..."}
+              {isAuthLoading 
+                ? "Verificando autenticação..." 
+                : isLoadingChannelId 
+                ? "Carregando configurações..." 
+                : "Sincronizando com YouTube..."}
             </p>
             <p className="text-sm text-muted-foreground">
-              {isLoadingChannelId ? "Buscando Channel ID..." : "Buscando vídeos não cadastrados..."}
+              {isAuthLoading 
+                ? "Aguarde..." 
+                : isLoadingChannelId 
+                ? "Buscando Channel ID..." 
+                : "Buscando vídeos não cadastrados..."}
             </p>
           </div>
         ) : syncComplete ? (
