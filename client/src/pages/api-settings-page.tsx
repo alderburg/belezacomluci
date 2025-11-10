@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertApiSettingsSchema } from "@shared/schema";
 import type { z } from "zod";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type ApiSettingsData = z.infer<typeof insertApiSettingsSchema>;
 
@@ -46,6 +47,10 @@ export default function ApiSettingsPage() {
       userId: user?.id || "",
     },
   });
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     if (settings) {
@@ -137,8 +142,36 @@ export default function ApiSettingsPage() {
               </CardHeader>
               <CardContent>
                 {isLoading ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Carregando configurações...</p>
+                  <div className="space-y-6">
+                    {/* Google Client ID Skeleton */}
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                    
+                    {/* Google Client Secret Skeleton */}
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-36" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                    
+                    {/* YouTube API Key Skeleton */}
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                    
+                    {/* YouTube Channel ID Skeleton */}
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-36" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                    
+                    {/* Instructions Box Skeleton */}
+                    <Skeleton className="h-40 w-full rounded-lg" />
+                    
+                    {/* Save Button Skeleton */}
+                    <Skeleton className="h-10 w-full" />
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -155,6 +188,7 @@ export default function ApiSettingsPage() {
                           placeholder="Digite o Google Client ID"
                           className="pr-10"
                           data-testid="input-google-client-id"
+                          autoComplete="off"
                         />
                         <button
                           type="button"
@@ -182,6 +216,7 @@ export default function ApiSettingsPage() {
                           placeholder="Digite o Google Client Secret"
                           className="pr-10"
                           data-testid="input-google-client-secret"
+                          autoComplete="off"
                         />
                         <button
                           type="button"
@@ -209,6 +244,7 @@ export default function ApiSettingsPage() {
                           placeholder="Digite a YouTube API Key"
                           className="pr-10"
                           data-testid="input-youtube-api-key"
+                          autoComplete="off"
                         />
                         <button
                           type="button"
@@ -234,6 +270,7 @@ export default function ApiSettingsPage() {
                         {...form.register("youtubeChannelId")}
                         placeholder="Digite o YouTube Channel ID"
                         data-testid="input-youtube-channel-id"
+                        autoComplete="off"
                       />
                       {form.formState.errors.youtubeChannelId && (
                         <p className="text-sm text-destructive">{form.formState.errors.youtubeChannelId.message}</p>
