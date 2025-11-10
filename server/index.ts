@@ -4,9 +4,6 @@ import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import { db } from "./db";
 import { NotificationWebSocketService } from "./websocket";
-import dotenv from 'dotenv';
-
-dotenv.config({ debug: false });
 
 console.log('🌸 Beleza com Luci - Servidor iniciando...');
 
