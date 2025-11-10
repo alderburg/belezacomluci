@@ -1,4 +1,3 @@
-
 import { db } from '../server/db';
 import { videos } from '../shared/schema';
 import { youtubeService } from '../server/youtube-service';
@@ -11,7 +10,7 @@ async function checkPendingVideos() {
     // Buscar o channel ID das configurações
     const { getYoutubeChannelId } = await import('../server/lib/apiSettings');
     const channelId = await getYoutubeChannelId();
-    
+
     if (!channelId) {
       console.log('❌ Channel ID não configurado');
       return;
@@ -31,14 +30,14 @@ async function checkPendingVideos() {
     // Função auxiliar para extrair ID do YouTube de uma URL
     const extractYouTubeId = (url: string): string | null => {
       if (!url) return null;
-      
+
       const patterns = [
         /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
         /(?:youtu\.be\/)([^&\n?#\?]+)/,
         /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
         /(?:youtube\.com\/v\/)([^&\n?#\?]+)/,
       ];
-      
+
       for (const pattern of patterns) {
         const match = url.match(pattern);
         if (match && match[1]) {
@@ -51,7 +50,7 @@ async function checkPendingVideos() {
 
     // Extrair IDs dos vídeos existentes
     const existingVideoIds = new Set<string>();
-    
+
     existingVideos.forEach(v => {
       const videoId = extractYouTubeId(v.videoUrl || '');
       if (videoId) {

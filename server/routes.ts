@@ -2,6 +2,7 @@ import { Express } from "express";
 import { createServer, Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
+import { youtubeService } from "./youtube-service";
 import jwt from 'jsonwebtoken';
 import {
   insertVideoSchema, insertProductSchema, insertCouponSchema,
