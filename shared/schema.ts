@@ -280,6 +280,12 @@ export const notificationSettings = pgTable("notification_settings", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+export const session = pgTable("session", {
+  sid: varchar("sid").primaryKey(),
+  sess: json("sess").notNull(),
+  expire: timestamp("expire").notNull(),
+});
+
 export const apiSettings = pgTable("api_settings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull().unique(),
