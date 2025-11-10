@@ -359,6 +359,72 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
+      const { channelId } = req.body;
+
+      if (!channelId) {
+        return res.status(400).json({ message: "Channel ID is required" });
+      }
+
+      // Buscar todos os vídeos do canal (aumentar limite para 500)
+      const youtubeVideos = await youtubeService.getAllChannelVideos(channelId, 500);
+
+      // Buscar vídeos já cadastrados
+      const existingVideos = await storage.getAllVideos();
+
+      // Criar set com IDs dos vídeos já cadastrados
+      const existingVideoIds = new Set(
+        existingVideos
+          .map(v => {
+            if (!v.videoUrl) return null;
+            
+            const patterns = [
+              /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
+              /(?:youtu\.be\/)([^&\n?#\?]+)/,
+              /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
+            ];
+            
+            for (const pattern of patterns) {
+              const match = v.videoUrl.match(pattern);
+              if (match && match[1]) {
+                return match[1].split('?')[0];
+              }
+            }
+            return null;
+          })
+          .filter(id => id !== null)
+      );
+
+      // Filtrar apenas vídeos novos
+      const newVideos = youtubeVideos.filter(video => !existingVideoIds.has(video.id));
+
+      res.json({
+        totalChannelVideos: youtubeVideos.length,
+        existingVideos: existingVideoIds.size,
+        newVideos: newVideos.length,
+        videos: newVideos.map(video => ({
+          id: video.id,
+          title: video.title,
+          description: video.description,
+          videoUrl: `https://youtu.be/${video.id}`,
+          thumbnailUrl: video.thumbnailUrl,
+          duration: video.duration,
+          publishedAt: video.publishedAt,
+        })),
+      });
+    } catch (error) {
+      console.error('Erro ao sincronizar com YouTube:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to sync with YouTube" 
+      });
+    }
+  });
+
+  app.post('/api/youtube/import', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
       const { youtubeService } = await import('./youtube-service');
       const { channelId } = req.body;
 
