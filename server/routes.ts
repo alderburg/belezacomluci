@@ -373,7 +373,7 @@ export function registerRoutes(app: Express): Server {
       console.log(`📺 Total de vídeos no canal do YouTube: ${youtubeVideos.length}`);
 
       // Buscar vídeos já cadastrados
-      const existingVideos = await storage.getAllVideos();
+      const existingVideos = await storage.getVideos();
       console.log(`📚 Total de vídeos no banco: ${existingVideos.length}`);
 
       // Função auxiliar para extrair ID do YouTube de uma URL
