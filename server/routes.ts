@@ -355,22 +355,30 @@ export function registerRoutes(app: Express): Server {
 
   // YouTube sync endpoints
   app.post('/api/youtube/sync', async (req, res) => {
+    console.log('📥 POST /api/youtube/sync - Autenticado:', req.isAuthenticated(), 'Admin:', req.user?.isAdmin);
+    
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      console.log('❌ Acesso negado - usuário não é admin');
       return res.status(403).json({ message: "Admin access required" });
     }
 
     try {
       const { channelId } = req.body;
+      console.log('🔍 Canal ID recebido:', channelId);
 
       if (!channelId) {
         return res.status(400).json({ message: "Channel ID is required" });
       }
 
       // Buscar TODOS os vídeos do canal (sem limite)
+      console.log('📺 Buscando vídeos do YouTube...');
       const youtubeVideos = await youtubeService.getAllChannelVideos(channelId, 9999);
+      console.log('✅ Vídeos do YouTube encontrados:', youtubeVideos.length);
 
       // Buscar vídeos já cadastrados
+      console.log('💾 Buscando vídeos no banco...');
       const existingVideos = await storage.getVideos();
+      console.log('✅ Vídeos no banco:', existingVideos.length);
 
       // Função auxiliar para extrair ID do YouTube de uma URL
       const extractYouTubeId = (url: string): string | null => {
@@ -408,6 +416,9 @@ export function registerRoutes(app: Express): Server {
         const isNew = !existingVideoIds.has(video.id);
         return isNew;
       });
+
+      console.log('🆕 Vídeos novos encontrados:', newVideos.length);
+      console.log('📊 Resumo: Total YouTube:', youtubeVideos.length, '| Cadastrados:', existingVideoIds.size, '| Novos:', newVideos.length);
 
       res.json({
         totalChannelVideos: youtubeVideos.length,

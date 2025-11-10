@@ -50,12 +50,8 @@ export function AutoYouTubeCheck() {
         setProgress(10); // Começa em 10%
         console.log('🔍 Verificando vídeos pendentes do canal:', channelId);
         
-        const response = await apiRequest<{
-          totalChannelVideos: number;
-          existingVideos: number;
-          newVideos: number;
-          videos: any[];
-        }>("POST", "/api/youtube/sync", { channelId });
+        const res = await apiRequest("POST", "/api/youtube/sync", { channelId });
+        const response = await res.json();
 
         console.log('📊 Resultado da verificação:', {
           total: response.totalChannelVideos,
@@ -69,8 +65,21 @@ export function AutoYouTubeCheck() {
           setNewVideosCount(response.newVideos);
           console.log('✅ Vídeos pendentes definidos:', response.newVideos);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("❌ Erro ao verificar novos vídeos:", error);
+        console.error("Erro completo:", error.message);
+        
+        // Parse do erro para verificar se é 401/403
+        const errorMessage = error.message || '';
+        const is401 = errorMessage.includes('401');
+        const is403 = errorMessage.includes('403');
+        
+        if (is401 || is403) {
+          console.warn("⚠️ Usuário não autenticado ou sem permissão admin");
+          console.warn("Erro:", errorMessage);
+        }
+        
+        // SEMPRE mostrar null em caso de erro para não confundir o usuário
         setNewVideosCount(null);
       } finally {
         setTimeout(() => setIsChecking(false), 300); // Pequeno delay para mostrar 100%

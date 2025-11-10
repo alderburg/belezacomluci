@@ -149,8 +149,14 @@ export class YouTubeService {
 
   async getAllChannelVideos(channelId: string, maxResults: number = 1000): Promise<YouTubeVideo[]> {
     try {
+      console.log('🎬 YouTubeService: Obtendo playlist de uploads do canal:', channelId);
       const uploadsPlaylistId = await this.getChannelUploadsPlaylist(channelId);
+      console.log('📋 Playlist ID:', uploadsPlaylistId);
+      
+      console.log('🔄 YouTubeService: Buscando vídeos da playlist (máx:', maxResults, ')');
       const videos = await this.getPlaylistVideos(uploadsPlaylistId, maxResults);
+      console.log('✅ YouTubeService: Total de vídeos retornados:', videos.length);
+      
       return videos;
     } catch (error) {
       throw new Error(`Erro ao buscar vídeos do canal: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
