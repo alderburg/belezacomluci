@@ -353,6 +353,26 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Endpoint para buscar Channel ID do banco
+  app.get('/api/youtube-channel-id', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      const { getYoutubeChannelId } = await import('./lib/apiSettings');
+      const channelId = await getYoutubeChannelId();
+      res.json({ channelId });
+    } catch (error) {
+      console.error('Erro ao buscar Channel ID:', error);
+      res.status(500).json({ 
+        channelId: null,
+        configured: false,
+        message: error instanceof Error ? error.message : "Channel ID não configurado" 
+      });
+    }
+  });
+
   // YouTube sync endpoints
   app.post('/api/youtube/sync', async (req, res) => {
     console.log('📥 POST /api/youtube/sync - Autenticado:', req.isAuthenticated(), 'Admin:', req.user?.isAdmin);

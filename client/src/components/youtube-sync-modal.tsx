@@ -28,12 +28,11 @@ interface Category {
 }
 
 export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const [channelId, setChannelId] = useState("");
   const [syncedVideos, setSyncedVideos] = useState<YouTubeVideo[]>([]);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncComplete, setSyncComplete] = useState(false);
-  
+
   const [batchConfig, setBatchConfig] = useState({
     type: "video",
     categoryId: "",
@@ -47,12 +46,25 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
     queryKey: ["/api/categories"],
   });
 
-  const handleSync = async () => {
-    if (!channelId.trim()) {
+  // Buscar o Channel ID das configurações de API
+  const { data: channelData, isLoading: isLoadingChannelId } = useQuery<{ channelId: string | null }>({
+    queryKey: ["/api/youtube-channel-id"],
+    enabled: isOpen,
+  });
+
+  // Quando o modal abrir e o channelId estiver disponível, iniciar sincronização automaticamente
+  useEffect(() => {
+    if (isOpen && channelData?.channelId && !isSyncing && !syncComplete) {
+      handleSync(channelData.channelId);
+    }
+  }, [isOpen, channelData?.channelId]);
+
+  const handleSync = async (channelIdParam: string) => {
+    if (!channelIdParam.trim()) {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "Por favor, informe o ID do canal do YouTube",
+        description: "Channel ID não configurado. Configure em Configurações > APIs",
       });
       return;
     }
@@ -64,7 +76,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
         existingVideos: number;
         newVideos: number;
         videos: YouTubeVideo[];
-      }>("POST", "/api/youtube/sync", { channelId: channelId.trim() });
+      }>("POST", "/api/youtube/sync", { channelId: channelIdParam.trim() });
 
       setSyncedVideos(response.videos);
       setSyncComplete(true);
@@ -145,7 +157,6 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
   };
 
   const resetState = () => {
-    setChannelId("");
     setSyncedVideos([]);
     setSelectedVideos(new Set());
     setSyncComplete(false);
@@ -170,49 +181,25 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
             Sincronizar com YouTube
           </DialogTitle>
           <DialogDescription>
-            {!syncComplete
-              ? "Informe o ID do canal do YouTube para buscar vídeos não cadastrados"
-              : `${syncedVideos.length} vídeos disponíveis para importação`}
+            {isLoadingChannelId || (isSyncing && !syncComplete)
+              ? "Aguarde enquanto buscamos os vídeos..."
+              : syncComplete
+              ? `${syncedVideos.length} vídeos disponíveis para importação`
+              : "Sincronizando com o canal configurado"}
           </DialogDescription>
         </DialogHeader>
 
-        {!syncComplete ? (
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="channelId">ID do Canal do YouTube</Label>
-              <Input
-                id="channelId"
-                placeholder="Ex: UCxxxxxxxxxxxxxx"
-                value={channelId}
-                onChange={(e) => setChannelId(e.target.value)}
-                disabled={isSyncing}
-                data-testid="input-channel-id"
-              />
-              <p className="text-xs text-muted-foreground">
-                Você encontra o ID do canal na URL ou nas configurações do YouTube
-              </p>
-            </div>
-
-            <Button
-              onClick={handleSync}
-              disabled={isSyncing || !channelId.trim()}
-              className="w-full"
-              data-testid="button-sync"
-            >
-              {isSyncing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Sincronizando...
-                </>
-              ) : (
-                <>
-                  <Youtube className="mr-2 h-4 w-4" />
-                  Sincronizar Canal
-                </>
-              )}
-            </Button>
+        {isLoadingChannelId || (isSyncing && !syncComplete) ? (
+          <div className="space-y-4 py-12 text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+            <p className="text-lg font-medium">
+              {isLoadingChannelId ? "Carregando configurações..." : "Sincronizando com YouTube..."}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {isLoadingChannelId ? "Buscando Channel ID..." : "Buscando vídeos não cadastrados..."}
+            </p>
           </div>
-        ) : (
+        ) : syncComplete ? (
           <div className="flex-1 flex flex-col min-h-0 space-y-4 py-4">
             {syncedVideos.length > 0 && (
               <>
@@ -321,7 +308,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
               </div>
             )}
           </div>
-        )}
+        ) : null}
 
         <DialogFooter className="flex flex-row items-center justify-end gap-2">
           <Button variant="outline" onClick={handleClose} data-testid="button-cancel">
