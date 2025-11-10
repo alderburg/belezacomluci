@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,11 +52,14 @@ export function AutoYouTubeCheck() {
   }
 
   if (!isConfigured || !channelId) {
+    const handleConfigClick = () => {
+      window.location.href = '/perfil/configuracoes/apis';
+    };
     return (
       <Button
         variant="outline"
         size="sm"
-        onClick={() => window.location.href = '/perfil/configuracoes/apis'}
+        onClick={handleConfigClick}
         className="flex items-center gap-2"
       >
         <Youtube className="h-4 w-4" />
@@ -121,7 +123,7 @@ export function AutoYouTubeCheck() {
         <Youtube className="h-4 w-4" />
         <span>Sincronizar YouTube</span>
       </Button>
-      
+
       <YouTubeSyncModal
         isOpen={showSyncModal}
         onClose={() => setShowSyncModal(false)}
