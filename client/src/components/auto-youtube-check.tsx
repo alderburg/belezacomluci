@@ -53,7 +53,17 @@ export function AutoYouTubeCheck() {
   }
 
   if (!isConfigured || !channelId) {
-    return null;
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => window.location.href = '/perfil/configuracoes/apis'}
+        className="flex items-center gap-2 border-orange-300 bg-orange-50 hover:bg-orange-100 text-orange-700"
+      >
+        <Youtube className="h-4 w-4" />
+        <span className="font-medium">Configurar APIs do YouTube</span>
+      </Button>
+    );
   }
 
   if (newVideosCount > 0) {
