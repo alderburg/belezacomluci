@@ -1,73 +1,6 @@
 # Overview
 
-This is "Beleza com Luci", a beauty platform built for followers to access exclusive content, digital products, and discount coupons. The application serves as a comprehensive beauty community platform where users can watch exclusive videos, download digital products like e-books and courses, access discount coupons from partner brands, and engage with the community. The platform includes a subscription system with free and premium tiers, where premium content is gated behind paid subscriptions.
-
-# Recent Changes
-
-## 2025-11-10: Sistema de Sincronização com YouTube
-- Implementado sistema completo de sincronização com canal do YouTube via API
-- Serviço backend (`server/youtube-service.ts`) que integra com YouTube Data API v3:
-  - Busca todos os vídeos de um canal do YouTube (até 100 vídeos)
-  - Extrai metadados: título, descrição, thumbnail, duração, data de publicação
-  - Parsing automático de duração ISO 8601 (PT1H30M15S → 1h 30min)
-- Endpoints REST para administração:
-  - `POST /api/youtube/sync`: Compara vídeos do canal com vídeos já cadastrados, retorna apenas novos
-  - `POST /api/videos/import-batch`: Permite importação em lote de múltiplos vídeos
-- Modal interativo de importação (`client/src/components/youtube-sync-modal.tsx`):
-  - Input para ID do canal do YouTube
-  - Busca automática de vídeos novos ao sincronizar
-  - Lista de vídeos com thumbnails, título, descrição e metadados
-  - Sistema de seleção individual com checkboxes
-  - Botão "Selecionar todos" / "Desmarcar todos" para seleção em massa
-  - Configuração compartilhada aplicada a todos os vídeos selecionados:
-    - Tipo de conteúdo (vídeo, playlist, live)
-    - Categoria (opcional)
-    - Exclusividade (premium/free)
-  - Preloader durante sincronização e importação
-  - Notificações de sucesso/erro via toast
-  - Estado "vazio" quando todos os vídeos já estão cadastrados
-- Integração na página `/admin/videos-mobile`:
-  - Botão "Sync" com ícone do YouTube no header
-  - Abre modal de sincronização ao clicar
-  - Cache invalidado automaticamente após importação bem-sucedida
-- Prevenção de duplicatas: Compara vídeos por URL (videoUrl) antes de importar
-- Requisitos: YOUTUBE_API_KEY deve estar configurada nas variáveis de ambiente
-
-## 2025-11-01: Sistema de Auto-Preenchimento de Posição em Cupons
-- Implementado cálculo automático da próxima posição disponível ao criar novos cupons
-- Sistema busca o cupom com maior ordem e preenche automaticamente o campo "ordem" com maxOrder + 1
-- Funcionalidade implementada tanto no formulário mobile (admin-coupon-form-mobile-page.tsx) quanto no desktop (admin-page.tsx)
-- Usuário pode alterar a posição sugerida se desejar, mantendo total flexibilidade
-- Sistema detecta conflitos de ordem e exibe AlertDialog para confirmar reorganização
-- Experiência consistente entre mobile e desktop: campo já preenchido, editável, com validação de conflitos
-
-## 2025-10-26: Sistema de Diferenciação de Cursos (Vídeo Único vs Playlist)
-- Implementado dois novos tipos de produto: `course_video` (Curso - Vídeo Único) e `course_playlist` (Curso - Playlist)
-- Sistema agora detecta automaticamente o tipo ao inserir URL do YouTube no admin:
-  - URLs com `list=` são identificadas como playlist e o tipo é alterado para `course_playlist`
-  - URLs de vídeo único (sem `list=`) são identificadas como vídeo e o tipo é alterado para `course_video`
-- ProductCard agora navega corretamente:
-  - `course_video` → abre em `/video/{id}` (player de vídeo único)
-  - `course_playlist` → abre em `/playlist/{id}` (player de playlist)
-- Mantida compatibilidade com produtos antigos que têm `type='course'` (detecta automaticamente pela URL)
-- Filtro "Cursos" na página /produtos inclui ambos os tipos (course_video e course_playlist)
-
-## 2025-10-26: Configuração do Banco de Dados Railway
-- Conectado ao banco de dados PostgreSQL do Railway
-- Credenciais configuradas via variáveis de ambiente RAILWAY_DB_*
-- Sistema funcionando com banco de dados externo
-
-## 2025-10-14: Correção de Espaçamento em /meuperfil Desktop
-- Corrigido padding-top da página /meuperfil para seguir o padrão das outras páginas
-- Aplicado pt-16 (64px) no desktop e pt-32 (128px) no mobile no elemento <main>
-- Resolvido problema onde título, subtítulo e botão voltar ficavam cobertos pela topbar
-
-## 2025-10-14: Sistema de Banners na Página /bio
-- Adicionada opção "Link da Bio" no formulário de cadastro de banners no admin
-- A página /bio agora suporta banners dinâmicos cadastrados pelo admin
-- Banners são exibidos verticalmente (um abaixo do outro), não em formato carrossel
-- Banners respeitam configurações de ativação, ordem e período de exibição (data/hora início e fim)
-- Integração completa com sistema de filtros e validação de banners ativos
+"Beleza com Luci" is a beauty platform designed to provide followers with exclusive content, digital products, and discount coupons. It functions as a comprehensive beauty community, offering exclusive videos, downloadable e-books and courses, discount access from partner brands, and community engagement features. The platform supports a subscription model with both free and premium tiers, gating premium content behind paid subscriptions. The business vision is to create a thriving online community around beauty, leveraging exclusive content and partnerships to generate revenue and build a loyal user base.
 
 # User Preferences
 
@@ -76,265 +9,60 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 
 ## Frontend Architecture
-- **React + TypeScript**: Modern single-page application built with React 18, TypeScript for type safety, and Vite as the build tool
-- **Styling**: TailwindCSS for utility-first styling with Shadcn/UI component library providing pre-built accessible components
-- **Routing**: Wouter for lightweight client-side routing with protected routes for authenticated users
-- **State Management**: TanStack Query for server state management, React Context for authentication state
-- **Form Handling**: React Hook Form with Zod validation for type-safe form validation
-- **Mobile-First Design**: Responsive sidebar navigation that adapts to mobile/desktop with useIsMobile hook
+- **Technology Stack**: React 18, TypeScript, Vite.
+- **Styling**: TailwindCSS with Shadcn/UI for accessible components.
+- **Routing**: Wouter for client-side routing with protected routes.
+- **State Management**: TanStack Query for server state, React Context for authentication.
+- **Form Handling**: React Hook Form with Zod validation.
+- **Design Principles**: Mobile-first responsive design.
 
 ## Backend Architecture
-- **Node.js + Express**: RESTful API server with Express.js framework
-- **Authentication**: Passport.js with local strategy for username/password authentication
-- **Session Management**: Express sessions with PostgreSQL session store for persistent login state
-- **Password Security**: Scrypt-based password hashing with salt for secure credential storage
-- **Middleware**: Request logging, JSON parsing, and error handling middleware
+- **Technology Stack**: Node.js with Express.js.
+- **Authentication**: Passport.js local strategy for username/password.
+- **Session Management**: Express sessions with PostgreSQL store.
+- **Security**: Scrypt-based password hashing.
+- **Middleware**: Request logging, JSON parsing, error handling.
 
 ## Database Design
-- **PostgreSQL**: Primary database with Drizzle ORM for type-safe database operations
-- **Schema Structure**:
-  - Users table with authentication credentials and admin flags
-  - Subscriptions table linking users to plan types (free/premium)
-  - Videos table with exclusive content flags and view tracking
-  - Products table for digital downloads (e-books, courses, PDFs)
-  - Coupons table with brand partnerships and expiration tracking
-  - Banners table for homepage carousel advertisements
-  - Posts and Comments for community features
-  - Activity tracking for user engagement analytics
+- **Database**: PostgreSQL with Drizzle ORM.
+- **Schema**: Includes tables for Users, Subscriptions, Videos, Products, Coupons, Banners, Posts, Comments, and Activity tracking.
 
-## Content Management
-- **Video System**: Embedded video player with exclusive content restrictions based on subscription status
-- **Digital Products**: File download system with usage tracking and access control
-- **Coupon System**: Brand partnership integration with category filtering and usage analytics
-- **Banner Carousel**: Monetizable advertising space with admin-controlled rotation
+## Core Features
+- **Content System**: Embedded video player with subscription-based access control; digital product downloads.
+- **Coupon System**: Manages brand partnerships, categories, and usage analytics. Auto-fills next available position when creating new coupons.
+- **Banner System**: Dynamic, admin-controlled banners for pages like `/bio`, supporting activation, order, and display periods.
+- **Video & Product Management**: Automatic detection of YouTube video (single) vs. playlist for courses. YouTube API integration for syncing channel videos, extracting metadata, and batch importing.
+- **Access Control**: Role-based permissions for admin users and subscription-gated premium content.
+- **User Experience**: Activity tracking, search/filtering capabilities, community forums, responsive design.
 
-## Access Control
-- **Role-Based Permissions**: Admin users have full CRUD access to all content via dedicated admin panel
-- **Subscription Gates**: Premium content requires active subscription validation
-- **Protected Routes**: Authentication middleware ensures proper access control
-
-## User Experience Features
-- **Activity Tracking**: Comprehensive user engagement analytics (videos watched, downloads, coupon usage)
-- **Search and Filtering**: Category-based filtering for videos, products, and coupons
-- **Community Features**: Forum-style posts and comments for user interaction
-- **Responsive Design**: Mobile-optimized interface with collapsible sidebar navigation
+## UI/UX Decisions
+- Consistent padding (`pt-16` desktop, `pt-32` mobile) across pages for proper layout.
+- Interactive modals for YouTube synchronization, providing video selection, batch configuration, and real-time feedback.
+- AlertDialogs for conflict resolution (e.g., coupon order).
 
 # External Dependencies
 
 ## Database Services
-- **Locaweb PostgreSQL**: External PostgreSQL database hosted by Locaweb (configured via environment variables)
-- **Drizzle Kit**: Database migration and schema management tools
-- **Connection**: The database is configured via the following environment variables:
-  - `LOCAWEB_DB_HOST`: Database server hostname
-  - `LOCAWEB_DB_PORT`: Database port (default: 5432)
-  - `LOCAWEB_DB_NAME`: Database name
-  - `LOCAWEB_DB_USER`: Database username
-  - `LOCAWEB_DB_PASSWORD`: Database password
+- **Locaweb PostgreSQL**: External PostgreSQL database.
+- **Drizzle Kit**: ORM for type-safe database operations and schema management.
+- **Railway PostgreSQL**: For Railway deployments, configured via environment variables.
 
 ## Authentication & Sessions
-- **Passport.js**: Authentication middleware with local strategy
-- **Connect-PG-Simple**: PostgreSQL-backed session storage for persistent authentication
+- **Passport.js**: Authentication middleware.
+- **Connect-PG-Simple**: PostgreSQL-backed session storage.
 
 ## Frontend Libraries
-- **Radix UI**: Headless UI components for accessibility and consistent behavior
-- **TanStack Query**: Server state management and caching
-- **React Hook Form**: Form state management with validation
-- **Zod**: Runtime type validation and schema definition
-- **Date-fns**: Date formatting and manipulation utilities
+- **Radix UI**: Headless UI components.
+- **TanStack Query**: Server state management.
+- **React Hook Form**: Form state management.
+- **Zod**: Runtime type validation.
+- **Date-fns**: Date manipulation utilities.
 
-## Development Tools
-- **Vite**: Fast build tool and development server
-- **ESBuild**: Production bundle optimization
-- **TypeScript**: Static type checking across the entire application
-- **Replit Integration**: Development environment plugins for live editing
+## APIs
+- **YouTube Data API v3**: For video synchronization and metadata extraction.
 
-# Configurações de Portabilidade para Replit
-
-Esta seção documenta as configurações críticas que garantem que o projeto funcione consistentemente em qualquer instância do Replit sem erros de resolução de módulos.
-
-## Configurações Essenciais do Vite
-
-O arquivo `vite.config.ts` deve usar a seguinte configuração padrão para garantir portabilidade:
-
-```typescript
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-export default defineConfig({
-  plugins: [react()],
-  root: path.resolve(__dirname, "client"),
-  resolve: {
-    alias: [
-      {
-        find: "@",
-        replacement: path.resolve(__dirname, "client/src")
-      },
-      {
-        find: "@shared", 
-        replacement: path.resolve(__dirname, "shared")
-      },
-      {
-        find: "@assets",
-        replacement: path.resolve(__dirname, "attached_assets")
-      }
-    ]
-  },
-  build: {
-    outDir: path.resolve(__dirname, "dist/public"),
-    emptyOutDir: true,
-  },
-  server: {
-    host: "0.0.0.0",
-    port: 5000,
-    hmr: false,
-  },
-});
-```
-
-## Correções Críticas de Paths
-
-### 1. HTML Script Path
-No arquivo `client/index.html`, usar caminho relativo:
-```html
-<script type="module" src="./src/main.tsx"></script>
-```
-Em vez de caminho absoluto `/src/main.tsx`
-
-### 2. Server Vite Template Path  
-No arquivo `server/vite.ts`, ajustar o replace para o caminho correto:
-```typescript
-template = template.replace(
-  `src="./src/main.tsx"`,
-  `src="./src/main.tsx?v=${nanoid()}"`,
-);
-```
-
-### 3. Usar fileURLToPath para Compatibilidade
-Sempre usar `fileURLToPath` em vez de `import.meta.dirname` para máxima compatibilidade:
-```typescript
-import { fileURLToPath } from 'node:url';
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-```
-
-## Dependências Essenciais
-
-O projeto requer estas dependências críticas:
-- `@paralleldrive/cuid2` - Para geração de IDs únicos
-- Todas as dependências do `package.json` devem estar instaladas via `npm install`
-
-## Comandos de Inicialização
-
-Para garantir funcionamento em nova instância:
-1. Copiar `.env.example` para `.env` e preencher as credenciais do banco Locaweb
-2. `npm install` - Instalar todas as dependências
-3. `npm run dev` - Executar em modo desenvolvimento
-
-## Configuração do Ambiente
-
-O projeto requer um arquivo `.env` na raiz com as seguintes variáveis:
-
-```env
-# Banco de dados Locaweb
-LOCAWEB_DB_HOST=seu_host_aqui
-LOCAWEB_DB_PORT=5432
-LOCAWEB_DB_NAME=seu_banco_aqui
-LOCAWEB_DB_USER=seu_usuario_aqui
-LOCAWEB_DB_PASSWORD=sua_senha_aqui
-
-# APIs externas
-YOUTUBE_API_KEY=sua_chave_youtube
-GOOGLE_CLIENT_ID=seu_client_id
-GOOGLE_CLIENT_SECRET=seu_client_secret
-
-# Configuração da aplicação
-BASE_URL=https://seu-replit-url.replit.dev
-WEBSOCKET=https://seu-replit-url.replit.dev
-SESSION_SECRET=sua_chave_secreta
-NODE_ENV=development
-```
-
-**IMPORTANTE**: O arquivo `.env` está no `.gitignore` e nunca deve ser commitado ao repositório por segurança.  
-
-## Estrutura de Arquivos Crítica
-
-A seguinte estrutura deve ser mantida:
-```
-/
-├── client/
-│   ├── src/
-│   │   ├── main.tsx
-│   │   ├── App.tsx
-│   │   └── ...
-│   └── index.html
-├── server/
-│   ├── index.ts
-│   └── vite.ts
-├── shared/
-├── vite.config.ts
-├── tsconfig.json
-└── package.json
-```
-
-Estas configurações garantem que o projeto funcione imediatamente em qualquer nova instância do Replit sem necessidade de correções manuais.
-
-# Deploy no Railway
-
-## Configuração do Projeto
-
-O projeto está configurado para deploy no Railway com as seguintes configurações:
-
-### Arquivos de Configuração
-- `railway.json` - Configuração do Railway com health check
-- `DEPLOY.md` - Guia completo de deploy
-
-### Banco de Dados
-O projeto usa o banco PostgreSQL da Locaweb (externo ao Railway):
-- Conexão via variáveis de ambiente LOCAWEB_DB_*
-- Migrações executadas automaticamente no startup
-- Não é necessário provisionar banco no Railway
-
-### Variáveis de Ambiente Necessárias no Railway
-```
-LOCAWEB_DB_HOST=seu_host.postgresql.dbaas.com.br
-LOCAWEB_DB_PORT=5432
-LOCAWEB_DB_NAME=seu_banco
-LOCAWEB_DB_USER=seu_usuario
-LOCAWEB_DB_PASSWORD=sua_senha
-YOUTUBE_API_KEY=sua_chave_youtube
-GOOGLE_CLIENT_ID=seu_client_id
-GOOGLE_CLIENT_SECRET=seu_client_secret
-SESSION_SECRET=sua_chave_session_secreta
-NODE_ENV=production
-BASE_URL=https://seu-app.up.railway.app
-WEBSOCKET=https://seu-app.up.railway.app
-```
-
-### Health Check
-- Endpoint: `/api/health`
-- Timeout: 100ms
-- Retorna: status, uptime, timestamp, environment
-
-### Build e Deploy
-- Build: `npm run build` (Vite frontend + esbuild backend)
-- Start: `npm start` (node dist/index.js)
-- Porta: Automática via variável PORT do Railway
-- Restart: ON_FAILURE com 10 retries
-
-## Diferenças entre Replit e Railway
-
-### Replit (Desenvolvimento)
-- Porta: 5000 (fixa)
-- Vite em modo dev com HMR
-- WebSocket para hot reload
-- Ambiente: development
-
-### Railway (Produção)
-- Porta: Dinâmica (variável PORT)
-- Frontend servido como arquivos estáticos
-- WebSocket para notificações
-- Ambiente: production
+## Deployment & Development Tools
+- **Vite**: Fast build tool and development server.
+- **ESBuild**: Production bundle optimization.
+- **TypeScript**: Static type checking.
+- **Railway**: Deployment platform with specific configurations for environment variables, health checks, and build/start commands.
