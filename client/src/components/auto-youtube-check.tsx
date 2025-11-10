@@ -58,10 +58,10 @@ export function AutoYouTubeCheck() {
         variant="outline"
         size="sm"
         onClick={() => window.location.href = '/perfil/configuracoes/apis'}
-        className="flex items-center gap-2 border-orange-300 bg-orange-50 hover:bg-orange-100 text-orange-700"
+        className="flex items-center gap-2"
       >
         <Youtube className="h-4 w-4" />
-        <span className="font-medium">Configurar APIs do YouTube</span>
+        <span>Configurar APIs</span>
       </Button>
     );
   }
@@ -70,18 +70,15 @@ export function AutoYouTubeCheck() {
     return (
       <>
         <Button
-          variant="outline"
+          variant="default"
           size="sm"
           onClick={() => setShowSyncModal(true)}
-          className="relative animate-pulse border-primary bg-primary/10 hover:bg-primary/20"
+          className="flex items-center gap-2"
         >
-          <Bell className="h-4 w-4 mr-2 text-primary" />
-          <span className="text-primary font-medium">
-            {newVideosCount} {newVideosCount === 1 ? "novo vídeo" : "novos vídeos"} disponível
+          <Bell className="h-4 w-4" />
+          <span>
+            {newVideosCount} {newVideosCount === 1 ? "novo vídeo" : "novos vídeos"}
           </span>
-          <Badge className="ml-2 bg-primary text-primary-foreground">
-            {newVideosCount}
-          </Badge>
         </Button>
 
         <YouTubeSyncModal
@@ -99,10 +96,10 @@ export function AutoYouTubeCheck() {
           variant="outline"
           size="sm"
           onClick={() => setShowSyncModal(true)}
-          className="flex items-center gap-2 border-green-300 bg-green-50 hover:bg-green-100 text-green-700"
+          className="flex items-center gap-2"
         >
           <Youtube className="h-4 w-4" />
-          <span className="font-medium">Canal sincronizado</span>
+          <span>Sincronizar YouTube</span>
         </Button>
 
         <YouTubeSyncModal
