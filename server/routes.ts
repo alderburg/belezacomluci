@@ -366,15 +366,11 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "Channel ID is required" });
       }
 
-      console.log(`🔍 Sincronizando canal: ${channelId}`);
-
       // Buscar TODOS os vídeos do canal (sem limite)
       const youtubeVideos = await youtubeService.getAllChannelVideos(channelId, 9999);
-      console.log(`📺 Total de vídeos no canal do YouTube: ${youtubeVideos.length}`);
 
       // Buscar vídeos já cadastrados
       const existingVideos = await storage.getVideos();
-      console.log(`📚 Total de vídeos no banco: ${existingVideos.length}`);
 
       // Função auxiliar para extrair ID do YouTube de uma URL
       const extractYouTubeId = (url: string): string | null => {
@@ -407,24 +403,11 @@ export function registerRoutes(app: Express): Server {
         }
       });
 
-      console.log(`🔑 IDs únicos extraídos do banco: ${existingVideoIds.size}`);
-      console.log(`🔑 Primeiros 5 IDs do banco:`, Array.from(existingVideoIds).slice(0, 5));
-      console.log(`🔑 Primeiros 5 IDs do YouTube:`, youtubeVideos.slice(0, 5).map(v => v.id));
-
       // Filtrar apenas vídeos novos
       const newVideos = youtubeVideos.filter(video => {
         const isNew = !existingVideoIds.has(video.id);
         return isNew;
       });
-
-      console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-      console.log(`📊 RESULTADO DA SINCRONIZAÇÃO`);
-      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-      console.log(`Total no YouTube: ${youtubeVideos.length}`);
-      console.log(`Já cadastrados: ${existingVideoIds.size}`);
-      console.log(`🆕 Vídeos novos: ${newVideos.length}`);
-      console.log(`Percentual sincronizado: ${((existingVideoIds.size / youtubeVideos.length) * 100).toFixed(1)}%`);
-      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
 
       res.json({
         totalChannelVideos: youtubeVideos.length,
