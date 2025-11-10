@@ -37,7 +37,7 @@ if (missingVars.length > 0) {
   throw new Error('Credenciais do banco Railway não configuradas nas Secrets');
 }
 
-console.log('🚂 Conectado ao banco de dados Railway PostgreSQL');
+console.log('🚂 Conectando ao banco de dados...');
 
 export const pool = new Pool(dbConfig);
 
