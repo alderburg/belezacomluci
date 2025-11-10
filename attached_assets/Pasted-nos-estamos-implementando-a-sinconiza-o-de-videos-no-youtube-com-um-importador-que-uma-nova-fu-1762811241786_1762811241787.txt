@@ -1,0 +1,68 @@
+nos estamos implementando  a sinconização de videos no youtube, com um importador que é 
+uma nova funcionalidade no sistema para importar vídeos automaticamente do canal do YouTube, integrada à página /admin/videos.
+
+Objetivo:
+Toda vez que a página /admin/videos for aberta, o sistema deve executar em segundo plano uma verificação automática na API do YouTube para identificar se há novos vídeos no canal que ainda não estão cadastrados no banco de dados.
+
+⚙️ Funcionalidade de verificação automática:
+
+Ao abrir a página, exibir no topo direito do box onde está o título "Gerenciar vídeos" um preloader animado com o texto:
+
+“Verificando atualizações no canal...”
+
+Após a verificação, o sistema deve exibir uma notificação visual (cor de destaque ou efeito pulsante) informando:
+
+“Foram encontrados X novos vídeos disponíveis para importação.”
+
+Esse elemento deve ser clicável, abrindo o formulário de importação.
+
+📦 Formulário de importação de vídeos:
+
+Exibir uma lista de vídeos novos vindos da API do YouTube.
+
+Para cada vídeo, importar automaticamente as seguintes informações:
+
+Título
+
+Descrição
+
+URL
+
+Thumbnail
+
+Duração
+
+Além disso, incluir campos exclusivos do sistema, que o administrador deverá preencher antes de salvar:
+
+Tipo (ex: tutorial, review, vlog, etc.)
+
+Categoria
+
+Conteúdo exclusivo (sim/não)
+
+✅ Comportamento da seleção:
+
+Permitir selecionar todos os vídeos de uma vez para aplicar os mesmos dados de tipo, categoria e exclusividade.
+
+Também permitir editar individualmente as informações de um vídeo específico, caso ele precise de configurações diferentes.
+
+Após confirmar o cadastro, os vídeos selecionados são gravados no banco de dados e passam a aparecer na listagem principal.
+
+🖥️ Resumo visual esperado:
+
+Abrir /admin/videos
+
+Sistema exibe preloader → “Verificando atualizações no canal...”
+
+Mostra notificação → “3 novos vídeos disponíveis”
+
+Usuário clica → abre modal/lista com vídeos + formulário
+
+Admin seleciona vídeos e preenche informações
+
+Clica em “Cadastrar selecionados” → grava no banco e atualiza a listagem
+
+
+
+
+ o sistema ja fez isso  acredito que esteja pronto ja  as chaves esta sendo pegado da api_settings no banco, so que o badge de  verificando se tem videos pra sincronizar ou se as apis nao estao cadastradas nao esta aparecendo em /admin/videos  aqui onde marquei na imagem. verifique para ele aparecer sempre quando verificar e ja tiver sincronizado ele dizer  que os videos ja estao sincronizados 
