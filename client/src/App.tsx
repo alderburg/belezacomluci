@@ -25,6 +25,7 @@ import PlaylistPage from "@/pages/playlist-page";
 import CheirosasPage from "@/pages/cheirosas-page";
 import AdminCheirosasPage from "@/pages/admin-cheirosas-page";
 import AdminAnalyticsPage from "@/pages/admin-analytics-page";
+import ApiSettingsPage from "@/pages/api-settings-page";
 import NotificationsPage from "@/pages/notifications-page";
 import NotificationsMobilePage from "@/pages/notifications-mobile-page";
 import NotificationSettingsPage from "@/pages/notification-settings-page";
@@ -125,7 +126,8 @@ function Router() {
       <ProtectedRoute path="/admin/categories" component={isMobile ? AdminCategoriesMobilePage : AdminPage} />
       <ProtectedRoute path="/admin/users" component={isMobile ? AdminUsersMobilePage : AdminPage} />
       <ProtectedRoute path="/admin/cheirosas" component={AdminCheirosasPage} />
-      <ProtectedRoute path="/admin/analytics" component={AdminAnalyticsPage} />
+      <Route path="/admin/analytics" component={AdminAnalyticsPage} />
+      <Route path="/perfil/configuracoes/apis" component={ApiSettingsPage} />
       <Route path="/bio" component={BioPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />

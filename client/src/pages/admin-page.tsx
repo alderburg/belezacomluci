@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Edit2, Trash2, Play, Download, Tag, Image, BarChart3, Eye, Users, Search, Filter, ChevronLeft, ChevronRight, Bell, Send } from "lucide-react";
+import { Plus, Edit, Edit2, Trash2, Play, Download, Tag, Image, BarChart3, Eye, Users, Search, Filter, ChevronLeft, ChevronRight, Bell, Send, Youtube } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -31,6 +31,7 @@ import { useAdmin } from "@/contexts/admin-context";
 import { useEffect } from "react";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { ResourceSearchSelect } from "@/components/resource-search-select";
+import { AutoYouTubeCheck } from "@/components/auto-youtube-check";
 
 const createVideoSchema = insertVideoSchema;
 const createProductSchema = insertProductSchema;
@@ -3520,10 +3521,27 @@ export default function AdminPage() {
               <TabsContent value="videos">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 mb-4">
-                      <Play className="w-5 h-5" />
-                      Gerenciar Vídeos
-                    </CardTitle>
+                    <div className="flex items-center justify-between mb-4">
+                      <CardTitle className="flex items-center gap-2">
+                        <Play className="w-5 h-5" />
+                        Gerenciar Vídeos
+                      </CardTitle>
+                      
+                      {/* Badge de Sincronização do YouTube */}
+                      {import.meta.env.VITE_YOUTUBE_API_KEY && import.meta.env.VITE_YOUTUBE_CHANNEL_ID ? (
+                        <AutoYouTubeCheck channelId={import.meta.env.VITE_YOUTUBE_CHANNEL_ID} />
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setLocation('/perfil/configuracoes/apis')}
+                          className="flex items-center gap-2 text-muted-foreground hover:text-primary"
+                        >
+                          <Youtube className="h-4 w-4" />
+                          <span>Configurar APIs do YouTube</span>
+                        </Button>
+                      )}
+                    </div>
 
                     {/* Campo de Pesquisa */}
                     <div className="relative">

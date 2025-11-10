@@ -30,6 +30,7 @@ export function AutoYouTubeCheck({ channelId }: AutoYouTubeCheckProps) {
         setHasChecked(true);
       } catch (error) {
         console.error("Erro ao verificar novos vídeos:", error);
+        setHasChecked(true); // Marca como verificado mesmo com erro
       } finally {
         setIsChecking(false);
       }
