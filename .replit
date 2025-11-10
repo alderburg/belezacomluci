@@ -73,11 +73,3 @@ waitForPort = 5000
 
 [agent]
 expertMode = true
-
-[userenv]
-
-[userenv.shared]
-RAILWAY_DB_HOST = "hopper.proxy.rlwy.net"
-RAILWAY_DB_NAME = "railway"
-RAILWAY_DB_PORT = "27395"
-RAILWAY_DB_USER = "postgres"
