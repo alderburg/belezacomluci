@@ -1,10 +1,6 @@
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
 
 // Log para debug - verificar se as variáveis estão sendo carregadas
 console.log('🔍 Verificando variáveis de ambiente Railway:');
