@@ -3,10 +3,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect, useLocation } from "wouter";
 import Sidebar from "@/components/sidebar";
-import { TopBar } from "@/components/top-bar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Youtube, Key, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Youtube, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +14,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertApiSettingsSchema } from "@shared/schema";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { z } from "zod";
 
 type ApiSettingsData = z.infer<typeof insertApiSettingsSchema>;
@@ -100,13 +100,55 @@ export default function ApiSettingsPage() {
     saveMutation.mutate(data);
   });
 
+  // Skeleton de carregamento
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex">
+        <Sidebar />
+
+        <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0 pt-32' : 'pt-16'}`}>
+          <div className="container mx-auto px-6 py-8">
+            <div className="mb-6 flex items-center gap-4">
+              <Skeleton className="h-10 w-10 rounded-md" />
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-80" />
+                <Skeleton className="h-5 w-96" />
+              </div>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-12 h-12 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-64" />
+                    <Skeleton className="h-4 w-80" />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  ))}
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar />
 
       <main className={`flex-1 transition-all duration-300 ${isMobile ? 'ml-0 pt-32' : 'pt-16'}`}>
-        <TopBar />
-        
         <div className="container mx-auto px-6 py-8">
           <div className="mb-6 flex items-center gap-4">
             <Button
@@ -139,12 +181,7 @@ export default function ApiSettingsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {isLoading ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Carregando configurações...</p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Google Client ID */}
                     <div className="space-y-2">
                       <Label htmlFor="google-client-id">
@@ -273,7 +310,6 @@ export default function ApiSettingsPage() {
                       {saveMutation.isPending ? "Salvando..." : "Salvar Configurações"}
                     </Button>
                   </form>
-                )}
               </CardContent>
             </Card>
 
