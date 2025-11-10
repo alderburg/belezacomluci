@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Loader2, Youtube, Bell, CheckCircle2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { YouTubeSyncModal } from "./youtube-sync-modal";
@@ -10,6 +11,7 @@ import { useLocation } from "wouter";
 export function AutoYouTubeCheck() {
   const [location] = useLocation();
   const [isChecking, setIsChecking] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [newVideosCount, setNewVideosCount] = useState<number | null>(null);
   const [showSyncModal, setShowSyncModal] = useState(false);
 
@@ -20,6 +22,24 @@ export function AutoYouTubeCheck() {
   const channelId = channelData?.channelId;
   const isConfigured = channelData?.configured !== false;
 
+  // Simular progresso durante verificação
+  useEffect(() => {
+    if (!isChecking) {
+      setProgress(0);
+      return;
+    }
+
+    // Simular progresso gradual
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) return 90; // Para em 90% até a resposta chegar
+        return prev + Math.random() * 15; // Incrementa de forma variável
+      });
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, [isChecking]);
+
   // Verificar sempre que a página for acessada ou quando location mudar
   useEffect(() => {
     if (!channelId || !isConfigured) return;
@@ -27,6 +47,7 @@ export function AutoYouTubeCheck() {
     const checkForNewVideos = async () => {
       try {
         setIsChecking(true);
+        setProgress(10); // Começa em 10%
         console.log('🔍 Verificando vídeos pendentes do canal:', channelId);
         
         const response = await apiRequest<{
@@ -44,6 +65,7 @@ export function AutoYouTubeCheck() {
 
         // Garantir que o número seja mantido
         if (response.newVideos !== undefined) {
+          setProgress(100); // Completa quando a resposta chegar
           setNewVideosCount(response.newVideos);
           console.log('✅ Vídeos pendentes definidos:', response.newVideos);
         }
@@ -51,7 +73,7 @@ export function AutoYouTubeCheck() {
         console.error("❌ Erro ao verificar novos vídeos:", error);
         setNewVideosCount(null);
       } finally {
-        setIsChecking(false);
+        setTimeout(() => setIsChecking(false), 300); // Pequeno delay para mostrar 100%
       }
     };
 
@@ -60,9 +82,17 @@ export function AutoYouTubeCheck() {
 
   if (channelLoading || isChecking) {
     return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <span>Verificando atualizações...</span>
+      <div className="flex flex-col gap-2 min-w-[200px]">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>Verificando atualizações...</span>
+        </div>
+        <div className="space-y-1">
+          <Progress value={progress} className="h-1.5" />
+          <p className="text-xs text-muted-foreground text-right">
+            {Math.round(progress)}%
+          </p>
+        </div>
       </div>
     );
   }
