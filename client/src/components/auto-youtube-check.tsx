@@ -27,13 +27,25 @@ export function AutoYouTubeCheck() {
     const checkForNewVideos = async () => {
       try {
         setIsChecking(true);
+        console.log('🔍 Verificando vídeos pendentes do canal:', channelId);
+        
         const response = await apiRequest<{
+          totalChannelVideos: number;
+          existingVideos: number;
           newVideos: number;
+          videos: any[];
         }>("POST", "/api/youtube/sync", { channelId });
+
+        console.log('📊 Resultado da verificação:', {
+          total: response.totalChannelVideos,
+          cadastrados: response.existingVideos,
+          pendentes: response.newVideos
+        });
 
         setNewVideosCount(response.newVideos);
       } catch (error) {
-        console.error("Erro ao verificar novos vídeos:", error);
+        console.error("❌ Erro ao verificar novos vídeos:", error);
+        setNewVideosCount(0);
       } finally {
         setIsChecking(false);
       }

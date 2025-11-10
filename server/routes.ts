@@ -414,13 +414,17 @@ export function registerRoutes(app: Express): Server {
       // Filtrar apenas vídeos novos
       const newVideos = youtubeVideos.filter(video => {
         const isNew = !existingVideoIds.has(video.id);
-        if (!isNew) {
-          console.log(`✅ Vídeo já cadastrado: ${video.id} - ${video.title}`);
-        }
         return isNew;
       });
 
-      console.log(`🆕 Vídeos novos encontrados: ${newVideos.length}`);
+      console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      console.log(`📊 RESULTADO DA SINCRONIZAÇÃO`);
+      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      console.log(`Total no YouTube: ${youtubeVideos.length}`);
+      console.log(`Já cadastrados: ${existingVideoIds.size}`);
+      console.log(`🆕 Vídeos novos: ${newVideos.length}`);
+      console.log(`Percentual sincronizado: ${((existingVideoIds.size / youtubeVideos.length) * 100).toFixed(1)}%`);
+      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
 
       res.json({
         totalChannelVideos: youtubeVideos.length,
