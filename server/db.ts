@@ -2,6 +2,17 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
+// FORÇAR LIMPEZA DE CACHE - delete variáveis antigas se existirem
+const OLD_HOSTS = ['hopper.proxy.rlwy.net'];
+if (OLD_HOSTS.includes(process.env.RAILWAY_DB_HOST || '')) {
+  console.log('⚠️ DETECTADAS CREDENCIAIS ANTIGAS - REINICIE O SERVIDOR!');
+  delete process.env.RAILWAY_DB_HOST;
+  delete process.env.RAILWAY_DB_PORT;
+  delete process.env.RAILWAY_DB_NAME;
+  delete process.env.RAILWAY_DB_USER;
+  delete process.env.RAILWAY_DB_PASSWORD;
+}
+
 // Log para debug - verificar se as variáveis estão sendo carregadas
 console.log('🔍 Verificando variáveis de ambiente Railway:');
 console.log('  RAILWAY_DB_HOST:', process.env.RAILWAY_DB_HOST ? 'definido' : 'AUSENTE');
