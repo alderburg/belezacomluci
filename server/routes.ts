@@ -351,6 +351,92 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // YouTube sync endpoints
+  app.post('/api/youtube/sync', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      const { youtubeService } = await import('./youtube-service');
+      const { channelId } = req.body;
+
+      if (!channelId) {
+        return res.status(400).json({ message: "Channel ID is required" });
+      }
+
+      const youtubeVideos = await youtubeService.getAllChannelVideos(channelId, 100);
+      const existingVideos = await storage.getVideos();
+
+      const existingUrls = new Set(existingVideos.map(v => v.videoUrl));
+      
+      const newVideos = youtubeVideos.filter(ytVideo => {
+        const url = `https://www.youtube.com/watch?v=${ytVideo.id}`;
+        return !existingUrls.has(url);
+      }).map(ytVideo => ({
+        id: ytVideo.id,
+        title: ytVideo.title,
+        description: ytVideo.description,
+        videoUrl: `https://www.youtube.com/watch?v=${ytVideo.id}`,
+        thumbnailUrl: ytVideo.thumbnailUrl,
+        duration: ytVideo.duration,
+        publishedAt: ytVideo.publishedAt,
+      }));
+
+      res.json({
+        totalChannelVideos: youtubeVideos.length,
+        existingVideos: existingVideos.length,
+        newVideos: newVideos.length,
+        videos: newVideos,
+      });
+    } catch (error) {
+      console.error('Erro ao sincronizar com YouTube:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Erro ao sincronizar com YouTube"
+      });
+    }
+  });
+
+  app.post('/api/videos/import-batch', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    try {
+      const { videos } = req.body;
+      
+      if (!Array.isArray(videos) || videos.length === 0) {
+        return res.status(400).json({ message: "Videos array is required" });
+      }
+
+      const createdVideos = [];
+      for (const videoData of videos) {
+        try {
+          const validatedData = insertVideoSchema.parse(videoData);
+          const video = await storage.createVideo(validatedData);
+          createdVideos.push(video);
+        } catch (error) {
+          console.error('Erro ao criar vídeo:', videoData.title, error);
+        }
+      }
+
+      const wsService = (global as any).notificationWS;
+      if (wsService && createdVideos.length > 0) {
+        wsService.broadcastDataUpdate('videos', 'batch-created', createdVideos);
+      }
+
+      res.status(201).json({
+        message: `${createdVideos.length} vídeos importados com sucesso`,
+        videos: createdVideos,
+      });
+    } catch (error) {
+      console.error('Erro ao importar vídeos:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Erro ao importar vídeos"
+      });
+    }
+  });
+
   app.post("/api/videos/:id/like", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });

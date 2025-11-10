@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Redirect } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { ArrowLeft, Plus, Video as VideoIcon, Edit, Trash2, Pencil, Search } from "lucide-react";
+import { ArrowLeft, Plus, Video as VideoIcon, Edit, Trash2, Pencil, Search, Youtube, RefreshCw } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useDataSync } from '@/hooks/use-data-sync';
@@ -24,6 +24,7 @@ import {
 import { useState } from "react";
 import { apiRequest } from '@/lib/queryClient';
 import { useEffect } from "react";
+import { YouTubeSyncModal } from "@/components/youtube-sync-modal";
 
 export default function AdminVideosMobilePage() {
   const { user } = useAuth();
@@ -35,6 +36,7 @@ export default function AdminVideosMobilePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeletingItem, setIsDeletingItem] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -103,7 +105,7 @@ export default function AdminVideosMobilePage() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -113,13 +115,22 @@ export default function AdminVideosMobilePage() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="text-left flex-1 ml-4">
+          <div className="text-left flex-1 ml-2">
             <h1 className="text-lg font-semibold text-foreground">Vídeos</h1>
             <p className="text-sm text-muted-foreground">
               {videos?.length || 0} vídeos cadastrados
             </p>
           </div>
-          <VideoIcon className="h-5 w-5 text-primary" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSyncModal(true)}
+            className="flex items-center gap-1 text-xs"
+            data-testid="button-open-sync"
+          >
+            <Youtube className="h-4 w-4" />
+            <span className="hidden sm:inline">Sync</span>
+          </Button>
         </div>
       </div>
 
@@ -259,6 +270,11 @@ export default function AdminVideosMobilePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <YouTubeSyncModal
+        isOpen={showSyncModal}
+        onClose={() => setShowSyncModal(false)}
+      />
 
       <MobileBottomNav />
     </div>
