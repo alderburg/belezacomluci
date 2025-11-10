@@ -365,37 +365,61 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "Channel ID is required" });
       }
 
+      console.log(`🔍 Sincronizando canal: ${channelId}`);
+
       // Buscar todos os vídeos do canal (aumentar limite para 500)
       const youtubeVideos = await youtubeService.getAllChannelVideos(channelId, 500);
+      console.log(`📺 Total de vídeos no canal do YouTube: ${youtubeVideos.length}`);
 
       // Buscar vídeos já cadastrados
       const existingVideos = await storage.getAllVideos();
+      console.log(`📚 Total de vídeos no banco: ${existingVideos.length}`);
+
+      // Função auxiliar para extrair ID do YouTube de uma URL
+      const extractYouTubeId = (url: string): string | null => {
+        if (!url) return null;
+        
+        const patterns = [
+          /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
+          /(?:youtu\.be\/)([^&\n?#\?]+)/,
+          /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
+          /(?:youtube\.com\/v\/)([^&\n?#\?]+)/,
+        ];
+        
+        for (const pattern of patterns) {
+          const match = url.match(pattern);
+          if (match && match[1]) {
+            // Limpar qualquer parâmetro adicional
+            return match[1].split('?')[0].split('&')[0].trim();
+          }
+        }
+        return null;
+      };
 
       // Criar set com IDs dos vídeos já cadastrados
-      const existingVideoIds = new Set(
-        existingVideos
-          .map(v => {
-            if (!v.videoUrl) return null;
-            
-            const patterns = [
-              /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
-              /(?:youtu\.be\/)([^&\n?#\?]+)/,
-              /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
-            ];
-            
-            for (const pattern of patterns) {
-              const match = v.videoUrl.match(pattern);
-              if (match && match[1]) {
-                return match[1].split('?')[0];
-              }
-            }
-            return null;
-          })
-          .filter(id => id !== null)
-      );
+      const existingVideoIds = new Set<string>();
+      
+      existingVideos.forEach(v => {
+        const videoId = extractYouTubeId(v.videoUrl || '');
+        if (videoId) {
+          existingVideoIds.add(videoId);
+        }
+      });
+
+      console.log(`🔑 IDs únicos extraídos do banco: ${existingVideoIds.size}`);
+      console.log(`🔑 Primeiros 5 IDs do banco:`, Array.from(existingVideoIds).slice(0, 5));
+      console.log(`🔑 Primeiros 5 IDs do YouTube:`, youtubeVideos.slice(0, 5).map(v => v.id));
 
       // Filtrar apenas vídeos novos
-      const newVideos = youtubeVideos.filter(video => !existingVideoIds.has(video.id));
+      const newVideos = youtubeVideos.filter(video => {
+        const isNew = !existingVideoIds.has(video.id);
+        if (!isNew) {
+          console.log(`✅ Vídeo já cadastrado: ${video.id} - ${video.title}`);
+        }
+        return isNew;
+      });
+
+      console.log(`🆕 Vídeos novos encontrados: ${newVideos.length}`);
 
       res.json({
         totalChannelVideos: youtubeVideos.length,
@@ -412,7 +436,7 @@ export function registerRoutes(app: Express): Server {
         })),
       });
     } catch (error) {
-      console.error('Erro ao sincronizar com YouTube:', error);
+      console.error('❌ Erro ao sincronizar com YouTube:', error);
       res.status(500).json({ 
         message: error instanceof Error ? error.message : "Failed to sync with YouTube" 
       });
