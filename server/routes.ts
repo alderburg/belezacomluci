@@ -1,4 +1,3 @@
-replit_final_file>
 import { Express } from "express";
 import { createServer, Server } from "http";
 import { setupAuth } from "./auth";
