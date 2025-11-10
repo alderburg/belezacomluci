@@ -169,7 +169,6 @@ export function setupAuth(app: Express) {
           // Don't fail login if tracking fails
         }
 
-        console.log('✅ Login bem-sucedido para:', user.email);
         res.status(200).json(user);
       });
     })(req, res, next);

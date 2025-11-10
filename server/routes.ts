@@ -2249,8 +2249,6 @@ export function registerRoutes(app: Express): Server {
         return res.status(500).json({ message: "Erro ao obter credenciais da API" });
       }
 
-      console.log('Buscando dados do YouTube para vídeo:', videoId);
-
       const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${videoId}&key=${apiKey}`;
 
       const response = await new Promise<string>((resolve, reject) => {
@@ -2296,7 +2294,6 @@ export function registerRoutes(app: Express): Server {
         publishedAt: video.snippet.publishedAt
       };
 
-      console.log('Dados do YouTube recuperados com sucesso:', result.title, isLive ? '(LIVE)' : '');
       res.json(result);
 
     } catch (error) {

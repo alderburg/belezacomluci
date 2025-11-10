@@ -1780,8 +1780,6 @@ export default function AdminPage() {
     }
 
     try {
-      console.log('Buscando dados do YouTube para vídeo:', videoId);
-
       // Primeiro, detectar o tipo baseado na URL
       const isPlaylist = isPlaylistUrl(url);
 

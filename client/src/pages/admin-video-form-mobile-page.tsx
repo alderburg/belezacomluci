@@ -221,8 +221,6 @@ export default function AdminVideoFormMobilePage() {
     }
 
     try {
-      console.log('Buscando dados do YouTube para vídeo:', videoId);
-
       // Detectar o tipo baseado na URL
       const isPlaylist = isPlaylistUrl(url);
 
