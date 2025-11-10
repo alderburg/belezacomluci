@@ -116,7 +116,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
 
   const importMutation = useMutation({
     mutationFn: async () => {
-      if (!syncedVideos || syncedVideos.length === 0) {
+      if (!syncedVideos || !Array.isArray(syncedVideos) || syncedVideos.length === 0) {
         throw new Error("Nenhum vídeo para importar");
       }
       
@@ -164,7 +164,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
   };
 
   const toggleAll = () => {
-    if (!syncedVideos || syncedVideos.length === 0) return;
+    if (!syncedVideos || !Array.isArray(syncedVideos) || syncedVideos.length === 0) return;
     
     if (selectedVideos.size === syncedVideos.length) {
       setSelectedVideos(new Set());
@@ -202,7 +202,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
             {isLoadingChannelId || (isSyncing && !syncComplete)
               ? "Aguarde enquanto buscamos os vídeos..."
               : syncComplete
-              ? `${syncedVideos?.length || 0} vídeos disponíveis para importação`
+              ? `${Array.isArray(syncedVideos) ? syncedVideos.length : 0} vídeos disponíveis para importação`
               : "Sincronizando com o canal configurado"}
           </DialogDescription>
         </DialogHeader>
@@ -227,7 +227,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
           </div>
         ) : syncComplete ? (
           <div className="flex-1 flex flex-col min-h-0 space-y-4 py-4">
-            {syncedVideos && syncedVideos.length > 0 && (
+            {syncedVideos && Array.isArray(syncedVideos) && syncedVideos.length > 0 && (
               <>
                 <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
                   <div className="space-y-2">
@@ -275,17 +275,17 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
 
                   <div className="flex items-center justify-between pt-2 border-t">
                     <span className="text-sm font-medium">
-                      {selectedVideos.size} de {syncedVideos?.length || 0} vídeos selecionados
+                      {selectedVideos.size} de {Array.isArray(syncedVideos) ? syncedVideos.length : 0} vídeos selecionados
                     </span>
                     <Button variant="outline" size="sm" onClick={toggleAll} data-testid="button-toggle-all">
-                      {selectedVideos.size === (syncedVideos?.length || 0) ? "Desmarcar todos" : "Selecionar todos"}
+                      {selectedVideos.size === (Array.isArray(syncedVideos) ? syncedVideos.length : 0) ? "Desmarcar todos" : "Selecionar todos"}
                     </Button>
                   </div>
                 </div>
 
                 <ScrollArea className="flex-1 -mx-6 px-6">
                   <div className="space-y-2">
-                    {syncedVideos.map((video) => (
+                    {Array.isArray(syncedVideos) && syncedVideos.map((video) => (
                       <div
                         key={video.id}
                         className={`flex gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
@@ -324,7 +324,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
               </>
             )}
 
-            {(!syncedVideos || syncedVideos.length === 0) && (
+            {(!syncedVideos || !Array.isArray(syncedVideos) || syncedVideos.length === 0) && (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <CheckCircle2 className="h-12 w-12 text-primary mb-4" />
                 <p className="text-lg font-medium">Tudo sincronizado!</p>
@@ -340,7 +340,7 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
           <Button variant="outline" onClick={handleClose} data-testid="button-cancel">
             Cancelar
           </Button>
-          {syncComplete && syncedVideos && syncedVideos.length > 0 && (
+          {syncComplete && syncedVideos && Array.isArray(syncedVideos) && syncedVideos.length > 0 && (
             <Button
               onClick={() => importMutation.mutate()}
               disabled={selectedVideos.size === 0 || importMutation.isPending}
