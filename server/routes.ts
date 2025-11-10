@@ -1,6 +1,6 @@
 replit_final_file>
-import type { Express } from "express";
-import { createServer, type Server } from "http";
+import { Express } from "express";
+import { createServer, Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import jwt from 'jsonwebtoken';
