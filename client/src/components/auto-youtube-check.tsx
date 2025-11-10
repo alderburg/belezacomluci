@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Youtube, Bell } from "lucide-react";
+import { Loader2, Youtube, Bell, CheckCircle2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { YouTubeSyncModal } from "./youtube-sync-modal";
 import { useQuery } from "@tanstack/react-query";
@@ -98,20 +98,15 @@ export function AutoYouTubeCheck() {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowSyncModal(true)}
-          className="flex items-center gap-2"
-        >
-          <Youtube className="h-4 w-4" />
-          <span>Sincronizar YouTube</span>
-        </Button>
-        <span className="text-xs text-muted-foreground">
-          Tudo sincronizado ✓
-        </span>
-      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setShowSyncModal(true)}
+        className="flex items-center gap-2"
+      >
+        <CheckCircle2 className="h-4 w-4 text-green-600" />
+        <span>Sincronizado</span>
+      </Button>
 
       <YouTubeSyncModal
         isOpen={showSyncModal}
