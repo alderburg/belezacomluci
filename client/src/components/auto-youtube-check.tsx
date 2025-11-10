@@ -82,19 +82,43 @@ export function AutoYouTubeCheck() {
     );
   }
 
+  if (hasChecked && newVideosCount === 0) {
+    return (
+      <>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowSyncModal(true)}
+          className="flex items-center gap-2 border-green-300 bg-green-50 hover:bg-green-100 text-green-700"
+        >
+          <Youtube className="h-4 w-4" />
+          <span className="font-medium">Canal sincronizado</span>
+        </Button>
+
+        <YouTubeSyncModal
+          isOpen={showSyncModal}
+          onClose={() => setShowSyncModal(false)}
+        />
+      </>
+    );
+  }
+
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() => setShowSyncModal(true)}
-      className="flex items-center gap-1"
-    >
-      <Youtube className="h-4 w-4" />
-      <span>Sincronizar YouTube</span>
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setShowSyncModal(true)}
+        className="flex items-center gap-2"
+      >
+        <Youtube className="h-4 w-4" />
+        <span>Sincronizar YouTube</span>
+      </Button>
+      
       <YouTubeSyncModal
         isOpen={showSyncModal}
         onClose={() => setShowSyncModal(false)}
       />
-    </Button>
+    </>
   );
 }

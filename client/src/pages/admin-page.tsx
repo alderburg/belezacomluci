@@ -3521,13 +3521,13 @@ export default function AdminPage() {
               <TabsContent value="videos">
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between mb-4">
-                      <CardTitle className="flex items-center gap-2">
-                        <Play className="w-5 h-5" />
-                        Gerenciar Vídeos
-                      </CardTitle>
-                      
-                      {/* Badge de Sincronização do YouTube */}
+                    <CardTitle className="flex items-center gap-2 mb-4">
+                      <Play className="w-5 h-5" />
+                      Gerenciar Vídeos
+                    </CardTitle>
+                    
+                    {/* Badge de Sincronização do YouTube */}
+                    <div className="flex justify-end -mt-2 mb-4">
                       <AutoYouTubeCheck />
                     </div>
 
