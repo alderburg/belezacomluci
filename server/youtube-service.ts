@@ -101,12 +101,13 @@ export class YouTubeService {
     const videos: YouTubeVideo[] = [];
     let nextPageToken: string | null = null;
     const apiKey = await this.getApiKey();
+    const pageSize = 50; // Máximo permitido pela API do YouTube por requisição
 
     try {
       do {
         const url = nextPageToken
-          ? `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${maxResults}&pageToken=${nextPageToken}&key=${apiKey}`
-          : `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${maxResults}&key=${apiKey}`;
+          ? `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${pageSize}&pageToken=${nextPageToken}&key=${apiKey}`
+          : `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${pageSize}&key=${apiKey}`;
 
         const data = await this.makeRequest(url);
 
@@ -135,7 +136,10 @@ export class YouTubeService {
         }
 
         nextPageToken = data.nextPageToken || null;
-      } while (nextPageToken && videos.length < maxResults);
+        
+        // Continuar buscando até não ter mais páginas OU até atingir o maxResults (se especificado e não for o padrão)
+        // Se maxResults for muito alto (500+), buscar todos os vídeos
+      } while (nextPageToken && (maxResults >= 500 || videos.length < maxResults));
 
       return videos;
     } catch (error) {
@@ -143,10 +147,13 @@ export class YouTubeService {
     }
   }
 
-  async getAllChannelVideos(channelId: string, maxResults: number = 50): Promise<YouTubeVideo[]> {
+  async getAllChannelVideos(channelId: string, maxResults: number = 1000): Promise<YouTubeVideo[]> {
     try {
+      console.log(`🔍 Buscando vídeos do canal ${channelId} (máximo: ${maxResults >= 1000 ? 'TODOS' : maxResults})...`);
       const uploadsPlaylistId = await this.getChannelUploadsPlaylist(channelId);
-      return await this.getPlaylistVideos(uploadsPlaylistId, maxResults);
+      const videos = await this.getPlaylistVideos(uploadsPlaylistId, maxResults);
+      console.log(`✅ Total de vídeos encontrados: ${videos.length}`);
+      return videos;
     } catch (error) {
       throw new Error(`Erro ao buscar vídeos do canal: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     }

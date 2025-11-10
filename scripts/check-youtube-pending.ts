@@ -18,9 +18,9 @@ async function checkPendingVideos() {
 
     console.log(`📺 Channel ID: ${channelId}\n`);
 
-    // Buscar todos os vídeos do YouTube
-    console.log('⏳ Buscando vídeos do YouTube...');
-    const youtubeVideos = await youtubeService.getAllChannelVideos(channelId, 500);
+    // Buscar TODOS os vídeos do YouTube (sem limite)
+    console.log('⏳ Buscando TODOS os vídeos do YouTube...');
+    const youtubeVideos = await youtubeService.getAllChannelVideos(channelId, 9999);
     console.log(`✅ Total de vídeos no canal: ${youtubeVideos.length}\n`);
 
     // Buscar vídeos já cadastrados no sistema

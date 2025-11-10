@@ -368,8 +368,8 @@ export function registerRoutes(app: Express): Server {
 
       console.log(`🔍 Sincronizando canal: ${channelId}`);
 
-      // Buscar todos os vídeos do canal (aumentar limite para 500)
-      const youtubeVideos = await youtubeService.getAllChannelVideos(channelId, 500);
+      // Buscar TODOS os vídeos do canal (sem limite)
+      const youtubeVideos = await youtubeService.getAllChannelVideos(channelId, 9999);
       console.log(`📺 Total de vídeos no canal do YouTube: ${youtubeVideos.length}`);
 
       // Buscar vídeos já cadastrados
