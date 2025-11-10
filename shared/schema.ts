@@ -283,7 +283,7 @@ export const notificationSettings = pgTable("notification_settings", {
 export const session = pgTable("session", {
   sid: varchar("sid").primaryKey(),
   sess: json("sess").notNull(),
-  expire: timestamp("expire").notNull(),
+  expire: timestamp("expire", { precision: 6, mode: 'date' }).notNull(),
 });
 
 export const apiSettings = pgTable("api_settings", {
