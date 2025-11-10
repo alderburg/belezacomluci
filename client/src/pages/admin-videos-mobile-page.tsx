@@ -121,7 +121,7 @@ export default function AdminVideosMobilePage() {
               {videos?.length || 0} vídeos cadastrados
             </p>
           </div>
-          <AutoYouTubeCheck channelId={import.meta.env.VITE_YOUTUBE_CHANNEL_ID || ""} />
+          <AutoYouTubeCheck />
         </div>
       </div>
 

@@ -31,13 +31,12 @@ LOCAWEB_DB_USER=seu_usuario_aqui
 LOCAWEB_DB_PASSWORD=sua_senha_aqui
 ```
 
-#### APIs e Autenticação
+#### Autenticação
 ```
-YOUTUBE_API_KEY=sua_chave_youtube_aqui
-GOOGLE_CLIENT_ID=seu_google_client_id_aqui
-GOOGLE_CLIENT_SECRET=seu_google_client_secret_aqui
 SESSION_SECRET=sua_chave_secreta_session_aqui
 ```
+
+**Nota:** As credenciais do Google/YouTube (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, YOUTUBE_API_KEY, YOUTUBE_CHANNEL_ID) agora são configuradas através da interface de administração em `/perfil/configuracoes/apis` e armazenadas no banco de dados.
 
 #### Configuração do Ambiente
 ```

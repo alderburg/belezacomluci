@@ -5,19 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Youtube, Bell } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { YouTubeSyncModal } from "./youtube-sync-modal";
+import { useQuery } from "@tanstack/react-query";
 
-interface AutoYouTubeCheckProps {
-  channelId: string;
-}
-
-export function AutoYouTubeCheck({ channelId }: AutoYouTubeCheckProps) {
-  const [isChecking, setIsChecking] = useState(true);
+export function AutoYouTubeCheck() {
+  const [isChecking, setIsChecking] = useState(false);
   const [newVideosCount, setNewVideosCount] = useState(0);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [hasChecked, setHasChecked] = useState(false);
 
+  const { data: channelData, isLoading: channelLoading } = useQuery<{ channelId: string | null; configured?: boolean }>({
+    queryKey: ["/api/youtube-channel-id"],
+  });
+
+  const channelId = channelData?.channelId;
+  const isConfigured = channelData?.configured !== false;
+
   useEffect(() => {
-    if (!channelId || hasChecked) return;
+    if (!channelId || hasChecked || !isConfigured) return;
 
     const checkForNewVideos = async () => {
       try {
@@ -30,22 +34,26 @@ export function AutoYouTubeCheck({ channelId }: AutoYouTubeCheckProps) {
         setHasChecked(true);
       } catch (error) {
         console.error("Erro ao verificar novos vídeos:", error);
-        setHasChecked(true); // Marca como verificado mesmo com erro
+        setHasChecked(true);
       } finally {
         setIsChecking(false);
       }
     };
 
     checkForNewVideos();
-  }, [channelId, hasChecked]);
+  }, [channelId, hasChecked, isConfigured]);
 
-  if (isChecking) {
+  if (channelLoading || isChecking) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
         <span>Verificando atualizações no canal...</span>
       </div>
     );
+  }
+
+  if (!isConfigured || !channelId) {
+    return null;
   }
 
   if (newVideosCount > 0) {

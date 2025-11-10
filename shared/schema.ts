@@ -946,6 +946,11 @@ export const insertApiSettingsSchema = createInsertSchema(apiSettings).omit({
   id: true,
   createdAt: true,
   updatedAt: true
+}).extend({
+  googleClientId: z.string().min(1, "Google Client ID é obrigatório"),
+  googleClientSecret: z.string().min(1, "Google Client Secret é obrigatório"),
+  youtubeApiKey: z.string().min(1, "YouTube API Key é obrigatória"),
+  youtubeChannelId: z.string().min(1, "YouTube Channel ID é obrigatório"),
 });
 
 // ========== GAMIFICATION INSERT SCHEMAS ==========

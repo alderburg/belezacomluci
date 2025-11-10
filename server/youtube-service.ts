@@ -1,7 +1,5 @@
 import https from 'https';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { getYoutubeApiKey, ApiCredentialsError } from './lib/apiSettings';
 
 interface YouTubeVideo {
   id: string;
@@ -19,12 +17,14 @@ interface YouTubeChannel {
 }
 
 export class YouTubeService {
-  private apiKey: string;
-
-  constructor() {
-    this.apiKey = process.env.YOUTUBE_API_KEY || '';
-    if (!this.apiKey) {
-      console.warn('⚠️ YOUTUBE_API_KEY não configurado');
+  private async getApiKey(): Promise<string> {
+    try {
+      return await getYoutubeApiKey();
+    } catch (error) {
+      if (error instanceof ApiCredentialsError) {
+        throw error;
+      }
+      throw new Error('Erro ao obter credenciais da API do YouTube');
     }
   }
 
@@ -68,7 +68,8 @@ export class YouTubeService {
   }
 
   async getChannelId(channelHandle: string): Promise<string> {
-    const url = `https://www.googleapis.com/youtube/v3/channels?part=id,snippet&forHandle=${encodeURIComponent(channelHandle)}&key=${this.apiKey}`;
+    const apiKey = await this.getApiKey();
+    const url = `https://www.googleapis.com/youtube/v3/channels?part=id,snippet&forHandle=${encodeURIComponent(channelHandle)}&key=${apiKey}`;
     
     try {
       const data = await this.makeRequest(url);
@@ -82,7 +83,8 @@ export class YouTubeService {
   }
 
   async getChannelUploadsPlaylist(channelId: string): Promise<string> {
-    const url = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${this.apiKey}`;
+    const apiKey = await this.getApiKey();
+    const url = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`;
     
     try {
       const data = await this.makeRequest(url);
@@ -98,12 +100,13 @@ export class YouTubeService {
   async getPlaylistVideos(playlistId: string, maxResults: number = 50): Promise<YouTubeVideo[]> {
     const videos: YouTubeVideo[] = [];
     let nextPageToken: string | null = null;
+    const apiKey = await this.getApiKey();
 
     try {
       do {
         const url = nextPageToken
-          ? `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${maxResults}&pageToken=${nextPageToken}&key=${this.apiKey}`
-          : `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${maxResults}&key=${this.apiKey}`;
+          ? `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${maxResults}&pageToken=${nextPageToken}&key=${apiKey}`
+          : `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${maxResults}&key=${apiKey}`;
 
         const data = await this.makeRequest(url);
 
@@ -113,7 +116,7 @@ export class YouTubeService {
             .filter((id: string) => id);
 
           if (videoIds.length > 0) {
-            const videoDetailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoIds.join(',')}&key=${this.apiKey}`;
+            const videoDetailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoIds.join(',')}&key=${apiKey}`;
             const videoDetails = await this.makeRequest(videoDetailsUrl);
 
             if (videoDetails.items) {
@@ -150,7 +153,8 @@ export class YouTubeService {
   }
 
   async getVideoDetails(videoId: string): Promise<YouTubeVideo | null> {
-    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoId}&key=${this.apiKey}`;
+    const apiKey = await this.getApiKey();
+    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoId}&key=${apiKey}`;
     
     try {
       const data = await this.makeRequest(url);

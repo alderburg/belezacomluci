@@ -12,13 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { insertApiSettingsSchema } from "@shared/schema";
+import type { z } from "zod";
 
-interface ApiSettingsData {
-  googleClientId: string;
-  googleClientSecret: string;
-  youtubeApiKey: string;
-  youtubeChannelId: string;
-}
+type ApiSettingsData = z.infer<typeof insertApiSettingsSchema>;
 
 export default function ApiSettingsPage() {
   const { user } = useAuth();
@@ -26,13 +25,6 @@ export default function ApiSettingsPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const [formData, setFormData] = useState<ApiSettingsData>({
-    googleClientId: "",
-    googleClientSecret: "",
-    youtubeApiKey: "",
-    youtubeChannelId: "",
-  });
 
   const [showSecrets, setShowSecrets] = useState({
     googleClientId: false,
@@ -45,16 +37,28 @@ export default function ApiSettingsPage() {
     enabled: !!user?.isAdmin,
   });
 
+  const form = useForm<ApiSettingsData>({
+    resolver: zodResolver(insertApiSettingsSchema),
+    defaultValues: {
+      googleClientId: "",
+      googleClientSecret: "",
+      youtubeApiKey: "",
+      youtubeChannelId: "",
+      userId: user?.id || "",
+    },
+  });
+
   useEffect(() => {
     if (settings) {
-      setFormData({
+      form.reset({
         googleClientId: settings.googleClientId || "",
         googleClientSecret: settings.googleClientSecret || "",
         youtubeApiKey: settings.youtubeApiKey || "",
         youtubeChannelId: settings.youtubeChannelId || "",
+        userId: settings.userId || user?.id || "",
       });
     }
-  }, [settings]);
+  }, [settings, form, user]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: ApiSettingsData) => {
@@ -66,7 +70,8 @@ export default function ApiSettingsPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save API settings");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save API settings");
       }
 
       return response.json();
@@ -78,10 +83,10 @@ export default function ApiSettingsPage() {
         description: "As configurações de API foram atualizadas com sucesso.",
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Erro",
-        description: "Não foi possível salvar as configurações. Tente novamente.",
+        description: error.message || "Não foi possível salvar as configurações. Tente novamente.",
         variant: "destructive",
       });
     },
@@ -91,10 +96,9 @@ export default function ApiSettingsPage() {
     return <Redirect to="/" />;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveMutation.mutate(formData);
-  };
+  const handleSubmit = form.handleSubmit((data) => {
+    saveMutation.mutate(data);
+  });
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -150,10 +154,10 @@ export default function ApiSettingsPage() {
                         <Input
                           id="google-client-id"
                           type={showSecrets.googleClientId ? "text" : "password"}
-                          value={formData.googleClientId}
-                          onChange={(e) => setFormData({ ...formData, googleClientId: e.target.value })}
+                          {...form.register("googleClientId")}
                           placeholder="Digite o Google Client ID"
                           className="pr-10"
+                          data-testid="input-google-client-id"
                         />
                         <button
                           type="button"
@@ -163,6 +167,9 @@ export default function ApiSettingsPage() {
                           {showSecrets.googleClientId ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
+                      {form.formState.errors.googleClientId && (
+                        <p className="text-sm text-destructive">{form.formState.errors.googleClientId.message}</p>
+                      )}
                     </div>
 
                     {/* Google Client Secret */}
@@ -174,10 +181,10 @@ export default function ApiSettingsPage() {
                         <Input
                           id="google-client-secret"
                           type={showSecrets.googleClientSecret ? "text" : "password"}
-                          value={formData.googleClientSecret}
-                          onChange={(e) => setFormData({ ...formData, googleClientSecret: e.target.value })}
+                          {...form.register("googleClientSecret")}
                           placeholder="Digite o Google Client Secret"
                           className="pr-10"
+                          data-testid="input-google-client-secret"
                         />
                         <button
                           type="button"
@@ -187,6 +194,9 @@ export default function ApiSettingsPage() {
                           {showSecrets.googleClientSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
+                      {form.formState.errors.googleClientSecret && (
+                        <p className="text-sm text-destructive">{form.formState.errors.googleClientSecret.message}</p>
+                      )}
                     </div>
 
                     {/* YouTube API Key */}
@@ -198,10 +208,10 @@ export default function ApiSettingsPage() {
                         <Input
                           id="youtube-api-key"
                           type={showSecrets.youtubeApiKey ? "text" : "password"}
-                          value={formData.youtubeApiKey}
-                          onChange={(e) => setFormData({ ...formData, youtubeApiKey: e.target.value })}
+                          {...form.register("youtubeApiKey")}
                           placeholder="Digite a YouTube API Key"
                           className="pr-10"
+                          data-testid="input-youtube-api-key"
                         />
                         <button
                           type="button"
@@ -211,6 +221,9 @@ export default function ApiSettingsPage() {
                           {showSecrets.youtubeApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
+                      {form.formState.errors.youtubeApiKey && (
+                        <p className="text-sm text-destructive">{form.formState.errors.youtubeApiKey.message}</p>
+                      )}
                     </div>
 
                     {/* YouTube Channel ID */}
@@ -221,10 +234,13 @@ export default function ApiSettingsPage() {
                       <Input
                         id="youtube-channel-id"
                         type="text"
-                        value={formData.youtubeChannelId}
-                        onChange={(e) => setFormData({ ...formData, youtubeChannelId: e.target.value })}
+                        {...form.register("youtubeChannelId")}
                         placeholder="Digite o YouTube Channel ID"
+                        data-testid="input-youtube-channel-id"
                       />
+                      {form.formState.errors.youtubeChannelId && (
+                        <p className="text-sm text-destructive">{form.formState.errors.youtubeChannelId.message}</p>
+                      )}
                     </div>
 
                     {/* Instruções */}

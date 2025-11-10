@@ -86,11 +86,6 @@ LOCAWEB_DB_NAME=seu_banco
 LOCAWEB_DB_USER=seu_usuario
 LOCAWEB_DB_PASSWORD=sua_senha
 
-# APIs
-YOUTUBE_API_KEY=sua_chave_youtube
-GOOGLE_CLIENT_ID=seu_client_id
-GOOGLE_CLIENT_SECRET=seu_client_secret
-
 # Configuração
 SESSION_SECRET=sua_chave_secreta
 NODE_ENV=development

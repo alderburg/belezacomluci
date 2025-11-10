@@ -3528,19 +3528,7 @@ export default function AdminPage() {
                       </CardTitle>
                       
                       {/* Badge de Sincronização do YouTube */}
-                      {import.meta.env.VITE_YOUTUBE_API_KEY && import.meta.env.VITE_YOUTUBE_CHANNEL_ID ? (
-                        <AutoYouTubeCheck channelId={import.meta.env.VITE_YOUTUBE_CHANNEL_ID} />
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setLocation('/perfil/configuracoes/apis')}
-                          className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-                        >
-                          <Youtube className="h-4 w-4" />
-                          <span>Configurar APIs do YouTube</span>
-                        </Button>
-                      )}
+                      <AutoYouTubeCheck />
                     </div>
 
                     {/* Campo de Pesquisa */}

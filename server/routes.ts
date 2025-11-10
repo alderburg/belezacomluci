@@ -2014,11 +2014,16 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/youtube/playlist/:playlistId", async (req, res) => {
     try {
       const playlistId = req.params.playlistId;
-      const apiKey = process.env.YOUTUBE_API_KEY;
-
-      if (!apiKey) {
-        console.error('YouTube API Key não encontrada');
-        return res.status(500).json({ message: "YouTube API Key not configured" });
+      const { getYoutubeApiKey, ApiCredentialsError } = await import('./lib/apiSettings');
+      
+      let apiKey: string;
+      try {
+        apiKey = await getYoutubeApiKey();
+      } catch (error) {
+        if (error instanceof ApiCredentialsError) {
+          return res.status(503).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Erro ao obter credenciais da API" });
       }
 
       // Buscar informações da playlist (título, descrição, etc)
@@ -2137,11 +2142,16 @@ export function registerRoutes(app: Express): Server {
       // Remove qualquer caractere especial ou espaço
       videoId = videoId.trim();
 
-      const apiKey = process.env.YOUTUBE_API_KEY;
-
-      if (!apiKey) {
-        console.error('YouTube API Key não encontrada');
-        return res.status(500).json({ message: "YouTube API Key not configured" });
+      const { getYoutubeApiKey, ApiCredentialsError } = await import('./lib/apiSettings');
+      
+      let apiKey: string;
+      try {
+        apiKey = await getYoutubeApiKey();
+      } catch (error) {
+        if (error instanceof ApiCredentialsError) {
+          return res.status(503).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Erro ao obter credenciais da API" });
       }
 
       console.log('Buscando dados do YouTube para vídeo:', videoId);
@@ -2663,6 +2673,104 @@ export function registerRoutes(app: Express): Server {
       res.json(settings);
     } catch (error) {
       console.error("Error saving notification settings:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // ========== API SETTINGS ENDPOINTS ==========
+  
+  // Get API settings (admin only)
+  app.get("/api/api-settings", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    if (!req.user!.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    try {
+      const settings = await db.select().from(apiSettings).limit(1);
+      
+      if (!settings || settings.length === 0) {
+        return res.json({
+          googleClientId: "",
+          googleClientSecret: "",
+          youtubeApiKey: "",
+          youtubeChannelId: "",
+        });
+      }
+
+      res.json(settings[0]);
+    } catch (error) {
+      console.error("Error fetching API settings:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Save API settings (admin only)
+  app.put("/api/api-settings", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    if (!req.user!.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    try {
+      const validatedData = insertApiSettingsSchema.parse(req.body);
+      const { bustApiCredentialsCache } = await import('./lib/apiSettings');
+      
+      const existingSettings = await db.select().from(apiSettings).limit(1);
+      
+      if (existingSettings && existingSettings.length > 0) {
+        await db.update(apiSettings)
+          .set({
+            ...validatedData,
+            updatedAt: new Date(),
+          })
+          .where(eq(apiSettings.id, existingSettings[0].id));
+      } else {
+        await db.insert(apiSettings).values({
+          ...validatedData,
+          userId: req.user!.id,
+        });
+      }
+
+      bustApiCredentialsCache();
+
+      res.json({ success: true, message: "API settings saved successfully" });
+    } catch (error: any) {
+      console.error("Error saving API settings:", error);
+      
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          error: "Validação falhou", 
+          details: error.errors 
+        });
+      }
+      
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Get YouTube Channel ID (público - necessário para sincronização automática)
+  app.get("/api/youtube-channel-id", async (req, res) => {
+    try {
+      const { getYoutubeChannelId, ApiCredentialsError } = await import('./lib/apiSettings');
+      
+      try {
+        const channelId = await getYoutubeChannelId();
+        res.json({ channelId });
+      } catch (error) {
+        if (error instanceof ApiCredentialsError) {
+          return res.json({ channelId: null, configured: false });
+        }
+        throw error;
+      }
+    } catch (error) {
+      console.error("Error fetching YouTube channel ID:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });
