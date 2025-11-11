@@ -447,16 +447,7 @@ export function YouTubeSyncContent({
         </>
       )}
       
-      {/* Status inline para modo inline */}
-      {mode === "inline" && !isLoading && syncComplete && (
-        <div className="bg-muted/50 rounded-lg p-3 text-center">
-          <p className="text-sm font-medium text-foreground">
-            {syncedVideos.length > 0 
-              ? `${syncedVideos.length} vídeos disponíveis para importação`
-              : "Todos os vídeos já estão sincronizados"}
-          </p>
-        </div>
-      )}
+      
 
       {isLoading ? (
         <div className="space-y-4 py-12 text-center">
