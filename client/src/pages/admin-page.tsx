@@ -3706,7 +3706,7 @@ export default function AdminPage() {
                     )}
 
                     {/* Controles de Paginação */}
-                    {!videosLoading && filteredAndPaginatedVideos.items.length > 0 && (
+                    {!showSyncContent && !videosLoading && filteredAndPaginatedVideos.items.length > 0 && (
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6 pt-4 border-t">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                           <div className="flex items-center gap-2">
