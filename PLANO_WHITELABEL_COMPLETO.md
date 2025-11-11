@@ -2,14 +2,16 @@
 
 ## 📋 Índice
 1. [Visão Geral](#visão-geral)
-2. [Fase 1: Fundação do Banco de Dados](#fase-1-fundação-do-banco-de-dados)
-3. [Fase 2: Sistema de Autenticação Multi-Tenant](#fase-2-sistema-de-autenticação-multi-tenant)
-4. [Fase 3: Refatoração do Backend](#fase-3-refatoração-do-backend)
-5. [Fase 4: Atualização do Frontend](#fase-4-atualização-do-frontend)
-6. [Fase 5: Sistema de Domínios](#fase-5-sistema-de-domínios)
-7. [Fase 6: Features Específicas](#fase-6-features-específicas)
-8. [Fase 7: Testes e Deploy](#fase-7-testes-e-deploy)
-9. [Checklist Geral](#checklist-geral)
+2. [Fluxo de Cadastro e Landing Page](#fluxo-de-cadastro-e-landing-page)
+3. [Fase 0: Landing Page e Cadastro Centralizado](#fase-0-landing-page-e-cadastro-centralizado)
+4. [Fase 1: Fundação do Banco de Dados](#fase-1-fundação-do-banco-de-dados)
+5. [Fase 2: Sistema de Autenticação Multi-Tenant](#fase-2-sistema-de-autenticação-multi-tenant)
+6. [Fase 3: Refatoração do Backend](#fase-3-refatoração-do-backend)
+7. [Fase 4: Atualização do Frontend](#fase-4-atualização-do-frontend)
+8. [Fase 5: Sistema de Domínios](#fase-5-sistema-de-domínios)
+9. [Fase 6: Features Específicas](#fase-6-features-específicas)
+10. [Fase 7: Testes e Deploy](#fase-7-testes-e-deploy)
+11. [Checklist Geral](#checklist-geral)
 
 ---
 
@@ -31,15 +33,85 @@
 ### Estrutura de Domínios
 ```
 Domínio Principal: minhainfluencer.com
+├── Landing Page & Cadastro: minhainfluencer.com
+│   ├── / (página inicial)
+│   ├── /cadastro (criar conta + escolher subdomínio)
+│   ├── /login (redireciona para subdomínio)
+│   └── /sobre, /precos, etc.
+│
 ├── Subdomínios: *.minhainfluencer.com
-│   ├── belezacomluci.minhainfluencer.com
-│   ├── mariabeauty.minhainfluencer.com
-│   └── joaofit.minhainfluencer.com
+│   ├── luci.minhainfluencer.com → App da Luci
+│   ├── maria.minhainfluencer.com → App da Maria
+│   └── joao.minhainfluencer.com → App do João
 │
 └── Domínios Customizados (opcional):
     ├── belezacomluci.com.br → CNAME → proxy
     └── mariabeauty.com → CNAME → proxy
 ```
+
+---
+
+## Fluxo de Cadastro e Landing Page
+
+### 🎯 Como Funciona o Cadastro Centralizado
+
+**Passo 1: Usuário acessa o site principal**
+```
+https://minhainfluencer.com
+```
+- Landing page com informações sobre a plataforma
+- Botão "Criar Minha Conta"
+
+**Passo 2: Página de cadastro**
+```
+https://minhainfluencer.com/cadastro
+```
+- Formulário pede:
+  - ✅ Nome completo
+  - ✅ Email
+  - ✅ Senha
+  - ✅ **Nome do subdomínio** (ex: "luci")
+  - ✅ Nome da marca/negócio (ex: "Beleza com Luci")
+
+**Passo 3: Sistema valida o subdomínio**
+- Verifica se "luci" está disponível
+- Mostra preview: `luci.minhainfluencer.com`
+- Valida se não tem caracteres inválidos
+
+**Passo 4: Sistema cria o tenant**
+- Cria registro em `tenants` com subdomínio "luci"
+- Cria o usuário
+- Vincula usuário como "owner" do tenant
+- Cria subdomínio automaticamente
+
+**Passo 5: Redirecionamento automático**
+```
+Redireciona para: https://luci.minhainfluencer.com
+```
+- Usuário já está logado
+- Cai direto no dashboard do seu espaço
+- Pronto para configurar!
+
+### 🏗️ Estrutura Técnica
+
+```
+minhainfluencer.com (Domínio principal)
+└── Hospeda a landing page + cadastro
+    ├── Frontend: React (páginas públicas)
+    ├── Backend: Express (mesma API)
+    └── Detecção: Se não tem subdomínio → mostra landing
+
+luci.minhainfluencer.com (Subdomínio do tenant)
+└── Hospeda o app completo da Luci
+    ├── Frontend: Todo o app (vídeos, cupons, etc)
+    ├── Backend: Mesma API (filtra por tenant)
+    └── Detecção: Tem subdomínio → mostra app
+```
+
+**TUDO no mesmo servidor!** 
+- Mesma aplicação Express
+- Mesmo código React
+- Middleware detecta se é landing ou app
 
 ---
 
