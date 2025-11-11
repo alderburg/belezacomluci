@@ -371,37 +371,39 @@ export function YouTubeSyncContent({
                         </div>
                       </div>
 
-                      <Button 
-                        onClick={applyBatchConfig} 
-                        disabled={selectedVideos.size === 0}
-                        size="sm"
-                        data-testid="button-apply-batch"
-                      >
-                        Aplicar
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={applyBatchConfig} 
+                          disabled={selectedVideos.size === 0}
+                          size="sm"
+                          data-testid="button-apply-batch"
+                        >
+                          Aplicar
+                        </Button>
 
-                      <Button
-                        onClick={() => importMutation.mutate()}
-                        disabled={selectedVideos.size === 0 || importMutation.isPending}
-                        size="sm"
-                        data-testid="button-import"
-                      >
-                        {importMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Importando...
-                          </>
-                        ) : (
-                          `Importar ${selectedVideos.size} vídeo${selectedVideos.size !== 1 ? "s" : ""}`
-                        )}
-                      </Button>
+                        <Button
+                          onClick={() => importMutation.mutate()}
+                          disabled={selectedVideos.size === 0 || importMutation.isPending}
+                          size="sm"
+                          data-testid="button-import"
+                        >
+                          {importMutation.isPending ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Importando...
+                            </>
+                          ) : (
+                            `Importar ${selectedVideos.size} vídeo${selectedVideos.size !== 1 ? "s" : ""}`
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </Card>
               </div>
 
               <ScrollArea className="flex-1" style={{ height: mode === "inline" ? '500px' : '400px' }}>
-                <div className="space-y-3 pr-4">
+                <div className="space-y-3 pr-4 mr-4">
                   {currentVideos.map((video) => {
                     const config = getVideoConfig(video.id);
                     const isSelected = selectedVideos.has(video.id);
