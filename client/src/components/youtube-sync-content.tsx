@@ -175,6 +175,16 @@ export function YouTubeSyncContent({
         throw new Error("Nenhum vídeo para importar");
       }
 
+      // Validar se todos os vídeos selecionados têm categoria
+      const videosWithoutCategory = Array.from(selectedVideos).filter(videoId => {
+        const config = getVideoConfig(videoId);
+        return !config.categoryId || config.categoryId.trim() === '';
+      });
+
+      if (videosWithoutCategory.length > 0) {
+        throw new Error(`Por favor, selecione uma categoria para ${videosWithoutCategory.length === 1 ? 'o vídeo selecionado' : `todos os ${videosWithoutCategory.length} vídeos selecionados`} antes de importar.`);
+      }
+
       const videosToImport = syncedVideos
         .filter(video => selectedVideos.has(video.id))
         .map(video => {
@@ -186,7 +196,7 @@ export function YouTubeSyncContent({
             thumbnailUrl: video.thumbnailUrl,
             duration: video.duration,
             type: "video",
-            categoryId: config.categoryId || null,
+            categoryId: config.categoryId,
             isExclusive: config.isExclusive,
           };
         });
