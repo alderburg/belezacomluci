@@ -1,0 +1,150 @@
+Excelente pergunta! Você tocou num ponto super importante de arquitetura. Deixa eu explicar como funciona em sistemas whitelabel e ajustar o plano:
+
+🎯 Como Sistemas Whitelabel Funcionam
+Existem 3 modelos principais, vou explicar cada um:
+
+Modelo 1: Tudo no Subdomínio (RECOMENDADO para você)
+📍 minhainfluencer.com
+└── Landing page pública + Cadastro
+    └── Sem login aqui!
+📍 luci.minhainfluencer.com
+├── Luci (OWNER) → Faz login e vê painel admin
+└── Seguidores da Luci (MEMBERS) → Fazem login e veem conteúdo
+📍 maria.minhainfluencer.com
+├── Maria (OWNER) → Faz login e vê painel admin
+└── Seguidores da Maria (MEMBERS) → Fazem login e veem conteúdo
+
+Como funciona:
+
+Cada influencer tem SEU subdomínio
+Influencer e seguidores fazem login NO MESMO lugar
+Sistema diferencia por role (owner vs member)
+Mais simples e intuitivo!
+Exemplo:
+
+Luci acessa luci.minhainfluencer.com
+Faz login com email + senha
+Sistema vê que ela é role: owner
+Mostra o painel admin para ela
+Vantagens:
+✅ Cada influencer tem "sua casa" (branding forte)
+✅ URL única e fácil de compartilhar
+✅ Seguidores sabem onde ir
+
+Modelo 2: Admin Centralizado (Comum em SaaS B2B)
+📍 minhainfluencer.com/admin
+└── TODOS os influencers fazem login aqui
+    ├── Luci → Gerencia conteúdo
+    └── Maria → Gerencia conteúdo
+📍 luci.minhainfluencer.com
+└── APENAS visualização pública (sem login)
+📍 maria.minhainfluencer.com
+└── APENAS visualização pública (sem login)
+
+Como funciona:
+
+Influencers gerenciam tudo no painel central
+Subdomínios são APENAS para visitantes/público
+Tipo WordPress.com, Shopify
+Desvantagens para você:
+❌ Menos "whitelabel" (influencer sempre vê sua marca)
+❌ Mais complexo (2 frontends diferentes)
+
+Modelo 3: Híbrido com Super Admin
+📍 admin.minhainfluencer.com
+└── VOCÊ (dono da plataforma)
+    └── Gerencia TODOS os tenants, vê estatísticas globais
+📍 luci.minhainfluencer.com
+├── Luci (OWNER) → Login + painel admin
+└── Seguidores (MEMBERS) → Login + ver conteúdo
+📍 maria.minhainfluencer.com
+├── Maria (OWNER) → Login + painel admin  
+└── Seguidores (MEMBERS) → Login + ver conteúdo
+
+Diferença:
+
+Tem um "super admin" separado (você!)
+Para gerenciar a plataforma inteira
+Influencers continuam usando seus subdomínios
+✅ Recomendação para Você: Modelo 1 + 3
+Vou ajustar o plano para funcionar assim:
+
+Estrutura Final:
+┌─────────────────────────────────────────────┐
+│  minhainfluencer.com                        │
+│  ├── / (landing page)                       │
+│  ├── /cadastro (criar conta + subdomínio)  │
+│  ├── /sobre                                 │
+│  └── /precos                                │
+└─────────────────────────────────────────────┘
+           ↓ Cadastro cria subdomínio
+           
+┌─────────────────────────────────────────────┐
+│  luci.minhainfluencer.com                   │
+│                                             │
+│  URL ÚNICA: Login + App Completo            │
+│  ├── /auth (login)                          │
+│  ├── /bio (página pública)                  │
+│  ├── / (home - requer login)                │
+│  ├── /videos                                │
+│  ├── /cupons                                │
+│  ├── /comunidade                            │
+│  └── /admin (se role = owner/admin)         │
+│                                             │
+│  ROLES no mesmo lugar:                      │
+│  ✅ Luci → role: owner → Vê /admin          │
+│  ✅ Seguidores → role: member → Não vê admin│
+└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│  admin.minhainfluencer.com (Opcional)       │
+│                                             │
+│  VOCÊ (Super Admin da Plataforma)           │
+│  └── Gerencia TODOS os tenants              │
+│      ├── Suspender/ativar tenants           │
+│      ├── Ver estatísticas globais           │
+│      └── Suporte técnico                    │
+└─────────────────────────────────────────────┘
+
+🔑 Como o Login Funciona
+Cenário 1: Influencer (Luci) quer entrar
+1. Luci acessa: luci.minhainfluencer.com/auth
+2. Faz login: email + senha
+3. Sistema detecta:
+   - Tenant: luci (pelo subdomínio)
+   - User: luci@email.com
+   - Role: owner (busca em tenant_members)
+4. Redireciona para: luci.minhainfluencer.com/
+5. Mostra menu admin completo (porque é owner)
+
+Cenário 2: Seguidor quer entrar
+1. Fã acessa: luci.minhainfluencer.com/auth
+2. Faz login: seguidor@email.com + senha
+3. Sistema detecta:
+   - Tenant: luci (pelo subdomínio)
+   - User: seguidor@email.com
+   - Role: member (busca em tenant_members)
+4. Redireciona para: luci.minhainfluencer.com/
+5. Mostra versão normal (sem opções admin)
+
+Cenário 3: Primeiro cadastro (criar novo tenant)
+1. Pessoa acessa: minhainfluencer.com/cadastro
+2. Preenche formulário:
+   - Nome: Maria Silva
+   - Email: maria@email.com
+   - Subdomínio desejado: maria
+   - Nome da marca: Maria Beauty
+3. Sistema:
+   - Cria tenant "maria"
+   - Cria usuário maria@email.com
+   - Vincula como owner em tenant_members
+   - Cria subdomínio maria.minhainfluencer.com
+4. Redireciona para: maria.minhainfluencer.com
+5. Maria já está logada como owner!
+
+Quer que eu atualize o arquivo completo com essa estrutura detalhada? Posso adicionar uma seção específica sobre:
+
+Como o middleware detecta se é landing page ou app
+Código do formulário de cadastro com validação de subdomínio
+Roteamento condicional no frontend (mostrar/ocultar admin)
+API de verificação de subdomínio disponível
+O que acha? Isso resolve sua dúvida sobre como vai funcionar?
