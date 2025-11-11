@@ -47,7 +47,7 @@ export default function AdminYouTubeSyncMobilePage() {
         </div>
       </div>
 
-      <div className="pt-20 px-4 pb-24">
+      <div className="pt-24 px-4 pb-24">
         <div className="mb-4">
           <AutoYouTubeCheck mode="inline" />
         </div>
