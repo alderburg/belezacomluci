@@ -327,9 +327,26 @@ export function YouTubeSyncContent({
                   <span className="text-sm font-medium">
                     {selectedVideos.size} de {syncedVideos.length} vídeos selecionados
                   </span>
-                  <Button variant="outline" size="sm" onClick={toggleAll} data-testid="button-toggle-all">
-                    {selectedVideos.size === syncedVideos.length ? "Desmarcar todos" : "Selecionar todos"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={toggleAll} data-testid="button-toggle-all">
+                      {selectedVideos.size === syncedVideos.length ? "Desmarcar todos" : "Selecionar todos"}
+                    </Button>
+                    <Button
+                      onClick={() => importMutation.mutate()}
+                      disabled={selectedVideos.size === 0 || importMutation.isPending}
+                      size="sm"
+                      data-testid="button-import"
+                    >
+                      {importMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Importando...
+                        </>
+                      ) : (
+                        `Importar ${selectedVideos.size} vídeo${selectedVideos.size !== 1 ? "s" : ""}`
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
                 <Card className="p-4">
