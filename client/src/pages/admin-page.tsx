@@ -3557,7 +3557,6 @@ export default function AdminPage() {
                           </CardTitle>
                           {!isMobile && (
                             <AutoYouTubeCheck 
-                              mode="inline"
                               onSyncClick={() => setShowSyncContent(true)}
                               onRefreshReady={(refreshFn) => {
                                 refreshVideosCheckRef.current = refreshFn;

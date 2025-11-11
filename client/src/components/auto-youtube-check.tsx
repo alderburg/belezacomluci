@@ -128,11 +128,11 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
         variant="default"
         size="sm"
         onClick={handleConfigClick}
-        className={`flex items-center gap-2 bg-primary hover:bg-primary/90 ${mode === "inline" ? "w-full" : ""}`}
+        className={`flex items-center gap-2 bg-primary hover:bg-primary/90 ${mode === "inline" ? "w-full" : "w-auto ml-auto"}`}
         data-testid="button-config-apis"
       >
         <Youtube className="h-4 w-4" />
-        <span>Configurar APIs</span>
+        <span className="whitespace-nowrap">Configurar APIs</span>
       </Button>
     );
   }
@@ -153,11 +153,11 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
           variant="default"
           size="sm"
           onClick={handleSyncClick}
-          className={`relative flex items-center gap-2 bg-primary hover:bg-primary/90 animate-pulse ${mode === "inline" ? "w-full justify-center" : ""}`}
+          className={`relative flex items-center gap-2 bg-primary hover:bg-primary/90 animate-pulse ${mode === "inline" ? "w-full justify-center" : "w-auto ml-auto"}`}
           data-testid="button-sync-videos"
         >
           <Bell className="h-4 w-4 animate-bounce" />
-          <span className="font-semibold">
+          <span className="font-semibold whitespace-nowrap">
             Sincronizar {newVideosCount} {newVideosCount === 1 ? "vídeo novo" : "vídeos novos"}
           </span>
           <span className="absolute -top-1 -right-1 flex h-3 w-3">
@@ -187,7 +187,7 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
         data-testid="button-synced"
       >
         <CheckCircle2 className="h-4 w-4 text-green-600" />
-        <span>Sincronizado</span>
+        <span className="whitespace-nowrap">Sincronizado</span>
       </Button>
 
       {mode === "modal" && (
