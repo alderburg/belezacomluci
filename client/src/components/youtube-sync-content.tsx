@@ -169,18 +169,21 @@ export function YouTubeSyncContent({
     }
   };
 
-  const applyBatchConfig = () => {
+  const applyBatchConfigToSelected = (config: Partial<typeof batchConfig>) => {
+    if (selectedVideos.size === 0) return;
+    
     const newConfigs = new Map(individualConfigs);
     selectedVideos.forEach(videoId => {
+      const currentConfig = newConfigs.get(videoId) || { categoryId: "", isExclusive: false };
       newConfigs.set(videoId, {
-        categoryId: batchConfig.categoryId,
-        isExclusive: batchConfig.isExclusive,
+        ...currentConfig,
+        ...config,
       });
     });
     setIndividualConfigs(newConfigs);
     
     // Limpar erros de validação para vídeos que agora têm categoria
-    if (batchConfig.categoryId) {
+    if (config.categoryId) {
       setValidationErrors(prev => {
         const newErrors = new Set(prev);
         selectedVideos.forEach(videoId => {
@@ -189,11 +192,6 @@ export function YouTubeSyncContent({
         return newErrors;
       });
     }
-    
-    toast({
-      title: "Configuração aplicada",
-      description: `Configurações aplicadas a ${selectedVideos.size} vídeo(s) selecionado(s)`,
-    });
   };
 
   const importVideosSequentially = async () => {
@@ -393,8 +391,8 @@ export function YouTubeSyncContent({
 
   const getVideoConfig = (videoId: string): VideoConfig => {
     return individualConfigs.get(videoId) || {
-      categoryId: batchConfig.categoryId,
-      isExclusive: batchConfig.isExclusive,
+      categoryId: "",
+      isExclusive: false,
     };
   };
 
@@ -501,14 +499,17 @@ export function YouTubeSyncContent({
                 <Card className="p-4">
                   <div className="flex flex-col gap-3">
                     <h3 className="text-sm font-medium">Aplicar a todos os selecionados:</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label htmlFor="batch-category" className="text-xs block">
                           Categoria <span className="text-destructive">*</span>
                         </Label>
                         <Select
                           value={batchConfig.categoryId}
-                          onValueChange={(value) => setBatchConfig({ ...batchConfig, categoryId: value })}
+                          onValueChange={(value) => {
+                            setBatchConfig({ ...batchConfig, categoryId: value });
+                            applyBatchConfigToSelected({ categoryId: value });
+                          }}
                         >
                           <SelectTrigger id="batch-category" data-testid="select-batch-category" className="h-9">
                             <SelectValue placeholder="Selecione uma categoria" />
@@ -529,26 +530,16 @@ export function YouTubeSyncContent({
                           <Switch
                             id="batch-exclusive"
                             checked={batchConfig.isExclusive}
-                            onCheckedChange={(checked) => setBatchConfig({ ...batchConfig, isExclusive: checked })}
+                            onCheckedChange={(checked) => {
+                              setBatchConfig({ ...batchConfig, isExclusive: checked });
+                              applyBatchConfigToSelected({ isExclusive: checked });
+                            }}
                             data-testid="switch-batch-exclusive"
                           />
                           <span className="text-xs text-muted-foreground">
                             {batchConfig.isExclusive ? "Sim" : "Não"}
                           </span>
                         </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-xs block invisible">Ação</Label>
-                        <Button
-                          onClick={applyBatchConfig}
-                          disabled={selectedVideos.size === 0}
-                          size="sm"
-                          data-testid="button-apply-batch"
-                          className="h-9 w-full"
-                        >
-                          Aplicar
-                        </Button>
                       </div>
                     </div>
                   </div>

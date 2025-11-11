@@ -178,8 +178,8 @@ export default function AdminYouTubeSyncMobilePage() {
 
   const getVideoConfig = (videoId: string): VideoConfig => {
     return individualConfigs.get(videoId) || {
-      categoryId: batchConfig.categoryId,
-      isExclusive: batchConfig.isExclusive,
+      categoryId: "",
+      isExclusive: false,
     };
   };
 
@@ -198,17 +198,20 @@ export default function AdminYouTubeSyncMobilePage() {
     }
   };
 
-  const applyBatchConfig = () => {
+  const applyBatchConfigToSelected = (config: Partial<typeof batchConfig>) => {
+    if (selectedVideos.size === 0) return;
+    
     const newConfigs = new Map(individualConfigs);
     selectedVideos.forEach(videoId => {
+      const currentConfig = newConfigs.get(videoId) || { categoryId: "", isExclusive: false };
       newConfigs.set(videoId, {
-        categoryId: batchConfig.categoryId,
-        isExclusive: batchConfig.isExclusive,
+        ...currentConfig,
+        ...config,
       });
     });
     setIndividualConfigs(newConfigs);
     
-    if (batchConfig.categoryId) {
+    if (config.categoryId) {
       setValidationErrors(prev => {
         const newErrors = new Set(prev);
         selectedVideos.forEach(videoId => {
@@ -217,11 +220,6 @@ export default function AdminYouTubeSyncMobilePage() {
         return newErrors;
       });
     }
-    
-    toast({
-      title: "Configuração aplicada",
-      description: `Configurações aplicadas a ${selectedVideos.size} vídeo(s) selecionado(s)`,
-    });
   };
 
   const importVideosSequentially = async () => {
@@ -462,7 +460,10 @@ export default function AdminYouTubeSyncMobilePage() {
                     </Label>
                     <Select
                       value={batchConfig.categoryId}
-                      onValueChange={(value) => setBatchConfig({ ...batchConfig, categoryId: value })}
+                      onValueChange={(value) => {
+                        setBatchConfig({ ...batchConfig, categoryId: value });
+                        applyBatchConfigToSelected({ categoryId: value });
+                      }}
                     >
                       <SelectTrigger id="batch-category" data-testid="select-batch-category">
                         <SelectValue placeholder="Selecione uma categoria" />
@@ -483,7 +484,10 @@ export default function AdminYouTubeSyncMobilePage() {
                       <Switch
                         id="batch-exclusive"
                         checked={batchConfig.isExclusive}
-                        onCheckedChange={(checked) => setBatchConfig({ ...batchConfig, isExclusive: checked })}
+                        onCheckedChange={(checked) => {
+                          setBatchConfig({ ...batchConfig, isExclusive: checked });
+                          applyBatchConfigToSelected({ isExclusive: checked });
+                        }}
                         data-testid="switch-batch-exclusive"
                       />
                       <span className="text-xs text-muted-foreground">
@@ -491,16 +495,6 @@ export default function AdminYouTubeSyncMobilePage() {
                       </span>
                     </div>
                   </div>
-
-                  <Button
-                    onClick={applyBatchConfig}
-                    disabled={selectedVideos.size === 0}
-                    size="sm"
-                    data-testid="button-apply-batch"
-                    className="w-full"
-                  >
-                    Aplicar configuração
-                  </Button>
                 </div>
               </Card>
             )}
