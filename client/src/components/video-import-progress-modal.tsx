@@ -36,6 +36,7 @@ export function VideoImportProgressModal({
         className="sm:max-w-[600px]" 
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
+        hideCloseButton
       >
         <DialogHeader>
           <DialogTitle>Importando Vídeos do YouTube</DialogTitle>
@@ -73,40 +74,23 @@ export function VideoImportProgressModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <div className="flex flex-col items-center gap-2 p-3 rounded-md bg-primary/10">
-              <CheckCircle2 className="h-5 w-5 text-primary" />
+          {failedCount > 0 && (
+            <div className="flex flex-col items-center gap-2 p-4 rounded-md bg-destructive/10">
+              <XCircle className="h-6 w-6 text-destructive" />
               <div className="text-center">
-                <div className="text-lg font-semibold">{importedCount}</div>
-                <div className="text-xs text-muted-foreground">Importados</div>
+                <div className="text-lg font-semibold">{failedCount}</div>
+                <div className="text-xs text-muted-foreground">Vídeos com falha</div>
               </div>
             </div>
+          )}
 
-            <div className="flex flex-col items-center gap-2 p-3 rounded-md bg-muted">
-              <AlertCircle className="h-5 w-5 text-muted-foreground" />
-              <div className="text-center">
-                <div className="text-lg font-semibold">{remaining}</div>
-                <div className="text-xs text-muted-foreground">Restantes</div>
-              </div>
-            </div>
-
-            {failedCount > 0 && (
-              <div className="flex flex-col items-center gap-2 p-3 rounded-md bg-destructive/10">
-                <XCircle className="h-5 w-5 text-destructive" />
-                <div className="text-center">
-                  <div className="text-lg font-semibold">{failedCount}</div>
-                  <div className="text-xs text-muted-foreground">Falhas</div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-center pt-2">
+          <div className="pt-2">
             <Button
               variant="outline"
               onClick={onCancel}
               disabled={isCancelling}
               data-testid="button-cancel-import"
+              className="w-full"
             >
               {isCancelling ? (
                 <>
