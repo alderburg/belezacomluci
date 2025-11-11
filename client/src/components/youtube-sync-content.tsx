@@ -522,7 +522,7 @@ export function YouTubeSyncContent({
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="batch-exclusive" className="text-xs">Exclusivo</Label>
+                        <Label htmlFor="batch-exclusive" className="text-xs">Conteúdo exclusivo</Label>
                         <div className="flex items-center space-x-2 h-9">
                           <Switch
                             id="batch-exclusive"
@@ -536,13 +536,14 @@ export function YouTubeSyncContent({
                         </div>
                       </div>
 
-                      <div className="flex items-end h-full">
+                      <div className="space-y-2">
+                        <Label className="text-xs invisible">Ação</Label>
                         <Button
                           onClick={applyBatchConfig}
                           disabled={selectedVideos.size === 0}
                           size="sm"
                           data-testid="button-apply-batch"
-                          className="h-9"
+                          className="h-9 w-full"
                         >
                           Aplicar
                         </Button>
