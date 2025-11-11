@@ -122,8 +122,19 @@ export default function AdminVideosMobilePage() {
         </div>
       </div>
 
-      <div className="pt-20 px-4 pb-24">
+      <div className="pt-24 px-4 pb-24">
         <div className="mb-4 space-y-3">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setLocation('/admin/videos-mobile/youtube-sync')}
+            className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90"
+            data-testid="button-youtube-sync"
+          >
+            <Youtube className="h-4 w-4" />
+            <span className="font-semibold">Sincronizar com YouTube</span>
+          </Button>
+          
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
