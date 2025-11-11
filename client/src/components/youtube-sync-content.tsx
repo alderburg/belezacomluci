@@ -182,7 +182,10 @@ export function YouTubeSyncContent({
       });
 
       if (videosWithoutCategory.length > 0) {
-        throw new Error(`Por favor, selecione uma categoria para ${videosWithoutCategory.length === 1 ? 'o vídeo selecionado' : `todos os ${videosWithoutCategory.length} vídeos selecionados`} antes de importar.`);
+        const message = videosWithoutCategory.length === 1
+          ? 'O campo Categoria é obrigatório. Por favor, verifique o vídeo selecionado e escolha uma categoria antes de importar.'
+          : `O campo Categoria é obrigatório. Por favor, verifique os ${videosWithoutCategory.length} vídeos selecionados e escolha uma categoria para cada um antes de importar.`;
+        throw new Error(message);
       }
 
       const videosToImport = syncedVideos
@@ -364,7 +367,9 @@ export function YouTubeSyncContent({
                     <h3 className="text-sm font-medium">Aplicar a todos os selecionados:</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                       <div className="space-y-2">
-                        <Label htmlFor="batch-category" className="text-xs">Categoria</Label>
+                        <Label htmlFor="batch-category" className="text-xs">
+                          Categoria <span className="text-destructive">*</span>
+                        </Label>
                         <Select
                           value={batchConfig.categoryId}
                           onValueChange={(value) => setBatchConfig({ ...batchConfig, categoryId: value })}
@@ -380,6 +385,7 @@ export function YouTubeSyncContent({
                             ))}
                           </SelectContent>
                         </Select>
+                        <p className="text-xs text-muted-foreground">Campo obrigatório</p>
                       </div>
 
                       <div className="space-y-2">
@@ -448,15 +454,17 @@ export function YouTubeSyncContent({
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-[1fr,auto] gap-3 items-end">
                               <div className="space-y-1">
-                                <Label className="text-xs text-muted-foreground">Categoria</Label>
+                                <Label className="text-xs text-muted-foreground">
+                                  Categoria <span className="text-destructive">*</span>
+                                </Label>
                                 <Select
                                   value={config.categoryId}
                                   onValueChange={(value) => updateIndividualConfig(video.id, { categoryId: value })}
                                 >
                                   <SelectTrigger className="h-8 text-xs" data-testid={`select-category-${video.id}`}>
-                                    <SelectValue placeholder="Selecione uma categoria" />
+                                    <SelectValue placeholder="Nenhuma" />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {categories?.map((cat) => (
