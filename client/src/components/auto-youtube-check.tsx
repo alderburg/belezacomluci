@@ -105,7 +105,7 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
 
   if (channelLoading || isChecking) {
     return (
-      <div className={`flex flex-col gap-2 ${mode === "inline" ? "w-full" : "w-auto min-w-[200px] max-w-[280px]"}`}>
+      <div className={`flex flex-col gap-2 ${mode === "inline" ? "w-full" : "w-auto"}`}>
         <div className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span>Verificando atualizações...</span>

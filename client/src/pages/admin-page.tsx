@@ -3556,13 +3556,14 @@ export default function AdminPage() {
                             Gerenciar Vídeos
                           </CardTitle>
                           {!isMobile && (
-                            <AutoYouTubeCheck 
-                              mode="inline"
-                              onSyncClick={() => setShowSyncContent(true)}
-                              onRefreshReady={(refreshFn) => {
-                                refreshVideosCheckRef.current = refreshFn;
-                              }}
-                            />
+                            <div className="flex justify-end">
+                              <AutoYouTubeCheck 
+                                onSyncClick={() => setShowSyncContent(true)}
+                                onRefreshReady={(refreshFn) => {
+                                  refreshVideosCheckRef.current = refreshFn;
+                                }}
+                              />
+                            </div>
                           )}
                         </div>
 
