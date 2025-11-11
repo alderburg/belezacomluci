@@ -94,7 +94,6 @@ export function YouTubeSyncContent({
     if (!channelIdParam?.trim()) {
       toast({
         variant: "destructive",
-        title: "Erro",
         description: "Channel ID não configurado. Configure em Configurações > APIs",
       });
       return;
@@ -146,8 +145,7 @@ export function YouTubeSyncContent({
 
       toast({
         variant: "destructive",
-        title: "Erro na sincronização",
-        description: error instanceof Error ? error.message : "Erro ao sincronizar com YouTube",
+        description: error instanceof Error ? error.message : "Não foi possível sincronizar com YouTube",
       });
     } finally {
       setIsSyncing(false);
@@ -182,7 +180,7 @@ export function YouTubeSyncContent({
       });
 
       if (videosWithoutCategory.length > 0) {
-        throw new Error(`Por favor, selecione uma categoria para ${videosWithoutCategory.length === 1 ? 'o vídeo selecionado' : `todos os ${videosWithoutCategory.length} vídeos selecionados`} antes de importar.`);
+        throw new Error(`Selecione uma categoria para ${videosWithoutCategory.length === 1 ? 'o vídeo selecionado' : `todos os ${videosWithoutCategory.length} vídeos selecionados`} antes de importar`);
       }
 
       const videosToImport = syncedVideos
@@ -222,8 +220,7 @@ export function YouTubeSyncContent({
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: error.message || "Erro ao importar vídeos",
+        description: error.message || "Não foi possível importar os vídeos",
       });
     },
   });
@@ -364,12 +361,18 @@ export function YouTubeSyncContent({
                     <h3 className="text-sm font-medium">Aplicar a todos os selecionados:</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                       <div className="space-y-2">
-                        <Label htmlFor="batch-category" className="text-xs">Categoria</Label>
+                        <Label htmlFor="batch-category" className="text-xs">
+                          Categoria <span className="text-destructive">*</span>
+                        </Label>
                         <Select
                           value={batchConfig.categoryId}
                           onValueChange={(value) => setBatchConfig({ ...batchConfig, categoryId: value })}
                         >
-                          <SelectTrigger id="batch-category" data-testid="select-batch-category" className="h-9">
+                          <SelectTrigger 
+                            id="batch-category" 
+                            data-testid="select-batch-category" 
+                            className={`h-9 ${!batchConfig.categoryId && selectedVideos.size > 0 ? 'border-destructive' : ''}`}
+                          >
                             <SelectValue placeholder="Selecione uma categoria" />
                           </SelectTrigger>
                           <SelectContent>
@@ -380,6 +383,9 @@ export function YouTubeSyncContent({
                             ))}
                           </SelectContent>
                         </Select>
+                        {!batchConfig.categoryId && selectedVideos.size > 0 && (
+                          <p className="text-xs text-destructive mt-1">Categoria é obrigatória</p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -450,12 +456,17 @@ export function YouTubeSyncContent({
 
                             <div className="grid grid-cols-2 gap-3">
                               <div className="space-y-1">
-                                <Label className="text-xs text-muted-foreground">Categoria</Label>
+                                <Label className="text-xs text-muted-foreground">
+                                  Categoria <span className="text-destructive">*</span>
+                                </Label>
                                 <Select
                                   value={config.categoryId}
                                   onValueChange={(value) => updateIndividualConfig(video.id, { categoryId: value })}
                                 >
-                                  <SelectTrigger className="h-8 text-xs" data-testid={`select-category-${video.id}`}>
+                                  <SelectTrigger 
+                                    className={`h-8 text-xs ${!config.categoryId && isSelected ? 'border-destructive' : ''}`}
+                                    data-testid={`select-category-${video.id}`}
+                                  >
                                     <SelectValue placeholder="Selecione uma categoria" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -466,6 +477,9 @@ export function YouTubeSyncContent({
                                     ))}
                                   </SelectContent>
                                 </Select>
+                                {!config.categoryId && isSelected && (
+                                  <p className="text-xs text-destructive mt-1">Obrigatório</p>
+                                )}
                               </div>
 
                               <div className="space-y-1">
