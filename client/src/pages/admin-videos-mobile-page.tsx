@@ -103,7 +103,7 @@ export default function AdminVideosMobilePage() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -119,22 +119,11 @@ export default function AdminVideosMobilePage() {
               {videos?.length || 0} vídeos cadastrados
             </p>
           </div>
-          </div>
+        </div>
       </div>
 
-      <div className="pt-24 px-4 pb-24">
+      <div className="pt-20 px-4 pb-24">
         <div className="mb-4 space-y-3">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => setLocation('/admin/videos-mobile/youtube-sync')}
-            className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90"
-            data-testid="button-youtube-sync"
-          >
-            <Youtube className="h-4 w-4" />
-            <span className="font-semibold">Sincronizar com YouTube</span>
-          </Button>
-          
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input

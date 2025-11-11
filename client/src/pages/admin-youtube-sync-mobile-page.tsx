@@ -6,6 +6,7 @@ import { Redirect } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
 import { ArrowLeft } from "lucide-react";
 import { YouTubeSyncContent } from "@/components/youtube-sync-content";
+import { AutoYouTubeCheck } from "@/components/auto-youtube-check";
 import { useEffect } from "react";
 
 export default function AdminYouTubeSyncMobilePage() {
@@ -47,6 +48,10 @@ export default function AdminYouTubeSyncMobilePage() {
       </div>
 
       <div className="pt-20 px-4 pb-24">
+        <div className="mb-4">
+          <AutoYouTubeCheck mode="inline" />
+        </div>
+        
         <YouTubeSyncContent
           mode="inline"
           onCancel={handleBackClick}
