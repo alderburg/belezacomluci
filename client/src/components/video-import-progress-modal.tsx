@@ -33,7 +33,7 @@ export function VideoImportProgressModal({
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent 
-        className="sm:max-w-[600px]" 
+        className="sm:max-w-[600px] mx-4 rounded-lg" 
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
         hideCloseButton
