@@ -61,7 +61,7 @@ export default function Sidebar() {
 
   // Add admin links for admin users
   if (user?.isAdmin) {
-    navItems.push({ href: "/admin", label: "Admin", icon: Crown });
+    navItems.push({ href: "/admin", label: "Admin", icon: Crown, matchPattern: /^\/admin/ });
     navItems.push({ href: "/admin/cheirosas", label: "Gerenciar Cheirosas", icon: BarChart3 });
     navItems.push({ href: "/admin/analytics", label: "Analytics", icon: BarChart3 });
   }
@@ -194,6 +194,9 @@ export default function Sidebar() {
                 isActive = location === "/videos" || location.startsWith("/videos/");
               } else if (item.href === "/produtos") {
                 isActive = location === "/produtos" || location.startsWith("/produtos/");
+              } else if (item.matchPattern) {
+                // Se o item tem um padrão de correspondência (como Admin), usa ele
+                isActive = item.matchPattern.test(location);
               }
 
               return (
