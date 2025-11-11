@@ -499,9 +499,9 @@ export function YouTubeSyncContent({
                 <Card className="p-4">
                   <div className="flex flex-col gap-3">
                     <h3 className="text-sm font-medium">Aplicar a todos os selecionados:</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="space-y-2">
-                        <Label htmlFor="batch-category" className="text-xs">
+                        <Label htmlFor="batch-category" className="text-xs block">
                           Categoria <span className="text-destructive">*</span>
                         </Label>
                         <Select
@@ -522,7 +522,7 @@ export function YouTubeSyncContent({
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="batch-exclusive" className="text-xs">Conteúdo exclusivo</Label>
+                        <Label htmlFor="batch-exclusive" className="text-xs block">Conteúdo exclusivo</Label>
                         <div className="flex items-center space-x-2 h-9">
                           <Switch
                             id="batch-exclusive"
@@ -537,7 +537,7 @@ export function YouTubeSyncContent({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-xs invisible">Ação</Label>
+                        <Label className="text-xs block invisible">Ação</Label>
                         <Button
                           onClick={applyBatchConfig}
                           disabled={selectedVideos.size === 0}
