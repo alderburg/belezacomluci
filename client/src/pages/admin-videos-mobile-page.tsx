@@ -21,10 +21,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { apiRequest } from '@/lib/queryClient';
 import { useEffect } from "react";
 import { YouTubeSyncModal } from "@/components/youtube-sync-modal";
+import { AutoYouTubeCheck } from "@/components/auto-youtube-check";
+
 export default function AdminVideosMobilePage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
@@ -35,9 +37,16 @@ export default function AdminVideosMobilePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeletingItem, setIsDeletingItem] = useState(false);
+  const refreshVideosCheckRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    if (refreshVideosCheckRef.current) {
+      refreshVideosCheckRef.current();
+    }
   }, []);
 
   if (!user?.isAdmin) {
@@ -124,16 +133,15 @@ export default function AdminVideosMobilePage() {
 
       <div className="pt-24 px-4 pb-24">
         <div className="mb-4 space-y-3">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => setLocation('/admin/videos-mobile/youtube-sync')}
-            className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90"
-            data-testid="button-youtube-sync"
-          >
-            <Youtube className="h-4 w-4" />
-            <span className="font-semibold">Sincronizar com YouTube</span>
-          </Button>
+          <div className="w-full">
+            <AutoYouTubeCheck 
+              mode="inline"
+              onSyncClick={() => setLocation('/admin/videos-mobile/youtube-sync')}
+              onRefreshReady={(refreshFn) => {
+                refreshVideosCheckRef.current = refreshFn;
+              }}
+            />
+          </div>
           
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
