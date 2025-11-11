@@ -40,9 +40,9 @@ interface YouTubeSyncContentProps {
   initialSync?: boolean;
 }
 
-export function YouTubeSyncContent({ 
-  mode = "modal", 
-  onCancel, 
+export function YouTubeSyncContent({
+  mode = "modal",
+  onCancel,
   onSuccess,
   initialSync = true
 }: YouTubeSyncContentProps) {
@@ -106,14 +106,14 @@ export function YouTubeSyncContent({
 
     try {
       console.log('🔄 Iniciando sincronização com canal:', channelIdParam);
-      
+
       const res = await apiRequest("POST", "/api/youtube/sync", { channelId: channelIdParam.trim() });
-      
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ message: 'Erro ao sincronizar' }));
         throw new Error(errorData.message || `Erro HTTP ${res.status}`);
       }
-      
+
       const response = await res.json() as {
         totalChannelVideos: number;
         existingVideos: number;
@@ -124,7 +124,7 @@ export function YouTubeSyncContent({
       console.log('✅ Resposta da sincronização:', response);
 
       const videos = Array.isArray(response.videos) ? response.videos : [];
-      
+
       setSyncedVideos(videos);
       setSyncComplete(true);
 
@@ -143,7 +143,7 @@ export function YouTubeSyncContent({
       console.error('❌ Erro na sincronização:', error);
       setSyncedVideos([]);
       setSyncComplete(true);
-      
+
       toast({
         variant: "destructive",
         title: "Erro na sincronização",
@@ -174,7 +174,7 @@ export function YouTubeSyncContent({
       if (!syncedVideos || syncedVideos.length === 0) {
         throw new Error("Nenhum vídeo para importar");
       }
-      
+
       const videosToImport = syncedVideos
         .filter(video => selectedVideos.has(video.id))
         .map(video => {
@@ -192,12 +192,12 @@ export function YouTubeSyncContent({
         });
 
       const res = await apiRequest("POST", "/api/videos/import-batch", { videos: videosToImport });
-      
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ message: 'Erro ao importar vídeos' }));
         throw new Error(errorData.message || `Erro HTTP ${res.status}`);
       }
-      
+
       return await res.json();
     },
     onSuccess: (data: any) => {
@@ -230,7 +230,7 @@ export function YouTubeSyncContent({
 
   const toggleAll = () => {
     if (!syncedVideos || syncedVideos.length === 0) return;
-    
+
     if (selectedVideos.size === syncedVideos.length) {
       setSelectedVideos(new Set());
     } else {
@@ -304,17 +304,17 @@ export function YouTubeSyncContent({
         <div className="space-y-4 py-12 text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
           <p className="text-lg font-medium">
-            {isAuthLoading 
-              ? "Verificando autenticação..." 
-              : isLoadingChannelId 
-              ? "Carregando configurações..." 
+            {isAuthLoading
+              ? "Verificando autenticação..."
+              : isLoadingChannelId
+              ? "Carregando configurações..."
               : "Sincronizando com YouTube..."}
           </p>
           <p className="text-sm text-muted-foreground">
-            {isAuthLoading 
-              ? "Aguarde..." 
-              : isLoadingChannelId 
-              ? "Buscando Channel ID..." 
+            {isAuthLoading
+              ? "Aguarde..."
+              : isLoadingChannelId
+              ? "Buscando Channel ID..."
               : "Buscando vídeos não cadastrados..."}
           </p>
         </div>
@@ -338,8 +338,8 @@ export function YouTubeSyncContent({
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                       <div className="space-y-2">
                         <Label htmlFor="batch-category" className="text-xs">Categoria</Label>
-                        <Select 
-                          value={batchConfig.categoryId} 
+                        <Select
+                          value={batchConfig.categoryId}
                           onValueChange={(value) => setBatchConfig({ ...batchConfig, categoryId: value })}
                         >
                           <SelectTrigger id="batch-category" data-testid="select-batch-category" className="h-9">
@@ -371,29 +371,13 @@ export function YouTubeSyncContent({
                         </div>
                       </div>
 
-                      <Button 
-                        onClick={applyBatchConfig} 
+                      <Button
+                        onClick={applyBatchConfig}
                         disabled={selectedVideos.size === 0}
                         size="sm"
                         data-testid="button-apply-batch"
                       >
                         Aplicar
-                      </Button>
-
-                      <Button
-                        onClick={() => importMutation.mutate()}
-                        disabled={selectedVideos.size === 0 || importMutation.isPending}
-                        size="sm"
-                        data-testid="button-import"
-                      >
-                        {importMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Importando...
-                          </>
-                        ) : (
-                          `Importar ${selectedVideos.size} vídeo${selectedVideos.size !== 1 ? "s" : ""}`
-                        )}
                       </Button>
                     </div>
                   </div>
@@ -405,7 +389,7 @@ export function YouTubeSyncContent({
                   {currentVideos.map((video) => {
                     const config = getVideoConfig(video.id);
                     const isSelected = selectedVideos.has(video.id);
-                    
+
                     return (
                       <Card key={video.id} className={`p-4 ${isSelected ? 'border-primary' : ''}`}>
                         <div className="flex gap-4">
@@ -441,8 +425,8 @@ export function YouTubeSyncContent({
                             <div className="grid grid-cols-2 gap-3">
                               <div className="space-y-1">
                                 <Label className="text-xs text-muted-foreground">Categoria</Label>
-                                <Select 
-                                  value={config.categoryId} 
+                                <Select
+                                  value={config.categoryId}
                                   onValueChange={(value) => updateIndividualConfig(video.id, { categoryId: value })}
                                 >
                                   <SelectTrigger className="h-8 text-xs" data-testid={`select-category-${video.id}`}>
