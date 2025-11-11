@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -36,7 +35,7 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
       setIsChecking(true);
       setProgress(10);
       console.log('🔍 Verificando vídeos pendentes do canal:', channelId);
-      
+
       const res = await apiRequest("POST", "/api/youtube/sync", { channelId });
       const response = await res.json();
 
@@ -54,16 +53,16 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
     } catch (error: any) {
       console.error("❌ Erro ao verificar novos vídeos:", error);
       console.error("Erro completo:", error.message);
-      
+
       const errorMessage = error.message || '';
       const is401 = errorMessage.includes('401');
       const is403 = errorMessage.includes('403');
-      
+
       if (is401 || is403) {
         console.warn("⚠️ Usuário não autenticado ou sem permissão admin");
         console.warn("Erro:", errorMessage);
       }
-      
+
       setNewVideosCount(null);
     } finally {
       setTimeout(() => setIsChecking(false), 300);
@@ -105,8 +104,8 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
 
   if (channelLoading || isChecking) {
     return (
-      <div className="flex flex-col gap-2 w-full">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className={`flex flex-col gap-2 ${mode === "inline" ? "w-full" : "w-auto ml-auto"}`}>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span>Verificando atualizações...</span>
         </div>
@@ -184,7 +183,7 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
         variant="outline"
         size="sm"
         onClick={handleSyncClick}
-        className={`flex items-center gap-2 ${mode === "inline" ? "w-full justify-center" : ""}`}
+        className={`flex items-center gap-2 ${mode === "inline" ? "w-full justify-center" : "w-auto ml-auto"}`}
         data-testid="button-synced"
       >
         <CheckCircle2 className="h-4 w-4 text-green-600" />
