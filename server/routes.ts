@@ -1,3 +1,46 @@
+
+import { db } from "@db";
+import { videos } from "@shared/schema";
+import { eq } from "drizzle-orm";
+
+// Endpoint para verificar se um vídeo já existe
+app.get("/api/videos/check-exists", async (req, res) => {
+  try {
+    const { videoId } = req.query;
+    
+    if (!videoId || typeof videoId !== 'string') {
+      return res.status(400).json({ error: "videoId é obrigatório" });
+    }
+
+    // Buscar vídeos que contenham este videoId na URL
+    const existingVideos = await db
+      .select()
+      .from(videos)
+      .where(eq(videos.videoUrl, videoId));
+
+    // Também verificar URLs completas do YouTube
+    const allVideos = await db.select().from(videos);
+    const exists = allVideos.some(video => {
+      if (!video.videoUrl) return false;
+      
+      // Verificar se a URL contém o videoId
+      const patterns = [
+        new RegExp(`[?&]v=${videoId}(?:&|$)`),
+        new RegExp(`youtu\\.be/${videoId}(?:\\?|$)`),
+        new RegExp(`embed/${videoId}(?:\\?|$)`),
+        new RegExp(`v/${videoId}(?:\\?|$)`)
+      ];
+      
+      return patterns.some(pattern => pattern.test(video.videoUrl));
+    });
+
+    res.json({ exists: exists || existingVideos.length > 0 });
+  } catch (error) {
+    console.error("Erro ao verificar vídeo existente:", error);
+    res.status(500).json({ error: "Erro ao verificar vídeo" });
+  }
+});
+
 import { Express } from "express";
 import { createServer, Server } from "http";
 import { setupAuth } from "./auth";

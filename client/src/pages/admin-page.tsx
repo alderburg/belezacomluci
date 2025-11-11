@@ -1582,7 +1582,50 @@ export default function AdminPage() {
   const handleSubmit = (type: string) => {
     switch (type) {
       case 'videos':
-        videoForm.handleSubmit((data) => createVideoMutation.mutate(data))();
+        videoForm.handleSubmit(async (data) => {
+          // Extrair ID do YouTube da URL
+          const videoId = extractYouTubeVideoId(data.videoUrl);
+          if (!videoId) {
+            toast({
+              variant: "destructive",
+              title: "Erro",
+              description: "URL do YouTube inválida",
+            });
+            return;
+          }
+
+          // Verificar se o vídeo já existe (apenas para novos vídeos)
+          if (!editingItem) {
+            try {
+              const response = await fetch(`/api/videos/check-exists?videoId=${videoId}`, {
+                credentials: 'include',
+              });
+              
+              if (response.ok) {
+                const { exists } = await response.json();
+                
+                if (exists) {
+                  // Marcar campo como erro
+                  videoForm.setError('videoUrl', {
+                    type: 'manual',
+                    message: 'Vídeo já cadastrado, cadastre um novo vídeo'
+                  });
+                  
+                  toast({
+                    variant: "destructive",
+                    title: "Vídeo já cadastrado",
+                    description: "Este vídeo já existe no sistema. Por favor, cadastre um novo vídeo.",
+                  });
+                  return;
+                }
+              }
+            } catch (error) {
+              console.error('Erro ao verificar vídeo duplicado:', error);
+            }
+          }
+
+          createVideoMutation.mutate(data);
+        })();
         break;
       case 'products':
         productForm.handleSubmit((data) => createProductMutation.mutate(data))();
