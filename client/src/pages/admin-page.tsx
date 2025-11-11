@@ -3995,10 +3995,9 @@ export default function AdminPage() {
                                       }
                                     }}
                                   />
-                                ) : null}
-                                <div className={`${coupon.coverImageUrl ? 'hidden' : ''}`}>
+                                ) : (
                                   <Tag className="w-6 h-6 text-muted-foreground" />
-                                </div>
+                                )}
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center space-x-2 mb-1">
@@ -4413,11 +4412,13 @@ export default function AdminPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 mb-4">
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <path d="M21 15l-5-5L5 21"/>
-                      </svg>
+                      <div className="w-5 h-5 text-purple-500 flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                          <circle cx="8.5" cy="8.5" r="1.5"/>
+                          <path d="M21 15l-5-5L5 21"/>
+                        </svg>
+                      </div>
                       Gerenciar Popups
                     </CardTitle>
 
@@ -5027,7 +5028,7 @@ export default function AdminPage() {
                           </div>
 
                           {/* Navegação de páginas */}
-                          <div className="flex items-center gap-2">
+                          <div className="flexitems-center gap-2">
                             <Button
                               variant="outline"
                               size="sm"
