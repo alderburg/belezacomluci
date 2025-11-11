@@ -1,4 +1,3 @@
-
 import { Express } from "express";
 import { createServer, Server } from "http";
 import { setupAuth } from "./auth";
@@ -188,52 +187,6 @@ export function registerRoutes(app: Express): Server {
       res.json(users);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch users" });
-    }
-  });
-
-  // Endpoint para verificar se um vídeo já existe
-  app.get("/api/videos/check-exists", async (req, res) => {
-    try {
-      const { videoId } = req.query;
-      
-      if (!videoId || typeof videoId !== 'string') {
-        return res.status(400).json({ error: "videoId é obrigatório" });
-      }
-
-      // Função auxiliar para extrair ID do YouTube de uma URL
-      const extractYouTubeId = (url: string): string | null => {
-        if (!url) return null;
-        
-        const patterns = [
-          /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
-          /(?:youtu\.be\/)([^&\n?#\?]+)/,
-          /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
-          /(?:youtube\.com\/v\/)([^&\n?#\?]+)/,
-        ];
-        
-        for (const pattern of patterns) {
-          const match = url.match(pattern);
-          if (match && match[1]) {
-            // Limpar qualquer parâmetro adicional
-            return match[1].split('?')[0].split('&')[0].trim();
-          }
-        }
-        return null;
-      };
-
-      // Buscar todos os vídeos do banco
-      const allVideos = await db.select().from(videos);
-      
-      // Verificar se algum vídeo tem o mesmo ID do YouTube
-      const exists = allVideos.some(video => {
-        const existingVideoId = extractYouTubeId(video.videoUrl || '');
-        return existingVideoId === videoId;
-      });
-
-      res.json({ exists });
-    } catch (error) {
-      console.error("Erro ao verificar vídeo existente:", error);
-      res.status(500).json({ error: "Erro ao verificar vídeo" });
     }
   });
 

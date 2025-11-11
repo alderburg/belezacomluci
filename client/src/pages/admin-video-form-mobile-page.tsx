@@ -138,48 +138,7 @@ export default function AdminVideoFormMobilePage() {
     setLocation('/admin/videos-mobile');
   };
 
-  const onSubmit = async (data: z.infer<typeof insertVideoSchema>) => {
-    // Extrair ID do YouTube da URL
-    const videoId = extractYouTubeVideoId(data.videoUrl);
-    if (!videoId) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "URL do YouTube inválida",
-      });
-      return;
-    }
-
-    // Verificar se o vídeo já existe (apenas para novos vídeos)
-    if (!isEditing) {
-      try {
-        const response = await fetch(`/api/videos/check-exists?videoId=${videoId}`, {
-          credentials: 'include',
-        });
-        
-        if (response.ok) {
-          const { exists } = await response.json();
-          
-          if (exists) {
-            // Marcar campo como erro
-            form.setError('videoUrl', {
-              type: 'manual',
-              message: 'Vídeo já cadastrado, cadastre um novo vídeo'
-            });
-            
-            toast({
-              variant: "destructive",
-              title: "Vídeo já cadastrado",
-              description: "Este vídeo já existe no sistema. Por favor, cadastre um novo vídeo.",
-            });
-            return;
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao verificar vídeo duplicado:', error);
-      }
-    }
-
+  const onSubmit = (data: z.infer<typeof insertVideoSchema>) => {
     mutation.mutate(data);
   };
 
