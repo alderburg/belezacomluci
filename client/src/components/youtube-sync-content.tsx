@@ -499,7 +499,7 @@ export function YouTubeSyncContent({
                 <Card className="p-4">
                   <div className="flex flex-col gap-3">
                     <h3 className="text-sm font-medium">Aplicar a todos os selecionados:</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
                       <div className="space-y-2">
                         <Label htmlFor="batch-category" className="text-xs">
                           Categoria <span className="text-destructive">*</span>
@@ -536,14 +536,17 @@ export function YouTubeSyncContent({
                         </div>
                       </div>
 
-                      <Button
-                        onClick={applyBatchConfig}
-                        disabled={selectedVideos.size === 0}
-                        size="sm"
-                        data-testid="button-apply-batch"
-                      >
-                        Aplicar
-                      </Button>
+                      <div className="flex items-end h-full">
+                        <Button
+                          onClick={applyBatchConfig}
+                          disabled={selectedVideos.size === 0}
+                          size="sm"
+                          data-testid="button-apply-batch"
+                          className="h-9"
+                        >
+                          Aplicar
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </Card>
