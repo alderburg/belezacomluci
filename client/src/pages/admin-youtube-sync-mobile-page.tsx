@@ -188,7 +188,7 @@ export default function AdminYouTubeSyncMobilePage() {
     const newConfigs = new Map(individualConfigs);
     newConfigs.set(videoId, { ...currentConfig, ...config });
     setIndividualConfigs(newConfigs);
-    
+
     if (config.categoryId) {
       setValidationErrors(prev => {
         const newErrors = new Set(prev);
@@ -199,6 +199,15 @@ export default function AdminYouTubeSyncMobilePage() {
   };
 
   const applyBatchConfig = () => {
+    if (selectedVideos.size === 0) {
+      toast({
+        variant: "destructive",
+        title: "Nenhum vídeo selecionado",
+        description: "Selecione pelo menos um vídeo para aplicar",
+      });
+      return;
+    }
+
     const newConfigs = new Map(individualConfigs);
     selectedVideos.forEach(videoId => {
       newConfigs.set(videoId, {
@@ -207,7 +216,7 @@ export default function AdminYouTubeSyncMobilePage() {
       });
     });
     setIndividualConfigs(newConfigs);
-    
+
     if (batchConfig.categoryId) {
       setValidationErrors(prev => {
         const newErrors = new Set(prev);
@@ -217,10 +226,10 @@ export default function AdminYouTubeSyncMobilePage() {
         return newErrors;
       });
     }
-    
+
     toast({
       title: "Configuração aplicada",
-      description: `Configurações aplicadas a ${selectedVideos.size} vídeo(s) selecionado(s)`,
+      description: `Aplicada a ${selectedVideos.size} vídeo(s)`,
     });
   };
 
@@ -243,9 +252,9 @@ export default function AdminYouTubeSyncMobilePage() {
       const description = videosWithoutCategory.length === 1
         ? 'Por favor, verifique o vídeo selecionado e escolha uma categoria antes de importar.'
         : `Por favor, verifique os ${videosWithoutCategory.length} vídeos selecionados e escolha uma categoria para cada um antes de importar.`;
-      
+
       setValidationErrors(new Set(videosWithoutCategory));
-      
+
       toast({
         variant: "destructive",
         title: "O campo Categoria é obrigatório",
@@ -257,12 +266,12 @@ export default function AdminYouTubeSyncMobilePage() {
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-      
+
       return;
     }
 
     const videosToImport = syncedVideos.filter(video => selectedVideos.has(video.id));
-    
+
     cancelImportRef.current = false;
     setIsCancellingImport(false);
     setImportProgress({
@@ -348,7 +357,7 @@ export default function AdminYouTubeSyncMobilePage() {
   const handleCancelImport = () => {
     setIsCancellingImport(true);
     cancelImportRef.current = true;
-    
+
     toast({
       title: "Cancelando importação",
       description: "Aguarde o vídeo atual terminar...",
@@ -424,9 +433,9 @@ export default function AdminYouTubeSyncMobilePage() {
           <div className="space-y-4">
             {/* Botões de ação */}
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={toggleAll}
                 className="flex-1"
                 data-testid="button-toggle-all"
@@ -494,12 +503,11 @@ export default function AdminYouTubeSyncMobilePage() {
 
                   <Button
                     onClick={applyBatchConfig}
-                    disabled={selectedVideos.size === 0}
-                    size="sm"
-                    data-testid="button-apply-batch"
                     className="w-full"
+                    size="sm"
+                    disabled={!batchConfig.categoryId}
                   >
-                    Aplicar configuração
+                    Aplicar configurações
                   </Button>
                 </div>
               </Card>
@@ -516,9 +524,9 @@ export default function AdminYouTubeSyncMobilePage() {
                 const isSelected = selectedVideos.has(video.id);
 
                 return (
-                  <Card 
-                    key={video.id} 
-                    data-video-id={video.id} 
+                  <Card
+                    key={video.id}
+                    data-video-id={video.id}
                     className={`p-4 ${isSelected ? 'border-primary' : ''}`}
                   >
                     <div className="space-y-3">
@@ -558,7 +566,7 @@ export default function AdminYouTubeSyncMobilePage() {
                             value={config.categoryId}
                             onValueChange={(value) => updateIndividualConfig(video.id, { categoryId: value })}
                           >
-                            <SelectTrigger 
+                            <SelectTrigger
                               className={`text-xs ${validationErrors.has(video.id) ? 'border-destructive' : ''}`}
                               data-testid={`select-category-${video.id}`}
                             >
