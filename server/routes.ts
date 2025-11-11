@@ -200,29 +200,37 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ error: "videoId é obrigatório" });
       }
 
-      // Buscar vídeos que contenham este videoId na URL
-      const existingVideos = await db
-        .select()
-        .from(videos)
-        .where(eq(videos.videoUrl, videoId));
-
-      // Também verificar URLs completas do YouTube
-      const allVideos = await db.select().from(videos);
-      const exists = allVideos.some(video => {
-        if (!video.videoUrl) return false;
+      // Função auxiliar para extrair ID do YouTube de uma URL
+      const extractYouTubeId = (url: string): string | null => {
+        if (!url) return null;
         
-        // Verificar se a URL contém o videoId
         const patterns = [
-          new RegExp(`[?&]v=${videoId}(?:&|$)`),
-          new RegExp(`youtu\\.be/${videoId}(?:\\?|$)`),
-          new RegExp(`embed/${videoId}(?:\\?|$)`),
-          new RegExp(`v/${videoId}(?:\\?|$)`)
+          /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
+          /(?:youtu\.be\/)([^&\n?#\?]+)/,
+          /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
+          /(?:youtube\.com\/v\/)([^&\n?#\?]+)/,
         ];
         
-        return patterns.some(pattern => pattern.test(video.videoUrl));
+        for (const pattern of patterns) {
+          const match = url.match(pattern);
+          if (match && match[1]) {
+            // Limpar qualquer parâmetro adicional
+            return match[1].split('?')[0].split('&')[0].trim();
+          }
+        }
+        return null;
+      };
+
+      // Buscar todos os vídeos do banco
+      const allVideos = await db.select().from(videos);
+      
+      // Verificar se algum vídeo tem o mesmo ID do YouTube
+      const exists = allVideos.some(video => {
+        const existingVideoId = extractYouTubeId(video.videoUrl || '');
+        return existingVideoId === videoId;
       });
 
-      res.json({ exists: exists || existingVideos.length > 0 });
+      res.json({ exists });
     } catch (error) {
       console.error("Erro ao verificar vídeo existente:", error);
       res.status(500).json({ error: "Erro ao verificar vídeo" });
