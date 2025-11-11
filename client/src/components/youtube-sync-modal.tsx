@@ -97,12 +97,19 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
     try {
       console.log('🔄 Iniciando sincronização com canal:', channelIdParam);
       
-      const response = await apiRequest<{
+      const res = await apiRequest("POST", "/api/youtube/sync", { channelId: channelIdParam.trim() });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: 'Erro ao sincronizar' }));
+        throw new Error(errorData.message || `Erro HTTP ${res.status}`);
+      }
+      
+      const response = await res.json() as {
         totalChannelVideos: number;
         existingVideos: number;
         newVideos: number;
         videos: YouTubeVideo[];
-      }>("POST", "/api/youtube/sync", { channelId: channelIdParam.trim() });
+      };
 
       console.log('✅ Resposta da sincronização:', response);
 
@@ -157,7 +164,14 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
           isExclusive: batchConfig.isExclusive,
         }));
 
-      return await apiRequest("POST", "/api/videos/import-batch", { videos: videosToImport });
+      const res = await apiRequest("POST", "/api/videos/import-batch", { videos: videosToImport });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: 'Erro ao importar vídeos' }));
+        throw new Error(errorData.message || `Erro HTTP ${res.status}`);
+      }
+      
+      return await res.json();
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
