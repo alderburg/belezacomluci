@@ -360,10 +360,9 @@ export function YouTubeSyncContent({
                           onValueChange={(value) => setBatchConfig({ ...batchConfig, categoryId: value })}
                         >
                           <SelectTrigger id="batch-category" data-testid="select-batch-category" className="h-9">
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder="Selecione uma categoria" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Nenhuma</SelectItem>
                             {categories?.map((cat) => (
                               <SelectItem key={cat.id} value={cat.id}>
                                 {cat.title}
@@ -447,10 +446,9 @@ export function YouTubeSyncContent({
                                   onValueChange={(value) => updateIndividualConfig(video.id, { categoryId: value })}
                                 >
                                   <SelectTrigger className="h-8 text-xs" data-testid={`select-category-${video.id}`}>
-                                    <SelectValue placeholder="Nenhuma" />
+                                    <SelectValue placeholder="Selecione uma categoria" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="">Nenhuma</SelectItem>
                                     {categories?.map((cat) => (
                                       <SelectItem key={cat.id} value={cat.id}>
                                         {cat.title}
