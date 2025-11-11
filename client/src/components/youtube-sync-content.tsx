@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,6 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Youtube, CheckCircle2, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { VideoImportProgressModal } from "@/components/video-import-progress-modal";
 
 interface YouTubeVideo {
   id: string;
@@ -62,6 +63,20 @@ export function YouTubeSyncContent({
   });
 
   const [individualConfigs, setIndividualConfigs] = useState<Map<string, VideoConfig>>(new Map());
+
+  // Estados do modal de progresso de importação
+  const [showImportProgress, setShowImportProgress] = useState(false);
+  const [importProgress, setImportProgress] = useState({
+    currentIndex: 0,
+    importedCount: 0,
+    failedCount: 0,
+    currentVideo: null as YouTubeVideo | null,
+  });
+  const [isCancellingImport, setIsCancellingImport] = useState(false);
+  const cancelImportRef = useRef(false);
+
+  // Estado para rastrear erros de validação
+  const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set());
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -163,66 +178,176 @@ export function YouTubeSyncContent({
       });
     });
     setIndividualConfigs(newConfigs);
+    
+    // Limpar erros de validação para vídeos que agora têm categoria
+    if (batchConfig.categoryId) {
+      setValidationErrors(prev => {
+        const newErrors = new Set(prev);
+        selectedVideos.forEach(videoId => {
+          newErrors.delete(videoId);
+        });
+        return newErrors;
+      });
+    }
+    
     toast({
       title: "Configuração aplicada",
       description: `Configurações aplicadas a ${selectedVideos.size} vídeo(s) selecionado(s)`,
     });
   };
 
-  const importMutation = useMutation({
-    mutationFn: async () => {
-      if (!syncedVideos || syncedVideos.length === 0) {
-        throw new Error("Nenhum vídeo para importar");
-      }
+  const importVideosSequentially = async () => {
+    if (!syncedVideos || syncedVideos.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Nenhum vídeo para importar",
+      });
+      return;
+    }
 
-      // Validar se todos os vídeos selecionados têm categoria
-      const videosWithoutCategory = Array.from(selectedVideos).filter(videoId => {
-        const config = getVideoConfig(videoId);
-        return !config.categoryId || config.categoryId.trim() === '';
+    // Validar se todos os vídeos selecionados têm categoria
+    const videosWithoutCategory = Array.from(selectedVideos).filter(videoId => {
+      const config = getVideoConfig(videoId);
+      return !config.categoryId || config.categoryId.trim() === '';
+    });
+
+    if (videosWithoutCategory.length > 0) {
+      const description = videosWithoutCategory.length === 1
+        ? 'Por favor, verifique o vídeo selecionado e escolha uma categoria antes de importar.'
+        : `Por favor, verifique os ${videosWithoutCategory.length} vídeos selecionados e escolha uma categoria para cada um antes de importar.`;
+      
+      // Marcar vídeos com erro de validação
+      setValidationErrors(new Set(videosWithoutCategory));
+      
+      toast({
+        variant: "destructive",
+        title: "O campo Categoria é obrigatório",
+        description,
       });
 
-      if (videosWithoutCategory.length > 0) {
-        const message = videosWithoutCategory.length === 1
-          ? 'O campo Categoria é obrigatório. Por favor, verifique o vídeo selecionado e escolha uma categoria antes de importar.'
-          : `O campo Categoria é obrigatório. Por favor, verifique os ${videosWithoutCategory.length} vídeos selecionados e escolha uma categoria para cada um antes de importar.`;
-        throw new Error(message);
+      // Rolar até o primeiro vídeo sem categoria
+      const firstVideoWithoutCategory = videosWithoutCategory[0];
+      const element = document.querySelector(`[data-video-id="${firstVideoWithoutCategory}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Dar foco no select de categoria
+        setTimeout(() => {
+          const selectTrigger = element.querySelector('[data-testid^="select-category-"]') as HTMLElement;
+          if (selectTrigger) {
+            selectTrigger.focus();
+          }
+        }, 500);
+      }
+      
+      return;
+    }
+
+    const videosToImport = syncedVideos.filter(video => selectedVideos.has(video.id));
+    
+    // Resetar estado de progresso e cancelamento
+    cancelImportRef.current = false;
+    setIsCancellingImport(false);
+    setImportProgress({
+      currentIndex: 0,
+      importedCount: 0,
+      failedCount: 0,
+      currentVideo: null,
+    });
+    setShowImportProgress(true);
+
+    let importedCount = 0;
+    let failedCount = 0;
+
+    for (let i = 0; i < videosToImport.length; i++) {
+      // Verificar se o usuário cancelou
+      if (cancelImportRef.current) {
+        toast({
+          title: "Importação cancelada",
+          description: `${importedCount} vídeo(s) importado(s) com sucesso. ${videosToImport.length - i} restante(s) não foram importados.`,
+        });
+        break;
       }
 
-      const videosToImport = syncedVideos
-        .filter(video => selectedVideos.has(video.id))
-        .map(video => {
-          const config = getVideoConfig(video.id);
-          return {
-            title: video.title,
-            description: video.description,
-            videoUrl: video.videoUrl,
-            thumbnailUrl: video.thumbnailUrl,
-            duration: video.duration,
-            type: "video",
-            categoryId: config.categoryId,
-            isExclusive: config.isExclusive,
-          };
+      const video = videosToImport[i];
+      const config = getVideoConfig(video.id);
+
+      // Atualizar progresso
+      setImportProgress({
+        currentIndex: i + 1,
+        importedCount,
+        failedCount,
+        currentVideo: video,
+      });
+
+      try {
+        const res = await apiRequest("POST", "/api/videos", {
+          title: video.title,
+          description: video.description,
+          videoUrl: video.videoUrl,
+          thumbnailUrl: video.thumbnailUrl,
+          duration: video.duration,
+          type: "video",
+          categoryId: config.categoryId,
+          isExclusive: config.isExclusive,
         });
 
-      const res = await apiRequest("POST", "/api/videos/import-batch", { videos: videosToImport });
+        if (!res.ok) {
+          throw new Error(`Erro ao importar: ${video.title}`);
+        }
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: 'Erro ao importar vídeos' }));
-        throw new Error(errorData.message || `Erro HTTP ${res.status}`);
+        importedCount++;
+      } catch (error) {
+        console.error(`Erro ao importar vídeo ${video.title}:`, error);
+        failedCount++;
+        setImportProgress(prev => ({
+          ...prev,
+          failedCount: prev.failedCount + 1,
+        }));
       }
 
-      return await res.json();
-    },
-    onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
-      toast({
-        title: "Sucesso!",
-        description: data.message || "Vídeos importados com sucesso",
-      });
+      // Atualizar contador de importados
+      setImportProgress(prev => ({
+        ...prev,
+        importedCount,
+      }));
+    }
+
+    // Finalizar importação
+    setShowImportProgress(false);
+    queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+
+    if (!cancelImportRef.current) {
+      if (failedCount === 0) {
+        toast({
+          title: "Sucesso!",
+          description: `${importedCount} vídeo(s) importado(s) com sucesso!`,
+        });
+      } else {
+        toast({
+          title: "Importação concluída com erros",
+          description: `${importedCount} vídeo(s) importado(s), ${failedCount} falha(s).`,
+        });
+      }
       onSuccess?.();
       resetState();
-    },
+    }
+  };
+
+  const handleCancelImport = () => {
+    setIsCancellingImport(true);
+    cancelImportRef.current = true;
+    
+    toast({
+      title: "Cancelando importação",
+      description: "Aguarde o vídeo atual terminar...",
+    });
+  };
+
+  const importMutation = useMutation({
+    mutationFn: importVideosSequentially,
     onError: (error: Error) => {
+      setShowImportProgress(false);
       toast({
         variant: "destructive",
         title: "Erro",
@@ -278,6 +403,15 @@ export function YouTubeSyncContent({
     const newConfigs = new Map(individualConfigs);
     newConfigs.set(videoId, { ...currentConfig, ...config });
     setIndividualConfigs(newConfigs);
+    
+    // Limpar erro de validação quando o usuário selecionar uma categoria
+    if (config.categoryId) {
+      setValidationErrors(prev => {
+        const newErrors = new Set(prev);
+        newErrors.delete(videoId);
+        return newErrors;
+      });
+    }
   };
 
   const handleCancel = () => {
@@ -385,7 +519,6 @@ export function YouTubeSyncContent({
                             ))}
                           </SelectContent>
                         </Select>
-                        <p className="text-xs text-muted-foreground">Campo obrigatório</p>
                       </div>
 
                       <div className="space-y-2">
@@ -423,7 +556,7 @@ export function YouTubeSyncContent({
                     const isSelected = selectedVideos.has(video.id);
 
                     return (
-                      <Card key={video.id} className={`p-4 ${isSelected ? 'border-primary' : ''}`}>
+                      <Card key={video.id} data-video-id={video.id} className={`p-4 ${isSelected ? 'border-primary' : ''}`}>
                         <div className="flex gap-4">
                           <div className="flex gap-3 items-start">
                             <Checkbox
@@ -463,7 +596,10 @@ export function YouTubeSyncContent({
                                   value={config.categoryId}
                                   onValueChange={(value) => updateIndividualConfig(video.id, { categoryId: value })}
                                 >
-                                  <SelectTrigger className="h-8 text-xs" data-testid={`select-category-${video.id}`}>
+                                  <SelectTrigger 
+                                    className={`h-8 text-xs ${validationErrors.has(video.id) ? 'border-destructive' : ''}`}
+                                    data-testid={`select-category-${video.id}`}
+                                  >
                                     <SelectValue placeholder="Nenhuma" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -474,6 +610,9 @@ export function YouTubeSyncContent({
                                     ))}
                                   </SelectContent>
                                 </Select>
+                                {validationErrors.has(video.id) && (
+                                  <p className="text-xs text-destructive">Categoria obrigatório</p>
+                                )}
                               </div>
 
                               <div className="space-y-1">
@@ -560,6 +699,19 @@ export function YouTubeSyncContent({
           )}
         </div>
       ) : null}
+
+      {/* Modal de Progresso de Importação */}
+      <VideoImportProgressModal
+        open={showImportProgress}
+        totalVideos={Array.from(selectedVideos).length}
+        currentVideoIndex={importProgress.currentIndex}
+        currentVideoTitle={importProgress.currentVideo?.title || "Preparando..."}
+        currentVideoThumbnail={importProgress.currentVideo?.thumbnailUrl || ""}
+        importedCount={importProgress.importedCount}
+        failedCount={importProgress.failedCount}
+        onCancel={handleCancelImport}
+        isCancelling={isCancellingImport}
+      />
     </div>
   );
 }
