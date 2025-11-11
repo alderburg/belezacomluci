@@ -4,7 +4,7 @@ import {
   Video, Product, Coupon, Banner, Popup, User, Notification, Category,
   insertVideoSchema, insertProductSchema, insertCouponSchema, insertBannerSchema, insertPopupSchema, insertNotificationSchema, insertCategorySchema
 } from "@shared/schema";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Edit2, Trash2, Play, Download, Tag, Image, BarChart3, Eye, Users, Search, Filter, ChevronLeft, ChevronRight, Bell, Send, Youtube } from "lucide-react";
+import { Plus, Edit, Edit2, Trash2, Play, Download, Tag, Image, BarChart3, Eye, Users, Search, Filter, ChevronLeft, ChevronRight, Bell, Send, Youtube, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -32,6 +32,7 @@ import { useEffect } from "react";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { ResourceSearchSelect } from "@/components/resource-search-select";
 import { AutoYouTubeCheck } from "@/components/auto-youtube-check";
+import { YouTubeSyncContent } from "@/components/youtube-sync-content";
 
 const createVideoSchema = insertVideoSchema;
 const createProductSchema = insertProductSchema;
@@ -147,7 +148,10 @@ export default function AdminPage() {
     }
   }, [location]);
 
-
+  // Resetar showSyncContent quando mudar de aba
+  useEffect(() => {
+    setShowSyncContent(false);
+  }, [activeTab]);
 
   // Estados para filtros e paginação dos usuários
   const [userSearchTerm, setUserSearchTerm] = useState("");
@@ -160,6 +164,8 @@ export default function AdminPage() {
   const [videoSearchTerm, setVideoSearchTerm] = useState("");
   const [videoCurrentPage, setVideoCurrentPage] = useState(1);
   const [videoItemsPerPage, setVideoItemsPerPage] = useState(10);
+  const [showSyncContent, setShowSyncContent] = useState(false);
+  const refreshVideosCheckRef = useRef<(() => void) | null>(null);
 
   const [productSearchTerm, setProductSearchTerm] = useState("");
   const [productCurrentPage, setProductCurrentPage] = useState(1);
@@ -3519,27 +3525,80 @@ export default function AdminPage() {
               <TabsContent value="videos">
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between mb-4">
-                      <CardTitle className="flex items-center gap-2">
-                        <Play className="w-5 h-5" />
-                        Gerenciar Vídeos
-                      </CardTitle>
-                      <AutoYouTubeCheck />
-                    </div>
+                    {showSyncContent ? (
+                      <>
+                        <div className="flex items-center justify-between mb-4">
+                          <CardTitle className="flex items-center gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => {
+                                setShowSyncContent(false);
+                                if (refreshVideosCheckRef.current) {
+                                  refreshVideosCheckRef.current();
+                                }
+                              }}
+                              data-testid="button-back-to-list"
+                              className="h-9 w-9 -ml-2"
+                            >
+                              <ArrowLeft className="h-4 w-4" />
+                            </Button>
+                            <Youtube className="w-5 h-5" />
+                            Sincronizar com YouTube
+                          </CardTitle>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between mb-4">
+                          <CardTitle className="flex items-center gap-2">
+                            <Play className="w-5 h-5" />
+                            Gerenciar Vídeos
+                          </CardTitle>
+                          {!isMobile && (
+                            <AutoYouTubeCheck 
+                              mode="inline"
+                              onSyncClick={() => setShowSyncContent(true)}
+                              onRefreshReady={(refreshFn) => {
+                                refreshVideosCheckRef.current = refreshFn;
+                              }}
+                            />
+                          )}
+                        </div>
 
-                    {/* Campo de Pesquisa */}
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input
-                        placeholder="Pesquisar vídeos por título ou descrição..."
-                        value={videoSearchTerm}
-                        onChange={(e) => setVideoSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
+                        {/* Campo de Pesquisa */}
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                          <Input
+                            placeholder="Pesquisar vídeos por título ou descrição..."
+                            value={videoSearchTerm}
+                            onChange={(e) => setVideoSearchTerm(e.target.value)}
+                            className="pl-10"
+                          />
+                        </div>
+                      </>
+                    )}
                   </CardHeader>
                   <CardContent>
-                    {videosLoading ? (
+                    {showSyncContent ? (
+                      <YouTubeSyncContent
+                        mode="inline"
+                        onCancel={() => {
+                          setShowSyncContent(false);
+                          if (refreshVideosCheckRef.current) {
+                            refreshVideosCheckRef.current();
+                          }
+                        }}
+                        onSuccess={() => {
+                          setShowSyncContent(false);
+                          queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+                          if (refreshVideosCheckRef.current) {
+                            refreshVideosCheckRef.current();
+                          }
+                        }}
+                        initialSync={true}
+                      />
+                    ) : videosLoading ? (
                       <div className="space-y-4">
                         {Array.from({ length: videoItemsPerPage }).map((_, i) => (
                           <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
