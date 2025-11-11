@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Youtube, CheckCircle2 } from "lucide-react";
+import { Loader2, Youtube, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 interface YouTubeVideo {
@@ -29,6 +31,11 @@ interface Category {
   title: string;
 }
 
+interface VideoConfig {
+  categoryId: string;
+  isExclusive: boolean;
+}
+
 export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [syncedVideos, setSyncedVideos] = useState<YouTubeVideo[]>([]);
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
@@ -36,11 +43,19 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
   const [syncComplete, setSyncComplete] = useState(false);
   const [hasAttemptedSync, setHasAttemptedSync] = useState(false);
 
+  // Estados de paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Configuração em lote (padrão para todos)
   const [batchConfig, setBatchConfig] = useState({
     type: "video",
     categoryId: "",
     isExclusive: false,
   });
+
+  // Configurações individuais por vídeo
+  const [individualConfigs, setIndividualConfigs] = useState<Map<string, VideoConfig>>(new Map());
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -145,6 +160,22 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
     }
   };
 
+  // Aplicar configuração em lote a todos os vídeos selecionados
+  const applyBatchConfig = () => {
+    const newConfigs = new Map(individualConfigs);
+    selectedVideos.forEach(videoId => {
+      newConfigs.set(videoId, {
+        categoryId: batchConfig.categoryId,
+        isExclusive: batchConfig.isExclusive,
+      });
+    });
+    setIndividualConfigs(newConfigs);
+    toast({
+      title: "Configuração aplicada",
+      description: `Configurações aplicadas a ${selectedVideos.size} vídeo(s) selecionado(s)`,
+    });
+  };
+
   const importMutation = useMutation({
     mutationFn: async () => {
       if (!syncedVideos || syncedVideos.length === 0) {
@@ -153,16 +184,19 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
       
       const videosToImport = syncedVideos
         .filter(video => selectedVideos.has(video.id))
-        .map(video => ({
-          title: video.title,
-          description: video.description,
-          videoUrl: video.videoUrl,
-          thumbnailUrl: video.thumbnailUrl,
-          duration: video.duration,
-          type: batchConfig.type,
-          categoryId: batchConfig.categoryId || null,
-          isExclusive: batchConfig.isExclusive,
-        }));
+        .map(video => {
+          const config = getVideoConfig(video.id);
+          return {
+            title: video.title,
+            description: video.description,
+            videoUrl: video.videoUrl,
+            thumbnailUrl: video.thumbnailUrl,
+            duration: video.duration,
+            type: "video", // Sempre vídeo
+            categoryId: config.categoryId || null,
+            isExclusive: config.isExclusive,
+          };
+        });
 
       const res = await apiRequest("POST", "/api/videos/import-batch", { videos: videosToImport });
       
@@ -217,11 +251,29 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
     setSyncComplete(false);
     setIsSyncing(false);
     setHasAttemptedSync(false);
+    setCurrentPage(1);
+    setIndividualConfigs(new Map());
     setBatchConfig({
       type: "video",
       categoryId: "",
       isExclusive: false,
     });
+  };
+
+  // Função para obter a configuração de um vídeo (individual ou em lote)
+  const getVideoConfig = (videoId: string): VideoConfig => {
+    return individualConfigs.get(videoId) || {
+      categoryId: batchConfig.categoryId,
+      isExclusive: batchConfig.isExclusive,
+    };
+  };
+
+  // Função para atualizar configuração individual de um vídeo
+  const updateIndividualConfig = (videoId: string, config: Partial<VideoConfig>) => {
+    const currentConfig = getVideoConfig(videoId);
+    const newConfigs = new Map(individualConfigs);
+    newConfigs.set(videoId, { ...currentConfig, ...config });
+    setIndividualConfigs(newConfigs);
   };
 
   const handleClose = () => {
@@ -232,6 +284,11 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
   // Estados de loading
   const isLoading = isAuthLoading || isLoadingChannelId || (isSyncing && !syncComplete);
   const hasVideos = syncedVideos && syncedVideos.length > 0;
+
+  // Cálculos de paginação
+  const totalPages = Math.ceil(syncedVideos.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentVideos = syncedVideos.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -272,51 +329,9 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
           <div className="flex-1 flex flex-col min-h-0 space-y-4 py-4">
             {hasVideos ? (
               <>
-                <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
-                  <div className="space-y-2">
-                    <Label>Tipo de Conteúdo</Label>
-                    <Select value={batchConfig.type} onValueChange={(value) => setBatchConfig({ ...batchConfig, type: value })}>
-                      <SelectTrigger data-testid="select-type">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="video">Vídeo</SelectItem>
-                        <SelectItem value="playlist">Playlist</SelectItem>
-                        <SelectItem value="live">Live</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Categoria (Opcional)</Label>
-                    <Select value={batchConfig.categoryId} onValueChange={(value) => setBatchConfig({ ...batchConfig, categoryId: value })}>
-                      <SelectTrigger data-testid="select-category">
-                        <SelectValue placeholder="Selecione uma categoria" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Nenhuma</SelectItem>
-                        {categories?.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="isExclusive"
-                      checked={batchConfig.isExclusive}
-                      onCheckedChange={(checked) => setBatchConfig({ ...batchConfig, isExclusive: checked as boolean })}
-                      data-testid="checkbox-exclusive"
-                    />
-                    <Label htmlFor="isExclusive" className="cursor-pointer">
-                      Conteúdo exclusivo (somente para assinantes)
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t">
+                {/* Cabeçalho com seleção e configuração em lote */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
                       {selectedVideos.size} de {syncedVideos.length} vídeos selecionados
                     </span>
@@ -324,46 +339,197 @@ export function YouTubeSyncModal({ isOpen, onClose }: { isOpen: boolean; onClose
                       {selectedVideos.size === syncedVideos.length ? "Desmarcar todos" : "Selecionar todos"}
                     </Button>
                   </div>
-                </div>
 
-                <ScrollArea className="flex-1 -mx-6 px-6">
-                  <div className="space-y-2">
-                    {syncedVideos.map((video) => (
-                      <div
-                        key={video.id}
-                        className={`flex gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
-                          selectedVideos.has(video.id) ? "bg-primary/10 border-primary" : "bg-card hover:bg-muted/50"
-                        }`}
-                        onClick={() => toggleVideo(video.id)}
-                        data-testid={`video-item-${video.id}`}
-                      >
-                        <Checkbox
-                          checked={selectedVideos.has(video.id)}
-                          onCheckedChange={() => toggleVideo(video.id)}
-                        />
-                        <img
-                          src={video.thumbnailUrl}
-                          alt={video.title}
-                          className="w-32 h-20 rounded-md object-cover flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm line-clamp-1">{video.title}</h4>
-                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                            {video.description || "Sem descrição"}
-                          </p>
-                          <div className="flex gap-2 mt-2">
-                            <Badge variant="outline" className="text-xs">
-                              {video.duration}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {new Date(video.publishedAt).toLocaleDateString("pt-BR")}
-                            </Badge>
+                  {/* Configuração em lote */}
+                  <Card className="p-4">
+                    <div className="flex flex-col gap-3">
+                      <h3 className="text-sm font-medium">Aplicar a todos os selecionados:</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                        <div className="space-y-2">
+                          <Label htmlFor="batch-category" className="text-xs">Categoria</Label>
+                          <Select 
+                            value={batchConfig.categoryId} 
+                            onValueChange={(value) => setBatchConfig({ ...batchConfig, categoryId: value })}
+                          >
+                            <SelectTrigger id="batch-category" data-testid="select-batch-category" className="h-9">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Nenhuma</SelectItem>
+                              {categories?.map((cat) => (
+                                <SelectItem key={cat.id} value={cat.id}>
+                                  {cat.title}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="batch-exclusive" className="text-xs">Exclusivo</Label>
+                          <div className="flex items-center space-x-2 h-9">
+                            <Switch
+                              id="batch-exclusive"
+                              checked={batchConfig.isExclusive}
+                              onCheckedChange={(checked) => setBatchConfig({ ...batchConfig, isExclusive: checked })}
+                              data-testid="switch-batch-exclusive"
+                            />
+                            <span className="text-xs text-muted-foreground">
+                              {batchConfig.isExclusive ? "Sim" : "Não"}
+                            </span>
                           </div>
                         </div>
+
+                        <Button 
+                          onClick={applyBatchConfig} 
+                          disabled={selectedVideos.size === 0}
+                          size="sm"
+                          data-testid="button-apply-batch"
+                        >
+                          Aplicar
+                        </Button>
                       </div>
-                    ))}
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Lista de vídeos com edição inline */}
+                <ScrollArea className="flex-1 -mx-6 px-6" style={{ height: '400px' }}>
+                  <div className="space-y-3">
+                    {currentVideos.map((video) => {
+                      const config = getVideoConfig(video.id);
+                      const isSelected = selectedVideos.has(video.id);
+                      
+                      return (
+                        <Card key={video.id} className={`p-4 ${isSelected ? 'border-primary' : ''}`}>
+                          <div className="flex gap-4">
+                            {/* Checkbox e Thumbnail */}
+                            <div className="flex gap-3 items-start">
+                              <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={() => toggleVideo(video.id)}
+                                data-testid={`checkbox-video-${video.id}`}
+                              />
+                              <img
+                                src={video.thumbnailUrl}
+                                alt={video.title}
+                                className="w-40 h-24 rounded-md object-cover flex-shrink-0"
+                              />
+                            </div>
+
+                            {/* Informações e configurações */}
+                            <div className="flex-1 space-y-3">
+                              {/* Título e descrição */}
+                              <div>
+                                <h4 className="font-medium text-sm line-clamp-1">{video.title}</h4>
+                                <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
+                                  {video.description || "Sem descrição"}
+                                </p>
+                                <div className="flex gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {video.duration}
+                                  </Badge>
+                                  <Badge variant="outline" className="text-xs">
+                                    {new Date(video.publishedAt).toLocaleDateString("pt-BR")}
+                                  </Badge>
+                                </div>
+                              </div>
+
+                              {/* Campos editáveis */}
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                  <Label className="text-xs text-muted-foreground">Categoria</Label>
+                                  <Select 
+                                    value={config.categoryId} 
+                                    onValueChange={(value) => updateIndividualConfig(video.id, { categoryId: value })}
+                                  >
+                                    <SelectTrigger className="h-8 text-xs" data-testid={`select-category-${video.id}`}>
+                                      <SelectValue placeholder="Nenhuma" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="">Nenhuma</SelectItem>
+                                      {categories?.map((cat) => (
+                                        <SelectItem key={cat.id} value={cat.id}>
+                                          {cat.title}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <Label className="text-xs text-muted-foreground">Conteúdo exclusivo</Label>
+                                  <div className="flex items-center space-x-2 h-8">
+                                    <Switch
+                                      checked={config.isExclusive}
+                                      onCheckedChange={(checked) => updateIndividualConfig(video.id, { isExclusive: checked })}
+                                      data-testid={`switch-exclusive-${video.id}`}
+                                    />
+                                    <span className="text-xs">
+                                      {config.isExclusive ? "Sim" : "Não"}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
                   </div>
                 </ScrollArea>
+
+                {/* Controles de paginação */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Mostrar:</span>
+                    <Select
+                      value={itemsPerPage.toString()}
+                      onValueChange={(value) => {
+                        setItemsPerPage(Number(value));
+                        setCurrentPage(1);
+                      }}
+                    >
+                      <SelectTrigger className="w-20" data-testid="select-items-per-page">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="25">25</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span className="text-sm text-muted-foreground">por página</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage <= 1}
+                      data-testid="button-previous-page"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Anterior
+                    </Button>
+
+                    <div className="text-sm text-muted-foreground px-3">
+                      {currentPage}/{totalPages}
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage >= totalPages}
+                      data-testid="button-next-page"
+                    >
+                      Próximo
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
