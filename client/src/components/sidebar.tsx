@@ -185,49 +185,46 @@ export default function Sidebar() {
           {/* Navigation Menu */}
           <nav className="flex-1 px-4 py-6 space-y-2">
             {navItems.map((item) => {
-              const Icon = item.icon;
-              let isActive = location === item.href;
+              const IconComponent = item.icon;
+              let isActive = false;
 
-              // Lógica especial para Vídeos Exclusivos e Produtos Digitais
-              // Verifica se a rota atual começa com o caminho do item
-              if (item.href === "/videos") {
-                isActive = location === "/videos" || location.startsWith("/videos/");
-              } else if (item.href === "/produtos") {
-                isActive = location === "/produtos" || location.startsWith("/produtos/");
+              // Special handling for admin routes - considerar qualquer rota que comece com /admin
+              if (item.href === '/admin') {
+                isActive = location.startsWith('/admin');
+              } else {
+                isActive = location === item.href;
+              }
+
+              // Don't show admin item if not admin
+              if (item.href === '/admin' && !user?.isAdmin) {
+                return null;
               }
 
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "nav-item flex items-center rounded-lg text-sm font-medium transition-colors cursor-pointer relative",
-                    isCollapsed && !isMobile
-                      ? "justify-center px-3 py-3"
-                      : "space-x-3 px-4 py-3",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-foreground hover:bg-muted"
-                  )}
-                  data-testid={`nav-${item.href.slice(1) || 'home'}`}
-                  title={isCollapsed && !isMobile ? item.label : undefined}
-                >
-                  <div className="relative">
-                    <Icon className={cn(
-                      "w-5 h-5",
-                      item.href === "/cheirosas" && "cheirosas-icon"
+                <Link key={item.href} href={item.href}>
+                  <a
+                    className={cn(
+                      "flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ease-in-out",
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      isCollapsed && !isMobile && "justify-center px-2"
+                    )}
+                    data-testid={`nav-link-${item.href.replace(/\//g, '-')}`}
+                  >
+                    <IconComponent className={cn(
+                      "w-5 h-5 transition-all duration-300 ease-in-out",
+                      isActive ? "text-primary-foreground" : ""
                     )} />
-                  </div>
-                  {(!isCollapsed || isMobile) && (
-                    <div className={cn(
-                      "flex items-center justify-between w-full transition-all duration-300 ease-in-out relative",
-                      !isMobile ? (isCollapsed ? "opacity-0 transform translate-x-[-10px]" : "opacity-100 transform translate-x-0 delay-150") : "opacity-100"
-                    )}>
+                    {(!isCollapsed || isMobile) && (
                       <span className={cn(
-                        item.href === "/cheirosas" && "cheirosas-text"
-                      )}>{item.label}</span>
-                    </div>
-                  )}
+                        "font-medium transition-all duration-300 ease-in-out",
+                        !isMobile ? (isCollapsed ? "opacity-0 transform translate-x-[-10px]" : "opacity-100 transform translate-x-0 delay-150") : "opacity-100"
+                      )}>
+                        {item.label}
+                      </span>
+                    )}
+                  </a>
                 </Link>
               );
             })}
