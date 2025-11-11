@@ -105,8 +105,8 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
 
   if (channelLoading || isChecking) {
     return (
-      <div className={`flex flex-col gap-2 ${mode === "inline" ? "w-full" : "w-auto"}`}>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
+      <div className="flex flex-col gap-2 w-full">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span>Verificando atualizações...</span>
         </div>
@@ -129,7 +129,7 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
         variant="default"
         size="sm"
         onClick={handleConfigClick}
-        className={`flex items-center gap-2 bg-primary hover:bg-primary/90 whitespace-nowrap ${mode === "inline" ? "w-full justify-center" : "w-auto"}`}
+        className={`flex items-center gap-2 bg-primary hover:bg-primary/90 ${mode === "inline" ? "w-full" : ""}`}
         data-testid="button-config-apis"
       >
         <Youtube className="h-4 w-4" />
@@ -154,7 +154,7 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
           variant="default"
           size="sm"
           onClick={handleSyncClick}
-          className={`relative flex items-center gap-2 bg-primary hover:bg-primary/90 animate-pulse whitespace-nowrap ${mode === "inline" ? "w-full justify-center" : "w-auto"}`}
+          className={`relative flex items-center gap-2 bg-primary hover:bg-primary/90 animate-pulse ${mode === "inline" ? "w-full justify-center" : ""}`}
           data-testid="button-sync-videos"
         >
           <Bell className="h-4 w-4 animate-bounce" />
@@ -184,7 +184,7 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
         variant="outline"
         size="sm"
         onClick={handleSyncClick}
-        className={`flex items-center gap-2 whitespace-nowrap ${mode === "inline" ? "w-full justify-center" : "w-auto"}`}
+        className={`flex items-center gap-2 ${mode === "inline" ? "w-full justify-center" : ""}`}
         data-testid="button-synced"
       >
         <CheckCircle2 className="h-4 w-4 text-green-600" />

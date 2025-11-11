@@ -178,7 +178,7 @@ export function YouTubeSyncContent({
       });
     });
     setIndividualConfigs(newConfigs);
-
+    
     // Limpar erros de validação para vídeos que agora têm categoria
     if (batchConfig.categoryId) {
       setValidationErrors(prev => {
@@ -189,7 +189,7 @@ export function YouTubeSyncContent({
         return newErrors;
       });
     }
-
+    
     toast({
       title: "Configuração aplicada",
       description: `Configurações aplicadas a ${selectedVideos.size} vídeo(s) selecionado(s)`,
@@ -216,10 +216,10 @@ export function YouTubeSyncContent({
       const description = videosWithoutCategory.length === 1
         ? 'Por favor, verifique o vídeo selecionado e escolha uma categoria antes de importar.'
         : `Por favor, verifique os ${videosWithoutCategory.length} vídeos selecionados e escolha uma categoria para cada um antes de importar.`;
-
+      
       // Marcar vídeos com erro de validação
       setValidationErrors(new Set(videosWithoutCategory));
-
+      
       toast({
         variant: "destructive",
         title: "O campo Categoria é obrigatório",
@@ -239,12 +239,12 @@ export function YouTubeSyncContent({
           }
         }, 500);
       }
-
+      
       return;
     }
 
     const videosToImport = syncedVideos.filter(video => selectedVideos.has(video.id));
-
+    
     // Resetar estado de progresso e cancelamento
     cancelImportRef.current = false;
     setIsCancellingImport(false);
@@ -337,7 +337,7 @@ export function YouTubeSyncContent({
   const handleCancelImport = () => {
     setIsCancellingImport(true);
     cancelImportRef.current = true;
-
+    
     toast({
       title: "Cancelando importação",
       description: "Aguarde o vídeo atual terminar...",
@@ -403,7 +403,7 @@ export function YouTubeSyncContent({
     const newConfigs = new Map(individualConfigs);
     newConfigs.set(videoId, { ...currentConfig, ...config });
     setIndividualConfigs(newConfigs);
-
+    
     // Limpar erro de validação quando o usuário selecionar uma categoria
     if (config.categoryId) {
       setValidationErrors(prev => {
@@ -446,8 +446,8 @@ export function YouTubeSyncContent({
           </p>
         </>
       )}
-
-
+      
+      
 
       {isLoading ? (
         <div className="space-y-4 py-12 text-center">
@@ -472,9 +472,9 @@ export function YouTubeSyncContent({
           {hasVideos ? (
             <>
               <div className="space-y-3">
-                <div className="flex items-center justify-end gap-4">
+                <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">
-                    {selectedVideos.size} de {syncedVideos.length} selecionados
+                    {selectedVideos.size} de {syncedVideos.length} vídeos selecionados
                   </span>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={toggleAll} data-testid="button-toggle-all">
@@ -542,12 +542,12 @@ export function YouTubeSyncContent({
                         <Label className="text-xs block invisible">Ação</Label>
                         <Button
                           onClick={applyBatchConfig}
-                          disabled={!batchConfig.categoryId}
+                          disabled={selectedVideos.size === 0}
                           size="sm"
                           data-testid="button-apply-batch"
                           className="h-9 w-full"
                         >
-                          Aplicar configurações aos selecionados
+                          Aplicar
                         </Button>
                       </div>
                     </div>
@@ -602,7 +602,7 @@ export function YouTubeSyncContent({
                                   value={config.categoryId}
                                   onValueChange={(value) => updateIndividualConfig(video.id, { categoryId: value })}
                                 >
-                                  <SelectTrigger
+                                  <SelectTrigger 
                                     className={`h-8 text-xs ${validationErrors.has(video.id) ? 'border-destructive' : ''}`}
                                     data-testid={`select-category-${video.id}`}
                                   >
