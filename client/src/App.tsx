@@ -61,6 +61,7 @@ import AdminCategoryFormMobilePage from "@/pages/admin-category-form-mobile-page
 import AdminVideoFormMobilePage from "@/pages/admin-video-form-mobile-page";
 import AdminProductFormMobilePage from "@/pages/admin-product-form-mobile-page";
 import AdminCouponFormMobilePage from "@/pages/admin-coupon-form-mobile-page";
+import AdminYouTubeSyncMobilePage from "@/pages/admin-youtube-sync-mobile-page";
 
 
 import { useNotificationsWebSocket } from './hooks/use-notifications-websocket';
@@ -96,9 +97,10 @@ function Router() {
       <ProtectedRoute path="/ajuda" component={AjudaMobilePage} />
       <ProtectedRoute path="/mobile-menu" component={MobileMenuPage} />
       <ProtectedRoute path="/admin" component={isMobile ? AdminMobilePage : AdminPage} />
+      <ProtectedRoute path="/admin/videos-mobile" component={AdminVideosMobilePage} />
+      <Route path="/admin/videos-mobile/youtube-sync" component={AdminYouTubeSyncMobilePage} />
       <ProtectedRoute path="/admin/videos-mobile/new" component={AdminVideoFormMobilePage} />
       <ProtectedRoute path="/admin/videos-mobile/edit/:id" component={AdminVideoFormMobilePage} />
-      <ProtectedRoute path="/admin/videos-mobile" component={AdminVideosMobilePage} />
       <ProtectedRoute path="/admin/videos" component={isMobile ? AdminVideosMobilePage : AdminPage} />
       <ProtectedRoute path="/admin/products-mobile/new" component={AdminProductFormMobilePage} />
       <ProtectedRoute path="/admin/products-mobile/edit/:id" component={AdminProductFormMobilePage} />
