@@ -129,7 +129,7 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
         variant="default"
         size="sm"
         onClick={handleConfigClick}
-        className={`flex items-center gap-2 bg-primary hover:bg-primary/90 ${mode === "inline" ? "w-full" : ""}`}
+        className={`flex items-center gap-2 bg-primary hover:bg-primary/90 ${mode === "inline" ? "w-full md:w-auto" : ""}`}
         data-testid="button-config-apis"
       >
         <Youtube className="h-4 w-4" />
@@ -154,7 +154,7 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
           variant="default"
           size="sm"
           onClick={handleSyncClick}
-          className={`relative flex items-center gap-2 bg-primary hover:bg-primary/90 animate-pulse ${mode === "inline" ? "w-full justify-center" : ""}`}
+          className={`relative flex items-center gap-2 bg-primary hover:bg-primary/90 animate-pulse ${mode === "inline" ? "w-full md:w-auto justify-center" : ""}`}
           data-testid="button-sync-videos"
         >
           <Bell className="h-4 w-4 animate-bounce" />
@@ -184,7 +184,7 @@ export function AutoYouTubeCheck({ onSyncClick, onRefreshReady, mode = "modal" }
         variant="outline"
         size="sm"
         onClick={handleSyncClick}
-        className={`flex items-center gap-2 ${mode === "inline" ? "w-full justify-center" : ""}`}
+        className={`flex items-center gap-2 ${mode === "inline" ? "w-full md:w-auto justify-center" : ""}`}
         data-testid="button-synced"
       >
         <CheckCircle2 className="h-4 w-4 text-green-600" />
