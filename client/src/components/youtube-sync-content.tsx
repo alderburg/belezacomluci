@@ -529,11 +529,8 @@ export function YouTubeSyncContent({
       ) : null}
 
       {/* Footer com botões */}
-      <div className="flex flex-row items-center justify-end gap-2 pt-4 border-t">
-        <Button variant="outline" onClick={handleCancel} data-testid="button-cancel">
-          {mode === "inline" ? "Voltar" : "Cancelar"}
-        </Button>
-        {syncComplete && hasVideos && (
+      {syncComplete && hasVideos && (
+        <div className="flex flex-row items-center justify-end gap-2 pt-4 border-t">
           <Button
             onClick={() => importMutation.mutate()}
             disabled={selectedVideos.size === 0 || importMutation.isPending}
@@ -548,8 +545,8 @@ export function YouTubeSyncContent({
               `Importar ${selectedVideos.size} vídeo${selectedVideos.size !== 1 ? "s" : ""}`
             )}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
