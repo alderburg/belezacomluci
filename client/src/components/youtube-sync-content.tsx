@@ -379,6 +379,22 @@ export function YouTubeSyncContent({
                       >
                         Aplicar
                       </Button>
+
+                      <Button
+                        onClick={() => importMutation.mutate()}
+                        disabled={selectedVideos.size === 0 || importMutation.isPending}
+                        size="sm"
+                        data-testid="button-import"
+                      >
+                        {importMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Importando...
+                          </>
+                        ) : (
+                          `Importar ${selectedVideos.size} vídeo${selectedVideos.size !== 1 ? "s" : ""}`
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </Card>
@@ -527,26 +543,6 @@ export function YouTubeSyncContent({
           )}
         </div>
       ) : null}
-
-      {/* Footer com botões */}
-      {syncComplete && hasVideos && (
-        <div className="flex flex-row items-center justify-end gap-2 pt-4 border-t">
-          <Button
-            onClick={() => importMutation.mutate()}
-            disabled={selectedVideos.size === 0 || importMutation.isPending}
-            data-testid="button-import"
-          >
-            {importMutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Importando...
-              </>
-            ) : (
-              `Importar ${selectedVideos.size} vídeo${selectedVideos.size !== 1 ? "s" : ""}`
-            )}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
