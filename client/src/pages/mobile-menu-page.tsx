@@ -4,6 +4,16 @@ import { useAdmin } from "@/contexts/admin-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useLocation } from "wouter";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
 import { 
@@ -15,7 +25,8 @@ import {
   Settings,
   ArrowLeft,
   ChevronRight,
-  Edit3
+  Edit3,
+  LogOut
 } from "lucide-react";
 
 interface MenuItem {
@@ -28,9 +39,10 @@ interface MenuItem {
 }
 
 export default function MobileMenuPage() {
-  const { user, logout } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const { viewMode } = useAdmin();
   const [, setLocation] = useLocation();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const menuItems: MenuItem[] = [
     {
@@ -93,6 +105,15 @@ export default function MobileMenuPage() {
 
   const handleEditProfile = () => {
     setLocation('/meuperfil');
+  };
+
+  const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = () => {
+    logoutMutation.mutate();
+    setShowLogoutDialog(false);
   };
 
   return (
@@ -198,6 +219,42 @@ export default function MobileMenuPage() {
           })}
         </div>
       </div>
+
+      {/* Logout Button */}
+      <div className="px-4 py-4">
+        <Button
+          onClick={handleLogout}
+          disabled={logoutMutation.isPending}
+          className="w-full bg-[#e92066] text-white hover:bg-[#d11a5a] h-12 rounded-xl"
+        >
+          <LogOut className="h-5 w-5 mr-2" />
+          {logoutMutation.isPending ? "Saindo..." : "Sair"}
+        </Button>
+      </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="mx-auto w-[calc(100vw-32px)] sm:max-w-sm rounded-2xl border-0 shadow-xl p-4">
+          <AlertDialogHeader className="text-center space-y-2">
+            <AlertDialogTitle>Confirmar saída</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja sair da sua conta? Você precisará fazer login novamente para acessar o conteúdo exclusivo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row items-center justify-center gap-2 mt-4 sm:space-y-0">
+            <AlertDialogCancel className="flex-1 h-10 rounded-xl flex items-center justify-center border border-input bg-background text-foreground hover:bg-muted mt-0">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmLogout}
+              disabled={logoutMutation.isPending}
+              className="flex-1 h-10 rounded-xl flex items-center justify-center bg-[#e92066] text-white hover:bg-[#d11a5a] disabled:opacity-50 disabled:cursor-not-allowed mt-0"
+            >
+              {logoutMutation.isPending ? "Saindo..." : "Sair"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Bottom Navigation */}
       <MobileBottomNav />
