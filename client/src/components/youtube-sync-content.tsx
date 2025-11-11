@@ -591,7 +591,7 @@ export function YouTubeSyncContent({
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-[1fr,auto] gap-3 items-end">
+                            <div className="grid grid-cols-1 sm:grid-cols-[1fr,auto] gap-3">
                               <div className="space-y-1">
                                 <Label className="text-xs text-muted-foreground">
                                   Categoria <span className="text-destructive">*</span>
@@ -631,6 +631,7 @@ export function YouTubeSyncContent({
                                     {config.isExclusive ? "Sim" : "Não"}
                                   </span>
                                 </div>
+                                <div className="h-5"></div>
                               </div>
                             </div>
                           </div>
