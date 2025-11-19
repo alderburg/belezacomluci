@@ -690,6 +690,15 @@ export default function AdminPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        
+        // Se for erro de vídeo duplicado, lançar com informações especiais
+        if (errorData.error === "duplicate_video") {
+          const error: any = new Error(errorData.message);
+          error.isDuplicate = true;
+          error.description = errorData.description;
+          throw error;
+        }
+        
         throw new Error(errorData.message || "Erro ao salvar vídeo");
       }
 
@@ -715,10 +724,16 @@ export default function AdminPage() {
 
       setIsCreatingItem(false);
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      // Marcar o campo de URL como erro
+      videoForm.setError("videoUrl", {
+        type: "manual",
+        message: error.isDuplicate ? "Vídeo já cadastrado anteriormente" : "URL inválida"
+      });
+
       toast({
-        title: "Erro",
-        description: error.message || "Falha ao salvar vídeo",
+        title: error.isDuplicate ? error.message : "Erro",
+        description: error.isDuplicate ? error.description : (error.message || "Falha ao salvar vídeo"),
         variant: "destructive",
       });
       setIsCreatingItem(false);

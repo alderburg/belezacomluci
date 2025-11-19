@@ -242,14 +242,14 @@ export function registerRoutes(app: Express): Server {
   // Função para extrair ID do YouTube de uma URL
   const extractYouTubeVideoId = (url: string): string | null => {
     if (!url) return null;
-    
+
     const patterns = [
       /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
       /(?:youtu\.be\/)([^&\n?#\?]+)/,
       /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
       /(?:youtube\.com\/v\/)([^&\n?#\?]+)/,
     ];
-    
+
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match && match[1]) {
@@ -268,7 +268,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const videoData = insertVideoSchema.parse(req.body);
-      
+
       // Verificar se o vídeo já está cadastrado
       const newVideoId = extractYouTubeVideoId(videoData.videoUrl);
       if (newVideoId) {
@@ -312,7 +312,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const videoData = insertVideoSchema.partial().parse(req.body);
-      
+
       // Se está alterando a URL, verificar se o novo vídeo já está cadastrado
       if (videoData.videoUrl) {
         const newVideoId = extractYouTubeVideoId(videoData.videoUrl);
@@ -445,7 +445,7 @@ export function registerRoutes(app: Express): Server {
   // YouTube sync endpoints
   app.post('/api/youtube/sync', async (req, res) => {
     console.log('📥 POST /api/youtube/sync - Autenticado:', req.isAuthenticated(), 'Admin:', req.user?.isAdmin);
-    
+
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
       console.log('❌ Acesso negado - usuário não é admin');
       return res.status(403).json({ message: "Admin access required" });
@@ -472,14 +472,14 @@ export function registerRoutes(app: Express): Server {
       // Função auxiliar para extrair ID do YouTube de uma URL
       const extractYouTubeId = (url: string): string | null => {
         if (!url) return null;
-        
+
         const patterns = [
           /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
           /(?:youtu\.be\/)([^&\n?#\?]+)/,
           /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
           /(?:youtube\.com\/v\/)([^&\n?#\?]+)/,
         ];
-        
+
         for (const pattern of patterns) {
           const match = url.match(pattern);
           if (match && match[1]) {
@@ -492,7 +492,7 @@ export function registerRoutes(app: Express): Server {
 
       // Criar set com IDs dos vídeos já cadastrados
       const existingVideoIds = new Set<string>();
-      
+
       existingVideos.forEach(v => {
         const videoId = extractYouTubeId(v.videoUrl || '');
         if (videoId) {
@@ -2193,7 +2193,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const playlistId = req.params.playlistId;
       const { getYoutubeApiKey, ApiCredentialsError } = await import('./lib/apiSettings');
-      
+
       let apiKey: string;
       try {
         apiKey = await getYoutubeApiKey();
@@ -2321,7 +2321,7 @@ export function registerRoutes(app: Express): Server {
       videoId = videoId.trim();
 
       const { getYoutubeApiKey, ApiCredentialsError } = await import('./lib/apiSettings');
-      
+
       let apiKey: string;
       try {
         apiKey = await getYoutubeApiKey();
@@ -2853,7 +2853,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   // ========== API SETTINGS ENDPOINTS ==========
-  
+
   // Get API settings (admin only)
   app.get("/api/api-settings", async (req, res) => {
     if (!req.isAuthenticated()) {
@@ -2866,7 +2866,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const settings = await db.select().from(apiSettings).limit(1);
-      
+
       if (!settings || settings.length === 0) {
         return res.json({
           googleClientId: "",
@@ -2896,9 +2896,9 @@ export function registerRoutes(app: Express): Server {
     try {
       const validatedData = insertApiSettingsSchema.parse(req.body);
       const { bustApiCredentialsCache } = await import('./lib/apiSettings');
-      
+
       const existingSettings = await db.select().from(apiSettings).limit(1);
-      
+
       if (existingSettings && existingSettings.length > 0) {
         await db.update(apiSettings)
           .set({
@@ -2918,14 +2918,14 @@ export function registerRoutes(app: Express): Server {
       res.json({ success: true, message: "API settings saved successfully" });
     } catch (error: any) {
       console.error("Error saving API settings:", error);
-      
+
       if (error.name === 'ZodError') {
         return res.status(400).json({ 
           error: "Validação falhou", 
           details: error.errors 
         });
       }
-      
+
       res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -2934,7 +2934,7 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/youtube-channel-id", async (req, res) => {
     try {
       const { getYoutubeChannelId, ApiCredentialsError } = await import('./lib/apiSettings');
-      
+
       try {
         const channelId = await getYoutubeChannelId();
         res.json({ channelId });
@@ -4234,7 +4234,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Endpoint temporário para popular banco com dados mockados
   app.post("/api/admin/seed-gamification", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
       return res.status(403).json({ message: "Admin access required" });
