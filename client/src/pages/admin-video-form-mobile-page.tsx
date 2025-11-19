@@ -137,12 +137,29 @@ export default function AdminVideoFormMobilePage() {
       });
       setLocation('/admin/videos-mobile');
     },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: error.message || (isEditing ? "Erro ao atualizar vídeo" : "Erro ao criar vídeo"),
-      });
+    onError: (error: any) => {
+      const errorData = error?.response?.data || error;
+      const isDuplicateVideo = errorData?.error === "duplicate_video";
+      
+      if (isDuplicateVideo) {
+        // Marcar o campo como erro
+        form.setError("videoUrl", {
+          type: "manual",
+          message: "Vídeo já cadastrado anteriormente"
+        });
+        
+        toast({
+          variant: "destructive",
+          title: "Este vídeo já foi cadastrado anteriormente!",
+          description: errorData.message || "Adicione o link de um novo vídeo para seu cadastro.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro ao salvar vídeo",
+          description: error.message || (isEditing ? "Erro ao atualizar vídeo" : "Erro ao criar vídeo"),
+        });
+      }
     },
   });
 
@@ -470,15 +487,17 @@ export default function AdminVideoFormMobilePage() {
               {...form.register("videoUrl")}
               placeholder="https://..."
               data-testid="input-video-url"
+              className={form.formState.errors.videoUrl ? "border-red-500 focus-visible:ring-red-500" : ""}
               onChange={(e) => {
                 form.setValue("videoUrl", e.target.value);
+                form.clearErrors("videoUrl"); // Limpar erro ao digitar
                 if (e.target.value) {
                   handleVideoUrlChange(e.target.value);
                 }
               }}
             />
             {form.formState.errors.videoUrl && (
-              <p className="text-sm text-destructive mt-1">{form.formState.errors.videoUrl.message}</p>
+              <p className="text-sm text-red-600 mt-1 font-medium">{form.formState.errors.videoUrl.message}</p>
             )}
           </div>
 

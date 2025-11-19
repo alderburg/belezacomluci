@@ -687,12 +687,12 @@ export default function AdminPage() {
       }
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/videos/${editingItem.id}` : "/api/videos", data);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Erro ao salvar vídeo");
       }
-      
+
       return response.json();
     },
     onSuccess: async () => {
@@ -2291,15 +2291,17 @@ export default function AdminPage() {
                             {...videoForm.register("videoUrl")}
                             placeholder="https://..."
                             data-testid="input-video-url"
+                            className={videoForm.formState.errors.videoUrl ? "border-red-500 focus-visible:ring-red-500" : ""}
                             onChange={(e) => {
                               videoForm.setValue("videoUrl", e.target.value);
+                              videoForm.clearErrors("videoUrl"); // Limpar erro ao digitar
                               if (e.target.value) {
                                 handleVideoUrlChange(e.target.value);
                               }
                             }}
                           />
                           {videoForm.formState.errors.videoUrl && (
-                            <p className="text-sm text-destructive mt-1">{videoForm.formState.errors.videoUrl.message}</p>
+                            <p className="text-sm text-red-600 mt-1 font-medium">{videoForm.formState.errors.videoUrl.message}</p>
                           )}
                         </div>
 
@@ -4001,10 +4003,9 @@ export default function AdminPage() {
                                       }
                                     }}
                                   />
-                                ) : null}
-                                <div className={`${coupon.coverImageUrl ? 'hidden' : ''}`}>
+                                ) : (
                                   <Tag className="w-6 h-6 text-muted-foreground" />
-                                </div>
+                                )}
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center space-x-2 mb-1">

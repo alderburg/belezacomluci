@@ -280,7 +280,8 @@ export function registerRoutes(app: Express): Server {
 
         if (duplicate) {
           return res.status(409).json({ 
-            message: "Este vídeo já está cadastrado no sistema. Verifique o link e tente novamente.",
+            error: "duplicate_video",
+            message: "Adicione o link de um novo vídeo para seu cadastro.",
             duplicateVideo: {
               id: duplicate.id,
               title: duplicate.title
@@ -326,7 +327,8 @@ export function registerRoutes(app: Express): Server {
 
           if (duplicate) {
             return res.status(409).json({ 
-              message: "Este vídeo já está cadastrado no sistema. Verifique o link e tente novamente.",
+              error: "duplicate_video",
+              message: "Adicione o link de um novo vídeo para seu cadastro.",
               duplicateVideo: {
                 id: duplicate.id,
                 title: duplicate.title
