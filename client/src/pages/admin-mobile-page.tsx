@@ -19,7 +19,9 @@ import {
   Bell,
   FolderTree,
   Users,
-  Eye
+  Eye,
+  Trophy,
+  BarChart3
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -107,6 +109,20 @@ export default function AdminMobilePage() {
       subtitle: "Gerenciar usuários do sistema",
       icon: Users,
       path: "/admin/users"
+    },
+    {
+      id: 'cheirosas',
+      title: 'Cheirosas',
+      subtitle: 'Sistema de gamificação',
+      icon: Trophy,
+      path: '/gerenciaseguidoras'
+    },
+    {
+      id: 'analytics',
+      title: 'Analytics',
+      subtitle: 'Métricas e estatísticas',
+      icon: BarChart3,
+      path: '/analytics'
     }
   ];
 
@@ -167,7 +183,7 @@ export default function AdminMobilePage() {
               <p className="text-sm text-muted-foreground mb-2">
                 Administrador
               </p>
-              
+
               {/* Seletor de Modo de Visualização */}
               <div className="flex items-center gap-2 bg-white/80 rounded-lg p-2 border border-pink-200">
                 <Eye className="w-4 h-4 text-muted-foreground" />

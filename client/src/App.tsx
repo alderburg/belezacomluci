@@ -127,8 +127,8 @@ function Router() {
       <ProtectedRoute path="/admin/categories-mobile" component={AdminCategoriesMobilePage} />
       <ProtectedRoute path="/admin/categories" component={isMobile ? AdminCategoriesMobilePage : AdminPage} />
       <ProtectedRoute path="/admin/users" component={isMobile ? AdminUsersMobilePage : AdminPage} />
-      <ProtectedRoute path="/admin/cheirosas" component={AdminCheirosasPage} />
-      <ProtectedRoute path="/admin/analytics" component={AdminAnalyticsPage} />
+      <ProtectedRoute path="/gerenciaseguidoras" component={AdminCheirosasPage} />
+      <ProtectedRoute path="/analytics" component={AdminAnalyticsPage} />
       <ProtectedRoute path="/perfil/configuracoes/apis" component={ApiSettingsPage} />
       <Route path="/bio" component={BioPage} />
       <Route path="/auth" component={AuthPage} />

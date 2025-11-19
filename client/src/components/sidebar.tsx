@@ -19,11 +19,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Heart, Home, Play, Download, Tag, Users, User,
-  Menu, X, Settings, Crown, LogOut, Shield, Eye, Sparkles, BarChart3
+  Menu, X, Settings, Crown, LogOut, Shield, Eye, Sparkles, BarChart3, Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdmin } from "@/contexts/admin-context";
 import { PopupSystem } from "@/components/popup-system";
+
+// Assuming SidebarMenuButton and other components are defined elsewhere and imported.
+// For this example, we'll mock SidebarMenuButton to make the code runnable.
+const SidebarMenuButton = ({ asChild, children }) => {
+  if (asChild) {
+    return children;
+  }
+  return <button>{children}</button>;
+};
 
 export default function Sidebar() {
   const [location, setLocation] = useLocation();
@@ -62,8 +71,8 @@ export default function Sidebar() {
   // Add admin links for admin users
   if (user?.isAdmin) {
     navItems.push({ href: "/admin", label: "Admin", icon: Crown, matchPattern: /^\/admin/ });
-    navItems.push({ href: "/admin/cheirosas", label: "Gerenciar Cheirosas", icon: BarChart3 });
-    navItems.push({ href: "/admin/analytics", label: "Analytics", icon: BarChart3 });
+    navItems.push({ href: "/gerenciaseguidoras", label: "Gerenciar Cheirosas", icon: Trophy });
+    navItems.push({ href: "/analytics", label: "Analytics", icon: BarChart3 });
   }
 
   const getUserInitials = (name: string) => {
