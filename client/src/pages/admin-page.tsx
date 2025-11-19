@@ -687,6 +687,12 @@ export default function AdminPage() {
       }
       const response = await apiRequest(editingItem ? "PUT" : "POST",
         editingItem ? `/api/videos/${editingItem.id}` : "/api/videos", data);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao salvar vídeo");
+      }
+      
       return response.json();
     },
     onSuccess: async () => {
@@ -709,10 +715,10 @@ export default function AdminPage() {
 
       setIsCreatingItem(false);
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Erro",
-        description: "Falha ao salvar vídeo",
+        description: error.message || "Falha ao salvar vídeo",
         variant: "destructive",
       });
       setIsCreatingItem(false);

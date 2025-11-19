@@ -114,11 +114,19 @@ export default function AdminVideoFormMobilePage() {
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertVideoSchema>) => {
+      let response;
       if (isEditing) {
-        return await apiRequest('PUT', `/api/videos/${videoId}`, data);
+        response = await apiRequest('PUT', `/api/videos/${videoId}`, data);
       } else {
-        return await apiRequest('POST', '/api/videos', data);
+        response = await apiRequest('POST', '/api/videos', data);
       }
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao salvar vídeo");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/videos'] });

@@ -239,6 +239,27 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Função para extrair ID do YouTube de uma URL
+  const extractYouTubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
+      /(?:youtu\.be\/)([^&\n?#\?]+)/,
+      /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
+      /(?:youtube\.com\/v\/)([^&\n?#\?]+)/,
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        // Limpar qualquer parâmetro adicional
+        return match[1].split('?')[0].split('&')[0].trim();
+      }
+    }
+    return null;
+  };
+
   // Rota para criar vídeo
   app.post('/api/videos', async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
@@ -247,6 +268,27 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const videoData = insertVideoSchema.parse(req.body);
+      
+      // Verificar se o vídeo já está cadastrado
+      const newVideoId = extractYouTubeVideoId(videoData.videoUrl);
+      if (newVideoId) {
+        const existingVideos = await storage.getVideos();
+        const duplicate = existingVideos.find(v => {
+          const existingVideoId = extractYouTubeVideoId(v.videoUrl || '');
+          return existingVideoId === newVideoId;
+        });
+
+        if (duplicate) {
+          return res.status(409).json({ 
+            message: "Este vídeo já está cadastrado no sistema. Verifique o link e tente novamente.",
+            duplicateVideo: {
+              id: duplicate.id,
+              title: duplicate.title
+            }
+          });
+        }
+      }
+
       const video = await storage.createVideo(videoData);
 
       // Broadcast data update
@@ -269,6 +311,31 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const videoData = insertVideoSchema.partial().parse(req.body);
+      
+      // Se está alterando a URL, verificar se o novo vídeo já está cadastrado
+      if (videoData.videoUrl) {
+        const newVideoId = extractYouTubeVideoId(videoData.videoUrl);
+        if (newVideoId) {
+          const existingVideos = await storage.getVideos();
+          const duplicate = existingVideos.find(v => {
+            // Ignorar o próprio vídeo sendo editado
+            if (v.id === req.params.id) return false;
+            const existingVideoId = extractYouTubeVideoId(v.videoUrl || '');
+            return existingVideoId === newVideoId;
+          });
+
+          if (duplicate) {
+            return res.status(409).json({ 
+              message: "Este vídeo já está cadastrado no sistema. Verifique o link e tente novamente.",
+              duplicateVideo: {
+                id: duplicate.id,
+                title: duplicate.title
+              }
+            });
+          }
+        }
+      }
+
       const video = await storage.updateVideo(req.params.id, videoData);
 
       // Broadcast data update
