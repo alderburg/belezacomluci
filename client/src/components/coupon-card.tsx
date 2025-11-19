@@ -150,10 +150,10 @@ export default function CouponCard({ coupon, viewMode: propViewMode }: CouponCar
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow h-[380px] flex flex-col" data-testid={`coupon-card-${coupon.id}`}>
       <div className={`${getCouponGradient()} p-4 text-white relative overflow-hidden h-40 flex flex-col justify-between`}>
-        {/* Cover image if available */}
-        {coupon.coverImageUrl && (
+        {/* Cover image if available - try coverImageUrl first, then modalImageUrl as fallback */}
+        {(coupon.coverImageUrl || coupon.modalImageUrl) && (
           <img
-            src={coupon.coverImageUrl}
+            src={coupon.coverImageUrl || coupon.modalImageUrl || ""}
             alt={coupon.brand}
             className="absolute inset-0 w-full h-full object-cover"
             onError={(e) => {
@@ -165,11 +165,21 @@ export default function CouponCard({ coupon, viewMode: propViewMode }: CouponCar
         {/* Gradient overlay for text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
         
-        {/* Decorative circles - only show when no image */}
-        {!coupon.coverImageUrl && (
+        {/* Default icon - only show when no image at all */}
+        {!coupon.coverImageUrl && !coupon.modalImageUrl && (
           <>
             <div className="absolute -top-2 -right-2 w-16 h-16 bg-white/20 rounded-full"></div>
             <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-white/10 rounded-full"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-16 h-16 text-white/40">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="7.5 4.21 12 6.81 16.5 4.21"/>
+                <polyline points="7.5 19.79 7.5 14.6 3 12"/>
+                <polyline points="21 12 16.5 14.6 16.5 19.79"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+            </div>
           </>
         )}
 

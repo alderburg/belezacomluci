@@ -171,12 +171,26 @@ export default function AdminCouponsMobilePage() {
                 data-testid={`card-coupon-${coupon.id}`}
               >
                 <div className="flex gap-3">
-                  {coupon.coverImageUrl && (
+                  {(coupon.coverImageUrl || coupon.modalImageUrl) ? (
                     <img
-                      src={coupon.coverImageUrl}
+                      src={coupon.coverImageUrl || coupon.modalImageUrl || ""}
                       alt={coupon.brand}
                       className="w-20 h-20 rounded-lg object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
+                  ) : (
+                    <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-10 h-10 text-pink-400">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        <polyline points="7.5 4.21 12 6.81 16.5 4.21"/>
+                        <polyline points="7.5 19.79 7.5 14.6 3 12"/>
+                        <polyline points="21 12 16.5 14.6 16.5 19.79"/>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                        <line x1="12" y1="22.08" x2="12" y2="12"/>
+                      </svg>
+                    </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-foreground truncate">

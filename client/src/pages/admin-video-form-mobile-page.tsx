@@ -65,6 +65,10 @@ export default function AdminVideoFormMobilePage() {
     queryKey: ["/api/categories"],
   });
 
+  const { data: allVideos = [] } = useQuery<Video[]>({
+    queryKey: ["/api/videos"],
+  });
+
   const form = useForm<z.infer<typeof insertVideoSchema>>({
     resolver: zodResolver(insertVideoSchema),
     defaultValues: {
@@ -139,6 +143,25 @@ export default function AdminVideoFormMobilePage() {
   };
 
   const onSubmit = (data: z.infer<typeof insertVideoSchema>) => {
+    const youtubeVideoId = extractYouTubeVideoId(data.videoUrl);
+    
+    if (youtubeVideoId && allVideos) {
+      const duplicateVideo = allVideos.find(v => {
+        if (v.id === videoId) return false;
+        const existingYoutubeId = extractYouTubeVideoId(v.videoUrl);
+        return existingYoutubeId === youtubeVideoId;
+      });
+      
+      if (duplicateVideo) {
+        toast({
+          variant: "destructive",
+          title: "Vídeo já cadastrado",
+          description: "Este vídeo do YouTube já está cadastrado no sistema. Por favor, insira uma URL diferente.",
+        });
+        return;
+      }
+    }
+    
     mutation.mutate(data);
   };
 

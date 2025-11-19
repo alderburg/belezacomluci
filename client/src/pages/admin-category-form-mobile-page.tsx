@@ -84,8 +84,12 @@ export default function AdminCategoryFormMobilePage() {
         isActive: category.isActive ?? true,
       });
     } else if (!isEditing && categories) {
-      const maxOrder = categories.reduce((max, cat) => Math.max(max, cat.order || 0), 0);
-      form.setValue("order", maxOrder + 1);
+      if (categories.length === 0) {
+        form.setValue("order", 0);
+      } else {
+        const maxOrder = categories.reduce((max, cat) => Math.max(max, cat.order || 0), 0);
+        form.setValue("order", maxOrder + 1);
+      }
     }
   }, [category, isEditing, categories, form]);
 
