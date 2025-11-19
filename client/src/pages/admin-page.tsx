@@ -28,7 +28,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAdmin } from "@/contexts/admin-context";
-import { useEffect } from "react";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { ResourceSearchSelect } from "@/components/resource-search-select";
 import { AutoYouTubeCheck } from "@/components/auto-youtube-check";
@@ -690,7 +689,7 @@ export default function AdminPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        
+
         // Se for erro de vídeo duplicado, lançar com informações especiais
         if (errorData.error === "duplicate_video") {
           const error: any = new Error(errorData.message);
@@ -698,7 +697,7 @@ export default function AdminPage() {
           error.description = errorData.description;
           throw error;
         }
-        
+
         throw new Error(errorData.message || "Erro ao salvar vídeo");
       }
 
@@ -731,9 +730,19 @@ export default function AdminPage() {
         message: error.isDuplicate ? "Vídeo já cadastrado anteriormente" : "URL inválida"
       });
 
+      // Se for erro de duplicado, mostrar toast específico
+      if (error.isDuplicate) {
+        toast({
+          title: "Vídeo Duplicado",
+          description: error.message || "Este vídeo já está cadastrado no sistema. Verifique o link e tente novamente.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
-        title: error.isDuplicate ? error.message : "Erro",
-        description: error.isDuplicate ? error.description : (error.message || "Falha ao salvar vídeo"),
+        title: "Erro",
+        description: error.message || "Falha ao salvar vídeo",
         variant: "destructive",
       });
       setIsCreatingItem(false);
