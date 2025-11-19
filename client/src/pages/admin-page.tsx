@@ -689,16 +689,7 @@ export default function AdminPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-
-        // Se for erro de vídeo duplicado, lançar com informações especiais
-        if (errorData.error === "duplicate_video") {
-          const error: any = new Error(errorData.message);
-          error.isDuplicate = true;
-          error.description = errorData.description;
-          throw error;
-        }
-
-        throw new Error(errorData.message || "Erro ao salvar vídeo");
+        throw errorData; // Lança o objeto de erro completo para o onError handler
       }
 
       return response.json();
@@ -724,27 +715,29 @@ export default function AdminPage() {
       setIsCreatingItem(false);
     },
     onError: (error: any) => {
-      // Marcar o campo de URL como erro
-      videoForm.setError("videoUrl", {
-        type: "manual",
-        message: error.isDuplicate ? "Vídeo já cadastrado anteriormente" : "URL inválida"
-      });
+      // Verificar se é erro de vídeo duplicado
+      const isDuplicateVideo = error?.error === "duplicate_video";
 
-      // Se for erro de duplicado, mostrar toast específico
-      if (error.isDuplicate) {
+      if (isDuplicateVideo) {
+        // Marcar o campo videoUrl com erro
+        videoForm.setError("videoUrl", {
+          type: "manual",
+          message: "Vídeo já cadastrado anteriormente"
+        });
+
         toast({
-          title: "Vídeo Duplicado",
-          description: error.message || "Este vídeo já está cadastrado no sistema. Verifique o link e tente novamente.",
+          variant: "destructive",
+          title: "Este vídeo já foi cadastrado anteriormente!",
+          description: error.message || "Adicione o link de um novo vídeo para seu cadastro.",
+        });
+      } else {
+        // Mensagem de erro genérica para outros problemas
+        toast({
+          title: "Erro",
+          description: error.message || "Falha ao salvar vídeo",
           variant: "destructive",
         });
-        return;
       }
-
-      toast({
-        title: "Erro",
-        description: error.message || "Falha ao salvar vídeo",
-        variant: "destructive",
-      });
       setIsCreatingItem(false);
     },
   });
@@ -4009,7 +4002,7 @@ export default function AdminPage() {
                         <div className="space-y-4">
                           {filteredAndPaginatedCoupons.items.map((coupon) => (
                             <div key={coupon.id} className="flex items-center space-x-4 p-4 border border-border rounded-lg">
-                              <div className="w-16 h-16 bg-muted rounded overflow-hidden relative flex items-center justify-center">
+                              <div className="w-16 h-16 bg-muted rounded overflow-hidden relative">
                                 {coupon.coverImageUrl ? (
                                   <img
                                     src={coupon.coverImageUrl}
