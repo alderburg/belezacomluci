@@ -164,9 +164,14 @@ const getSocialIcon = (type: string) => {
 
 export default function ComunidadeMobilePage() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Scroll para o topo quando a página carrega
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
 
   // Hook para sincronização de dados em tempo real
   useDataSync(['/api/admin/community-settings', '/api/posts']);
