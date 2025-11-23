@@ -269,7 +269,7 @@ export default function ProfilePage() {
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => setLocation("/configuracoes-notificacoes")}
+                      onClick={() => setLocation("/perfil/configuracoes")}
                       data-testid="button-settings"
                     >
                       <Settings className="w-4 h-4 mr-2" />
