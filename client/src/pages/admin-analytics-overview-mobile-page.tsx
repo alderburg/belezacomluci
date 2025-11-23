@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState } from "react";
+import MobileBottomNav from "@/components/mobile-bottom-nav";
 
 const COLORS = ['#ff6b9d', '#c084fc', '#60a5fa', '#34d399'];
 
@@ -323,6 +324,8 @@ export default function AdminAnalyticsOverviewMobilePage() {
           </CardContent>
         </Card>
       </main>
+
+      <MobileBottomNav />
     </div>
   );
 }

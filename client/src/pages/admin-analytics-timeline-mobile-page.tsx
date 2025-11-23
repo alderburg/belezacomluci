@@ -14,6 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { useState } from "react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import MobileBottomNav from "@/components/mobile-bottom-nav";
 
 interface TimelineData {
   items: { targetType: string; targetId: string | null; targetName: string }[];
@@ -388,6 +389,8 @@ export default function AdminAnalyticsTimelineMobilePage() {
           </CardContent>
         </Card>
       </main>
+
+      <MobileBottomNav />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState } from "react";
+import MobileBottomNav from "@/components/mobile-bottom-nav";
 
 interface AnalyticsStats {
   totalPageViews: number;
@@ -279,6 +280,8 @@ export default function AdminAnalyticsEngagementMobilePage() {
           </CardContent>
         </Card>
       </main>
+
+      <MobileBottomNav />
     </div>
   );
 }

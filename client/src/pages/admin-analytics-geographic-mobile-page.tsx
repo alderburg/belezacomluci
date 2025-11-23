@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState } from "react";
+import MobileBottomNav from "@/components/mobile-bottom-nav";
 
 const COLORS = ['#ff6b9d', '#c084fc', '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#fb923c'];
 
@@ -313,6 +314,8 @@ export default function AdminAnalyticsGeographicMobilePage() {
           </CardContent>
         </Card>
       </main>
+
+      <MobileBottomNav />
     </div>
   );
 }
