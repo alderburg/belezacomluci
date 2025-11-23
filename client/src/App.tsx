@@ -64,6 +64,8 @@ import AdminCouponFormMobilePage from "@/pages/admin-coupon-form-mobile-page";
 import AdminYouTubeSyncMobilePage from "@/pages/admin-youtube-sync-mobile-page";
 import ConfiguracoesPage from "@/pages/configuracoes-page";
 import ConfiguracoesApisMobilePage from "@/pages/configuracoes-apis-mobile-page";
+import AdminAnalyticsMobilePage from "@/pages/admin-analytics-mobile-page";
+import AdminAnalyticsOverviewMobilePage from "@/pages/admin-analytics-overview-mobile-page";
 
 
 import { useNotificationsWebSocket } from './hooks/use-notifications-websocket';
@@ -103,7 +105,7 @@ function Router() {
       <ProtectedRoute path="/mobile-menu" component={MobileMenuPage} />
       <ProtectedRoute path="/admin" component={isMobile ? AdminMobilePage : AdminPage} />
       <ProtectedRoute path="/admin/videos-mobile" component={AdminVideosMobilePage} />
-      <Route path="/admin/videos-mobile/youtube-sync" component={AdminYouTubeSyncMobilePage} />
+      <Route path="/admin/videos-mobile/youtube-sync" component={AdminYoutubeSyncMobilePage} />
       <ProtectedRoute path="/admin/videos-mobile/new" component={AdminVideoFormMobilePage} />
       <ProtectedRoute path="/admin/videos-mobile/edit/:id" component={AdminVideoFormMobilePage} />
       <ProtectedRoute path="/admin/videos" component={isMobile ? AdminVideosMobilePage : AdminPage} />
@@ -134,6 +136,8 @@ function Router() {
       <ProtectedRoute path="/admin/users" component={isMobile ? AdminUsersMobilePage : AdminPage} />
       <ProtectedRoute path="/gerenciaseguidoras" component={AdminCheirosasPage} />
       <ProtectedRoute path="/analytics" component={AdminAnalyticsPage} />
+      <ProtectedRoute path="/analytics/menu" component={AdminAnalyticsMobilePage} />
+      <ProtectedRoute path="/analytics/overview" component={AdminAnalyticsOverviewMobilePage} />
       <ProtectedRoute path="/perfil/configuracoes/apis" component={ApiSettingsPage} />
       <Route path="/bio" component={BioPage} />
       <Route path="/auth" component={AuthPage} />

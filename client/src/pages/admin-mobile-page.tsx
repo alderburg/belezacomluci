@@ -122,7 +122,7 @@ export default function AdminMobilePage() {
       title: 'Analytics',
       subtitle: 'Métricas e estatísticas',
       icon: BarChart3,
-      path: '/analytics'
+      path: '/admin/analytics',
     }
   ];
 
