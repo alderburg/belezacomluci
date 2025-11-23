@@ -238,9 +238,9 @@ export default function ProfilePage() {
                     <Badge className={`${
                       user?.isAdmin && viewMode === 'free'
                         ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        : 'bg-primary/10 text-primary hover:bg-primary/20'
+                        : 'bg-yellow-500 text-black hover:bg-yellow-600'
                     }`}>
-                      {user?.isAdmin && viewMode === 'free' ? 'Plano Free' : 'Plano Premium'}
+                      {user?.isAdmin && viewMode === 'free' ? 'Acesso Free' : 'Acesso Premium'}
                     </Badge>
                     <span className="text-sm text-muted-foreground flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />

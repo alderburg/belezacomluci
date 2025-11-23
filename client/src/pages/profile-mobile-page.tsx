@@ -279,12 +279,14 @@ export default function ProfileMobilePage() {
                   {user?.email || 'email@exemplo.com'}
                 </p>
                 <div className="flex flex-col items-start gap-2">
-                  <Badge className={`${
-                    user?.isAdmin && viewMode === 'free'
-                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      : 'bg-primary/10 text-primary hover:bg-primary/20'
-                  }`}>
-                    {user?.isAdmin && viewMode === 'free' ? 'Plano Free' : 'Plano Premium'}
+                  <Badge 
+                    className={`text-xs px-2 py-1 ${
+                      ((user?.isAdmin ? viewMode : user.planType) || 'free') === 'premium' 
+                        ? 'bg-yellow-500 text-black hover:bg-yellow-600' 
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {((user?.isAdmin ? viewMode : user.planType) || 'free') === 'premium' ? 'Acesso Premium' : 'Acesso Free'}
                   </Badge>
                   <span className="text-xs text-muted-foreground flex items-center">
                     <Calendar className="w-3 h-3 mr-1" />
