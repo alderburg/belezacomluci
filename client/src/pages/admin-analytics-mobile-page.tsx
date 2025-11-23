@@ -2,13 +2,28 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Activity, TrendingUp, MapPin, Clock, BarChart3, ChevronRight } from "lucide-react";
+import { ArrowLeft, Activity, TrendingUp, MapPin, Clock, BarChart3, ChevronRight, Eye, Users, MousePointerClick } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
+import { useQuery } from "@tanstack/react-query";
+
+interface AnalyticsStats {
+  totalPageViews: number;
+  uniqueVisitors: number;
+  totalClicks: number;
+  clicksByType: { type: string; count: number }[];
+  topClickedItems: { targetName: string; targetType: string; count: number }[];
+}
 
 export default function AdminAnalyticsMobilePage() {
   const { user, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
+
+  const { data: stats, isLoading } = useQuery<AnalyticsStats>({
+    queryKey: ["/api/analytics/stats"],
+    enabled: !!user?.isAdmin,
+    refetchInterval: 5000,
+  });
 
   if (authLoading) {
     return (
@@ -81,10 +96,43 @@ export default function AdminAnalyticsMobilePage() {
         </div>
       </div>
 
-      {/* Título Analytics */}
-      <div className="px-4 pt-24 pb-2">
-        <h3 className="text-lg font-semibold text-foreground">Analytics</h3>
-        <p className="text-sm text-muted-foreground">Selecione uma seção para visualizar</p>
+      {/* KPI Cards */}
+      <div className="px-4 pt-24 pb-4">
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="bg-gradient-to-br from-pink-500 to-rose-500 text-white border-0">
+            <CardContent className="p-4">
+              <Eye className="w-6 h-6 opacity-80 mb-2" />
+              <h3 className="text-xl font-bold">{stats?.totalPageViews.toLocaleString() || 0}</h3>
+              <p className="text-white/80 text-xs">Visualizações</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white border-0">
+            <CardContent className="p-4">
+              <Users className="w-6 h-6 opacity-80 mb-2" />
+              <h3 className="text-xl font-bold">{stats?.uniqueVisitors.toLocaleString() || 0}</h3>
+              <p className="text-white/80 text-xs">Visitantes</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white border-0">
+            <CardContent className="p-4">
+              <MousePointerClick className="w-6 h-6 opacity-80 mb-2" />
+              <h3 className="text-xl font-bold">{stats?.totalClicks.toLocaleString() || 0}</h3>
+              <p className="text-white/80 text-xs">Cliques</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white border-0">
+            <CardContent className="p-4">
+              <TrendingUp className="w-6 h-6 opacity-80 mb-2" />
+              <h3 className="text-xl font-bold">
+                {stats?.totalPageViews ? ((stats.totalClicks / stats.totalPageViews) * 100).toFixed(1) : 0}%
+              </h3>
+              <p className="text-white/80 text-xs">Taxa Conversão</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Menu Items */}

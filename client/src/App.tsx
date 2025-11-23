@@ -66,6 +66,9 @@ import ConfiguracoesPage from "@/pages/configuracoes-page";
 import ConfiguracoesApisMobilePage from "@/pages/configuracoes-apis-mobile-page";
 import AdminAnalyticsMobilePage from "@/pages/admin-analytics-mobile-page";
 import AdminAnalyticsOverviewMobilePage from "@/pages/admin-analytics-overview-mobile-page";
+import AdminAnalyticsEngagementMobilePage from "@/pages/admin-analytics-engagement-mobile-page";
+import AdminAnalyticsGeographicMobilePage from "@/pages/admin-analytics-geographic-mobile-page";
+import AdminAnalyticsTimelineMobilePage from "@/pages/admin-analytics-timeline-mobile-page";
 
 import { useNotificationsWebSocket } from './hooks/use-notifications-websocket';
 import { useDataSync } from './hooks/use-data-sync';
@@ -135,9 +138,9 @@ function Router() {
       <ProtectedRoute path="/admin/users" component={isMobile ? AdminUsersMobilePage : AdminPage} />
       <ProtectedRoute path="/gerenciaseguidoras" component={AdminCheirosasPage} />
       <ProtectedRoute path="/admin/analytics/overview" component={AdminAnalyticsOverviewMobilePage} />
-      <ProtectedRoute path="/admin/analytics/engagement" component={AdminAnalyticsOverviewMobilePage} />
-      <ProtectedRoute path="/admin/analytics/geographic" component={AdminAnalyticsOverviewMobilePage} />
-      <ProtectedRoute path="/admin/analytics/timeline" component={AdminAnalyticsOverviewMobilePage} />
+      <ProtectedRoute path="/admin/analytics/engagement" component={AdminAnalyticsEngagementMobilePage} />
+      <ProtectedRoute path="/admin/analytics/geographic" component={AdminAnalyticsGeographicMobilePage} />
+      <ProtectedRoute path="/admin/analytics/timeline" component={AdminAnalyticsTimelineMobilePage} />
       <ProtectedRoute path="/admin/analytics" component={isMobile ? AdminAnalyticsMobilePage : AdminAnalyticsPage} />
       <ProtectedRoute path="/analytics" component={isMobile ? AdminAnalyticsMobilePage : AdminAnalyticsPage} />
       <ProtectedRoute path="/perfil/configuracoes/apis" component={ApiSettingsPage} />
