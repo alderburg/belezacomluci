@@ -62,6 +62,8 @@ import AdminVideoFormMobilePage from "@/pages/admin-video-form-mobile-page";
 import AdminProductFormMobilePage from "@/pages/admin-product-form-mobile-page";
 import AdminCouponFormMobilePage from "@/pages/admin-coupon-form-mobile-page";
 import AdminYouTubeSyncMobilePage from "@/pages/admin-youtube-sync-mobile-page";
+import ConfiguracoesPage from "@/pages/configuracoes-page";
+import ConfiguracoesApisMobilePage from "@/pages/configuracoes-apis-mobile-page";
 
 
 import { useNotificationsWebSocket } from './hooks/use-notifications-websocket';
@@ -93,6 +95,9 @@ function Router() {
       <ProtectedRoute path="/cheirosas" component={CheirosasPage} />
       <ProtectedRoute path="/notificacoes" component={isMobile ? NotificationsMobilePage : NotificationsPage} />
       <ProtectedRoute path="/configuracoes-notificacoes" component={isMobile ? NotificationSettingsMobilePage : NotificationSettingsPage} />
+      <ProtectedRoute path="/configuracoes-apis" component={ConfiguracoesApisMobilePage} />
+      <ProtectedRoute path="/perfil/configuracoes" component={ConfiguracoesPage} />
+      <ProtectedRoute path="/perfil/configuracoes/notificacoes" component={NotificationSettingsPage} />
       <ProtectedRoute path="/seguranca" component={isMobile ? SecurityMobilePage : SecurityPage} />
       <ProtectedRoute path="/ajuda" component={AjudaMobilePage} />
       <ProtectedRoute path="/mobile-menu" component={MobileMenuPage} />
