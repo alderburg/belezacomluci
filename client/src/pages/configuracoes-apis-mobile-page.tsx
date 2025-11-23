@@ -273,6 +273,27 @@ export default function ConfiguracoesApisMobilePage() {
               </div>
             </div>
 
+            {/* Instruções */}
+            <div className="bg-blue-50/50 border border-blue-200/50 rounded-xl p-4">
+              <h4 className="font-medium text-sm text-blue-900 mb-2">Como configurar:</h4>
+              <ol className="text-xs text-blue-800 space-y-1.5 list-decimal list-inside">
+                <li>
+                  Acesse o{" "}
+                  <a
+                    href="https://console.cloud.google.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-blue-600"
+                  >
+                    Google Cloud Console
+                  </a>
+                </li>
+                <li>Crie um novo projeto ou selecione um existente</li>
+                <li>Ative a YouTube Data API v3 no seu projeto</li>
+                <li>Crie credenciais OAuth 2.0 para obter Client ID e Client Secret, e também uma API Key</li>
+              </ol>
+            </div>
+
             {/* Save Button */}
             <Button
               type="submit"
