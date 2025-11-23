@@ -74,29 +74,16 @@ export default function ConfiguracoesPage() {
                   data-testid={`card-${option.id}`}
                 >
                   <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg">
-                          <IconComponent className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-xl">{option.title}</CardTitle>
-                          <CardDescription className="text-base">
-                            {option.description}
-                          </CardDescription>
-                        </div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg">
+                        <IconComponent className="h-6 w-6 text-primary" />
                       </div>
-                      <Button
-                        variant="outline"
-                        data-testid={`button-${option.id}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setLocation(option.path);
-                        }}
-                      >
-                        <Settings className="h-4 w-4 mr-2" />
-                        Configurar
-                      </Button>
+                      <div>
+                        <CardTitle className="text-xl">{option.title}</CardTitle>
+                        <CardDescription className="text-base">
+                          {option.description}
+                        </CardDescription>
+                      </div>
                     </div>
                   </CardHeader>
                 </Card>
