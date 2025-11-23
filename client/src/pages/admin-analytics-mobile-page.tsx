@@ -2,8 +2,9 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Activity, TrendingUp, Target, MapPin, Clock } from "lucide-react";
+import { ArrowLeft, Activity, TrendingUp, MapPin, Clock, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import MobileBottomNav from "@/components/mobile-bottom-nav";
 
 export default function AdminAnalyticsMobilePage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -26,82 +27,97 @@ export default function AdminAnalyticsMobilePage() {
 
   const menuItems = [
     {
+      id: "overview",
       title: "Visão Geral",
-      description: "KPIs e métricas principais",
+      subtitle: "KPIs e métricas principais",
       icon: Activity,
-      path: "/admin/analytics/overview",
-      color: "from-pink-500 to-rose-500"
+      path: "/admin/analytics/overview"
     },
     {
+      id: "engagement",
       title: "Engajamento",
-      description: "Cliques e conversões",
+      subtitle: "Cliques e conversões",
       icon: TrendingUp,
-      path: "/admin/analytics/engagement",
-      color: "from-purple-500 to-indigo-500"
+      path: "/admin/analytics/engagement"
     },
     {
+      id: "geographic",
       title: "Geografia",
-      description: "Localização dos usuários",
+      subtitle: "Localização dos usuários",
       icon: MapPin,
-      path: "/admin/analytics/geographic",
-      color: "from-blue-500 to-cyan-500"
+      path: "/admin/analytics/geographic"
     },
     {
+      id: "timeline",
       title: "Timeline",
-      description: "Histórico detalhado",
+      subtitle: "Histórico detalhado",
       icon: Clock,
-      path: "/admin/analytics/timeline",
-      color: "from-emerald-500 to-teal-500"
+      path: "/admin/analytics/timeline"
     }
   ];
 
+  const handleBackClick = () => {
+    setLocation('/admin');
+  };
+
   return (
-    <div className="min-h-screen bg-background pb-6">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-gradient-to-r from-primary to-accent border-b border-white/10">
-        <div className="flex items-center gap-3 px-4 py-4">
+      <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
+        <div className="flex items-center justify-between">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setLocation('/admin')}
-            className="text-white hover:bg-white/10"
+            className="text-muted-foreground hover:bg-muted"
+            onClick={handleBackClick}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-lg font-bold text-white">Analytics</h1>
-            <p className="text-xs text-white/80">Métricas e estatísticas</p>
+          <div className="text-left flex-1 ml-4">
+            <h1 className="text-lg font-semibold text-foreground">Analytics</h1>
+            <p className="text-sm text-muted-foreground">Métricas e estatísticas</p>
           </div>
+          <Settings className="h-5 w-5 text-primary" />
         </div>
       </div>
 
-      {/* Content */}
-      <main className="px-4 py-6 space-y-4">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Card
-              key={item.path}
-              className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => setLocation(item.path)}
-            >
-              <div className={`h-2 bg-gradient-to-r ${item.color}`} />
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${item.color} flex items-center justify-center`}>
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-base">{item.title}</CardTitle>
-                    <CardDescription className="text-xs">{item.description}</CardDescription>
-                  </div>
-                  <Target className="w-5 h-5 text-muted-foreground" />
+      {/* Título Analytics */}
+      <div className="px-4 pt-24 pb-2">
+        <h3 className="text-lg font-semibold text-foreground">Analytics</h3>
+        <p className="text-sm text-muted-foreground">Selecione uma seção para visualizar</p>
+      </div>
+
+      {/* Menu Items */}
+      <div className="px-4 py-2">
+        <div className="space-y-3">
+          {menuItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setLocation(item.path)}
+                className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border border-border hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-center justify-center w-12 h-12 bg-pink-100/50 border border-pink-200/50 rounded-lg shadow-sm">
+                  <IconComponent className="h-6 w-6 text-primary" />
                 </div>
-              </CardHeader>
-            </Card>
-          );
-        })}
-      </main>
+                <div className="flex-1 text-left">
+                  <h3 className="text-base font-medium text-foreground">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {item.subtitle}
+                  </p>
+                </div>
+                <ArrowLeft className="h-5 w-5 text-muted-foreground rotate-180" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }
