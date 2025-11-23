@@ -2,7 +2,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Eye, Users, MousePointerClick, TrendingUp, Target, Tag, Image } from "lucide-react";
+import { ArrowLeft, Eye, Users, MousePointerClick, TrendingUp, Target, Tag, Image, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -57,25 +57,26 @@ export default function AdminAnalyticsOverviewMobilePage() {
   return (
     <div className="min-h-screen bg-background pb-6">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-gradient-to-r from-primary to-accent border-b border-white/10">
-        <div className="flex items-center gap-3 px-4 py-4">
+      <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
+        <div className="flex items-center justify-between">
           <Button
             variant="ghost"
             size="icon"
+            className="text-muted-foreground hover:bg-muted"
             onClick={() => setLocation('/admin/analytics')}
-            className="text-white hover:bg-white/10"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-lg font-bold text-white">Visão Geral</h1>
-            <p className="text-xs text-white/80">Métricas principais</p>
+          <div className="text-left flex-1 ml-4">
+            <h1 className="text-lg font-semibold text-foreground">Visão Geral</h1>
+            <p className="text-sm text-muted-foreground">Métricas principais</p>
           </div>
+          <Activity className="h-5 w-5 text-primary" />
         </div>
       </div>
 
       {/* Content */}
-      <main className="px-4 py-6 space-y-4">
+      <main className="px-4 pt-24 pb-6 space-y-4">
         {/* KPI Cards */}
         <div className="grid grid-cols-2 gap-3">
           <Card className="bg-gradient-to-br from-pink-500 to-rose-500 text-white border-0">

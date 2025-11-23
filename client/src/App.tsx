@@ -135,6 +135,9 @@ function Router() {
       <ProtectedRoute path="/admin/users" component={isMobile ? AdminUsersMobilePage : AdminPage} />
       <ProtectedRoute path="/gerenciaseguidoras" component={AdminCheirosasPage} />
       <ProtectedRoute path="/admin/analytics/overview" component={AdminAnalyticsOverviewMobilePage} />
+      <ProtectedRoute path="/admin/analytics/engagement" component={AdminAnalyticsOverviewMobilePage} />
+      <ProtectedRoute path="/admin/analytics/geographic" component={AdminAnalyticsOverviewMobilePage} />
+      <ProtectedRoute path="/admin/analytics/timeline" component={AdminAnalyticsOverviewMobilePage} />
       <ProtectedRoute path="/admin/analytics" component={isMobile ? AdminAnalyticsMobilePage : AdminAnalyticsPage} />
       <ProtectedRoute path="/analytics" component={isMobile ? AdminAnalyticsMobilePage : AdminAnalyticsPage} />
       <ProtectedRoute path="/perfil/configuracoes/apis" component={ApiSettingsPage} />

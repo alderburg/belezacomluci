@@ -2,7 +2,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Activity, TrendingUp, MapPin, Clock, Settings, ChevronRight } from "lucide-react";
+import { ArrowLeft, Activity, TrendingUp, MapPin, Clock, BarChart3, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
 
@@ -77,7 +77,7 @@ export default function AdminAnalyticsMobilePage() {
             <h1 className="text-lg font-semibold text-foreground">Analytics</h1>
             <p className="text-sm text-muted-foreground">Métricas e estatísticas</p>
           </div>
-          <Settings className="h-5 w-5 text-primary" />
+          <BarChart3 className="h-5 w-5 text-primary" />
         </div>
       </div>
 
