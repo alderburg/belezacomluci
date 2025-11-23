@@ -2,13 +2,18 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Eye, Users, MousePointerClick, TrendingUp, Target, Tag, Image, Activity } from "lucide-react";
+import { ArrowLeft, Eye, Users, MousePointerClick, TrendingUp, Target, Tag, Image, Activity, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useState } from "react";
 
 const COLORS = ['#ff6b9d', '#c084fc', '#60a5fa', '#34d399'];
 
@@ -32,12 +37,55 @@ interface AnalyticsStats {
 export default function AdminAnalyticsOverviewMobilePage() {
   const { user, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [tempDateRange, setTempDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const { data: stats, isLoading } = useQuery<AnalyticsStats>({
-    queryKey: ["/api/analytics/stats"],
+    queryKey: ["/api/analytics/stats", dateRange],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (dateRange.from) {
+        params.append('startDate', dateRange.from.toISOString());
+      }
+      if (dateRange.to) {
+        params.append('endDate', dateRange.to.toISOString());
+      }
+
+      const response = await fetch(`/api/analytics/stats?${params.toString()}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch analytics stats');
+      }
+
+      return response.json();
+    },
     enabled: !!user?.isAdmin,
     refetchInterval: 5000,
   });
+
+  const handleApplyDateRange = () => {
+    setDateRange(tempDateRange);
+    setIsCalendarOpen(false);
+  };
+
+  const handleClearDateRange = () => {
+    setTempDateRange({});
+    setDateRange({});
+    setIsCalendarOpen(false);
+  };
+
+  const handleCalendarOpenChange = (open: boolean) => {
+    if (open) {
+      setTempDateRange(dateRange);
+    }
+    setIsCalendarOpen(open);
+  };
 
   if (authLoading) {
     return (
@@ -58,7 +106,7 @@ export default function AdminAnalyticsOverviewMobilePage() {
     <div className="min-h-screen bg-background pb-6">
       {/* Header */}
       <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <Button
             variant="ghost"
             size="icon"
@@ -73,6 +121,53 @@ export default function AdminAnalyticsOverviewMobilePage() {
           </div>
           <Activity className="h-5 w-5 text-primary" />
         </div>
+        <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpenChange}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-full gap-2 text-xs" size="sm">
+              <Calendar className="w-4 h-4" />
+              {dateRange.from ? (
+                dateRange.to ? (
+                  <>
+                    {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} -{" "}
+                    {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
+                  </>
+                ) : (
+                  format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
+                )
+              ) : (
+                "Selecionar período"
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="center">
+            <div className="p-3">
+              <CalendarComponent
+                mode="range"
+                selected={tempDateRange}
+                onSelect={(range) => {
+                  setTempDateRange(range || {});
+                }}
+                numberOfMonths={1}
+                locale={ptBR}
+              />
+              <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleClearDateRange}
+                >
+                  Limpar
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={handleApplyDateRange}
+                >
+                  Aplicar
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Content */}

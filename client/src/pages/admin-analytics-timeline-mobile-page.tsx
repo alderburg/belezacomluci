@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState } from "react";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface TimelineData {
   items: { targetType: string; targetId: string | null; targetName: string }[];
@@ -40,11 +42,20 @@ export default function AdminAnalyticsTimelineMobilePage() {
   const [, setLocation] = useLocation();
   const [timelineType, setTimelineType] = useState<string>("all");
   const [timelineItem, setTimelineItem] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [tempDateRange, setTempDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const { data: timelineData, isLoading } = useQuery<TimelineData>({
-    queryKey: ["/api/analytics/timeline", timelineType, timelineItem],
+    queryKey: ["/api/analytics/timeline", dateRange, timelineType, timelineItem],
     queryFn: async () => {
       const params = new URLSearchParams();
+      if (dateRange.from) {
+        params.append('startDate', dateRange.from.toISOString());
+      }
+      if (dateRange.to) {
+        params.append('endDate', dateRange.to.toISOString());
+      }
       if (timelineType && timelineType !== "all") {
         params.append('targetType', timelineType);
       }
@@ -69,6 +80,24 @@ export default function AdminAnalyticsTimelineMobilePage() {
     refetchInterval: 5000,
   });
 
+  const handleApplyDateRange = () => {
+    setDateRange(tempDateRange);
+    setIsCalendarOpen(false);
+  };
+
+  const handleClearDateRange = () => {
+    setTempDateRange({});
+    setDateRange({});
+    setIsCalendarOpen(false);
+  };
+
+  const handleCalendarOpenChange = (open: boolean) => {
+    if (open) {
+      setTempDateRange(dateRange);
+    }
+    setIsCalendarOpen(open);
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -88,7 +117,7 @@ export default function AdminAnalyticsTimelineMobilePage() {
     <div className="min-h-screen bg-background pb-6">
       {/* Header */}
       <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <Button
             variant="ghost"
             size="icon"
@@ -104,6 +133,53 @@ export default function AdminAnalyticsTimelineMobilePage() {
           </div>
           <Clock className="h-5 w-5 text-primary" />
         </div>
+        <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpenChange}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-full gap-2 text-xs" size="sm">
+              <Calendar className="w-4 h-4" />
+              {dateRange.from ? (
+                dateRange.to ? (
+                  <>
+                    {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} -{" "}
+                    {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
+                  </>
+                ) : (
+                  format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
+                )
+              ) : (
+                "Selecionar período"
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="center">
+            <div className="p-3">
+              <CalendarComponent
+                mode="range"
+                selected={tempDateRange}
+                onSelect={(range) => {
+                  setTempDateRange(range || {});
+                }}
+                numberOfMonths={1}
+                locale={ptBR}
+              />
+              <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleClearDateRange}
+                >
+                  Limpar
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={handleApplyDateRange}
+                >
+                  Aplicar
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Content */}
