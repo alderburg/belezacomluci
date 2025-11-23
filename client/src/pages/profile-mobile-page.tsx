@@ -283,8 +283,9 @@ export default function ProfileMobilePage() {
                     className={`text-xs px-2 py-1 ${
                       ((user?.isAdmin ? viewMode : user.planType) || 'free') === 'premium' 
                         ? 'bg-yellow-500 text-black hover:bg-yellow-600' 
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'text-white hover:opacity-90'
                     }`}
+                    style={((user?.isAdmin ? viewMode : user.planType) || 'free') !== 'premium' ? { backgroundColor: '#e92066' } : undefined}
                   >
                     {((user?.isAdmin ? viewMode : user.planType) || 'free') === 'premium' ? 'Acesso Premium' : 'Acesso Free'}
                   </Badge>

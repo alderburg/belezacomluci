@@ -235,11 +235,14 @@ export default function ProfilePage() {
                     {user?.email || 'email@exemplo.com'}
                   </p>
                   <div className="flex flex-wrap items-center gap-4 mb-4">
-                    <Badge className={`${
-                      user?.isAdmin && viewMode === 'free'
-                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        : 'bg-yellow-500 text-black hover:bg-yellow-600'
-                    }`}>
+                    <Badge 
+                      className={`${
+                        user?.isAdmin && viewMode === 'free'
+                          ? 'text-white hover:opacity-90'
+                          : 'bg-yellow-500 text-black hover:bg-yellow-600'
+                      }`}
+                      style={user?.isAdmin && viewMode === 'free' ? { backgroundColor: '#e92066' } : undefined}
+                    >
                       {user?.isAdmin && viewMode === 'free' ? 'Acesso Free' : 'Acesso Premium'}
                     </Badge>
                     <span className="text-sm text-muted-foreground flex items-center">
