@@ -2,7 +2,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Activity, TrendingUp, MapPin, Clock, Settings } from "lucide-react";
+import { ArrowLeft, Activity, TrendingUp, MapPin, Clock, Settings, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
 
@@ -109,7 +109,7 @@ export default function AdminAnalyticsMobilePage() {
                     {item.subtitle}
                   </p>
                 </div>
-                <ArrowLeft className="h-5 w-5 text-muted-foreground rotate-180" />
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
               </button>
             );
           })}
