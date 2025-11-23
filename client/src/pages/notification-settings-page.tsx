@@ -131,7 +131,7 @@ export default function NotificationSettingsPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setLocation('/perfil')}
+              onClick={() => setLocation('/perfil/configuracoes')}
               className="h-10 w-10"
             >
               <ArrowLeft className="h-5 w-5" />
