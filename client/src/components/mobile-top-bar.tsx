@@ -217,7 +217,7 @@ export default function MobileTopBar({
           onClick={() => setIsSearchOpen(false)}
         />
       )}
-      
+
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary to-accent shadow-lg border-b border-white/10 h-20">
       <div className="flex items-center justify-between px-4 h-full">
         {/* Left Side */}
@@ -241,11 +241,12 @@ export default function MobileTopBar({
                 </h1>
                 <Badge
                   variant={((user?.isAdmin ? viewMode : user.planType) || 'free') === 'premium' ? 'default' : 'secondary'}
-                  className={`text-[10px] px-1.5 py-0.5 ${
+                  className={`text-xs px-2.5 py-0.5 ${
                     ((user?.isAdmin ? viewMode : user.planType) || 'free') === 'premium'
                       ? 'bg-yellow-500 text-black hover:bg-yellow-600'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'text-white hover:opacity-90'
                   }`}
+                  style={((user?.isAdmin ? viewMode : user.planType) || 'free') !== 'premium' ? { backgroundColor: '#e92066' } : undefined}
                 >
                   {((user?.isAdmin ? viewMode : user.planType) || 'free') === 'premium' ? 'Acesso Premium' : 'Acesso Free'}
                 </Badge>
@@ -283,7 +284,7 @@ export default function MobileTopBar({
                   {isConnected && (
                     <div className="absolute -top-0.5 -left-0.5 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   )}
-                  
+
                   {/* Efeito de ondas quando há notificações */}
                   {notificationCount > 0 && (
                     <>
@@ -291,7 +292,7 @@ export default function MobileTopBar({
                       <div className="absolute inset-0 rounded-full bg-pink-300 opacity-25 animate-ping animation-delay-75" />
                     </>
                   )}
-                  
+
                   <Bell 
                     className={`h-5 w-5 transition-all duration-300 ${
                       notificationCount > 0 
@@ -299,7 +300,7 @@ export default function MobileTopBar({
                         : 'text-white'
                     }`} 
                   />
-                  
+
                   {notificationCount > 0 && (
                     <Badge
                       variant="destructive"
