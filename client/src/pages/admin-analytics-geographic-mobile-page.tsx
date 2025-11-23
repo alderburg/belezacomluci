@@ -113,7 +113,7 @@ export default function AdminAnalyticsGeographicMobilePage() {
     <div className="min-h-screen bg-background pb-6">
       {/* Header */}
       <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <Button
             variant="ghost"
             size="icon"
@@ -129,63 +129,57 @@ export default function AdminAnalyticsGeographicMobilePage() {
           </div>
           <MapPin className="h-5 w-5 text-primary" />
         </div>
+        <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpenChange}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-full gap-2 text-xs" size="sm">
+              <Calendar className="w-4 h-4" />
+              {dateRange.from ? (
+                dateRange.to ? (
+                  <>
+                    {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} -{" "}
+                    {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
+                  </>
+                ) : (
+                  format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
+                )
+              ) : (
+                "Selecionar período"
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="center">
+            <div className="p-3">
+              <CalendarComponent
+                mode="range"
+                selected={tempDateRange}
+                onSelect={(range) => {
+                  setTempDateRange(range || {});
+                }}
+                numberOfMonths={1}
+                locale={ptBR}
+              />
+              <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleClearDateRange}
+                >
+                  Limpar
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={handleApplyDateRange}
+                >
+                  Aplicar
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Content */}
-      <main className="px-4 pt-20 pb-6 space-y-4">
-        {/* Filtro de Período */}
-        <Card>
-          <CardContent className="p-3">
-            <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpenChange}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full gap-2 text-xs" size="sm">
-                  <Calendar className="w-4 h-4" />
-                  {dateRange.from ? (
-                    dateRange.to ? (
-                      <>
-                        {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} -{" "}
-                        {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
-                      </>
-                    ) : (
-                      format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
-                    )
-                  ) : (
-                    "Selecionar período"
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="center">
-                <div className="p-3">
-                  <CalendarComponent
-                    mode="range"
-                    selected={tempDateRange}
-                    onSelect={(range) => {
-                      setTempDateRange(range || {});
-                    }}
-                    numberOfMonths={1}
-                    locale={ptBR}
-                  />
-                  <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleClearDateRange}
-                    >
-                      Limpar
-                    </Button>
-                    <Button 
-                      size="sm"
-                      onClick={handleApplyDateRange}
-                    >
-                      Aplicar
-                    </Button>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </CardContent>
-        </Card>
-
+      <main className="px-4 pt-24 pb-6 space-y-4">
         {/* Top Cidades */}
         <Card>
           <CardHeader className="pb-3">
