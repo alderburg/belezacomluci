@@ -67,7 +67,6 @@ import ConfiguracoesApisMobilePage from "@/pages/configuracoes-apis-mobile-page"
 import AdminAnalyticsMobilePage from "@/pages/admin-analytics-mobile-page";
 import AdminAnalyticsOverviewMobilePage from "@/pages/admin-analytics-overview-mobile-page";
 
-
 import { useNotificationsWebSocket } from './hooks/use-notifications-websocket';
 import { useDataSync } from './hooks/use-data-sync';
 import { MobileDetectionProvider, useMobileDetection } from '@/contexts/mobile-detection-context';
@@ -105,7 +104,7 @@ function Router() {
       <ProtectedRoute path="/mobile-menu" component={MobileMenuPage} />
       <ProtectedRoute path="/admin" component={isMobile ? AdminMobilePage : AdminPage} />
       <ProtectedRoute path="/admin/videos-mobile" component={AdminVideosMobilePage} />
-      <Route path="/admin/videos-mobile/youtube-sync" component={AdminYoutubeSyncMobilePage} />
+      <Route path="/admin/videos-mobile/youtube-sync" component={AdminYouTubeSyncMobilePage} />
       <ProtectedRoute path="/admin/videos-mobile/new" component={AdminVideoFormMobilePage} />
       <ProtectedRoute path="/admin/videos-mobile/edit/:id" component={AdminVideoFormMobilePage} />
       <ProtectedRoute path="/admin/videos" component={isMobile ? AdminVideosMobilePage : AdminPage} />
