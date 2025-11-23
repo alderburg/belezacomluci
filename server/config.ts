@@ -14,7 +14,7 @@ export const config = {
   app: {
     port: process.env.PORT || 5000,
     environment: process.env.NODE_ENV || 'development',
-    sessionSecret: process.env.SESSION_SECRET || 'beleza_luci_secret_key_2024_a8f2e9c7b1d4f6a3e8b5c2d7f9a1e4b6c3d8f2a5e7b9c1d4f6a8e2b5c7d9f1a3e6',
+    sessionSecret: process.env.SESSION_SECRET!,
   },
   
   // URLs e endpoints
@@ -27,10 +27,7 @@ export const config = {
 // Validação das configurações essenciais
 export function validateConfig() {
   const required = [
-    'LOCAWEB_DB_HOST',
-    'LOCAWEB_DB_NAME', 
-    'LOCAWEB_DB_USER',
-    'LOCAWEB_DB_PASSWORD'
+    'SESSION_SECRET'
   ];
   
   const missing = required.filter(key => !process.env[key]);

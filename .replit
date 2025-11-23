@@ -14,10 +14,6 @@ run = ["npm", "run", "start"]
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 42217
-externalPort = 3000
-
 [env]
 PORT = "5000"
 
@@ -78,7 +74,6 @@ RAILWAY_DB_PORT = "56383"
 RAILWAY_DB_NAME = "railway"
 RAILWAY_DB_USER = "postgres"
 RAILWAY_DB_PASSWORD = "wOYUXNKSYlDEenPappkHkVkQRPlasehs"
-DATABASE_URL = "postgresql://postgres:wOYUXNKSYlDEenPappkHkVkQRPlasehs@maglev.proxy.rlwy.net:56383/railway"
 
 [userenv.production]
 NODE_ENV = "production"

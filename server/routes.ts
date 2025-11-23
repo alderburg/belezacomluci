@@ -3966,7 +3966,11 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const secret = process.env.SESSION_SECRET || 'default-secret';
+      const secret = process.env.SESSION_SECRET;
+      if (!secret) {
+        console.error('SESSION_SECRET not configured');
+        return res.status(500).json({ error: "Server configuration error" });
+      }
 
       const token = jwt.sign(
         {

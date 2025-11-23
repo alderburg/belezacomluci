@@ -113,7 +113,7 @@ export default function AdminAnalyticsGeographicMobilePage() {
     <div className="min-h-screen bg-background pb-6">
       {/* Header */}
       <div className="bg-card border-b border-border px-4 py-4 fixed top-0 left-0 right-0 z-50">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between">
           <Button
             variant="ghost"
             size="icon"
@@ -129,6 +129,11 @@ export default function AdminAnalyticsGeographicMobilePage() {
           </div>
           <MapPin className="h-5 w-5 text-primary" />
         </div>
+      </div>
+
+      {/* Content */}
+      <main className="px-4 pt-20 pb-6 space-y-4">
+        {/* Filtro de Período */}
         <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpenChange}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full gap-2 text-xs" size="sm">
@@ -176,10 +181,7 @@ export default function AdminAnalyticsGeographicMobilePage() {
             </div>
           </PopoverContent>
         </Popover>
-      </div>
 
-      {/* Content */}
-      <main className="px-4 pt-24 pb-6 space-y-4">
         {/* Top Cidades */}
         <Card>
           <CardHeader className="pb-3">
