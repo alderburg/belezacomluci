@@ -639,11 +639,13 @@ export default function ComunidadeMobilePage() {
       </div>
 
       {/* Main Content */}
-      <main className="pt-16">
+      <main className="pt-16 px-4">
         {/* Banner Carousel */}
-        <BannerCarousel page="community" />
+        <div className="-mx-4">
+          <BannerCarousel page="community" />
+        </div>
 
-        <div className="relative mb-6 overflow-hidden rounded-xl mt-6 px-4">
+        <div className="relative mb-6 overflow-hidden rounded-xl mt-6">
 
           {/* Input de arquivo oculto para mobile */}
           {user?.isAdmin && (
@@ -833,7 +835,7 @@ export default function ComunidadeMobilePage() {
         </div>
 
         {/* Card Criar Post Mobile Melhorado */}
-        <Card className="mb-6">
+        <Card className="mb-6 mx-0">
           <CardContent className="p-4">
             {!isCreatingPost ? (
               <div className="flex items-center space-x-3" onClick={handleCreatePost}>
@@ -929,13 +931,13 @@ export default function ComunidadeMobilePage() {
           </CardContent>
         </Card>
 
-        <div className="space-y-4">
+        <div className="space-y-4 pb-4">
           {posts && posts.length > 0 ? (
             posts.map((post: PostWithUser) => (
               <EnhancedPostCard key={post.id} post={post} />
             ))
           ) : (
-            <Card className="p-8 text-center">
+            <Card className="p-8 text-center mx-0">
               <div className="flex flex-col items-center gap-3">
                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
                   <MessageCircle className="w-8 h-8 text-muted-foreground" />
