@@ -142,14 +142,13 @@ export default function NotificationSettingsPage() {
             </div>
           </div>
 
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Preferências de Notificação
-                </CardTitle>
-              </CardHeader>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Preferências de Notificação
+              </CardTitle>
+            </CardHeader>
 
               <CardContent>
                 {isLoading ? (
@@ -245,9 +244,8 @@ export default function NotificationSettingsPage() {
                     </Button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
 

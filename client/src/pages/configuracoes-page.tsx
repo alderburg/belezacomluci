@@ -63,7 +63,7 @@ export default function ConfiguracoesPage() {
           </div>
 
           {/* Configuration Options */}
-          <div className="max-w-3xl mx-auto grid gap-6 md:grid-cols-2">
+          <div className="space-y-4">
             {filteredOptions.map((option) => {
               const IconComponent = option.icon;
               return (
@@ -74,30 +74,31 @@ export default function ConfiguracoesPage() {
                   data-testid={`card-${option.id}`}
                 >
                   <CardHeader>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg">
-                        <IconComponent className="h-6 w-6 text-primary" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg">
+                          <IconComponent className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-xl">{option.title}</CardTitle>
+                          <CardDescription className="text-base">
+                            {option.description}
+                          </CardDescription>
+                        </div>
                       </div>
-                      <CardTitle className="text-xl">{option.title}</CardTitle>
+                      <Button
+                        variant="outline"
+                        data-testid={`button-${option.id}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLocation(option.path);
+                        }}
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Configurar
+                      </Button>
                     </div>
-                    <CardDescription className="text-base">
-                      {option.description}
-                    </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <Button
-                      className="w-full"
-                      variant="outline"
-                      data-testid={`button-${option.id}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLocation(option.path);
-                      }}
-                    >
-                      <Settings className="h-4 w-4 mr-2" />
-                      Configurar
-                    </Button>
-                  </CardContent>
                 </Card>
               );
             })}
