@@ -106,6 +106,14 @@ export default function ProfileMobilePage() {
     });
   };
 
+  const formatMemberSince = (dateString: string | Date | undefined) => {
+    if (!dateString) return 'Janeiro 2024';
+    const date = new Date(dateString);
+    const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    return `${months[date.getMonth()]} ${date.getFullYear()}`;
+  };
+
   const handleEditProfile = async () => {
     setIsEditProfileLoading(true);
 
@@ -280,7 +288,7 @@ export default function ProfileMobilePage() {
                   </Badge>
                   <span className="text-xs text-muted-foreground flex items-center">
                     <Calendar className="w-3 h-3 mr-1" />
-                    Membro desde Janeiro 2024
+                    Membro desde {formatMemberSince(user?.createdAt)}
                   </span>
                 </div>
               </div>
