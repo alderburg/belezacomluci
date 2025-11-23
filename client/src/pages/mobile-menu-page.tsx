@@ -26,7 +26,8 @@ import {
   ArrowLeft,
   ChevronRight,
   Edit3,
-  LogOut
+  LogOut,
+  Key
 } from "lucide-react";
 
 interface MenuItem {
@@ -74,6 +75,14 @@ export default function MobileMenuPage() {
       subtitle: "Configurar alertas e avisos",
       icon: Bell,
       path: "/configuracoes-notificacoes"
+    },
+    {
+      id: "apis",
+      title: "APIs e Integrações",
+      subtitle: "Gerencie integrações com serviços externos",
+      icon: Key,
+      path: "/configuracoes-apis",
+      adminOnly: true
     },
     {
       id: "security",
