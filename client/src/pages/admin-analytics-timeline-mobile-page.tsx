@@ -136,7 +136,7 @@ export default function AdminAnalyticsTimelineMobilePage() {
       </div>
 
       {/* Content */}
-      <main className="px-4 pt-20 pb-6 space-y-4">
+      <main className="px-4 pt-24 pb-6 space-y-4">
         {/* Filtro de Período */}
         <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpenChange}>
           <PopoverTrigger asChild>
